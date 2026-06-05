@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>aEterna | Seu Legado Digital Eterno</title>
+    <meta name="description" content="Preserve seu legado digital com segurança. Guarde senhas, mensagens em vídeo e deixe instruções para seus entes queridos.">
+    <meta name="keywords" content="legado digital, testamento digital, senhas, herança digital, aEterna">
+    <meta name="author" content="aEterna">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://aeterenalegado.com.br/">
+    <meta property="og:title" content="aEterna - Seu Legado Digital Eterno">
+    <meta property="og:description" content="Preserve suas memórias, senhas e mensagens para sempre.">
+    <meta property="og:image" content="https://aeterenalegado.com.br/assets/logo.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://aeterenalegado.com.br/">
+    <meta property="twitter:title" content="aEterna - Seu Legado Digital Eterno">
+    <meta property="twitter:description" content="Preserve suas memórias, senhas e mensagens para sempre.">
+
+    <!-- Fontes -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8f5e9 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #90EE90 0%, #2E8B57 50%, #1B5E20 100%);
+            padding: 1rem 2rem;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo img {
+            height: 50px;
+        }
+
+        .logo span {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 0.8;
+        }
+
+        .btn-acessar {
+            background: white;
+            color: #2E8B57 !important;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 120px 2rem 80px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(144,238,144,0.1) 0%, rgba(46,139,87,0.1) 100%);
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-family: 'Playfair Display', serif;
+            color: #1B5E20;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 2rem;
+        }
+
+        .btn-primary {
+            display: inline-block;
+            background: linear-gradient(135deg, #2E8B57 0%, #1B5E20 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin: 0 0.5rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(46,139,87,0.3);
+        }
+
+        .btn-secondary {
+            display: inline-block;
+            background: transparent;
+            color: #2E8B57;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 2px solid #2E8B57;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: #2E8B57;
+            color: white;
+        }
+
+        /* Sections */
+        .section {
+            padding: 80px 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-family: 'Playfair Display', serif;
+            color: #1B5E20;
+            margin-bottom: 3rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+            text-align: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            color: #2E8B57;
+            margin-bottom: 1rem;
+        }
+
+        /* Futuro Section */
+        .futuro {
+            background: linear-gradient(135deg, #f0faf0 0%, #ffffff 100%);
+            border-radius: 30px;
+            padding: 3rem;
+            margin-top: 2rem;
+        }
+
+        .futuro-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .futuro-item {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            border-left: 4px solid #2E8B57;
+        }
+
+        .futuro-item h4 {
+            color: #2E8B57;
+            margin-bottom: 0.5rem;
+        }
+
+        .badge {
+            background: #2E8B57;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        /* Testimonials */
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .testimonial-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 1rem;
+        }
+
+        .testimonial-author {
+            font-weight: 600;
+            color: #2E8B57;
+        }
+
+        /* CTA */
+        .cta {
+            background: linear-gradient(135deg, #2E8B57 0%, #1B5E20 100%);
+            padding: 60px 2rem;
+            text-align: center;
+            color: white;
+            border-radius: 30px;
+            margin-top: 3rem;
+        }
+
+        .cta h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta .btn-primary {
+            background: white;
+            color: #2E8B57;
+            margin-top: 1rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: #1a1a1a;
+            color: #999;
+            padding: 3rem 2rem 1rem;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-logo img {
+            height: 50px;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links h4 {
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links a {
+            color: #999;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 0.5rem;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: #90EE90;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid #333;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .btn-primary, .btn-secondary {
+                display: block;
+                margin: 0.5rem auto;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">
+                <img src="assets/logo.png" alt="aEterna Logo" onerror="this.src='https://via.placeholder.com/50?text=🌿'">
+                <span>aEterna</span>
+            </div>
+            <div class="nav-links">
+                <a href="#sobre">Sobre</a>
+                <a href="#futuro">Futuro</a>
+                <a href="#depoimentos">Depoimentos</a>
+                <a href="https://aeterna.streamlit.app" class="btn-acessar">Acessar Cofre</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Seu legado digital, eternizado</h1>
+            <p>Guarde suas senhas, mensagens e lembranças para quem você ama. Deixe um presente para o futuro.</p>
+            <a href="https://aeterna.streamlit.app" class="btn-primary">Começar Agora →</a>
+            <a href="#sobre" class="btn-secondary">Saiba Mais</a>
+        </div>
+    </section>
+
+    <!-- Features Atuais -->
+    <section id="sobre" class="section">
+        <h2 class="section-title">O que já está disponível</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🔐</div>
+                <h3>Cofre de Senhas</h3>
+                <p>Armazene todas as suas senhas e contas importantes com criptografia de ponta a ponta. Segurança garantida.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📹</div>
+                <h3>Mensagens em Vídeo</h3>
+                <p>Grave vídeos com suas palavras, conselhos e lembranças para seus entes queridos assistirem.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">👥</div>
+                <h3>Contatos de Confiança</h3>
+                <p>Indique quem terá acesso ao seu legado e defina regras de liberação.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Importância do Legado Digital -->
+    <section class="section" style="background: #f0faf0; border-radius: 30px;">
+        <div style="max-width: 800px; margin: 0 auto; text-align: center;">
+            <h2 style="color: #1B5E20; margin-bottom: 1rem;">Por que pensar no seu legado digital?</h2>
+            <p style="font-size: 1.1rem;">Você já pensou em como suas senhas, contas e lembranças digitais serão acessadas? Deixar tudo organizado é um ato de amor.</p>
+            <br>
+            <p>Imagine seus filhos, cônjuges ou amigos conseguindo acessar fotos importantes, contas bancárias ou até mesmo receber uma mensagem sua em vídeo. É sobre cuidar de quem fica.</p>
+        </div>
+    </section>
+
+    <!-- Futuro -->
+    <section id="futuro" class="section">
+        <h2 class="section-title">O que está por vir</h2>
+        <div class="futuro">
+            <div class="futuro-grid">
+                <div class="futuro-item">
+                    <span class="badge">Em desenvolvimento</span>
+                    <h4>📱 App Mobile</h4>
+                    <p>Aplicativos nativos para Android e iOS. Acesse seu legado de qualquer lugar, direto do seu celular.</p>
+                </div>
+                <div class="futuro-item">
+                    <span class="badge">Em desenvolvimento</span>
+                    <h4>🤖 Assistente de Luto com IA</h4>
+                    <p>Uma inteligência artificial treinada com suas palavras e vídeos para oferecer conforto e conselhos aos seus entes queridos.</p>
+                </div>
+                <div class="futuro-item">
+                    <span class="badge">Planejado</span>
+                    <h4>🔄 Verificação Automática</h4>
+                    <p>Integração com APIs oficiais (Cartórios, SUS, etc) para verificar óbito e liberar acesso automaticamente.</p>
+                </div>
+                <div class="futuro-item">
+                    <span class="badge">Planejado</span>
+                    <h4>💬 Conversas com IA</h4>
+                    <p>Seus entes queridos poderão "conversar" com uma versão digital sua, gerada com base em suas mensagens e personalidade.</p>
+                </div>
+                <div class="futuro-item">
+                    <span class="badge">Ideia</span>
+                    <h4>🎁 Árvore da Memória</h4>
+                    <p>Um mural interativo com fotos, histórias e mensagens de pessoas que partiram, onde amigos podem contribuir.</p>
+                </div>
+                <div class="futuro-item">
+                    <span class="badge">Ideia</span>
+                    <h4>📜 Testamento Digital</h4>
+                    <p>Registre suas últimas vontades de forma legal e segura, com validação digital.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Como funciona a liberação -->
+    <section class="section">
+        <h2 class="section-title">Como funciona a liberação</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <h3>1️⃣ Cadastro</h3>
+                <p>Você cadastra suas senhas, vídeos e indica contatos de confiança.</p>
+            </div>
+            <div class="feature-card">
+                <h3>2️⃣ Prova de Vida</h3>
+                <p>O sistema verifica periodicamente se você está ativo. Você recebe e-mails de confirmação.</p>
+            </div>
+            <div class="feature-card">
+                <h3>3️⃣ Confirmação</h3>
+                <p>Após um período sem resposta, seus contatos são notificados e precisam confirmar (mínimo 2 pessoas).</p>
+            </div>
+            <div class="feature-card">
+                <h3>4️⃣ Liberação</h3>
+                <p>Após confirmação, os dados são liberados de forma segura para seus herdeiros digitais.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Frases de impacto -->
+    <section class="section" style="text-align: center; background: #e8f5e9; border-radius: 30px; padding: 60px;">
+        <div style="font-size: 2rem; font-family: 'Playfair Display', serif; color: #1B5E20;">
+            "O que você deixará para quem fica? <br>Um legado de amor e organização."
+        </div>
+        <div style="margin-top: 1rem; color: #666;">— aEterna</div>
+    </section>
+
+    <!-- Depoimentos -->
+    <section id="depoimentos" class="section">
+        <h2 class="section-title">O que estão dizendo</h2>
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <div class="testimonial-text">"Uma ideia incrível! Finalmente vou conseguir deixar minhas senhas organizadas para minha família. O app é muito intuitivo."</div>
+                <div class="testimonial-author">— Ana Paula, 42 anos</div>
+            </div>
+            <div class="testimonial-card">
+                <div class="testimonial-text">"A funcionalidade de vídeos é emocionante. Gravei mensagens para meus filhos e me sinto mais tranquila sabendo que eles terão isso."</div>
+                <div class="testimonial-author">— Marcos Silva, 38 anos</div>
+            </div>
+            <div class="testimonial-card">
+                <div class="testimonial-text">"Facilita muito a vida de quem fica. Ter tudo em um só lugar, seguro e organizado, é um presente para os entes queridos."</div>
+                <div class="testimonial-author">— Carla Mendes, 55 anos</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section">
+        <div class="cta">
+            <h2>Comece a eternizar seu legado hoje</h2>
+            <p>É gratuito e leva apenas alguns minutos. Sua família agradecerá.</p>
+            <a href="https://aeterna.streamlit.app" class="btn-primary" style="background: white; color: #2E8B57;">Acessar o aEterna →</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">
+                <img src="assets/logo.png" alt="aEterna" onerror="this.src='https://via.placeholder.com/50?text=🌿'" style="height: 50px;">
+                <p>Seu legado digital eternizado</p>
+            </div>
+            <div class="footer-links">
+                <h4>Produto</h4>
+                <a href="https://aeterna.streamlit.app">Acessar Cofre</a>
+                <a href="#futuro">Funcionalidades</a>
+                <a href="#">Preços (em breve)</a>
+            </div>
+            <div class="footer-links">
+                <h4>Contato</h4>
+                <a href="mailto:contato@aeterenalegado.com.br">contato@aeterenalegado.com.br</a>
+                <a href="#">Política de Privacidade</a>
+                <a href="#">Termos de Uso</a>
+            </div>
+            <div class="footer-links">
+                <h4>Redes Sociais</h4>
+                <a href="#"><i class="fab fa-instagram"></i> Instagram</a>
+                <a href="#"><i class="fab fa-linkedin"></i> LinkedIn</a>
+                <a href="#"><i class="fab fa-github"></i> GitHub</a>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2024 aEterna - Preserve sua história, eternize seu legado. 🌿</p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scroll para links internos
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
