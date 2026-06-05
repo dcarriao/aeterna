@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>aEterna | Seu Legado Digital Eterno</title>
-    <meta name="description" content="Preserve seu legado digital com segurança. Guarde senhas, mensagens em vídeo e deixe instruções para seus entes queridos.">
-    <meta name="keywords" content="legado digital, testamento digital, senhas, herança digital, aEterna">
+    <meta name="description" content="Preserve seu legado digital com segurança. Guarde senhas, mensagens em vídeo e deixe instruções para seus entes queridos. Criptografia de ponta a ponta e conformidade com a LGPD.">
+    <meta name="keywords" content="legado digital, testamento digital, senhas, herança digital, LGPD, criptografia, aEterna">
     <meta name="author" content="aEterna">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://aeterenalegado.com.br/">
     <meta property="og:title" content="aEterna - Seu Legado Digital Eterno">
-    <meta property="og:description" content="Preserve suas memórias, senhas e mensagens para sempre.">
+    <meta property="og:description" content="Preserve suas memórias, senhas e mensagens para sempre. Criptografia de ponta a ponta.">
     <meta property="og:image" content="https://aeterenalegado.com.br/assets/logo.png">
 
     <!-- Twitter -->
@@ -100,6 +100,18 @@
             padding: 0.5rem 1.5rem;
             border-radius: 25px;
             font-weight: 600;
+        }
+
+        /* Badge Beta */
+        .beta-badge {
+            background: #ff9800;
+            color: white;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+            vertical-align: middle;
         }
 
         /* Hero Section */
@@ -205,6 +217,40 @@
             margin-bottom: 1rem;
         }
 
+        /* Como funciona */
+        .how-it-works {
+            background: white;
+            border-radius: 30px;
+            padding: 3rem;
+            margin-top: 2rem;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .step {
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #2E8B57 0%, #1B5E20 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0 auto 1rem;
+        }
+
         /* Futuro Section */
         .futuro {
             background: linear-gradient(135deg, #f0faf0 0%, #ffffff 100%);
@@ -237,34 +283,39 @@
             color: white;
             padding: 0.2rem 0.5rem;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             display: inline-block;
             margin-bottom: 1rem;
         }
 
-        /* Testimonials */
-        .testimonials-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
+        .badge-beta {
+            background: #ff9800;
         }
 
-        .testimonial-card {
+        /* Pricing Box */
+        .pricing-box {
             background: white;
+            border-radius: 20px;
             padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
             text-align: center;
+            max-width: 500px;
+            margin: 2rem auto 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
         }
 
-        .testimonial-text {
-            font-style: italic;
+        .pricing-box h3 {
+            color: #1B5E20;
+            font-size: 1.8rem;
+        }
+
+        .pricing-badge {
+            background: #ff9800;
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            display: inline-block;
             margin-bottom: 1rem;
-        }
-
-        .testimonial-author {
-            font-weight: 600;
-            color: #2E8B57;
+            font-size: 0.8rem;
         }
 
         /* CTA */
@@ -304,11 +355,6 @@
             gap: 2rem;
         }
 
-        .footer-logo img {
-            height: 50px;
-            margin-bottom: 1rem;
-        }
-
         .footer-links h4 {
             color: white;
             margin-bottom: 1rem;
@@ -331,6 +377,40 @@
             padding-top: 2rem;
             margin-top: 2rem;
             border-top: 1px solid #333;
+        }
+
+        /* Alert Box */
+        .alert-info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+
+        .alert-warning {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+
+        /* Lista estilizada */
+        .feature-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .feature-list li {
+            padding: 0.3rem 0;
+            font-size: 0.85rem;
+        }
+
+        .feature-list li:before {
+            content: "✓ ";
+            color: #2E8B57;
+            font-weight: bold;
         }
 
         /* Responsive */
@@ -361,12 +441,14 @@
         <nav class="nav">
             <div class="logo">
                 <img src="assets/logo.png" alt="aEterna Logo" onerror="this.src='https://via.placeholder.com/50?text=🌿'">
-                <span>aEterna</span>
+                <span>aEterna <span class="beta-badge">BETA</span></span>
             </div>
             <div class="nav-links">
                 <a href="#sobre">Sobre</a>
+                <a href="#funcionamento">Como Funciona</a>
+                <a href="#seguranca">Segurança</a>
                 <a href="#futuro">Futuro</a>
-                <a href="#depoimentos">Depoimentos</a>
+                <a href="#preco">Preço</a>
                 <a href="https://aeterna.streamlit.app" class="btn-acessar">Acessar Cofre</a>
             </div>
         </nav>
@@ -376,41 +458,180 @@
     <section class="hero">
         <div class="hero-content">
             <h1>Seu legado digital, eternizado</h1>
-            <p>Guarde suas senhas, mensagens e lembranças para quem você ama. Deixe um presente para o futuro.</p>
-            <a href="https://aeterna.streamlit.app" class="btn-primary">Começar Agora →</a>
+            <p>Guarde suas senhas, mensagens em vídeo e deixe instruções para quem você ama. Um presente para o futuro.</p>
+            <a href="https://aeterna.streamlit.app" class="btn-primary">Começar a Testar →</a>
             <a href="#sobre" class="btn-secondary">Saiba Mais</a>
+        </div>
+
+        <div class="alert-warning" style="max-width: 600px; margin: 2rem auto 0; text-align: left;">
+            <strong>🧪 Fase de Testes (Beta):</strong><br>
+            O aEterna está em desenvolvimento ativo e testes gratuitos. <strong>Os dados criados durante o beta serão migrados para contas pagas quando o serviço se tornar comercial.</strong> Participe, teste e ajude a construir um produto melhor!
         </div>
     </section>
 
     <!-- Features Atuais -->
     <section id="sobre" class="section">
-        <h2 class="section-title">O que já está disponível</h2>
+        <h2 class="section-title">O que o aEterna já oferece</h2>
         <div class="features-grid">
             <div class="feature-card">
                 <div class="feature-icon">🔐</div>
                 <h3>Cofre de Senhas</h3>
-                <p>Armazene todas as suas senhas e contas importantes com criptografia de ponta a ponta. Segurança garantida.</p>
+                <p>Armazene todas as suas senhas e contas importantes com criptografia de ponta a ponta.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">📹</div>
                 <h3>Mensagens em Vídeo</h3>
-                <p>Grave vídeos com suas palavras, conselhos e lembranças para seus entes queridos assistirem.</p>
+                <p>Grave vídeos com suas palavras, conselhos e lembranças. Quantos vídeos quiser, para quem quiser.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">👥</div>
-                <h3>Contatos de Confiança</h3>
-                <p>Indique quem terá acesso ao seu legado e defina regras de liberação.</p>
+                <h3>Até 3 Pessoas de Confiança</h3>
+                <p>Indique quem terá acesso ao seu legado, com graus de prioridade diferentes.</p>
             </div>
         </div>
     </section>
 
-    <!-- Importância do Legado Digital -->
+    <!-- Como funciona -->
+    <section id="funcionamento" class="section">
+        <h2 class="section-title">Como funciona a liberação?</h2>
+        <div class="how-it-works">
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Cadastro</h3>
+                    <p>Você cadastra suas senhas, vídeos e indica até 3 pessoas de confiança com prioridades.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Prova de Vida</h3>
+                    <p>Periodicamente, o sistema verifica se você está ativo. Você recebe e-mails de confirmação.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Verificação Automática</h3>
+                    <p>Nossa API consulta bases oficiais (CPF) para identificar o falecimento de forma automática.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Liberação Inteligente</h3>
+                    <p>O sistema envia todas as orientações e acessos para o primeiro contato da lista de prioridade.</p>
+                </div>
+            </div>
+
+            <div class="alert-info" style="margin-top: 2rem;">
+                <strong>📌 Prioridade:</strong> Você define a ordem de quem receberá acesso. Se a primeira pessoa não responder, o sistema avança para a próxima automaticamente.
+            </div>
+        </div>
+    </section>
+
+    <!-- Por que deixar um legado digital? -->
     <section class="section" style="background: #f0faf0; border-radius: 30px;">
         <div style="max-width: 800px; margin: 0 auto; text-align: center;">
             <h2 style="color: #1B5E20; margin-bottom: 1rem;">Por que pensar no seu legado digital?</h2>
-            <p style="font-size: 1.1rem;">Você já pensou em como suas senhas, contas e lembranças digitais serão acessadas? Deixar tudo organizado é um ato de amor.</p>
+            <p style="font-size: 1.1rem;">Você já pensou em como suas senhas, contas bancárias e lembranças digitais serão acessadas? Deixar tudo organizado é um ato de amor.</p>
             <br>
-            <p>Imagine seus filhos, cônjuges ou amigos conseguindo acessar fotos importantes, contas bancárias ou até mesmo receber uma mensagem sua em vídeo. É sobre cuidar de quem fica.</p>
+            <p>Imagine seus filhos, cônjuge ou amigos conseguindo acessar contas importantes, resgatar fotos, ouvir suas palavras em vídeo. O aEterna cuida de tudo para que eles não precisem se preocupar.</p>
+        </div>
+    </section>
+
+    <!-- Segurança e LGPD -->
+    <section id="seguranca" class="section" style="background: #ffffff; border-radius: 30px;">
+        <h2 class="section-title">🔒 Segurança e Privacidade</h2>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🔐</div>
+                <h3>Criptografia de Ponta a Ponta</h3>
+                <p>Todas as suas senhas são criptografadas localmente antes mesmo de serem salvas.</p>
+                <ul class="feature-list" style="margin-top: 0.5rem;">
+                    <li>Algoritmo Fernet (cryptography)</li>
+                    <li>Chave derivada com PBKDF2</li>
+                    <li>32 bytes de criptografia simétrica</li>
+                    <li>Seus dados só são descriptografados localmente</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">📋</div>
+                <h3>LGPD - Seus dados, seu controle</h3>
+                <p>Estamos comprometidos com a Lei Geral de Proteção de Dados (Lei 13.709/2018).</p>
+                <ul class="feature-list" style="margin-top: 0.5rem;">
+                    <li>Seus dados não são compartilhados com terceiros</li>
+                    <li>Você pode solicitar exclusão a qualquer momento</li>
+                    <li>Dados armazenados apenas com seu consentimento</li>
+                    <li>Transparência total sobre o que coletamos</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🏦</div>
+                <h3>Armazenamento Seguro</h3>
+                <p>Seus dados ficam armazenados com os mais altos padrões de segurança.</p>
+                <ul class="feature-list" style="margin-top: 0.5rem;">
+                    <li>SQLite com acesso restrito</li>
+                    <li>Sempre criptografados em repouso</li>
+                    <li>Apenas você tem a chave de acesso</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="alert-info" style="margin-top: 2rem; text-align: center;">
+            <strong>🔒 Sua privacidade é nossa prioridade.</strong><br>
+            Suas senhas e mensagens pessoais nunca são acessadas por nós. Apenas você e as pessoas que você autorizar terão acesso.
+        </div>
+    </section>
+
+    <!-- Tecnologia e Segurança - Versão Detalhada -->
+    <section class="section" style="background: #e8f5e9; border-radius: 30px;">
+        <h2 class="section-title">🛡️ Como protegemos seu legado</h2>
+
+        <div class="futuro-grid" style="grid-template-columns: repeat(2, 1fr);">
+            <div class="futuro-item">
+                <h4>🔐 Criptografia Aplicada</h4>
+                <p style="font-size: 0.9rem;">Utilizamos o algoritmo <strong>Fernet</strong> da biblioteca <strong>cryptography</strong> (Python), que garante:</p>
+                <ul class="feature-list">
+                    <li>Chave de 32 bytes</li>
+                    <li>Criptografia simétrica AES-128 em modo CBC</li>
+                    <li>Assinatura HMAC-SHA256 para autenticidade</li>
+                    <li>Timestamp para evitar replay attacks</li>
+                </ul>
+            </div>
+
+            <div class="futuro-item">
+                <h4>🗝️ Derivação de Chave</h4>
+                <p style="font-size: 0.9rem;">Sua senha mestra nunca é armazenada. Utilizamos <strong>PBKDF2</strong> com:</p>
+                <ul class="feature-list">
+                    <li>100.000 iterações</li>
+                    <li>Salt único por usuário (32 bytes)</li>
+                    <li>SHA256 como função hash</li>
+                </ul>
+            </div>
+
+            <div class="futuro-item">
+                <h4>📁 Armazenamento Local</h4>
+                <p style="font-size: 0.9rem;">Todos os dados são criptografados <strong>antes</strong> de serem salvos:</p>
+                <ul class="feature-list">
+                    <li>Banco de dados SQLite criptografado</li>
+                    <li>Dados em trânsito via HTTPS (TLS 1.3)</li>
+                    <li>Seu navegador nunca envia senhas descriptografadas</li>
+                </ul>
+            </div>
+
+            <div class="futuro-item">
+                <h4>⚖️ Conformidade com a LGPD</h4>
+                <p style="font-size: 0.9rem;">Direitos garantidos aos titulares:</p>
+                <ul class="feature-list">
+                    <li>Confirmação da existência de tratamento</li>
+                    <li>Acesso aos dados pessoais</li>
+                    <li>Correção de dados incompletos</li>
+                    <li>Eliminação dos dados tratados com consentimento</li>
+                    <li>Portabilidade dos dados</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="alert-warning" style="margin-top: 2rem; text-align: center;">
+            <strong>📌 Importante:</strong> A única pessoa que pode descriptografar seus dados é VOCÊ. Nem mesmo a equipe aEterna tem acesso às suas senhas ou mensagens pessoais. Guarde sua senha mestra com segurança - ela é insubstituível!
         </div>
     </section>
 
@@ -422,30 +643,20 @@
                 <div class="futuro-item">
                     <span class="badge">Em desenvolvimento</span>
                     <h4>📱 App Mobile</h4>
-                    <p>Aplicativos nativos para Android e iOS. Acesse seu legado de qualquer lugar, direto do seu celular.</p>
+                    <p>Aplicativos nativos para Android e iOS. Acesse seu legado de qualquer lugar.</p>
                 </div>
                 <div class="futuro-item">
                     <span class="badge">Em desenvolvimento</span>
                     <h4>🤖 Assistente de Luto com IA</h4>
-                    <p>Uma inteligência artificial treinada com suas palavras e vídeos para oferecer conforto e conselhos aos seus entes queridos.</p>
+                    <p>Uma IA treinada com suas palavras e vídeos para oferecer conforto e conselhos.</p>
                 </div>
                 <div class="futuro-item">
-                    <span class="badge">Planejado</span>
-                    <h4>🔄 Verificação Automática</h4>
-                    <p>Integração com APIs oficiais (Cartórios, SUS, etc) para verificar óbito e liberar acesso automaticamente.</p>
+                    <span class="badge">Em desenvolvimento</span>
+                    <h4>🎁 Mural da Memória</h4>
+                    <p>Um espaço interativo onde amigos e familiares podem postar fotos, histórias e mensagens.</p>
                 </div>
                 <div class="futuro-item">
-                    <span class="badge">Planejado</span>
-                    <h4>💬 Conversas com IA</h4>
-                    <p>Seus entes queridos poderão "conversar" com uma versão digital sua, gerada com base em suas mensagens e personalidade.</p>
-                </div>
-                <div class="futuro-item">
-                    <span class="badge">Ideia</span>
-                    <h4>🎁 Árvore da Memória</h4>
-                    <p>Um mural interativo com fotos, histórias e mensagens de pessoas que partiram, onde amigos podem contribuir.</p>
-                </div>
-                <div class="futuro-item">
-                    <span class="badge">Ideia</span>
+                    <span class="badge">Em breve</span>
                     <h4>📜 Testamento Digital</h4>
                     <p>Registre suas últimas vontades de forma legal e segura, com validação digital.</p>
                 </div>
@@ -453,53 +664,21 @@
         </div>
     </section>
 
-    <!-- Como funciona a liberação -->
-    <section class="section">
-        <h2 class="section-title">Como funciona a liberação</h2>
-        <div class="features-grid">
-            <div class="feature-card">
-                <h3>1️⃣ Cadastro</h3>
-                <p>Você cadastra suas senhas, vídeos e indica contatos de confiança.</p>
-            </div>
-            <div class="feature-card">
-                <h3>2️⃣ Prova de Vida</h3>
-                <p>O sistema verifica periodicamente se você está ativo. Você recebe e-mails de confirmação.</p>
-            </div>
-            <div class="feature-card">
-                <h3>3️⃣ Confirmação</h3>
-                <p>Após um período sem resposta, seus contatos são notificados e precisam confirmar (mínimo 2 pessoas).</p>
-            </div>
-            <div class="feature-card">
-                <h3>4️⃣ Liberação</h3>
-                <p>Após confirmação, os dados são liberados de forma segura para seus herdeiros digitais.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Frases de impacto -->
-    <section class="section" style="text-align: center; background: #e8f5e9; border-radius: 30px; padding: 60px;">
-        <div style="font-size: 2rem; font-family: 'Playfair Display', serif; color: #1B5E20;">
-            "O que você deixará para quem fica? <br>Um legado de amor e organização."
-        </div>
-        <div style="margin-top: 1rem; color: #666;">— aEterna</div>
-    </section>
-
-    <!-- Depoimentos -->
-    <section id="depoimentos" class="section">
-        <h2 class="section-title">O que estão dizendo</h2>
-        <div class="testimonials-grid">
-            <div class="testimonial-card">
-                <div class="testimonial-text">"Uma ideia incrível! Finalmente vou conseguir deixar minhas senhas organizadas para minha família. O app é muito intuitivo."</div>
-                <div class="testimonial-author">— Ana Paula, 42 anos</div>
-            </div>
-            <div class="testimonial-card">
-                <div class="testimonial-text">"A funcionalidade de vídeos é emocionante. Gravei mensagens para meus filhos e me sinto mais tranquila sabendo que eles terão isso."</div>
-                <div class="testimonial-author">— Marcos Silva, 38 anos</div>
-            </div>
-            <div class="testimonial-card">
-                <div class="testimonial-text">"Facilita muito a vida de quem fica. Ter tudo em um só lugar, seguro e organizado, é um presente para os entes queridos."</div>
-                <div class="testimonial-author">— Carla Mendes, 55 anos</div>
-            </div>
+    <!-- Preço -->
+    <section id="preco" class="section">
+        <h2 class="section-title">Planos e Preços</h2>
+        <div class="pricing-box">
+            <div class="pricing-badge">🎯 BETA GRATUITO</div>
+            <h3>Participe do Beta</h3>
+            <p style="font-size: 1.5rem; color: #2E8B57; margin: 1rem 0;"><strong>Grátis</strong> durante os testes</p>
+            <p>✅ Cofre de senhas ilimitado</p>
+            <p>✅ Vídeos ilimitados</p>
+            <p>✅ Até 3 contatos de confiança</p>
+            <p>✅ Liberação automática via API</p>
+            <p style="margin-top: 1rem; font-size: 0.8rem; color: #666;">
+                ⚠️ Os dados criados durante o beta serão mantidos e acessíveis somente através de contas pagas quando o serviço se tornar comercial.
+            </p>
+            <a href="https://aeterna.streamlit.app" class="btn-primary" style="margin-top: 1rem; display: inline-block;">Participar do Beta →</a>
         </div>
     </section>
 
@@ -507,7 +686,7 @@
     <section class="section">
         <div class="cta">
             <h2>Comece a eternizar seu legado hoje</h2>
-            <p>É gratuito e leva apenas alguns minutos. Sua família agradecerá.</p>
+            <p>Participe do beta, é gratuito. Sua família agradecerá.</p>
             <a href="https://aeterna.streamlit.app" class="btn-primary" style="background: white; color: #2E8B57;">Acessar o aEterna →</a>
         </div>
     </section>
@@ -515,31 +694,36 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
-            <div class="footer-logo">
-                <img src="assets/logo.png" alt="aEterna" onerror="this.src='https://via.placeholder.com/50?text=🌿'" style="height: 50px;">
-                <p>Seu legado digital eternizado</p>
-            </div>
             <div class="footer-links">
                 <h4>Produto</h4>
                 <a href="https://aeterna.streamlit.app">Acessar Cofre</a>
                 <a href="#futuro">Funcionalidades</a>
-                <a href="#">Preços (em breve)</a>
+                <a href="#preco">Planos</a>
+            </div>
+            <div class="footer-links">
+                <h4>Empresa</h4>
+                <a href="#sobre">Sobre</a>
+                <a href="#funcionamento">Como funciona</a>
+                <a href="#seguranca">Segurança e LGPD</a>
+            </div>
+            <div class="footer-links">
+                <h4>LGPD e Privacidade</h4>
+                <a href="#">Política de Privacidade</a>
+                <a href="#">Termos de Uso</a>
+                <a href="#">Pedido de Exclusão de Dados</a>
+                <a href="#" style="font-size: 0.8rem; color: #90EE90;">🔒 Criptografia de ponta a ponta</a>
             </div>
             <div class="footer-links">
                 <h4>Contato</h4>
                 <a href="mailto:contato@aeterenalegado.com.br">contato@aeterenalegado.com.br</a>
-                <a href="#">Política de Privacidade</a>
-                <a href="#">Termos de Uso</a>
-            </div>
-            <div class="footer-links">
-                <h4>Redes Sociais</h4>
-                <a href="#"><i class="fab fa-instagram"></i> Instagram</a>
-                <a href="#"><i class="fab fa-linkedin"></i> LinkedIn</a>
-                <a href="#"><i class="fab fa-github"></i> GitHub</a>
+                <a href="mailto:privacidade@aeterenalegado.com.br">privacidade@aeterenalegado.com.br</a>
+                <a href="https://github.com/dcarriao/aeterna"><i class="fab fa-github"></i> GitHub</a>
             </div>
         </div>
         <div class="copyright">
-            <p>&copy; 2024 aEterna - Preserve sua história, eternize seu legado. 🌿</p>
+            <p>&copy; 2024 aEterna - Em desenvolvimento. Versão Beta.</p>
+            <p style="font-size: 0.7rem; margin-top: 0.5rem;">🌿 Cuidamos do seu legado com dedicação, transparência e segurança</p>
+            <p style="font-size: 0.7rem;">🔒 100% Criptografado | LGPD Compliant</p>
         </div>
     </footer>
 
@@ -548,9 +732,10 @@
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
             });
         });
     </script>
