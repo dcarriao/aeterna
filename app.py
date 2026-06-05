@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 from utils.banco import BancoDados
 from utils.criptografia import GerenciadorCriptografia
+from utils.usuarios import GerenciadorUsuarios
 
 
 # ============================================================================
@@ -15,7 +16,6 @@ def encontrar_icone_aba():
     icones_possiveis = [
         "assets/favicon.ico",
         "assets/favicon-32.png",
-        "assets/favicon-64.png",
         "assets/icon-192.png",
         "assets/logo.png",
         "logo.png"
@@ -79,58 +79,23 @@ def remover_fundo_branco(imagem):
 
 
 def inject_custom_css():
-    """Injeta CSS personalizado - com remoção da faixa de deploy"""
+    """Injeta CSS personalizado"""
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
 
-        /* ========== REMOVER FAIXA DE DEPLOY E BOTÕES DO STREAMLIT ========== */
-        /* Remove o botão Deploy e a faixa branca */
-        .stDeployButton {
-            display: none !important;
-        }
-
-        /* Remove a barra superior do Streamlit Cloud */
-        header[data-testid="stHeader"] {
-            background: transparent !important;
-        }
-
-        /* Remove o espaço reservado para o deploy */
-        .stApp > header {
-            display: none !important;
-        }
-
-        /* Ajusta o padding do topo para compensar a remoção */
-        .main .block-container {
-            padding-top: 0rem !important;
-            padding-bottom: 1rem;
-        }
-
-        /* Remove qualquer elemento indesejado */
-        .stStatusWidget {
-            display: none !important;
-        }
-
-        /* Ajusta o iframe de deploy */
-        iframe {
-            display: none !important;
-        }
-
-        /* Remove a faixa branca superior */
-        .stAppViewContainer {
-            padding-top: 0 !important;
-        }
-
-        /* ========== VARIÁVEIS DO TEMA VERDE ========== */
         :root {
             --aeterna-green-light: #90EE90;
             --aeterna-green-medium: #3CB371;
             --aeterna-green-primary: #2E8B57;
             --aeterna-green-dark: #1B5E20;
-            --aeterna-green-deep: #0A2F1F;
         }
 
-        /* Remove padding extra */
+        /* Remove botão de deploy */
+        .stDeployButton { display: none !important; }
+        header[data-testid="stHeader"] { background: transparent !important; }
+        .stApp > header { display: none !important; }
+
         .main .block-container {
             padding-top: 0.5rem;
             padding-bottom: 1rem;
@@ -141,11 +106,6 @@ def inject_custom_css():
             background: linear-gradient(135deg, #f5f5f5 0%, #e8f5e9 100%);
         }
 
-        h1, h2, h3 {
-            font-family: 'Playfair Display', serif !important;
-        }
-
-        /* ========== HEADER ========== */
         .aeterna-header {
             background: linear-gradient(135deg, var(--aeterna-green-light) 0%, var(--aeterna-green-primary) 50%, var(--aeterna-green-dark) 100%);
             padding: 0.5rem;
@@ -155,7 +115,6 @@ def inject_custom_css():
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
-        /* ========== CARDS ========== */
         .info-card {
             background: linear-gradient(135deg, #ffffff 0%, #f0faf0 100%);
             padding: 1rem;
@@ -165,45 +124,13 @@ def inject_custom_css():
             transition: transform 0.2s;
         }
 
-        .info-card:hover {
-            transform: translateY(-2px);
-        }
+        .info-card:hover { transform: translateY(-2px); }
 
-        .info-card h3 {
-            font-size: 1rem;
-            margin-bottom: 0.5rem;
-            color: var(--aeterna-green-dark);
-        }
-
-        .info-card p {
-            font-size: 0.8rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .warning-card {
-            background: linear-gradient(135deg, #fff3cd 0%, #ffe69b 100%);
-            padding: 1rem;
-            border-radius: 12px;
-            border-left: 4px solid #ffc107;
-            margin: 0.75rem 0;
-        }
-
-        .success-card {
-            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-            padding: 1rem;
-            border-radius: 12px;
-            border-left: 4px solid var(--aeterna-green-primary);
-            margin: 0.75rem 0;
-        }
-
-        /* ========== BOTÕES ========== */
         .stButton > button {
-            background: linear-gradient(135deg, var(--aeterna-green-medium) 0%, var(--aeterna-green-dark) 100%);
+            background: linear-gradient(135deg, #3CB371 0%, #1B5E20 100%);
             color: white;
             border: none;
             border-radius: 8px;
-            padding: 0.4rem 0.8rem;
-            font-weight: 500;
             transition: all 0.3s ease;
         }
 
@@ -212,68 +139,23 @@ def inject_custom_css():
             box-shadow: 0 4px 12px rgba(46, 139, 87, 0.3);
         }
 
-        /* ========== SIDEBAR ========== */
         [data-testid="stSidebar"] {
             background: linear-gradient(180deg, #e8f5e9 0%, #f0faf0 100%);
         }
 
-        /* Container da logo na sidebar */
         .sidebar-logo-container {
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px 0 15px 0;
-            background: transparent;
         }
 
-        /* Forçar tamanho e fundo transparente na sidebar */
         [data-testid="stSidebar"] img {
             max-width: 280px !important;
             width: 280px !important;
-            margin: 0 auto;
             background: transparent !important;
         }
 
-        /* Estilo do título na sidebar */
-        [data-testid="stSidebar"] h3 {
-            text-align: center;
-            color: #2E8B57;
-            margin-top: 0;
-            font-size: 1.5rem;
-        }
-
-        /* ========== EXPANDER ========== */
-        .streamlit-expanderHeader {
-            background-color: #f0faf0;
-            border-radius: 8px;
-            font-weight: 500;
-            color: var(--aeterna-green-dark);
-        }
-
-        /* ========== TABS ========== */
-        .stTabs [data-baseweb="tab-list"] {
-            gap: 5px;
-        }
-
-        .stTabs [data-baseweb="tab"] {
-            border-radius: 8px;
-            padding: 0.4rem 0.8rem;
-            font-weight: 500;
-            font-size: 0.85rem;
-        }
-
-        .stTabs [aria-selected="true"] {
-            background: linear-gradient(135deg, var(--aeterna-green-medium) 0%, var(--aeterna-green-dark) 100%);
-            color: white;
-        }
-
-        /* ========== METRICAS ========== */
-        [data-testid="stMetricValue"] {
-            color: var(--aeterna-green-dark);
-            font-size: 1.1rem;
-        }
-
-        /* ========== FOOTER ========== */
         .footer-aeterna {
             text-align: center;
             padding: 1rem;
@@ -283,70 +165,31 @@ def inject_custom_css():
             margin-top: 2rem;
         }
 
-        /* ========== ANIMAÇÕES ========== */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        img { background: transparent !important; }
 
-        .aeterna-header {
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        /* ========== SCROLLBAR ========== */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #e8f5e9;
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--aeterna-green-primary);
-            border-radius: 10px;
-        }
-
-        /* ========== INPUTS ========== */
+        /* Estilo para formulários */
         .stTextInput > div > div > input {
             border-radius: 8px;
             border: 1px solid #c8e6c8;
-            font-size: 0.85rem;
         }
 
-        /* ========== REMOVER FUNDO BRANCO DAS IMAGENS ========== */
-        img {
-            background: transparent !important;
+        /* Estilo para abas */
+        .stTabs [data-baseweb="tab-list"] { gap: 5px; }
+        .stTabs [data-baseweb="tab"] {
+            border-radius: 8px;
+            padding: 0.4rem 0.8rem;
+            font-weight: 500;
         }
-
-        /* ========== CENTRALIZAR LOGO ========== */
-        .stImage {
-            display: flex;
-            justify-content: center;
-        }
-
-        /* ========== AJUSTAR LARGURA DA SIDEBAR ========== */
-        [data-testid="stSidebar"] {
-            min-width: 300px;
+        .stTabs [aria-selected="true"] {
+            background: linear-gradient(135deg, #3CB371 0%, #1B5E20 100%);
+            color: white;
         }
     </style>
 
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2E8B57">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="aEterna">
-
-    <!-- Ícones para diferentes dispositivos -->
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
-    <link rel="icon" type="image/png" sizes="48x48" href="assets/favicon-48.png">
-    <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="assets/favicon-96.png">
-    <link rel="icon" type="image/png" sizes="128x128" href="assets/favicon-128.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="assets/icon-152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-192.png">
     """, unsafe_allow_html=True)
 
 
@@ -354,81 +197,56 @@ def inject_custom_css():
 # INICIALIZAÇÃO
 # ============================================================================
 db = BancoDados()
+gerente_usuarios = GerenciadorUsuarios()
 
+# Criar usuário admin inicial
+gerente_usuarios.criar_usuario_admin_inicial()
+
+# Inicializar estado da sessão
 if 'autenticado' not in st.session_state:
     st.session_state.autenticado = False
-if 'senha_mestre' not in st.session_state:
-    st.session_state.senha_mestre = ""
+if 'usuario_atual' not in st.session_state:
+    st.session_state.usuario_atual = None
+if 'pagina' not in st.session_state:
+    st.session_state.pagina = 'login'
 if 'crypto' not in st.session_state:
     st.session_state.crypto = None
 
 
 # ============================================================================
-# SIDEBAR
+# FUNÇÕES DE AUTENTICAÇÃO
 # ============================================================================
-def render_sidebar():
-    logo = carregar_logo()
-    logo_sem_fundo = remover_fundo_branco(logo) if logo else None
+def fazer_login(email, senha):
+    """Realiza login do usuário"""
+    usuario = gerente_usuarios.autenticar(email, senha)
+    if usuario:
+        st.session_state.usuario_atual = usuario
+        st.session_state.autenticado = True
+        st.session_state.pagina = 'app'
+        st.session_state.crypto = GerenciadorCriptografia(senha)
+        return True
+    return False
 
-    with st.sidebar:
-        if logo_sem_fundo:
-            st.markdown('<div class="sidebar-logo-container">', unsafe_allow_html=True)
-            st.image(logo_sem_fundo, width=280)
-            st.markdown('</div>', unsafe_allow_html=True)
 
-        st.markdown("<h3 style='text-align: center; color: #2E8B57;'>✨ aEterna</h3>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center; color: #3CB371; font-size: 0.8rem;'>Legado Digital Eterno</p>",
-                    unsafe_allow_html=True)
-        st.markdown("---")
+def fazer_logout():
+    """Realiza logout do usuário"""
+    st.session_state.autenticado = False
+    st.session_state.usuario_atual = None
+    st.session_state.pagina = 'login'
+    st.session_state.crypto = None
+    st.rerun()
 
-        if not st.session_state.autenticado:
-            st.markdown("### 🔐 Acesso")
 
-            with st.form("login_form"):
-                senha_digitada = st.text_input("Senha Mestra", type="password", placeholder="Digite sua senha...")
-                submitted = st.form_submit_button("🌿 Abrir Cofre", use_container_width=True)
-
-                if submitted:
-                    if senha_digitada:
-                        if senha_digitada == "admin123":
-                            st.session_state.autenticado = True
-                            st.session_state.senha_mestre = senha_digitada
-                            st.session_state.crypto = GerenciadorCriptografia(senha_digitada)
-                            st.rerun()
-                        else:
-                            st.error("❌ Senha incorreta!")
-                    else:
-                        st.warning("⚠️ Digite a senha")
-
-            st.markdown("---")
-            st.caption("💡 Teste: admin123")
-
-        else:
-            st.success(f"✅ Cofre aberto")
-            st.caption(f"🕐 {datetime.now().strftime('%d/%m/%Y %H:%M')}")
-
-            if st.button("🔒 Fechar", use_container_width=True):
-                st.session_state.autenticado = False
-                st.session_state.senha_mestre = ""
-                st.session_state.crypto = None
-                st.rerun()
-
-            st.markdown("---")
-            st.markdown("### 📊 Estatísticas")
-
-            senhas = db.listar_senhas()
-            videos = db.listar_videos()
-            contatos = db.listar_contatos()
-
-            st.metric("🔐 Senhas", len(senhas))
-            st.metric("📹 Vídeos", len(videos))
-            st.metric("👥 Contatos", len(contatos))
+def fazer_cadastro(nome, email, senha):
+    """Cadastra novo usuário"""
+    return gerente_usuarios.criar_usuario(nome, email, senha)
 
 
 # ============================================================================
-# TELA INICIAL
+# TELA DE LOGIN
 # ============================================================================
-def render_welcome():
+def render_login():
+    """Renderiza tela de login e cadastro"""
     logo = carregar_logo()
     logo_sem_fundo = remover_fundo_branco(logo) if logo else None
 
@@ -436,52 +254,150 @@ def render_welcome():
     if logo_sem_fundo:
         col1, col2, col3 = st.columns([1, 1, 1])
         with col2:
-            st.image(logo_sem_fundo, width=400)
-    else:
-        st.markdown("<h1 style='text-align: center; font-size: 6rem; margin: 0;'>🌿</h1>", unsafe_allow_html=True)
+            st.image(logo_sem_fundo, width=250)
     st.markdown('</div>', unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown("""
-        <div class="info-card">
-            <h3>🔐 Senhas</h3>
-            <p>Armazene senhas e acessos de forma segura e criptografada.</p>
-            <p style="font-size: 0.7rem; color: #2E8B57;">✓ Criptografia E2E</p>
-        </div>
-        """, unsafe_allow_html=True)
-    with col2:
-        st.markdown("""
-        <div class="info-card">
-            <h3>📹 Vídeos</h3>
-            <p>Grave mensagens em vídeo para seus entes queridos.</p>
-            <p style="font-size: 0.7rem; color: #2E8B57;">✓ Mensagens eternas</p>
-        </div>
-        """, unsafe_allow_html=True)
-    with col3:
-        st.markdown("""
-        <div class="info-card">
-            <h3>👥 Contatos</h3>
-            <p>Indique quem terá acesso após sua partida.</p>
-            <p style="font-size: 0.7rem; color: #2E8B57;">✓ Liberação segura</p>
-        </div>
-        """, unsafe_allow_html=True)
+    # Criar abas para login e cadastro
+    tab_login, tab_cadastro = st.tabs(["🔐 Entrar", "📝 Criar Conta"])
 
-    st.markdown("---")
-    st.info("🔑 **Para testar**: Digite a senha `admin123` no menu lateral")
+    # ABA DE LOGIN
+    with tab_login:
+        st.markdown("### Bem-vindo de volta!")
 
-    st.markdown("""
-    <div class="footer-aeterna">
-        <p>✨ aEterna - Preserve sua história, eternize seu legado ✨</p>
-    </div>
-    """, unsafe_allow_html=True)
+        with st.form("login_form"):
+            email = st.text_input("E-mail", placeholder="seu@email.com", key="login_email")
+            senha = st.text_input("Senha", type="password", placeholder="Sua senha", key="login_senha")
+
+            col1, col2, col3 = st.columns([1, 2, 1])
+            with col2:
+                submitted = st.form_submit_button("🌿 Entrar", use_container_width=True)
+
+            if submitted:
+                if email and senha:
+                    if fazer_login(email, senha):
+                        st.success("✅ Login realizado com sucesso!")
+                        st.rerun()
+                    else:
+                        st.error("❌ E-mail ou senha incorretos")
+                else:
+                    st.warning("⚠️ Preencha todos os campos")
+
+        st.markdown("---")
+        st.caption("💡 **Teste:** use admin@aeterna.com / admin123")
+
+    # ABA DE CADASTRO
+    with tab_cadastro:
+        st.markdown("### Crie sua conta gratuita")
+        st.caption("Comece a eternizar seu legado digital")
+
+        with st.form("cadastro_form"):
+            nome = st.text_input("Nome completo", placeholder="Seu nome", key="cadastro_nome")
+            email = st.text_input("E-mail", placeholder="seu@email.com", key="cadastro_email")
+            senha = st.text_input("Senha", type="password", placeholder="Crie uma senha", key="cadastro_senha")
+            confirmar_senha = st.text_input("Confirmar senha", type="password", placeholder="Digite a senha novamente",
+                                            key="cadastro_confirmar")
+
+            col1, col2, col3 = st.columns([1, 2, 1])
+            with col2:
+                submitted = st.form_submit_button("📝 Criar Conta", use_container_width=True)
+
+            if submitted:
+                if not nome or not email or not senha:
+                    st.error("❌ Preencha todos os campos")
+                elif senha != confirmar_senha:
+                    st.error("❌ As senhas não coincidem")
+                elif len(senha) < 4:
+                    st.warning("⚠️ A senha deve ter pelo menos 4 caracteres")
+                else:
+                    if fazer_cadastro(nome, email, senha):
+                        st.success("✅ Conta criada com sucesso! Faça login para continuar.")
+                        st.balloons()
+                    else:
+                        st.error("❌ Este e-mail já está cadastrado")
 
 
 # ============================================================================
-# SENHAS
+# SIDEBAR (APÓS LOGIN)
+# ============================================================================
+def render_sidebar():
+    """Renderiza a sidebar com informações do usuário"""
+    logo = carregar_logo()
+    logo_sem_fundo = remover_fundo_branco(logo) if logo else None
+
+    with st.sidebar:
+        if logo_sem_fundo:
+            st.markdown('<div class="sidebar-logo-container">', unsafe_allow_html=True)
+            st.image(logo_sem_fundo, width=220)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown(f"### ✨ Olá, **{st.session_state.usuario_atual['nome']}**!")
+        st.caption(f"📧 {st.session_state.usuario_atual['email']}")
+
+        if st.session_state.usuario_atual.get('tipo') == 'admin':
+            st.caption("👑 Administrador")
+
+        st.markdown("---")
+
+        # Botão de logout
+        if st.button("🚪 Sair", use_container_width=True):
+            fazer_logout()
+
+        st.markdown("---")
+
+        # Estatísticas
+        st.markdown("### 📊 Seu Cofre")
+        senhas = db.listar_senhas()
+        videos = db.listar_videos()
+        contatos = db.listar_contatos()
+
+        st.metric("🔐 Senhas", len(senhas))
+        st.metric("📹 Vídeos", len(videos))
+        st.metric("👥 Contatos", len(contatos))
+
+
+# ============================================================================
+# TELA PRINCIPAL DO APP
+# ============================================================================
+def render_app():
+    """Renderiza o app principal após login"""
+    st.markdown('<div class="aeterna-header">', unsafe_allow_html=True)
+    st.markdown(
+        f"<h2 style='text-align: center; color: white;'>Bem-vindo, {st.session_state.usuario_atual['nome']}!</h2>",
+        unsafe_allow_html=True)
+    st.markdown(
+        '<p style="text-align: center; color: rgba(255,255,255,0.9);">Gerencie seu legado digital com segurança</p>',
+        unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    tab1, tab2, tab3, tab4 = st.tabs(["🔐 Senhas", "📹 Vídeos", "👥 Contatos",
+                                      "⚙️ Admin" if st.session_state.usuario_atual.get(
+                                          'tipo') == 'admin' else "ℹ️ Sobre"])
+
+    # TAB 1: SENHAS
+    with tab1:
+        render_senhas()
+
+    # TAB 2: VÍDEOS
+    with tab2:
+        render_videos()
+
+    # TAB 3: CONTATOS
+    with tab3:
+        render_contatos()
+
+    # TAB 4: ADMIN ou SOBRE
+    with tab4:
+        if st.session_state.usuario_atual.get('tipo') == 'admin':
+            render_admin()
+        else:
+            render_sobre()
+
+
+# ============================================================================
+# GERENCIAMENTO DE SENHAS
 # ============================================================================
 def render_senhas():
-    st.markdown("<h2 style='color: #2E8B57; font-size: 1.3rem;'>🔐 Gerenciamento de Senhas</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color: #2E8B57;'>🔐 Gerenciamento de Senhas</h2>", unsafe_allow_html=True)
 
     col1, col2 = st.columns([2, 1])
 
@@ -531,10 +447,10 @@ def render_senhas():
 
 
 # ============================================================================
-# VÍDEOS
+# GERENCIAMENTO DE VÍDEOS
 # ============================================================================
 def render_videos():
-    st.markdown("<h2 style='color: #2E8B57; font-size: 1.3rem;'>📹 Mensagens em Vídeo</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color: #2E8B57;'>📹 Mensagens em Vídeo</h2>", unsafe_allow_html=True)
 
     col1, col2 = st.columns([1, 2])
 
@@ -573,10 +489,10 @@ def render_videos():
 
 
 # ============================================================================
-# CONTATOS
+# GERENCIAMENTO DE CONTATOS
 # ============================================================================
 def render_contatos():
-    st.markdown("<h2 style='color: #2E8B57; font-size: 1.3rem;'>👥 Contatos de Confiança</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color: #2E8B57;'>👥 Contatos de Confiança</h2>", unsafe_allow_html=True)
 
     col1, col2 = st.columns([1, 2])
 
@@ -624,29 +540,68 @@ def render_contatos():
 
 
 # ============================================================================
-# CONFIGURAÇÕES
+# PAINEL ADMINISTRATIVO
 # ============================================================================
-def render_configuracoes():
-    st.markdown("<h2 style='color: #2E8B57; font-size: 1.3rem;'>⚙️ Configurações</h2>", unsafe_allow_html=True)
+def render_admin():
+    st.markdown("<h2 style='color: #2E8B57;'>👑 Painel Administrativo</h2>", unsafe_allow_html=True)
 
-    col1, col2 = st.columns(2)
+    st.markdown("### 📋 Usuários Cadastrados")
 
+    usuarios = gerente_usuarios.listar_usuarios()
+
+    if not usuarios:
+        st.info("Nenhum usuário cadastrado")
+    else:
+        for usuario in usuarios:
+            with st.expander(f"👤 {usuario['nome']} - {usuario['email']}"):
+                st.markdown(f"**ID:** {usuario['id']}")
+                st.markdown(f"**Tipo:** {usuario['tipo']}")
+                st.markdown(f"**Data de criação:** {usuario['data_criacao']}")
+                st.markdown(f"**Último acesso:** {usuario['ultimo_acesso'] or 'Nunca'}")
+
+    st.markdown("---")
+    st.markdown("### 📊 Estatísticas do Sistema")
+
+    col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.markdown("#### 🔄 Segurança")
-        interval_days = st.slider("Dias para inatividade", 30, 365, 90, key="slider_inatividade")
-        if st.button("💾 Salvar", key="btn_salvar_config"):
-            db.salvar_config("prova_vida_dias", str(interval_days))
-            st.success("✅ Salvo!")
-
+        st.metric("Total Usuários", len(usuarios))
     with col2:
-        st.markdown("#### 📊 Sistema")
-        senhas = db.listar_senhas()
-        videos = db.listar_videos()
-        contatos = db.listar_contatos()
+        st.metric("Total Senhas", len(db.listar_senhas()))
+    with col3:
+        st.metric("Total Vídeos", len(db.listar_videos()))
+    with col4:
+        st.metric("Total Contatos", len(db.listar_contatos()))
 
-        st.metric("Senhas", len(senhas))
-        st.metric("Vídeos", len(videos))
-        st.metric("Contatos", len(contatos))
+
+# ============================================================================
+# TELA SOBRE
+# ============================================================================
+def render_sobre():
+    st.markdown("<h2 style='color: #2E8B57;'>ℹ️ Sobre o aEterna</h2>", unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class="info-card">
+        <h3>✨ O que é o aEterna?</h3>
+        <p>O aEterna é uma plataforma de legado digital que permite você guardar suas senhas, 
+        mensagens em vídeo e contatos de confiança em um único lugar seguro.</p>
+    </div>
+
+    <div class="info-card">
+        <h3>🔒 Segurança</h3>
+        <p>Todas as suas senhas são criptografadas localmente antes de serem salvas. 
+        Nem mesmo nós temos acesso aos seus dados.</p>
+    </div>
+
+    <div class="info-card">
+        <h3>🚀 Futuro</h3>
+        <p>Em breve: aplicativo mobile, assistente de luto com IA, verificação automática de falecimento e muito mais!</p>
+    </div>
+
+    <div class="info-card">
+        <h3>📧 Contato</h3>
+        <p>Dúvidas ou sugestões? Entre em contato: <strong>contato@aeterenalegado.com.br</strong></p>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 # ============================================================================
@@ -654,29 +609,12 @@ def render_configuracoes():
 # ============================================================================
 def main():
     inject_custom_css()
-    render_sidebar()
 
     if not st.session_state.autenticado:
-        render_welcome()
+        render_login()
     else:
-        tab1, tab2, tab3, tab4 = st.tabs([
-            "🔐 Senhas", "📹 Vídeos", "👥 Contatos", "⚙️ Config"
-        ])
-
-        with tab1:
-            render_senhas()
-        with tab2:
-            render_videos()
-        with tab3:
-            render_contatos()
-        with tab4:
-            render_configuracoes()
-
-        st.markdown("""
-        <div class="footer-aeterna">
-            <p>✨ aEterna - Legado Digital Eterno ✨</p>
-        </div>
-        """, unsafe_allow_html=True)
+        render_sidebar()
+        render_app()
 
 
 if __name__ == "__main__":
