@@ -192,10 +192,78 @@ def inject_custom_css():
             color: white;
         }
 
-        /* Sem cruz no rodapé */
-        .footer-no-cross {
-            text-align: center;
-            padding: 1rem;
+        /* Melhorias para mobile - tela de cadastro */
+        @media (max-width: 768px) {
+            .stTextInput > div > div > input {
+                font-size: 16px !important;
+                padding: 12px !important;
+                min-height: 48px !important;
+            }
+
+            .stButton > button {
+                min-height: 48px !important;
+                font-size: 16px !important;
+            }
+
+            .stMarkdown h3 {
+                font-size: 1.3rem !important;
+            }
+
+            .stTextInput {
+                margin-bottom: 15px !important;
+            }
+
+            .stTextArea textarea {
+                font-size: 16px !important;
+                min-height: 80px !important;
+            }
+
+            .block-container {
+                padding-left: 15px !important;
+                padding-right: 15px !important;
+            }
+
+            hr {
+                margin: 20px 0 !important;
+            }
+
+            .stTabs [data-baseweb="tab-list"] {
+                gap: 8px !important;
+            }
+
+            .stTabs [data-baseweb="tab"] {
+                padding: 10px 16px !important;
+                font-size: 14px !important;
+            }
+        }
+
+        /* Cards mais limpos para mobile */
+        .info-card {
+            background: white !important;
+            border-radius: 12px !important;
+            padding: 16px !important;
+            margin: 12px 0 !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+        }
+
+        .stTextInput > div > div > input {
+            border: 1px solid #ddd !important;
+            border-radius: 10px !important;
+            background: white !important;
+        }
+
+        .stTextInput > div > div > input:focus {
+            border-color: #2E8B57 !important;
+            box-shadow: 0 0 0 2px rgba(46,139,87,0.1) !important;
+        }
+
+        .stTextArea textarea {
+            border: 1px solid #ddd !important;
+            border-radius: 10px !important;
+        }
+
+        .stTextArea textarea:focus {
+            border-color: #2E8B57 !important;
         }
     </style>
 
@@ -254,29 +322,46 @@ def fazer_cadastro(nome, email, cpf, senha, foto=None, redes=None):
 
 
 # ============================================================================
-# TELA DE LOGIN
+# TELA DE LOGIN E CADASTRO - VERSÃO OTIMIZADA PARA MOBILE
 # ============================================================================
 def render_login():
     logo = carregar_logo()
     logo_sem_fundo = remover_fundo_branco(logo) if logo else None
 
-    st.markdown('<div class="aeterna-header">', unsafe_allow_html=True)
+    # Header com logo
+    st.markdown('<div class="aeterna-header" style="padding: 0.8rem;">', unsafe_allow_html=True)
     if logo_sem_fundo:
-        col1, col2, col3 = st.columns([1, 1, 1])
+        col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            st.image(logo_sem_fundo, width=250)
+            st.image(logo_sem_fundo, width=180)
     st.markdown('</div>', unsafe_allow_html=True)
 
-    tab_login, tab_cadastro = st.tabs(["🔐 Entrar", "📝 Criar Conta"])
+    # Abas responsivas
+    tab1, tab2 = st.tabs(["🔐 **ENTRAR**", "📝 **CRIAR CONTA**"])
 
-    with tab_login:
+    # ========== ABA DE LOGIN ==========
+    with tab1:
         st.markdown("### Bem-vindo de volta!")
+
         with st.form("login_form"):
-            email = st.text_input("E-mail", placeholder="seu@email.com", key="login_email")
-            senha = st.text_input("Senha", type="password", placeholder="Sua senha", key="login_senha")
+            email = st.text_input(
+                "E-mail",
+                placeholder="seu@email.com",
+                key="login_email",
+                help="Digite seu e-mail cadastrado"
+            )
+            senha = st.text_input(
+                "Senha",
+                type="password",
+                placeholder="••••••••",
+                key="login_senha",
+                help="Digite sua senha"
+            )
+
             col1, col2, col3 = st.columns([1, 2, 1])
             with col2:
-                submitted = st.form_submit_button("🌿 Entrar", use_container_width=True)
+                submitted = st.form_submit_button("🌿 ENTRAR", use_container_width=True, type="primary")
+
             if submitted:
                 if email and senha:
                     if fazer_login(email, senha):
@@ -285,34 +370,111 @@ def render_login():
                     else:
                         st.error("❌ E-mail ou senha incorretos")
                 else:
-                    st.warning("⚠️ Preencha todos os campos")
+                    st.warning("⚠️ Preencha e-mail e senha")
+
         st.caption("💡 **Teste:** admin@aeterna.com / admin123")
 
-    with tab_cadastro:
-        st.markdown("### Crie sua conta gratuita")
+    # ========== ABA DE CADASTRO - VERSÃO MOBILE AMIGÁVEL ==========
+    with tab2:
+        st.markdown("### ✨ Crie sua conta")
         st.caption("⚠️ O CPF é obrigatório e será usado para validação futura")
 
         with st.form("cadastro_form"):
-            nome = st.text_input("Nome completo *", placeholder="Seu nome", key="cadastro_nome")
-            email = st.text_input("E-mail *", placeholder="seu@email.com", key="cadastro_email")
-            cpf = st.text_input("CPF *", placeholder="Apenas números - 00000000000", key="cadastro_cpf", max_chars=11)
-            senha = st.text_input("Senha *", type="password", placeholder="Mínimo 6 caracteres", key="cadastro_senha")
-            confirmar_senha = st.text_input("Confirmar senha *", type="password",
-                                            placeholder="Digite a senha novamente", key="cadastro_confirmar")
+            # Campo Nome
+            st.markdown("**📝 Nome completo**")
+            nome = st.text_input(
+                "Nome",
+                placeholder="Ex: João Silva",
+                key="cadastro_nome",
+                label_visibility="collapsed"
+            )
+
+            # Campo E-mail
+            st.markdown("**📧 E-mail**")
+            email = st.text_input(
+                "E-mail",
+                placeholder="seu@email.com",
+                key="cadastro_email",
+                label_visibility="collapsed"
+            )
+
+            # Campo CPF
+            st.markdown("**🆔 CPF (apenas números)**")
+            cpf = st.text_input(
+                "CPF",
+                placeholder="00000000000",
+                key="cadastro_cpf",
+                max_chars=11,
+                label_visibility="collapsed"
+            )
+
+            # Campo Senha
+            st.markdown("**🔒 Senha**")
+            senha = st.text_input(
+                "Senha",
+                type="password",
+                placeholder="Mínimo 6 caracteres",
+                key="cadastro_senha",
+                label_visibility="collapsed"
+            )
+
+            # Campo Confirmar Senha
+            st.markdown("**🔒 Confirmar senha**")
+            confirmar_senha = st.text_input(
+                "Confirmar",
+                type="password",
+                placeholder="Digite a senha novamente",
+                key="cadastro_confirmar",
+                label_visibility="collapsed"
+            )
+
+            # Separador visual
+            st.markdown("---")
+
+            # Opcionais
+            st.markdown("#### ✨ Opcional (pode pular)")
+
+            # Foto
+            st.markdown("**📷 Foto de perfil**")
+            foto = st.file_uploader(
+                "Foto",
+                type=["png", "jpg", "jpeg"],
+                key="cadastro_foto",
+                label_visibility="collapsed",
+                help="Envie uma foto para personalizar seu perfil"
+            )
+
+            # Redes sociais
+            st.markdown("**🌐 Redes sociais**")
+            redes = st.text_area(
+                "Redes",
+                placeholder="Instagram: @seuusuario\nLinkedIn: linkedin.com/in/seuusuario",
+                key="cadastro_redes",
+                label_visibility="collapsed",
+                height=80
+            )
 
             st.markdown("---")
-            st.markdown("#### ✨ Opcional")
-            foto = st.file_uploader("Foto de perfil", type=["png", "jpg", "jpeg"], key="cadastro_foto")
-            redes = st.text_area("Redes sociais", placeholder="Instagram, LinkedIn, etc. (opcional)",
-                                 key="cadastro_redes")
 
+            # Botão de cadastro
             col1, col2, col3 = st.columns([1, 2, 1])
             with col2:
-                submitted = st.form_submit_button("📝 Criar Conta", use_container_width=True)
+                submitted = st.form_submit_button("📝 CRIAR CONTA", use_container_width=True, type="primary")
 
             if submitted:
-                if not nome or not email or not cpf or not senha:
-                    st.error("❌ Preencha todos os campos obrigatórios (*)")
+                # Validações
+                erros = []
+                if not nome:
+                    erros.append("Nome")
+                if not email:
+                    erros.append("E-mail")
+                if not cpf:
+                    erros.append("CPF")
+                if not senha:
+                    erros.append("Senha")
+
+                if erros:
+                    st.error(f"❌ Preencha os campos obrigatórios: {', '.join(erros)}")
                 elif len(cpf) != 11 or not cpf.isdigit():
                     st.error("❌ CPF inválido. Digite apenas 11 números")
                 elif senha != confirmar_senha:
@@ -324,6 +486,7 @@ def render_login():
                     if resultado == True:
                         st.success("✅ Conta criada com sucesso! Faça login para continuar.")
                         st.balloons()
+                        st.rerun()
                     elif resultado == "cpf_existente":
                         st.error("❌ Este CPF já está cadastrado")
                     else:
@@ -533,7 +696,7 @@ def render_contatos():
                     st.rerun()
 
         st.markdown("""
-        <div class="warning-card" style="padding: 0.75rem; font-size: 0.8rem;">
+        <div class="info-card" style="padding: 0.75rem; font-size: 0.8rem; background: #fff3e0;">
             <strong>📌 Como funciona:</strong><br>
             A liberação será feita automaticamente via API de validação de CPF (em desenvolvimento).<br>
             Quando confirmado o falecimento, o primeiro contato da lista receberá todas as orientações.
