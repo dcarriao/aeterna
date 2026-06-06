@@ -2,29 +2,21 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>aEterna | Seu Legado Digital Eterno</title>
-    <meta name="description" content="Preserve seu legado digital com segurança. Guarde senhas, mensagens em vídeo e deixe instruções para seus entes queridos. Criptografia de ponta a ponta e conformidade com a LGPD.">
+    <meta name="description" content="Preserve seu legado digital com segurança. Guarde senhas, mensagens em vídeo e deixe instruções para seus entes queridos.">
     <meta name="keywords" content="legado digital, testamento digital, senhas, herança digital, LGPD, criptografia, aEterna">
     <meta name="author" content="aEterna">
 
-    <!-- Open Graph / Facebook -->
+    <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://aeterenalegado.com.br/">
     <meta property="og:title" content="aEterna - Seu Legado Digital Eterno">
-    <meta property="og:description" content="Preserve suas memórias, senhas e mensagens para sempre. Criptografia de ponta a ponta.">
+    <meta property="og:description" content="Preserve suas memórias, senhas e mensagens para sempre.">
     <meta property="og:image" content="https://aeterenalegado.com.br/assets/logo.png">
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://aeterenalegado.com.br/">
-    <meta property="twitter:title" content="aEterna - Seu Legado Digital Eterno">
-    <meta property="twitter:description" content="Preserve suas memórias, senhas e mensagens para sempre.">
 
     <!-- Fontes -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
@@ -38,13 +30,13 @@
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #f5f5f5 0%, #e8f5e9 100%);
             color: #333;
-            line-height: 1.6;
+            line-height: 1.5;
         }
 
-        /* Header */
+        /* ========== HEADER RESPONSIVO ========== */
         .header {
             background: linear-gradient(135deg, #90EE90 0%, #2E8B57 50%, #1B5E20 100%);
-            padding: 1rem 2rem;
+            padding: 0.8rem 1rem;
             position: fixed;
             width: 100%;
             top: 0;
@@ -58,28 +50,39 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .logo img {
-            height: 50px;
+            height: 40px;
         }
 
         .logo span {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: 700;
             color: white;
             font-family: 'Playfair Display', serif;
         }
 
+        /* Menu hambúrguer para mobile */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
         .nav-links {
             display: flex;
-            gap: 2rem;
+            gap: 1.5rem;
             align-items: center;
         }
 
@@ -87,7 +90,9 @@
             color: white;
             text-decoration: none;
             font-weight: 500;
+            font-size: 0.9rem;
             transition: opacity 0.3s;
+            white-space: nowrap;
         }
 
         .nav-links a:hover {
@@ -97,28 +102,26 @@
         .btn-acessar {
             background: white;
             color: #2E8B57 !important;
-            padding: 0.5rem 1.5rem;
+            padding: 0.4rem 1rem;
             border-radius: 25px;
             font-weight: 600;
         }
 
-        /* Badge Beta */
         .beta-badge {
             background: #ff9800;
             color: white;
-            padding: 0.2rem 0.8rem;
+            padding: 0.15rem 0.5rem;
             border-radius: 20px;
-            font-size: 0.7rem;
+            font-size: 0.6rem;
             font-weight: 600;
-            margin-left: 0.5rem;
+            margin-left: 0.3rem;
             vertical-align: middle;
         }
 
-        /* Hero Section */
+        /* ========== HERO ========== */
         .hero {
-            padding: 120px 2rem 80px;
+            padding: 90px 1rem 50px;
             text-align: center;
-            background: linear-gradient(135deg, rgba(144,238,144,0.1) 0%, rgba(46,139,87,0.1) 100%);
         }
 
         .hero-content {
@@ -127,45 +130,43 @@
         }
 
         .hero h1 {
-            font-size: 3rem;
+            font-size: 2rem;
             font-family: 'Playfair Display', serif;
             color: #1B5E20;
-            margin-bottom: 1rem;
+            margin-bottom: 0.8rem;
         }
 
         .hero p {
-            font-size: 1.2rem;
+            font-size: 1rem;
             color: #555;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
-        .btn-primary {
+        .btn-primary, .btn-secondary {
             display: inline-block;
-            background: linear-gradient(135deg, #2E8B57 0%, #1B5E20 100%);
-            color: white;
-            padding: 1rem 2rem;
+            padding: 0.7rem 1.2rem;
             border-radius: 50px;
             text-decoration: none;
             font-weight: 600;
-            transition: transform 0.3s, box-shadow 0.3s;
-            margin: 0 0.5rem;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            margin: 0.3rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2E8B57 0%, #1B5E20 100%);
+            color: white;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(46,139,87,0.3);
+            box-shadow: 0 5px 15px rgba(46,139,87,0.3);
         }
 
         .btn-secondary {
-            display: inline-block;
             background: transparent;
             color: #2E8B57;
-            padding: 1rem 2rem;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
             border: 2px solid #2E8B57;
-            transition: all 0.3s;
         }
 
         .btn-secondary:hover {
@@ -173,198 +174,262 @@
             color: white;
         }
 
-        /* Sections */
+        .alert-warning {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 0.8rem;
+            border-radius: 10px;
+            margin-top: 1.5rem;
+            text-align: left;
+            font-size: 0.8rem;
+        }
+
+        /* ========== SECTIONS ========== */
         .section {
-            padding: 80px 2rem;
+            padding: 50px 1rem;
             max-width: 1200px;
             margin: 0 auto;
         }
 
         .section-title {
             text-align: center;
-            font-size: 2.5rem;
+            font-size: 1.8rem;
             font-family: 'Playfair Display', serif;
             color: #1B5E20;
-            margin-bottom: 3rem;
+            margin-bottom: 2rem;
         }
 
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.2rem;
         }
 
         .feature-card {
             background: white;
-            padding: 2rem;
+            padding: 1.2rem;
             border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-            transition: transform 0.3s;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
             text-align: center;
         }
 
         .feature-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-3px);
         }
 
         .feature-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
         }
 
         .feature-card h3 {
+            font-size: 1rem;
             color: #2E8B57;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-card p {
+            font-size: 0.8rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding-left: 0;
+            margin-top: 0.5rem;
+        }
+
+        .feature-list li {
+            font-size: 0.75rem;
+            padding: 0.2rem 0;
+        }
+
+        .feature-list li:before {
+            content: "✓ ";
+            color: #2E8B57;
+            font-weight: bold;
         }
 
         /* Como funciona */
         .how-it-works {
             background: white;
-            border-radius: 30px;
-            padding: 3rem;
-            margin-top: 2rem;
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-top: 1rem;
         }
 
         .steps {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
         }
 
         .step {
             text-align: center;
-            padding: 1rem;
+            padding: 0.5rem;
         }
 
         .step-number {
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             background: linear-gradient(135deg, #2E8B57 0%, #1B5E20 100%);
             color: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: bold;
-            margin: 0 auto 1rem;
+            margin: 0 auto 0.5rem;
         }
 
-        /* Futuro Section */
+        .step h3 {
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .step p {
+            font-size: 0.75rem;
+        }
+
+        /* Futuro */
         .futuro {
             background: linear-gradient(135deg, #f0faf0 0%, #ffffff 100%);
-            border-radius: 30px;
-            padding: 3rem;
-            margin-top: 2rem;
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-top: 1rem;
         }
 
         .futuro-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
         }
 
         .futuro-item {
             background: white;
-            padding: 1.5rem;
-            border-radius: 15px;
-            border-left: 4px solid #2E8B57;
+            padding: 1rem;
+            border-radius: 12px;
+            border-left: 3px solid #2E8B57;
         }
 
         .futuro-item h4 {
+            font-size: 0.9rem;
             color: #2E8B57;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .futuro-item p {
+            font-size: 0.75rem;
         }
 
         .badge {
             background: #2E8B57;
             color: white;
-            padding: 0.2rem 0.5rem;
+            padding: 0.15rem 0.4rem;
             border-radius: 20px;
-            font-size: 0.7rem;
+            font-size: 0.6rem;
             display: inline-block;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
         }
 
-        .badge-beta {
-            background: #ff9800;
-        }
-
-        /* Pricing Box */
+        /* Pricing */
         .pricing-box {
             background: white;
             border-radius: 20px;
-            padding: 2rem;
+            padding: 1.5rem;
             text-align: center;
-            max-width: 500px;
-            margin: 2rem auto 0;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 1rem auto 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
         }
 
         .pricing-box h3 {
+            font-size: 1.3rem;
             color: #1B5E20;
-            font-size: 1.8rem;
         }
 
         .pricing-badge {
             background: #ff9800;
             color: white;
-            padding: 0.3rem 1rem;
+            padding: 0.2rem 0.8rem;
             border-radius: 20px;
             display: inline-block;
-            margin-bottom: 1rem;
-            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.7rem;
         }
 
-        /* CTA */
-        .cta {
-            background: linear-gradient(135deg, #2E8B57 0%, #1B5E20 100%);
-            padding: 60px 2rem;
+        /* Parcerias */
+        .parcerias {
+            background: linear-gradient(135deg, #1B5E20 0%, #2E8B57 100%);
+            border-radius: 20px;
+            padding: 2rem 1.5rem;
             text-align: center;
             color: white;
-            border-radius: 30px;
-            margin-top: 3rem;
+            margin-top: 2rem;
         }
 
-        .cta h2 {
-            font-size: 2rem;
+        .parcerias h2 {
+            font-size: 1.3rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .parcerias p {
+            font-size: 0.85rem;
             margin-bottom: 1rem;
         }
 
-        .cta .btn-primary {
+        .btn-parceiro {
             background: white;
             color: #2E8B57;
-            margin-top: 1rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: inline-block;
+        }
+
+        /* Alertas */
+        .alert-info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 0.8rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            font-size: 0.8rem;
         }
 
         /* Footer */
         .footer {
             background: #1a1a1a;
             color: #999;
-            padding: 3rem 2rem 1rem;
-            margin-top: 4rem;
+            padding: 2rem 1rem 1rem;
+            margin-top: 3rem;
         }
 
         .footer-content {
             max-width: 1200px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1.5rem;
         }
 
         .footer-links h4 {
             color: white;
-            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            margin-bottom: 0.8rem;
         }
 
         .footer-links a {
             color: #999;
             text-decoration: none;
             display: block;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
+            font-size: 0.75rem;
             transition: color 0.3s;
         }
 
@@ -374,79 +439,99 @@
 
         .copyright {
             text-align: center;
-            padding-top: 2rem;
-            margin-top: 2rem;
+            padding-top: 1.5rem;
+            margin-top: 1.5rem;
             border-top: 1px solid #333;
+            font-size: 0.65rem;
         }
 
-        /* Alert Box */
-        .alert-info {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            padding: 1rem;
-            border-radius: 10px;
-            margin: 1rem 0;
-        }
-
-        .alert-warning {
-            background: #fff3e0;
-            border-left: 4px solid #ff9800;
-            padding: 1rem;
-            border-radius: 10px;
-            margin: 1rem 0;
-        }
-
-        /* Lista estilizada */
-        .feature-list {
-            list-style: none;
-            padding-left: 0;
-        }
-
-        .feature-list li {
-            padding: 0.3rem 0;
-            font-size: 0.85rem;
-        }
-
-        .feature-list li:before {
-            content: "✓ ";
-            color: #2E8B57;
-            font-weight: bold;
-        }
-
-        /* Responsive */
+        /* ========== RESPONSIVO ========== */
         @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+
             .nav-links {
                 display: none;
+                width: 100%;
+                flex-direction: column;
+                gap: 0.8rem;
+                padding: 1rem 0 0.5rem;
+            }
+
+            .nav-links.show {
+                display: flex;
+            }
+
+            .nav-links a {
+                white-space: normal;
+                text-align: center;
             }
 
             .hero h1 {
-                font-size: 2rem;
+                font-size: 1.6rem;
             }
 
             .section-title {
-                font-size: 2rem;
+                font-size: 1.5rem;
             }
 
             .btn-primary, .btn-secondary {
                 display: block;
                 margin: 0.5rem auto;
                 text-align: center;
+                max-width: 250px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .steps {
+                grid-template-columns: 1fr;
+            }
+
+            .futuro-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 1.4rem;
+            }
+
+            .logo img {
+                height: 32px;
+            }
+
+            .logo span {
+                font-size: 1rem;
+            }
+
+            .section {
+                padding: 35px 1rem;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
+    <!-- Header com menu hambúrguer -->
     <header class="header">
         <nav class="nav">
             <div class="logo">
-                <img src="assets/logo.png" alt="aEterna Logo" onerror="this.src='https://via.placeholder.com/50?text=🌿'">
+                <img src="assets/logo.png" alt="aEterna Logo" onerror="this.src='https://via.placeholder.com/40?text=🌿'">
                 <span>aEterna <span class="beta-badge">BETA</span></span>
             </div>
-            <div class="nav-links">
+            <button class="menu-toggle" id="menuToggle">☰</button>
+            <div class="nav-links" id="navLinks">
                 <a href="#sobre">Sobre</a>
                 <a href="#funcionamento">Como Funciona</a>
-                <a href="#seguranca">Segurança</a>
                 <a href="#futuro">Futuro</a>
                 <a href="#preco">Preço</a>
                 <a href="https://aeterna.streamlit.app" class="btn-acessar">Acessar Cofre</a>
@@ -463,175 +548,86 @@
             <a href="#sobre" class="btn-secondary">Saiba Mais</a>
         </div>
 
-        <div class="alert-warning" style="max-width: 600px; margin: 2rem auto 0; text-align: left;">
+        <div class="alert-warning" style="max-width: 600px; margin: 1.5rem auto 0;">
             <strong>🧪 Fase de Testes (Beta):</strong><br>
-            O aEterna está em desenvolvimento ativo e testes gratuitos. <strong>Os dados criados durante o beta serão migrados para contas pagas quando o serviço se tornar comercial.</strong> Participe, teste e ajude a construir um produto melhor!
+            O aEterna está em desenvolvimento ativo. Os dados criados durante o beta serão migrados para contas pagas quando o serviço se tornar comercial.
         </div>
     </section>
 
-    <!-- Features Atuais -->
+    <!-- Sobre / Features -->
     <section id="sobre" class="section">
-        <h2 class="section-title">O que o aEterna já oferece</h2>
+        <h2 class="section-title">O que o aEterna oferece</h2>
         <div class="features-grid">
             <div class="feature-card">
                 <div class="feature-icon">🔐</div>
                 <h3>Cofre de Senhas</h3>
-                <p>Armazene todas as suas senhas e contas importantes com criptografia de ponta a ponta.</p>
+                <p>Armazene suas senhas com criptografia. <strong>Opcional</strong> - use apenas para indicar onde estão suas coisas.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">📹</div>
                 <h3>Mensagens em Vídeo</h3>
-                <p>Grave vídeos com suas palavras, conselhos e lembranças. Quantos vídeos quiser, para quem quiser.</p>
+                <p>Grave vídeos com suas palavras e lembranças. Quantos quiser, para quem quiser.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">👥</div>
-                <h3>Até 3 Pessoas de Confiança</h3>
-                <p>Indique quem terá acesso ao seu legado, com graus de prioridade diferentes.</p>
+                <h3>Até 3 Pessoas</h3>
+                <p>Indique seus contatos de confiança com ordem de prioridade.</p>
             </div>
         </div>
     </section>
 
     <!-- Como funciona -->
     <section id="funcionamento" class="section">
-        <h2 class="section-title">Como funciona a liberação?</h2>
+        <h2 class="section-title">Como funciona</h2>
         <div class="how-it-works">
             <div class="steps">
                 <div class="step">
                     <div class="step-number">1</div>
                     <h3>Cadastro</h3>
-                    <p>Você cadastra suas senhas, vídeos e indica até 3 pessoas de confiança com prioridades.</p>
+                    <p>Você cadastra suas senhas, vídeos e indica até 3 contatos com prioridades.</p>
                 </div>
                 <div class="step">
                     <div class="step-number">2</div>
                     <h3>Prova de Vida</h3>
-                    <p>Periodicamente, o sistema verifica se você está ativo. Você recebe e-mails de confirmação.</p>
+                    <p>Periodicamente, o sistema verifica se você está ativo por e-mail.</p>
                 </div>
                 <div class="step">
                     <div class="step-number">3</div>
-                    <h3>Verificação Automática</h3>
-                    <p>Nossa API consulta bases oficiais (CPF) para identificar o falecimento de forma automática.</p>
+                    <h3>Verificação</h3>
+                    <p>API consulta bases oficiais (CPF) para identificar falecimento.</p>
                 </div>
                 <div class="step">
                     <div class="step-number">4</div>
-                    <h3>Liberação Inteligente</h3>
-                    <p>O sistema envia todas as orientações e acessos para o primeiro contato da lista de prioridade.</p>
+                    <h3>Liberação</h3>
+                    <p>O sistema envia orientações para o primeiro contato da lista de prioridade.</p>
                 </div>
             </div>
 
-            <div class="alert-info" style="margin-top: 2rem;">
-                <strong>📌 Prioridade:</strong> Você define a ordem de quem receberá acesso. Se a primeira pessoa não responder, o sistema avança para a próxima automaticamente.
+            <div class="alert-info" style="margin-top: 1rem;">
+                <strong>📌 Prioridade:</strong> Você define a ordem. Se a primeira pessoa não responder, o sistema avança para a próxima.
             </div>
         </div>
     </section>
 
-    <!-- Por que deixar um legado digital? -->
-    <section class="section" style="background: #f0faf0; border-radius: 30px;">
-        <div style="max-width: 800px; margin: 0 auto; text-align: center;">
-            <h2 style="color: #1B5E20; margin-bottom: 1rem;">Por que pensar no seu legado digital?</h2>
-            <p style="font-size: 1.1rem;">Você já pensou em como suas senhas, contas bancárias e lembranças digitais serão acessadas? Deixar tudo organizado é um ato de amor.</p>
-            <br>
-            <p>Imagine seus filhos, cônjuge ou amigos conseguindo acessar contas importantes, resgatar fotos, ouvir suas palavras em vídeo. O aEterna cuida de tudo para que eles não precisem se preocupar.</p>
-        </div>
-    </section>
-
-    <!-- Segurança e LGPD -->
-    <section id="seguranca" class="section" style="background: #ffffff; border-radius: 30px;">
-        <h2 class="section-title">🔒 Segurança e Privacidade</h2>
-
+    <!-- Segurança (resumido) -->
+    <section class="section" style="background: #ffffff; border-radius: 25px;">
+        <h2 class="section-title">🔒 Segurança e LGPD</h2>
         <div class="features-grid">
             <div class="feature-card">
                 <div class="feature-icon">🔐</div>
-                <h3>Criptografia de Ponta a Ponta</h3>
-                <p>Todas as suas senhas são criptografadas localmente antes mesmo de serem salvas.</p>
-                <ul class="feature-list" style="margin-top: 0.5rem;">
-                    <li>Algoritmo Fernet (cryptography)</li>
-                    <li>Chave derivada com PBKDF2</li>
-                    <li>32 bytes de criptografia simétrica</li>
-                    <li>Seus dados só são descriptografados localmente</li>
-                </ul>
+                <h3>Criptografia de ponta a ponta</h3>
+                <p>Seus dados, sua chave. Nem nós acessamos suas senhas.</p>
             </div>
-
             <div class="feature-card">
-                <div class="feature-icon">📋</div>
-                <h3>LGPD - Seus dados, seu controle</h3>
-                <p>Estamos comprometidos com a Lei Geral de Proteção de Dados (Lei 13.709/2018).</p>
-                <ul class="feature-list" style="margin-top: 0.5rem;">
-                    <li>Seus dados não são compartilhados com terceiros</li>
-                    <li>Você pode solicitar exclusão a qualquer momento</li>
-                    <li>Dados armazenados apenas com seu consentimento</li>
-                    <li>Transparência total sobre o que coletamos</li>
-                </ul>
+                <div class="feature-icon">⚖️</div>
+                <h3>LGPD - Você no controle</h3>
+                <p>Seus dados não são compartilhados. Você pode solicitar exclusão a qualquer momento.</p>
             </div>
-
             <div class="feature-card">
-                <div class="feature-icon">🏦</div>
-                <h3>Armazenamento Seguro</h3>
-                <p>Seus dados ficam armazenados com os mais altos padrões de segurança.</p>
-                <ul class="feature-list" style="margin-top: 0.5rem;">
-                    <li>SQLite com acesso restrito</li>
-                    <li>Sempre criptografados em repouso</li>
-                    <li>Apenas você tem a chave de acesso</li>
-                </ul>
+                <div class="feature-icon">💡</div>
+                <h3>Flexível e opcional</h3>
+                <p>O cofre é opcional. Use apenas para indicar onde estão suas coisas, sem obrigação de guardar senhas.</p>
             </div>
-        </div>
-
-        <div class="alert-info" style="margin-top: 2rem; text-align: center;">
-            <strong>🔒 Sua privacidade é nossa prioridade.</strong><br>
-            Suas senhas e mensagens pessoais nunca são acessadas por nós. Apenas você e as pessoas que você autorizar terão acesso.
-        </div>
-    </section>
-
-    <!-- Tecnologia e Segurança - Versão Detalhada -->
-    <section class="section" style="background: #e8f5e9; border-radius: 30px;">
-        <h2 class="section-title">🛡️ Como protegemos seu legado</h2>
-
-        <div class="futuro-grid" style="grid-template-columns: repeat(2, 1fr);">
-            <div class="futuro-item">
-                <h4>🔐 Criptografia Aplicada</h4>
-                <p style="font-size: 0.9rem;">Utilizamos o algoritmo <strong>Fernet</strong> da biblioteca <strong>cryptography</strong> (Python), que garante:</p>
-                <ul class="feature-list">
-                    <li>Chave de 32 bytes</li>
-                    <li>Criptografia simétrica AES-128 em modo CBC</li>
-                    <li>Assinatura HMAC-SHA256 para autenticidade</li>
-                    <li>Timestamp para evitar replay attacks</li>
-                </ul>
-            </div>
-
-            <div class="futuro-item">
-                <h4>🗝️ Derivação de Chave</h4>
-                <p style="font-size: 0.9rem;">Sua senha mestra nunca é armazenada. Utilizamos <strong>PBKDF2</strong> com:</p>
-                <ul class="feature-list">
-                    <li>100.000 iterações</li>
-                    <li>Salt único por usuário (32 bytes)</li>
-                    <li>SHA256 como função hash</li>
-                </ul>
-            </div>
-
-            <div class="futuro-item">
-                <h4>📁 Armazenamento Local</h4>
-                <p style="font-size: 0.9rem;">Todos os dados são criptografados <strong>antes</strong> de serem salvos:</p>
-                <ul class="feature-list">
-                    <li>Banco de dados SQLite criptografado</li>
-                    <li>Dados em trânsito via HTTPS (TLS 1.3)</li>
-                    <li>Seu navegador nunca envia senhas descriptografadas</li>
-                </ul>
-            </div>
-
-            <div class="futuro-item">
-                <h4>⚖️ Conformidade com a LGPD</h4>
-                <p style="font-size: 0.9rem;">Direitos garantidos aos titulares:</p>
-                <ul class="feature-list">
-                    <li>Confirmação da existência de tratamento</li>
-                    <li>Acesso aos dados pessoais</li>
-                    <li>Correção de dados incompletos</li>
-                    <li>Eliminação dos dados tratados com consentimento</li>
-                    <li>Portabilidade dos dados</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="alert-warning" style="margin-top: 2rem; text-align: center;">
-            <strong>📌 Importante:</strong> A única pessoa que pode descriptografar seus dados é VOCÊ. Nem mesmo a equipe aEterna tem acesso às suas senhas ou mensagens pessoais. Guarde sua senha mestra com segurança - ela é insubstituível!
         </div>
     </section>
 
@@ -643,22 +639,22 @@
                 <div class="futuro-item">
                     <span class="badge">Em desenvolvimento</span>
                     <h4>📱 App Mobile</h4>
-                    <p>Aplicativos nativos para Android e iOS. Acesse seu legado de qualquer lugar.</p>
+                    <p>Aplicativos nativos para Android e iOS.</p>
                 </div>
                 <div class="futuro-item">
                     <span class="badge">Em desenvolvimento</span>
                     <h4>🤖 Assistente de Luto com IA</h4>
-                    <p>Uma IA treinada com suas palavras e vídeos para oferecer conforto e conselhos.</p>
+                    <p>IA treinada com suas palavras para oferecer conforto.</p>
                 </div>
                 <div class="futuro-item">
-                    <span class="badge">Em desenvolvimento</span>
+                    <span class="badge">Em breve</span>
                     <h4>🎁 Mural da Memória</h4>
-                    <p>Um espaço interativo onde amigos e familiares podem postar fotos, histórias e mensagens.</p>
+                    <p>Espaço interativo para fotos, histórias e mensagens.</p>
                 </div>
                 <div class="futuro-item">
                     <span class="badge">Em breve</span>
                     <h4>📜 Testamento Digital</h4>
-                    <p>Registre suas últimas vontades de forma legal e segura, com validação digital.</p>
+                    <p>Registre suas últimas vontades com validação digital.</p>
                 </div>
             </div>
         </div>
@@ -666,27 +662,37 @@
 
     <!-- Preço -->
     <section id="preco" class="section">
-        <h2 class="section-title">Planos e Preços</h2>
+        <h2 class="section-title">Planos</h2>
         <div class="pricing-box">
             <div class="pricing-badge">🎯 BETA GRATUITO</div>
             <h3>Participe do Beta</h3>
-            <p style="font-size: 1.5rem; color: #2E8B57; margin: 1rem 0;"><strong>Grátis</strong> durante os testes</p>
+            <p style="font-size: 1.3rem; color: #2E8B57; margin: 0.5rem 0;"><strong>Grátis</strong> durante os testes</p>
             <p>✅ Cofre de senhas ilimitado</p>
             <p>✅ Vídeos ilimitados</p>
             <p>✅ Até 3 contatos de confiança</p>
             <p>✅ Liberação automática via API</p>
-            <p style="margin-top: 1rem; font-size: 0.8rem; color: #666;">
-                ⚠️ Os dados criados durante o beta serão mantidos e acessíveis somente através de contas pagas quando o serviço se tornar comercial.
+            <p style="margin-top: 0.8rem; font-size: 0.7rem; color: #666;">
+                ⚠️ Os dados criados durante o beta serão mantidos e acessíveis somente através de contas pagas.
             </p>
             <a href="https://aeterna.streamlit.app" class="btn-primary" style="margin-top: 1rem; display: inline-block;">Participar do Beta →</a>
         </div>
     </section>
 
-    <!-- CTA -->
+    <!-- Parcerias e Investidores -->
     <section class="section">
-        <div class="cta">
-            <h2>Comece a eternizar seu legado hoje</h2>
-            <p>Participe do beta, é gratuito. Sua família agradecerá.</p>
+        <div class="parcerias">
+            <h2>🚀 Faça parte dessa jornada</h2>
+            <p>Estamos abertos a parcerias estratégicas e investimentos anjo.</p>
+            <p>💼 Planos funerários e seguros de vida: podemos ser o diferencial que seu cliente precisa.</p>
+            <a href="mailto:parcerias@aeterenalegado.com.br" class="btn-parceiro">Quero ser parceiro →</a>
+        </div>
+    </section>
+
+    <!-- CTA Final -->
+    <section class="section">
+        <div style="background: linear-gradient(135deg, #2E8B57 0%, #1B5E20 100%); padding: 2rem 1rem; text-align: center; color: white; border-radius: 25px;">
+            <h2 style="font-size: 1.3rem; margin-bottom: 0.5rem;">Comece a eternizar seu legado</h2>
+            <p style="font-size: 0.85rem; margin-bottom: 1rem;">Participe do beta, é gratuito. Sua família agradecerá.</p>
             <a href="https://aeterna.streamlit.app" class="btn-primary" style="background: white; color: #2E8B57;">Acessar o aEterna →</a>
         </div>
     </section>
@@ -704,30 +710,32 @@
                 <h4>Empresa</h4>
                 <a href="#sobre">Sobre</a>
                 <a href="#funcionamento">Como funciona</a>
-                <a href="#seguranca">Segurança e LGPD</a>
-            </div>
-            <div class="footer-links">
-                <h4>LGPD e Privacidade</h4>
                 <a href="#">Política de Privacidade</a>
-                <a href="#">Termos de Uso</a>
-                <a href="#">Pedido de Exclusão de Dados</a>
-                <a href="#" style="font-size: 0.8rem; color: #90EE90;">🔒 Criptografia de ponta a ponta</a>
             </div>
             <div class="footer-links">
                 <h4>Contato</h4>
                 <a href="mailto:contato@aeterenalegado.com.br">contato@aeterenalegado.com.br</a>
-                <a href="mailto:privacidade@aeterenalegado.com.br">privacidade@aeterenalegado.com.br</a>
+                <a href="mailto:parcerias@aeterenalegado.com.br">parcerias@aeterenalegado.com.br</a>
                 <a href="https://github.com/dcarriao/aeterna"><i class="fab fa-github"></i> GitHub</a>
             </div>
         </div>
         <div class="copyright">
-            <p>&copy; 2024 aEterna - Em desenvolvimento. Versão Beta.</p>
-            <p style="font-size: 0.7rem; margin-top: 0.5rem;">🌿 Cuidamos do seu legado com dedicação, transparência e segurança</p>
-            <p style="font-size: 0.7rem;">🔒 100% Criptografado | LGPD Compliant</p>
+            <p>✨ aEterna - Seu legado, sua história, sua vida. ✨</p>
+            <p style="margin-top: 0.3rem;">© 2024 aEterna - Em desenvolvimento. Versão Beta.</p>
         </div>
     </footer>
 
+    <!-- Script do menu hambúrguer -->
     <script>
+        const menuToggle = document.getElementById('menuToggle');
+        const navLinks = document.getElementById('navLinks');
+
+        if (menuToggle) {
+            menuToggle.addEventListener('click', function() {
+                navLinks.classList.toggle('show');
+            });
+        }
+
         // Smooth scroll para links internos
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
@@ -735,6 +743,10 @@
                 const target = document.querySelector(this.getAttribute('href'));
                 if (target) {
                     target.scrollIntoView({ behavior: 'smooth' });
+                }
+                // Fechar menu mobile após clique
+                if (navLinks.classList.contains('show')) {
+                    navLinks.classList.remove('show');
                 }
             });
         });

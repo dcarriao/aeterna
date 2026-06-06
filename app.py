@@ -2,9 +2,11 @@ import streamlit as st
 from PIL import Image
 import os
 from datetime import datetime
+import json
 from utils.banco import BancoDados
 from utils.criptografia import GerenciadorCriptografia
 from utils.usuarios import GerenciadorUsuarios
+from utils.upload_video import GerenciadorVideos
 
 
 # ============================================================================
@@ -12,7 +14,6 @@ from utils.usuarios import GerenciadorUsuarios
 # ============================================================================
 
 def encontrar_icone_aba():
-    """Procura o ícone para a aba do navegador"""
     icones_possiveis = [
         "assets/favicon.ico",
         "assets/favicon-32.png",
@@ -20,7 +21,6 @@ def encontrar_icone_aba():
         "assets/logo.png",
         "logo.png"
     ]
-
     for icone in icones_possiveis:
         if os.path.exists(icone):
             return icone
@@ -41,14 +41,7 @@ st.set_page_config(
 # FUNÇÕES AUXILIARES
 # ============================================================================
 def carregar_logo():
-    """Carrega a logo otimizada do aplicativo"""
-    logo_paths = [
-        "assets/logo.png",
-        "assets/icon-512.png",
-        "assets/icon-256.png",
-        "logo.png"
-    ]
-
+    logo_paths = ["assets/logo.png", "assets/icon-512.png", "logo.png"]
     for path in logo_paths:
         if os.path.exists(path):
             try:
@@ -59,13 +52,10 @@ def carregar_logo():
 
 
 def remover_fundo_branco(imagem):
-    """Remove fundo branco da imagem (torna transparente)"""
     if imagem is None:
         return None
-
     if imagem.mode != 'RGBA':
         imagem = imagem.convert('RGBA')
-
     dados = imagem.getdata()
     nova_lista = []
     for item in dados:
@@ -73,29 +63,19 @@ def remover_fundo_branco(imagem):
             nova_lista.append((255, 255, 255, 0))
         else:
             nova_lista.append(item)
-
     imagem.putdata(nova_lista)
     return imagem
 
 
 def inject_custom_css():
-    """Injeta CSS personalizado"""
     st.markdown("""
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
-
-        :root {
-            --aeterna-green-light: #90EE90;
-            --aeterna-green-medium: #3CB371;
-            --aeterna-green-primary: #2E8B57;
-            --aeterna-green-dark: #1B5E20;
-        }
-
-        /* Remove botão de deploy */
+        /* Remover botão de deploy */
         .stDeployButton { display: none !important; }
         header[data-testid="stHeader"] { background: transparent !important; }
         .stApp > header { display: none !important; }
 
+        /* Layout compacto */
         .main .block-container {
             padding-top: 0.5rem;
             padding-bottom: 1rem;
@@ -106,8 +86,27 @@ def inject_custom_css():
             background: linear-gradient(135deg, #f5f5f5 0%, #e8f5e9 100%);
         }
 
+        /* FONTES MENORES */
+        .main .block-container {
+            font-size: 0.85rem;
+        }
+
+        .stTabs [data-baseweb="tab"] {
+            font-size: 0.8rem;
+            padding: 0.3rem 0.6rem;
+        }
+
+        .info-card h3 {
+            font-size: 0.9rem;
+        }
+
+        .info-card p {
+            font-size: 0.75rem;
+        }
+
+        /* Header com texto verde escuro */
         .aeterna-header {
-            background: linear-gradient(135deg, var(--aeterna-green-light) 0%, var(--aeterna-green-primary) 50%, var(--aeterna-green-dark) 100%);
+            background: linear-gradient(135deg, #90EE90 0%, #2E8B57 50%, #1B5E20 100%);
             padding: 0.5rem;
             border-radius: 20px;
             text-align: center;
@@ -115,11 +114,21 @@ def inject_custom_css():
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
+        .aeterna-header h2 {
+            color: #1B5E20 !important;
+            margin: 0;
+        }
+
+        .aeterna-header p {
+            color: rgba(255,255,255,0.9) !important;
+            margin: 0;
+        }
+
         .info-card {
             background: linear-gradient(135deg, #ffffff 0%, #f0faf0 100%);
             padding: 1rem;
             border-radius: 12px;
-            border-left: 4px solid var(--aeterna-green-primary);
+            border-left: 4px solid #2E8B57;
             margin: 0.75rem 0;
             transition: transform 0.2s;
         }
@@ -167,13 +176,11 @@ def inject_custom_css():
 
         img { background: transparent !important; }
 
-        /* Estilo para formulários */
         .stTextInput > div > div > input {
             border-radius: 8px;
             border: 1px solid #c8e6c8;
         }
 
-        /* Estilo para abas */
         .stTabs [data-baseweb="tab-list"] { gap: 5px; }
         .stTabs [data-baseweb="tab"] {
             border-radius: 8px;
@@ -183,6 +190,12 @@ def inject_custom_css():
         .stTabs [aria-selected="true"] {
             background: linear-gradient(135deg, #3CB371 0%, #1B5E20 100%);
             color: white;
+        }
+
+        /* Sem cruz no rodapé */
+        .footer-no-cross {
+            text-align: center;
+            padding: 1rem;
         }
     </style>
 
@@ -198,6 +211,7 @@ def inject_custom_css():
 # ============================================================================
 db = BancoDados()
 gerente_usuarios = GerenciadorUsuarios()
+gerente_videos = GerenciadorVideos()
 
 # Criar usuário admin inicial
 gerente_usuarios.criar_usuario_admin_inicial()
@@ -217,7 +231,6 @@ if 'crypto' not in st.session_state:
 # FUNÇÕES DE AUTENTICAÇÃO
 # ============================================================================
 def fazer_login(email, senha):
-    """Realiza login do usuário"""
     usuario = gerente_usuarios.autenticar(email, senha)
     if usuario:
         st.session_state.usuario_atual = usuario
@@ -229,7 +242,6 @@ def fazer_login(email, senha):
 
 
 def fazer_logout():
-    """Realiza logout do usuário"""
     st.session_state.autenticado = False
     st.session_state.usuario_atual = None
     st.session_state.pagina = 'login'
@@ -237,16 +249,14 @@ def fazer_logout():
     st.rerun()
 
 
-def fazer_cadastro(nome, email, senha):
-    """Cadastra novo usuário"""
-    return gerente_usuarios.criar_usuario(nome, email, senha)
+def fazer_cadastro(nome, email, cpf, senha, foto=None, redes=None):
+    return gerente_usuarios.criar_usuario(nome, email, cpf, senha, 'usuario', foto or '', redes or '{}')
 
 
 # ============================================================================
 # TELA DE LOGIN
 # ============================================================================
 def render_login():
-    """Renderiza tela de login e cadastro"""
     logo = carregar_logo()
     logo_sem_fundo = remover_fundo_branco(logo) if logo else None
 
@@ -257,21 +267,16 @@ def render_login():
             st.image(logo_sem_fundo, width=250)
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # Criar abas para login e cadastro
     tab_login, tab_cadastro = st.tabs(["🔐 Entrar", "📝 Criar Conta"])
 
-    # ABA DE LOGIN
     with tab_login:
         st.markdown("### Bem-vindo de volta!")
-
         with st.form("login_form"):
             email = st.text_input("E-mail", placeholder="seu@email.com", key="login_email")
             senha = st.text_input("Senha", type="password", placeholder="Sua senha", key="login_senha")
-
             col1, col2, col3 = st.columns([1, 2, 1])
             with col2:
                 submitted = st.form_submit_button("🌿 Entrar", use_container_width=True)
-
             if submitted:
                 if email and senha:
                     if fazer_login(email, senha):
@@ -281,46 +286,54 @@ def render_login():
                         st.error("❌ E-mail ou senha incorretos")
                 else:
                     st.warning("⚠️ Preencha todos os campos")
+        st.caption("💡 **Teste:** admin@aeterna.com / admin123")
 
-        st.markdown("---")
-        st.caption("💡 **Teste:** use admin@aeterna.com / admin123")
-
-    # ABA DE CADASTRO
     with tab_cadastro:
         st.markdown("### Crie sua conta gratuita")
-        st.caption("Comece a eternizar seu legado digital")
+        st.caption("⚠️ O CPF é obrigatório e será usado para validação futura")
 
         with st.form("cadastro_form"):
-            nome = st.text_input("Nome completo", placeholder="Seu nome", key="cadastro_nome")
-            email = st.text_input("E-mail", placeholder="seu@email.com", key="cadastro_email")
-            senha = st.text_input("Senha", type="password", placeholder="Crie uma senha", key="cadastro_senha")
-            confirmar_senha = st.text_input("Confirmar senha", type="password", placeholder="Digite a senha novamente",
-                                            key="cadastro_confirmar")
+            nome = st.text_input("Nome completo *", placeholder="Seu nome", key="cadastro_nome")
+            email = st.text_input("E-mail *", placeholder="seu@email.com", key="cadastro_email")
+            cpf = st.text_input("CPF *", placeholder="Apenas números - 00000000000", key="cadastro_cpf", max_chars=11)
+            senha = st.text_input("Senha *", type="password", placeholder="Mínimo 6 caracteres", key="cadastro_senha")
+            confirmar_senha = st.text_input("Confirmar senha *", type="password",
+                                            placeholder="Digite a senha novamente", key="cadastro_confirmar")
+
+            st.markdown("---")
+            st.markdown("#### ✨ Opcional")
+            foto = st.file_uploader("Foto de perfil", type=["png", "jpg", "jpeg"], key="cadastro_foto")
+            redes = st.text_area("Redes sociais", placeholder="Instagram, LinkedIn, etc. (opcional)",
+                                 key="cadastro_redes")
 
             col1, col2, col3 = st.columns([1, 2, 1])
             with col2:
                 submitted = st.form_submit_button("📝 Criar Conta", use_container_width=True)
 
             if submitted:
-                if not nome or not email or not senha:
-                    st.error("❌ Preencha todos os campos")
+                if not nome or not email or not cpf or not senha:
+                    st.error("❌ Preencha todos os campos obrigatórios (*)")
+                elif len(cpf) != 11 or not cpf.isdigit():
+                    st.error("❌ CPF inválido. Digite apenas 11 números")
                 elif senha != confirmar_senha:
                     st.error("❌ As senhas não coincidem")
-                elif len(senha) < 4:
-                    st.warning("⚠️ A senha deve ter pelo menos 4 caracteres")
+                elif len(senha) < 6:
+                    st.warning("⚠️ A senha deve ter pelo menos 6 caracteres")
                 else:
-                    if fazer_cadastro(nome, email, senha):
+                    resultado = fazer_cadastro(nome, email, cpf, senha)
+                    if resultado == True:
                         st.success("✅ Conta criada com sucesso! Faça login para continuar.")
                         st.balloons()
+                    elif resultado == "cpf_existente":
+                        st.error("❌ Este CPF já está cadastrado")
                     else:
                         st.error("❌ Este e-mail já está cadastrado")
 
 
 # ============================================================================
-# SIDEBAR (APÓS LOGIN)
+# SIDEBAR
 # ============================================================================
 def render_sidebar():
-    """Renderiza a sidebar com informações do usuário"""
     logo = carregar_logo()
     logo_sem_fundo = remover_fundo_branco(logo) if logo else None
 
@@ -333,21 +346,13 @@ def render_sidebar():
         st.markdown(f"### ✨ Olá, **{st.session_state.usuario_atual['nome']}**!")
         st.caption(f"📧 {st.session_state.usuario_atual['email']}")
 
-        if st.session_state.usuario_atual.get('tipo') == 'admin':
-            st.caption("👑 Administrador")
-
-        st.markdown("---")
-
-        # Botão de logout
         if st.button("🚪 Sair", use_container_width=True):
             fazer_logout()
 
         st.markdown("---")
-
-        # Estatísticas
         st.markdown("### 📊 Seu Cofre")
         senhas = db.listar_senhas()
-        videos = db.listar_videos()
+        videos = gerente_videos.listar_videos_usuario(st.session_state.usuario_atual['id'])
         contatos = db.listar_contatos()
 
         st.metric("🔐 Senhas", len(senhas))
@@ -356,48 +361,34 @@ def render_sidebar():
 
 
 # ============================================================================
-# TELA PRINCIPAL DO APP
+# TELA PRINCIPAL
 # ============================================================================
 def render_app():
-    """Renderiza o app principal após login"""
     st.markdown('<div class="aeterna-header">', unsafe_allow_html=True)
-    st.markdown(
-        f"<h2 style='text-align: center; color: white;'>Bem-vindo, {st.session_state.usuario_atual['nome']}!</h2>",
-        unsafe_allow_html=True)
-    st.markdown(
-        '<p style="text-align: center; color: rgba(255,255,255,0.9);">Gerencie seu legado digital com segurança</p>',
-        unsafe_allow_html=True)
+    st.markdown(f"<h2 style='text-align: center;'>Bem-vindo, {st.session_state.usuario_atual['nome']}!</h2>",
+                unsafe_allow_html=True)
+    st.markdown('<p style="text-align: center;">Gerencie seu legado digital com segurança</p>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-    tab1, tab2, tab3, tab4 = st.tabs(["🔐 Senhas", "📹 Vídeos", "👥 Contatos",
-                                      "⚙️ Admin" if st.session_state.usuario_atual.get(
-                                          'tipo') == 'admin' else "ℹ️ Sobre"])
+    tab1, tab2, tab3, tab4 = st.tabs(["🔐 Senhas", "📹 Vídeos", "👥 Contatos", "ℹ️ Sobre"])
 
-    # TAB 1: SENHAS
     with tab1:
         render_senhas()
-
-    # TAB 2: VÍDEOS
     with tab2:
         render_videos()
-
-    # TAB 3: CONTATOS
     with tab3:
         render_contatos()
-
-    # TAB 4: ADMIN ou SOBRE
     with tab4:
-        if st.session_state.usuario_atual.get('tipo') == 'admin':
-            render_admin()
-        else:
-            render_sobre()
+        render_sobre()
 
 
 # ============================================================================
-# GERENCIAMENTO DE SENHAS
+# SENHAS
 # ============================================================================
 def render_senhas():
-    st.markdown("<h2 style='color: #2E8B57;'>🔐 Gerenciamento de Senhas</h2>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #2E8B57;'>🔐 Gerenciamento de Senhas</h3>", unsafe_allow_html=True)
+    st.info(
+        "💡 **Opcional:** Você pode usar o cofre para guardar suas senhas ou apenas para indicar onde elas estão. A escolha é sua.")
 
     col1, col2 = st.columns([2, 1])
 
@@ -407,7 +398,8 @@ def render_senhas():
             usuario = st.text_input("Usuário/E-mail *", key="usuario_input")
             senha_original = st.text_input("Senha *", type="password", key="senha_input")
             url = st.text_input("URL", key="url_input")
-            notas = st.text_area("Notas", key="notas_input", height=80)
+            notas = st.text_area("Notas", key="notas_input", height=80,
+                                 placeholder="Onde esta senha está salva? Observações importantes?")
 
             if st.button("💾 Salvar", key="btn_salvar_senha", type="primary", use_container_width=True):
                 if servico and usuario and senha_original:
@@ -420,7 +412,6 @@ def render_senhas():
 
     with col1:
         senhas = db.listar_senhas()
-
         if not senhas:
             st.info("📭 Nenhuma senha cadastrada")
         else:
@@ -447,30 +438,38 @@ def render_senhas():
 
 
 # ============================================================================
-# GERENCIAMENTO DE VÍDEOS
+# VÍDEOS
 # ============================================================================
 def render_videos():
-    st.markdown("<h2 style='color: #2E8B57;'>📹 Mensagens em Vídeo</h2>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #2E8B57;'>📹 Mensagens em Vídeo</h3>", unsafe_allow_html=True)
+    st.info("💡 Grave vídeos com suas palavras, conselhos e lembranças. Eles ficarão salvos em nosso servidor seguro.")
 
     col1, col2 = st.columns([1, 2])
 
     with col1:
         with st.expander("🎥 Adicionar vídeo", expanded=False):
             titulo = st.text_input("Título *", key="titulo_video_input")
-            destinatario = st.text_input("Para", key="destinatario_video")
-            url_video = st.text_input("URL *", key="url_video_input", placeholder="https://youtube.com/...")
-            notas_video = st.text_area("Notas", key="notas_video", height=60)
+            destinatario = st.text_input("Para", key="destinatario_video", placeholder="Ex: Para minha filha Ana")
+
+            arquivo_video = st.file_uploader("Arquivo de vídeo", type=["mp4", "mov", "avi", "mkv"], key="video_file")
+
+            st.caption("📹 Formatos aceitos: MP4, MOV, AVI, MKV | Tamanho máximo: 200MB")
 
             if st.button("💾 Salvar", key="btn_salvar_video", type="primary", use_container_width=True):
-                if titulo and url_video:
-                    db.adicionar_video(titulo, destinatario, url_externa=url_video, notas=notas_video)
-                    st.success(f"✅ {titulo} adicionado!")
+                if titulo and arquivo_video:
+                    caminho = gerente_videos.salvar_video(
+                        arquivo_video,
+                        st.session_state.usuario_atual['id'],
+                        titulo,
+                        destinatario
+                    )
+                    st.success(f"✅ {titulo} salvo com sucesso!")
                     st.rerun()
                 else:
-                    st.error("❌ Preencha título e URL")
+                    st.error("❌ Preencha o título e selecione um vídeo")
 
     with col2:
-        videos = db.listar_videos()
+        videos = gerente_videos.listar_videos_usuario(st.session_state.usuario_atual['id'])
 
         if not videos:
             st.info("📭 Nenhum vídeo cadastrado")
@@ -479,20 +478,19 @@ def render_videos():
                 with st.expander(f"🎬 {video['titulo']}"):
                     if video['destinatario']:
                         st.markdown(f"**👥 Para:** {video['destinatario']}")
-                    if video['notas']:
-                        st.markdown(f"**📝 Notas:** {video['notas']}")
-                    if video['url_externa']:
-                        st.video(video['url_externa'])
+                    st.markdown(f"**📅 Data:** {video['data'][:19] if video['data'] else 'Não informada'}")
+                    st.video(video['caminho'])
                     if st.button(f"🗑️ Remover", key=f"del_video_{video['id']}"):
-                        db.deletar_video(video['id'])
-                        st.rerun()
+                        if gerente_videos.deletar_video(video['id'], st.session_state.usuario_atual['id']):
+                            st.rerun()
 
 
 # ============================================================================
-# GERENCIAMENTO DE CONTATOS
+# CONTATOS
 # ============================================================================
 def render_contatos():
-    st.markdown("<h2 style='color: #2E8B57;'>👥 Contatos de Confiança</h2>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #2E8B57;'>👥 Contatos de Confiança</h3>", unsafe_allow_html=True)
+    st.info("💡 Indique até 3 pessoas que receberão seu legado. A ordem define a prioridade.")
 
     col1, col2 = st.columns([1, 2])
 
@@ -502,12 +500,14 @@ def render_contatos():
             email_contato = st.text_input("E-mail *", key="email_contato_input")
             telefone_contato = st.text_input("Telefone", key="telefone_contato")
             papel_contato = st.selectbox("Papel",
-                                         ["Filho(a)", "Cônjuge", "Irmão(ã)", "Amigo(a)", "Outro"],
+                                         ["Filho(a)", "Cônjuge", "Irmão(ã)", "Amigo(a)", "Advogado(a)", "Outro"],
                                          key="papel_contato")
+            prioridade = st.selectbox("Prioridade", [1, 2, 3], key="prioridade_contato")
 
             if st.button("💾 Salvar", key="btn_salvar_contato", type="primary", use_container_width=True):
                 if nome_contato and email_contato:
-                    db.adicionar_contato(nome_contato, email_contato, telefone_contato, papel_contato, "")
+                    db.adicionar_contato(nome_contato, email_contato, telefone_contato, papel_contato,
+                                         f"Prioridade: {prioridade}")
                     st.success(f"✅ {nome_contato} adicionado!")
                     st.rerun()
                 else:
@@ -519,10 +519,10 @@ def render_contatos():
         if not contatos:
             st.info("📭 Nenhum contato cadastrado")
         else:
-            for contato in contatos:
+            for i, contato in enumerate(contatos):
                 st.markdown(f"""
                 <div class="info-card" style="padding: 0.75rem;">
-                    <strong>👤 {contato['nome']}</strong><br>
+                    <strong>{i + 1}º - 👤 {contato['nome']}</strong><br>
                     📧 {contato['email']}<br>
                     🏷️ {contato['papel']}
                 </div>
@@ -534,72 +534,46 @@ def render_contatos():
 
         st.markdown("""
         <div class="warning-card" style="padding: 0.75rem; font-size: 0.8rem;">
-            <strong>⚠️ Liberação:</strong> 2 contatos precisam confirmar o falecimento
+            <strong>📌 Como funciona:</strong><br>
+            A liberação será feita automaticamente via API de validação de CPF (em desenvolvimento).<br>
+            Quando confirmado o falecimento, o primeiro contato da lista receberá todas as orientações.
         </div>
         """, unsafe_allow_html=True)
 
 
 # ============================================================================
-# PAINEL ADMINISTRATIVO
-# ============================================================================
-def render_admin():
-    st.markdown("<h2 style='color: #2E8B57;'>👑 Painel Administrativo</h2>", unsafe_allow_html=True)
-
-    st.markdown("### 📋 Usuários Cadastrados")
-
-    usuarios = gerente_usuarios.listar_usuarios()
-
-    if not usuarios:
-        st.info("Nenhum usuário cadastrado")
-    else:
-        for usuario in usuarios:
-            with st.expander(f"👤 {usuario['nome']} - {usuario['email']}"):
-                st.markdown(f"**ID:** {usuario['id']}")
-                st.markdown(f"**Tipo:** {usuario['tipo']}")
-                st.markdown(f"**Data de criação:** {usuario['data_criacao']}")
-                st.markdown(f"**Último acesso:** {usuario['ultimo_acesso'] or 'Nunca'}")
-
-    st.markdown("---")
-    st.markdown("### 📊 Estatísticas do Sistema")
-
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("Total Usuários", len(usuarios))
-    with col2:
-        st.metric("Total Senhas", len(db.listar_senhas()))
-    with col3:
-        st.metric("Total Vídeos", len(db.listar_videos()))
-    with col4:
-        st.metric("Total Contatos", len(db.listar_contatos()))
-
-
-# ============================================================================
-# TELA SOBRE
+# SOBRE
 # ============================================================================
 def render_sobre():
-    st.markdown("<h2 style='color: #2E8B57;'>ℹ️ Sobre o aEterna</h2>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #2E8B57;'>✨ Sobre o aEterna</h3>", unsafe_allow_html=True)
 
     st.markdown("""
     <div class="info-card">
-        <h3>✨ O que é o aEterna?</h3>
+        <h3>🌿 O que é o aEterna?</h3>
         <p>O aEterna é uma plataforma de legado digital que permite você guardar suas senhas, 
         mensagens em vídeo e contatos de confiança em um único lugar seguro.</p>
+        <p><strong>O cofre é opcional:</strong> Você pode usar apenas para indicar onde estão suas coisas, sem armazenar senhas.</p>
     </div>
 
     <div class="info-card">
-        <h3>🔒 Segurança</h3>
-        <p>Todas as suas senhas são criptografadas localmente antes de serem salvas. 
-        Nem mesmo nós temos acesso aos seus dados.</p>
+        <h3>🚀 Roadmap</h3>
+        <p>✅ App funcional (senhas, vídeos, contatos)<br>
+        🔄 App mobile (Android/iOS) - em desenvolvimento<br>
+        🔄 API de validação de CPF - em desenvolvimento<br>
+        🔄 Assistente de luto com IA - em planejamento<br>
+        🔄 Mural da Memória - em planejamento</p>
     </div>
 
     <div class="info-card">
-        <h3>🚀 Futuro</h3>
-        <p>Em breve: aplicativo mobile, assistente de luto com IA, verificação automática de falecimento e muito mais!</p>
-    </div>
-
-    <div class="info-card">
-        <h3>📧 Contato</h3>
-        <p>Dúvidas ou sugestões? Entre em contato: <strong>contato@aeterenalegado.com.br</strong></p>
+        <h3>💼 Para Investidores e Parceiros</h3>
+        <p>Estamos abertos a:</p>
+        <ul>
+            <li>Investimento anjo</li>
+            <li>Parcerias com planos funerários</li>
+            <li>Parcerias com seguros de vida</li>
+            <li>Licenciamento da tecnologia</li>
+        </ul>
+        <p>📧 Contato: <strong>parcerias@aeterenalegado.com.br</strong></p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -616,6 +590,13 @@ def main():
         render_sidebar()
         render_app()
 
+        # Rodapé SEM CRUZ
+        st.markdown("""
+        <div class="footer-aeterna">
+            <p>✨ aEterna - Seu legado, sua história, sua vida. ✨</p>
+            <p style="font-size: 0.6rem;">Versão 2.0 | Desenvolvido com dedicação</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-if __name__ == "__main__":
-    main()
+
+if __name__ == "__
