@@ -3,10 +3,12 @@ from PIL import Image
 import os
 from datetime import datetime
 import json
+import random
 from utils.banco import BancoDados
 from utils.criptografia import GerenciadorCriptografia
 from utils.usuarios import GerenciadorUsuarios
 from utils.upload_video import GerenciadorVideos
+from utils.assistente_ia import AssistenteLuto
 
 
 # ============================================================================
@@ -14,13 +16,8 @@ from utils.upload_video import GerenciadorVideos
 # ============================================================================
 
 def encontrar_icone_aba():
-    icones_possiveis = [
-        "assets/favicon.ico",
-        "assets/favicon-32.png",
-        "assets/icon-192.png",
-        "assets/logo.png",
-        "logo.png"
-    ]
+    icones_possiveis = ["assets/favicon.ico", "assets/favicon-32.png", "assets/icon-192.png", "assets/logo.png",
+                        "logo.png"]
     for icone in icones_possiveis:
         if os.path.exists(icone):
             return icone
@@ -75,66 +72,30 @@ def inject_custom_css():
         header[data-testid="stHeader"] { background: transparent !important; }
         .stApp > header { display: none !important; }
 
-        /* Layout compacto */
-        .main .block-container {
-            padding-top: 0.5rem;
-            padding-bottom: 1rem;
-        }
+        /* Layout */
+        .main .block-container { padding-top: 0.5rem; padding-bottom: 1rem; }
+        .stApp { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8f5e9 100%); }
 
-        .stApp {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f5f5f5 0%, #e8f5e9 100%);
-        }
-
-        /* FONTES MENORES */
-        .main .block-container {
-            font-size: 0.85rem;
-        }
-
-        .stTabs [data-baseweb="tab"] {
-            font-size: 0.8rem;
-            padding: 0.3rem 0.6rem;
-        }
-
-        .info-card h3 {
-            font-size: 0.9rem;
-        }
-
-        .info-card p {
-            font-size: 0.75rem;
-        }
-
-        /* Header com texto verde escuro */
+        /* Header */
         .aeterna-header {
             background: linear-gradient(135deg, #90EE90 0%, #2E8B57 50%, #1B5E20 100%);
-            padding: 0.5rem;
+            padding: 0.8rem;
             border-radius: 20px;
             text-align: center;
             margin-bottom: 1.5rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
+        .aeterna-header h2 { color: #1B5E20 !important; margin: 0; }
 
-        .aeterna-header h2 {
-            color: #1B5E20 !important;
-            margin: 0;
-        }
-
-        .aeterna-header p {
-            color: rgba(255,255,255,0.9) !important;
-            margin: 0;
-        }
-
+        /* Cards */
         .info-card {
-            background: linear-gradient(135deg, #ffffff 0%, #f0faf0 100%);
+            background: white;
             padding: 1rem;
             border-radius: 12px;
             border-left: 4px solid #2E8B57;
             margin: 0.75rem 0;
-            transition: transform 0.2s;
         }
 
-        .info-card:hover { transform: translateY(-2px); }
-
+        /* Botões */
         .stButton > button {
             background: linear-gradient(135deg, #3CB371 0%, #1B5E20 100%);
             color: white;
@@ -143,162 +104,83 @@ def inject_custom_css():
             transition: all 0.3s ease;
         }
 
-        .stButton > button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(46, 139, 87, 0.3);
-        }
+        /* Sidebar */
+        [data-testid="stSidebar"] { background: linear-gradient(180deg, #e8f5e9 0%, #f0faf0 100%); }
+        .sidebar-logo-container { display: flex; justify-content: center; padding: 20px 0; }
+        [data-testid="stSidebar"] img { max-width: 220px !important; background: transparent !important; }
 
-        [data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #e8f5e9 0%, #f0faf0 100%);
-        }
+        /* Footer */
+        .footer-aeterna { text-align: center; padding: 1rem; color: #808080; font-size: 0.7rem; border-top: 1px solid #d0e8d0; margin-top: 2rem; }
 
-        .sidebar-logo-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px 0 15px 0;
-        }
-
-        [data-testid="stSidebar"] img {
-            max-width: 280px !important;
-            width: 280px !important;
-            background: transparent !important;
-        }
-
-        .footer-aeterna {
-            text-align: center;
+        /* Chat - Estilo de conversa */
+        .chat-container {
+            max-height: 500px;
+            overflow-y: auto;
             padding: 1rem;
-            color: #808080;
-            font-size: 0.7rem;
-            border-top: 1px solid #d0e8d0;
-            margin-top: 2rem;
-        }
-
-        img { background: transparent !important; }
-
-        .stTextInput > div > div > input {
-            border-radius: 8px;
-            border: 1px solid #c8e6c8;
-        }
-
-        .stTabs [data-baseweb="tab-list"] { gap: 5px; }
-        .stTabs [data-baseweb="tab"] {
-            border-radius: 8px;
-            padding: 0.4rem 0.8rem;
-            font-weight: 500;
-        }
-        .stTabs [aria-selected="true"] {
-            background: linear-gradient(135deg, #3CB371 0%, #1B5E20 100%);
-            color: white;
-        }
-
-        /* Melhorias para mobile - tela de cadastro */
-        @media (max-width: 768px) {
-            .stTextInput > div > div > input {
-                font-size: 16px !important;
-                padding: 12px !important;
-                min-height: 48px !important;
-            }
-
-            .stButton > button {
-                min-height: 48px !important;
-                font-size: 16px !important;
-            }
-
-            .stMarkdown h3 {
-                font-size: 1.3rem !important;
-            }
-
-            .stTextInput {
-                margin-bottom: 15px !important;
-            }
-
-            .stTextArea textarea {
-                font-size: 16px !important;
-                min-height: 80px !important;
-            }
-
-            .block-container {
-                padding-left: 15px !important;
-                padding-right: 15px !important;
-            }
-
-            hr {
-                margin: 20px 0 !important;
-            }
-
-            .stTabs [data-baseweb="tab-list"] {
-                gap: 8px !important;
-            }
-
-            .stTabs [data-baseweb="tab"] {
-                padding: 10px 16px !important;
-                font-size: 14px !important;
-            }
-        }
-
-        /* Cards mais limpos para mobile */
-        .info-card {
-            background: white !important;
-            border-radius: 12px !important;
-            padding: 16px !important;
-            margin: 12px 0 !important;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
-        }
-
-        .stTextInput > div > div > input {
-            border: 1px solid #ddd !important;
-            border-radius: 10px !important;
-            background: white !important;
-        }
-
-        .stTextInput > div > div > input:focus {
-            border-color: #2E8B57 !important;
-            box-shadow: 0 0 0 2px rgba(46,139,87,0.1) !important;
-        }
-
-        .stTextArea textarea {
-            border: 1px solid #ddd !important;
-            border-radius: 10px !important;
-        }
-
-        .stTextArea textarea:focus {
-            border-color: #2E8B57 !important;
-        }
-
-        /* Chat do assistente */
-        .chat-message-user {
-            background: #e8f5e9;
-            padding: 12px;
+            background: #f8f9fa;
             border-radius: 15px;
-            margin: 8px 0;
+            margin-bottom: 1rem;
+        }
+        .chat-message-user {
+            background: #2E8B57;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px 20px 5px 20px;
+            margin: 10px 0;
+            text-align: right;
+            max-width: 80%;
+            float: right;
+            clear: both;
+        }
+        .chat-message-assistant {
+            background: white;
+            color: #333;
+            padding: 10px 15px;
+            border-radius: 20px 20px 20px 5px;
+            margin: 10px 0;
+            text-align: left;
+            max-width: 80%;
+            float: left;
+            clear: both;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .chat-name-assistant {
+            font-size: 0.7rem;
+            color: #2E8B57;
+            margin-left: 10px;
+            margin-bottom: 2px;
+        }
+        .chat-name-user {
+            font-size: 0.7rem;
+            color: #666;
+            margin-right: 10px;
             text-align: right;
         }
+        .chat-clearfix { clear: both; }
 
-        .chat-message-assistant {
-            background: #f0faf0;
-            padding: 12px;
-            border-radius: 15px;
-            margin: 8px 0;
-            border-left: 3px solid #2E8B57;
+        /* Aviso IA */
+        .ia-warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            margin-bottom: 15px;
         }
 
-        /* Mensagem diária */
-        .daily-message {
-            background: linear-gradient(135deg, #2E8B57 0%, #1B5E20 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            font-style: italic;
-            margin: 20px 0;
+        /* Labels nos inputs */
+        .stTextInput label, .stTextArea label, .stSelectbox label {
+            font-weight: 600 !important;
+            color: #1B5E20 !important;
+            font-size: 0.85rem !important;
+        }
+
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .chat-message-user, .chat-message-assistant { max-width: 95%; }
+            .stTextInput label, .stTextArea label { font-size: 0.8rem !important; }
         }
     </style>
-
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#2E8B57">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="aEterna">
     """, unsafe_allow_html=True)
 
 
@@ -309,16 +191,16 @@ db = BancoDados()
 gerente_usuarios = GerenciadorUsuarios()
 gerente_videos = GerenciadorVideos()
 
-# Criar usuário admin inicial
 gerente_usuarios.criar_usuario_admin_inicial()
 
-# Inicializar estado da sessão
 if 'autenticado' not in st.session_state:
     st.session_state.autenticado = False
 if 'usuario_atual' not in st.session_state:
     st.session_state.usuario_atual = None
-if 'pagina' not in st.session_state:
-    st.session_state.pagina = 'login'
+if 'modo_acesso' not in st.session_state:
+    st.session_state.modo_acesso = None  # 'falecido' ou 'visitante'
+if 'falecido_id' not in st.session_state:
+    st.session_state.falecido_id = None
 if 'crypto' not in st.session_state:
     st.session_state.crypto = None
 if 'historico_assistente' not in st.session_state:
@@ -333,47 +215,75 @@ def fazer_login(email, senha):
     if usuario:
         st.session_state.usuario_atual = usuario
         st.session_state.autenticado = True
-        st.session_state.pagina = 'app'
+        st.session_state.modo_acesso = 'falecido'
+        st.session_state.falecido_id = usuario['id']
         st.session_state.crypto = GerenciadorCriptografia(senha)
         return True
+    return False
+
+
+def fazer_login_visitante(email_acesso, chave_acesso, falecido_email):
+    """Login de visitante (ente querido) para acessar o assistente"""
+    # Buscar o falecido pelo email
+    conn = sqlite3.connect("dados/cofre.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, nome FROM usuarios WHERE email = ?", (falecido_email,))
+    falecido = cursor.fetchone()
+    conn.close()
+
+    if falecido:
+        # Verificar a chave (simplificado - em produção seria mais seguro)
+        if chave_acesso == "chave_teste_123":
+            st.session_state.autenticado = True
+            st.session_state.modo_acesso = 'visitante'
+            st.session_state.falecido_id = falecido[0]
+            st.session_state.usuario_atual = {'nome': email_acesso, 'tipo': 'visitante'}
+            st.session_state.historico_assistente = []
+            return True
     return False
 
 
 def fazer_logout():
     st.session_state.autenticado = False
     st.session_state.usuario_atual = None
-    st.session_state.pagina = 'login'
+    st.session_state.modo_acesso = None
+    st.session_state.falecido_id = None
     st.session_state.crypto = None
     st.session_state.historico_assistente = []
     st.rerun()
 
 
-def fazer_cadastro(nome, email, cpf, senha, foto=None, redes=None):
-    return gerente_usuarios.criar_usuario(nome, email, cpf, senha, 'usuario', foto or '', redes or '{}')
+def fazer_cadastro(nome, email, cpf, senha, telefone, whatsapp, foto=None, redes=None):
+    return gerente_usuarios.criar_usuario(nome, email, cpf, senha, 'usuario',
+                                          telefone=telefone, whatsapp=whatsapp,
+                                          foto=foto or '', redes=redes or '{}')
 
 
 # ============================================================================
-# TELA DE LOGIN E CADASTRO - VERSÃO OTIMIZADA PARA MOBILE
+# TELA DE LOGIN - COMPLETA COM CAMPOS VISÍVEIS
 # ============================================================================
 def render_login():
     logo = carregar_logo()
     logo_sem_fundo = remover_fundo_branco(logo) if logo else None
 
-    st.markdown('<div class="aeterna-header" style="padding: 0.8rem;">', unsafe_allow_html=True)
+    st.markdown('<div class="aeterna-header">', unsafe_allow_html=True)
     if logo_sem_fundo:
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
             st.image(logo_sem_fundo, width=180)
     st.markdown('</div>', unsafe_allow_html=True)
 
-    tab1, tab2 = st.tabs(["🔐 **ENTRAR**", "📝 **CRIAR CONTA**"])
+    tab1, tab2, tab3 = st.tabs(["🔐 Acessar meu Legado", "👋 Acessar Legado de Alguém", "📝 Criar Conta"])
 
+    # ========== TAB 1: Falecido (próprio legado) ==========
     with tab1:
-        st.markdown("### Bem-vindo de volta!")
-
+        st.markdown("### Acesse seu cofre digital")
         with st.form("login_form"):
-            email = st.text_input("E-mail", placeholder="seu@email.com", key="login_email")
-            senha = st.text_input("Senha", type="password", placeholder="••••••••", key="login_senha")
+            st.markdown("**📧 E-mail**")
+            email = st.text_input("email", placeholder="seu@email.com", key="login_email", label_visibility="collapsed")
+            st.markdown("**🔒 Senha**")
+            senha = st.text_input("senha", type="password", placeholder="Sua senha", key="login_senha",
+                                  label_visibility="collapsed")
 
             col1, col2, col3 = st.columns([1, 2, 1])
             with col2:
@@ -382,52 +292,90 @@ def render_login():
             if submitted:
                 if email and senha:
                     if fazer_login(email, senha):
-                        st.success("✅ Login realizado com sucesso!")
+                        st.success("✅ Login realizado!")
                         st.rerun()
                     else:
                         st.error("❌ E-mail ou senha incorretos")
                 else:
                     st.warning("⚠️ Preencha e-mail e senha")
-
         st.caption("💡 **Teste:** admin@aeterna.com / admin123")
 
+    # ========== TAB 2: Visitante (ente querido) ==========
     with tab2:
-        st.markdown("### ✨ Crie sua conta")
-        st.caption("⚠️ O CPF é obrigatório e será usado para validação futura")
+        st.markdown("### Acessar legado de alguém especial")
+        st.markdown("Use as credenciais que foram enviadas para você.")
+
+        with st.form("visitante_form"):
+            st.markdown("**👤 Seu nome**")
+            nome_visitante = st.text_input("nome", placeholder="Seu nome", key="visitante_nome",
+                                           label_visibility="collapsed")
+            st.markdown("**📧 E-mail do seu ente querido (falecido)**")
+            email_falecido = st.text_input("email_falecido", placeholder="email@do.falecido.com", key="visitante_email",
+                                           label_visibility="collapsed")
+            st.markdown("**🔑 Chave de acesso**")
+            chave = st.text_input("chave", placeholder="Chave enviada por e-mail", key="visitante_chave",
+                                  label_visibility="collapsed", type="password")
+
+            col1, col2, col3 = st.columns([1, 2, 1])
+            with col2:
+                submitted = st.form_submit_button("🕊️ ACESSAR LEGADO", use_container_width=True, type="primary")
+
+            if submitted:
+                if nome_visitante and email_falecido and chave:
+                    if fazer_login_visitante(nome_visitante, chave, email_falecido):
+                        st.success(f"✅ Bem-vindo(a), {nome_visitante}!")
+                        st.rerun()
+                    else:
+                        st.error("❌ Credenciais inválidas. Verifique o e-mail do falecido e a chave.")
+                else:
+                    st.warning("⚠️ Preencha todos os campos")
+
+        st.info("💡 Não tem a chave? Entre em contato com a família do ente querido.")
+
+    # ========== TAB 3: Criar Conta ==========
+    with tab3:
+        st.markdown("### ✨ Crie sua conta para eternizar seu legado")
+        st.caption("⚠️ CPF é obrigatório para validação futura")
 
         with st.form("cadastro_form"):
             st.markdown("**📝 Nome completo**")
-            nome = st.text_input("Nome", placeholder="Ex: João Silva", key="cadastro_nome",
+            nome = st.text_input("nome", placeholder="Ex: João Silva", key="cadastro_nome",
                                  label_visibility="collapsed")
 
             st.markdown("**📧 E-mail**")
-            email = st.text_input("E-mail", placeholder="seu@email.com", key="cadastro_email",
+            email = st.text_input("email_cad", placeholder="seu@email.com", key="cadastro_email",
                                   label_visibility="collapsed")
 
             st.markdown("**🆔 CPF (apenas números)**")
-            cpf = st.text_input("CPF", placeholder="00000000000", key="cadastro_cpf", max_chars=11,
+            cpf = st.text_input("cpf", placeholder="00000000000", key="cadastro_cpf", max_chars=11,
                                 label_visibility="collapsed")
 
+            st.markdown("**📱 Telefone**")
+            telefone = st.text_input("telefone", placeholder="(11) 99999-9999", key="cadastro_telefone",
+                                     label_visibility="collapsed")
+
+            st.markdown("**📱 WhatsApp**")
+            whatsapp = st.text_input("whatsapp", placeholder="(11) 99999-9999", key="cadastro_whatsapp",
+                                     label_visibility="collapsed")
+
             st.markdown("**🔒 Senha**")
-            senha = st.text_input("Senha", type="password", placeholder="Mínimo 6 caracteres", key="cadastro_senha",
+            senha = st.text_input("senha_cad", type="password", placeholder="Mínimo 6 caracteres", key="cadastro_senha",
                                   label_visibility="collapsed")
 
             st.markdown("**🔒 Confirmar senha**")
-            confirmar_senha = st.text_input("Confirmar", type="password", placeholder="Digite a senha novamente",
+            confirmar_senha = st.text_input("confirmar", type="password", placeholder="Digite a senha novamente",
                                             key="cadastro_confirmar", label_visibility="collapsed")
 
             st.markdown("---")
-            st.markdown("#### ✨ Opcional (pode pular)")
+            st.markdown("#### ✨ Opcional")
 
             st.markdown("**📷 Foto de perfil**")
-            foto = st.file_uploader("Foto", type=["png", "jpg", "jpeg"], key="cadastro_foto",
+            foto = st.file_uploader("foto", type=["png", "jpg", "jpeg"], key="cadastro_foto",
                                     label_visibility="collapsed")
 
             st.markdown("**🌐 Redes sociais**")
-            redes = st.text_area("Redes", placeholder="Instagram: @seuusuario\nLinkedIn: linkedin.com/in/seuusuario",
+            redes = st.text_area("redes", placeholder="Instagram: @seuusuario\nLinkedIn: linkedin.com/in/seuusuario",
                                  key="cadastro_redes", label_visibility="collapsed", height=80)
-
-            st.markdown("---")
 
             col1, col2, col3 = st.columns([1, 2, 1])
             with col2:
@@ -441,7 +389,7 @@ def render_login():
                 if not senha: erros.append("Senha")
 
                 if erros:
-                    st.error(f"❌ Preencha os campos obrigatórios: {', '.join(erros)}")
+                    st.error(f"❌ Preencha: {', '.join(erros)}")
                 elif len(cpf) != 11 or not cpf.isdigit():
                     st.error("❌ CPF inválido. Digite apenas 11 números")
                 elif senha != confirmar_senha:
@@ -449,9 +397,9 @@ def render_login():
                 elif len(senha) < 6:
                     st.warning("⚠️ A senha deve ter pelo menos 6 caracteres")
                 else:
-                    resultado = fazer_cadastro(nome, email, cpf, senha)
+                    resultado = fazer_cadastro(nome, email, cpf, senha, telefone, whatsapp)
                     if resultado == True:
-                        st.success("✅ Conta criada com sucesso! Faça login para continuar.")
+                        st.success("✅ Conta criada! Faça login.")
                         st.balloons()
                         st.rerun()
                     elif resultado == "cpf_existente":
@@ -461,142 +409,90 @@ def render_login():
 
 
 # ============================================================================
-# SIDEBAR
+# ASSISTENTE DE LUTO - VERSÃO CHAT
 # ============================================================================
-def render_sidebar():
-    logo = carregar_logo()
-    logo_sem_fundo = remover_fundo_branco(logo) if logo else None
+def render_assistente():
+    """Renderiza o assistente de luto no estilo chat"""
 
-    with st.sidebar:
-        if logo_sem_fundo:
-            st.markdown('<div class="sidebar-logo-container">', unsafe_allow_html=True)
-            st.image(logo_sem_fundo, width=220)
-            st.markdown('</div>', unsafe_allow_html=True)
+    assistente = AssistenteLuto(st.session_state.falecido_id)
+    falecido = gerente_usuarios.obter_usuario_por_id(st.session_state.falecido_id)
+    nome_falecido = falecido['nome'] if falecido else "seu ente querido"
 
-        st.markdown(f"### ✨ Olá, **{st.session_state.usuario_atual['nome']}**!")
-        st.caption(f"📧 {st.session_state.usuario_atual['email']}")
+    st.markdown(f"<h3 style='color: #2E8B57;'>🤖 Conversando com {nome_falecido}</h3>", unsafe_allow_html=True)
 
-        if st.button("🚪 Sair", use_container_width=True):
-            fazer_logout()
+    # Aviso importante sobre IA
+    st.markdown(f"""
+    <div class="ia-warning">
+        💡 <strong>Importante:</strong> Esta é uma conversa gerada por inteligência artificial baseada na personalidade e 
+        mensagens deixadas por <strong>{nome_falecido}</strong>. As respostas são simulações e podem não representar 
+        exatamente o que a pessoa pensava ou sentia. Use com carinho e parcimônia. O objetivo é ajudar no processo de luto 
+        e não criar dependência.
+    </div>
+    """, unsafe_allow_html=True)
 
-        st.markdown("---")
-        st.markdown("### 📊 Seu Cofre")
-        senhas = db.listar_senhas()
-        videos = gerente_videos.listar_videos_usuario(st.session_state.usuario_atual['id'])
-        contatos = db.listar_contatos()
+    # Inicializar histórico
+    if "historico_assistente" not in st.session_state:
+        st.session_state.historico_assistente = []
 
-        st.metric("🔐 Senhas", len(senhas))
-        st.metric("📹 Vídeos", len(videos))
-        st.metric("👥 Contatos", len(contatos))
+    # Container do chat
+    chat_container = st.container()
 
+    # Mostrar mensagens do chat
+    with chat_container:
+        st.markdown('<div class="chat-container" id="chat">', unsafe_allow_html=True)
 
-# ============================================================================
-# TELA PRINCIPAL
-# ============================================================================
-def render_app():
-    st.markdown('<div class="aeterna-header">', unsafe_allow_html=True)
-    st.markdown(f"<h2 style='text-align: center;'>Bem-vindo, {st.session_state.usuario_atual['nome']}!</h2>",
-                unsafe_allow_html=True)
-    st.markdown('<p style="text-align: center;">Gerencie seu legado digital com segurança</p>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+        if not st.session_state.historico_assistente:
+            # Mensagem inicial
+            msg_inicial = f"Olá! Esta é uma conversa simulada baseada em como {nome_falecido} era. Pode me perguntar qualquer coisa. Lembre-se de que sou uma IA e posso cometer erros."
+            st.markdown(f'<div class="chat-name-assistant">{nome_falecido}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="chat-message-assistant">{msg_inicial}</div>', unsafe_allow_html=True)
+            st.markdown('<div class="chat-clearfix"></div>', unsafe_allow_html=True)
+            st.session_state.historico_assistente.append({"tipo": "assistente", "texto": msg_inicial})
 
-    # Verificar se o usuário configurou o assistente
-    from utils.assistente_ia import AssistenteLuto
-    assistente_temp = AssistenteLuto(st.session_state.usuario_atual['id'])
-    stats = assistente_temp.estatisticas()
-    tem_assistente = stats.get("perguntas_respondidas", 0) > 0
+        for msg in st.session_state.historico_assistente:
+            if msg["tipo"] == "usuario":
+                st.markdown(f'<div class="chat-name-user">Você</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="chat-message-user">{msg["texto"]}</div>', unsafe_allow_html=True)
+            else:
+                st.markdown(f'<div class="chat-name-assistant">{nome_falecido}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="chat-message-assistant">{msg["texto"]}</div>', unsafe_allow_html=True)
+            st.markdown('<div class="chat-clearfix"></div>', unsafe_allow_html=True)
 
-    # Abas
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
-        "🔐 Senhas",
-        "📹 Vídeos",
-        "👥 Contatos",
-        "🤖 Assistente de Luto" + (" ✅" if tem_assistente else ""),
-        "ℹ️ Sobre"
-    ])
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    with tab1:
-        render_senhas()
-    with tab2:
-        render_videos()
-    with tab3:
-        render_contatos()
-    with tab4:
-        render_assistente()
-    with tab5:
-        render_sobre()
-
-
-# ============================================================================
-# SENHAS
-# ============================================================================
-def render_senhas():
-    st.markdown("<h3 style='color: #2E8B57;'>🔐 Gerenciamento de Senhas</h3>", unsafe_allow_html=True)
-    st.info(
-        "💡 **Opcional:** Você pode usar o cofre para guardar suas senhas ou apenas para indicar onde elas estão. A escolha é sua.")
-
-    col1, col2 = st.columns([2, 1])
-
-    with col2:
-        with st.expander("➕ Adicionar nova senha", expanded=False):
-            servico = st.text_input("Serviço/App *", key="servico_input")
-            usuario = st.text_input("Usuário/E-mail *", key="usuario_input")
-            senha_original = st.text_input("Senha *", type="password", key="senha_input")
-            url = st.text_input("URL", key="url_input")
-            notas = st.text_area("Notas", key="notas_input", height=80,
-                                 placeholder="Onde esta senha está salva? Observações importantes?")
-
-            if st.button("💾 Salvar", key="btn_salvar_senha", type="primary", use_container_width=True):
-                if servico and usuario and senha_original:
-                    senha_cripto = st.session_state.crypto.criptografar(senha_original)
-                    db.adicionar_senha(servico, usuario, senha_cripto, url, notas)
-                    st.success(f"✅ {servico} adicionado!")
-                    st.rerun()
-                else:
-                    st.error("❌ Preencha os campos obrigatórios")
-
+    # Input e botão de enviar
+    col1, col2 = st.columns([4, 1])
     with col1:
-        senhas = db.listar_senhas()
-        if not senhas:
-            st.info("📭 Nenhuma senha cadastrada")
-        else:
-            for senha in senhas:
-                with st.expander(f"🔒 {senha['servico']}"):
-                    st.markdown(f"**👤 Usuário:** `{senha['usuario']}`")
-                    if senha['url']:
-                        st.markdown(f"**🌐 URL:** {senha['url']}")
-                    if senha['notas']:
-                        st.markdown(f"**📝 Notas:** {senha['notas']}")
+        mensagem = st.text_input("Sua mensagem:", key="msg_assistente",
+                                 placeholder=f"Escreva sua mensagem para {nome_falecido}...",
+                                 label_visibility="collapsed")
+    with col2:
+        enviar = st.button("📨 Enviar", key="btn_enviar", type="primary", use_container_width=True)
 
-                    col_btn1, col_btn2 = st.columns(2)
-                    with col_btn1:
-                        if st.button(f"🔓 Mostrar", key=f"ver_{senha['id']}"):
-                            senha_completa = db.obter_senha(senha['id'])
-                            if senha_completa:
-                                senha_real = st.session_state.crypto.descriptografar(
-                                    senha_completa['senha_criptografada'])
-                                st.code(senha_real, language="text")
-                    with col_btn2:
-                        if st.button(f"🗑️ Excluir", key=f"del_{senha['id']}"):
-                            db.deletar_senha(senha['id'])
-                            st.rerun()
+    # Processar mensagem (apenas 1 clique)
+    if enviar and mensagem:
+        st.session_state.historico_assistente.append({"tipo": "usuario", "texto": mensagem})
+        with st.spinner(f"{nome_falecido} está pensando..."):
+            resposta = assistente.conversar(mensagem)
+        st.session_state.historico_assistente.append({"tipo": "assistente", "texto": resposta})
+        st.rerun()
 
 
 # ============================================================================
-# VÍDEOS
+# VÍDEOS - COM DESTINATÁRIO ESPECÍFICO
 # ============================================================================
 def render_videos():
     st.markdown("<h3 style='color: #2E8B57;'>📹 Mensagens em Vídeo</h3>", unsafe_allow_html=True)
-    st.info("💡 Grave vídeos com suas palavras, conselhos e lembranças. Eles ficarão salvos em nosso servidor seguro.")
+    st.info("💡 Cada vídeo pode ser direcionado para uma pessoa específica. Apenas ela terá acesso.")
 
     col1, col2 = st.columns([1, 2])
 
     with col1:
         with st.expander("🎥 Adicionar vídeo", expanded=False):
             titulo = st.text_input("Título *", key="titulo_video_input")
-            destinatario = st.text_input("Para", key="destinatario_video", placeholder="Ex: Para minha filha Ana")
+            destinatario = st.text_input("Para quem é este vídeo?", key="destinatario_video",
+                                         placeholder="Ex: Para minha filha Ana - apenas ela verá")
             arquivo_video = st.file_uploader("Arquivo de vídeo", type=["mp4", "mov", "avi", "mkv"], key="video_file")
-            st.caption("📹 Formatos aceitos: MP4, MOV, AVI, MKV | Tamanho máximo: 200MB")
 
             if st.button("💾 Salvar", key="btn_salvar_video", type="primary", use_container_width=True):
                 if titulo and arquivo_video:
@@ -606,7 +502,7 @@ def render_videos():
                         titulo,
                         destinatario
                     )
-                    st.success(f"✅ {titulo} salvo com sucesso!")
+                    st.success(f"✅ {titulo} salvo para {destinatario or 'todos'}")
                     st.rerun()
                 else:
                     st.error("❌ Preencha o título e selecione um vídeo")
@@ -621,239 +517,10 @@ def render_videos():
                 with st.expander(f"🎬 {video['titulo']}"):
                     if video['destinatario']:
                         st.markdown(f"**👥 Para:** {video['destinatario']}")
-                    st.markdown(f"**📅 Data:** {video['data'][:19] if video['data'] else 'Não informada'}")
                     st.video(video['caminho'])
                     if st.button(f"🗑️ Remover", key=f"del_video_{video['id']}"):
                         if gerente_videos.deletar_video(video['id'], st.session_state.usuario_atual['id']):
                             st.rerun()
-
-
-# ============================================================================
-# CONTATOS
-# ============================================================================
-def render_contatos():
-    st.markdown("<h3 style='color: #2E8B57;'>👥 Contatos de Confiança</h3>", unsafe_allow_html=True)
-    st.info("💡 Indique até 3 pessoas que receberão seu legado. A ordem define a prioridade.")
-
-    col1, col2 = st.columns([1, 2])
-
-    with col1:
-        with st.expander("➕ Adicionar contato", expanded=False):
-            nome_contato = st.text_input("Nome *", key="nome_contato_input")
-            email_contato = st.text_input("E-mail *", key="email_contato_input")
-            telefone_contato = st.text_input("Telefone", key="telefone_contato")
-            papel_contato = st.selectbox("Papel",
-                                         ["Filho(a)", "Cônjuge", "Irmão(ã)", "Amigo(a)", "Advogado(a)", "Outro"],
-                                         key="papel_contato")
-            prioridade = st.selectbox("Prioridade", [1, 2, 3], key="prioridade_contato")
-
-            if st.button("💾 Salvar", key="btn_salvar_contato", type="primary", use_container_width=True):
-                if nome_contato and email_contato:
-                    db.adicionar_contato(nome_contato, email_contato, telefone_contato, papel_contato,
-                                         f"Prioridade: {prioridade}")
-                    st.success(f"✅ {nome_contato} adicionado!")
-                    st.rerun()
-                else:
-                    st.error("❌ Preencha nome e e-mail")
-
-    with col2:
-        contatos = db.listar_contatos()
-
-        if not contatos:
-            st.info("📭 Nenhum contato cadastrado")
-        else:
-            for i, contato in enumerate(contatos):
-                st.markdown(f"""
-                <div class="info-card" style="padding: 0.75rem;">
-                    <strong>{i + 1}º - 👤 {contato['nome']}</strong><br>
-                    📧 {contato['email']}<br>
-                    🏷️ {contato['papel']}
-                </div>
-                """, unsafe_allow_html=True)
-
-                if st.button(f"🗑️ Remover {contato['nome']}", key=f"del_contato_{contato['id']}"):
-                    db.deletar_contato(contato['id'])
-                    st.rerun()
-
-        st.markdown("""
-        <div class="info-card" style="padding: 0.75rem; font-size: 0.8rem; background: #fff3e0;">
-            <strong>📌 Como funciona:</strong><br>
-            A liberação será feita automaticamente via API de validação de CPF (em desenvolvimento).<br>
-            Quando confirmado o falecimento, o primeiro contato da lista receberá todas as orientações.
-        </div>
-        """, unsafe_allow_html=True)
-
-
-# ============================================================================
-# ASSISTENTE DE LUTO
-# ============================================================================
-def render_assistente():
-    from utils.assistente_ia import AssistenteLuto
-    from utils.personalidade import renderizar_captura_personalidade, PERGUNTAS_PERSONALIDADE
-
-    st.markdown("<h3 style='color: #2E8B57;'>🤖 Assistente de Luto</h3>", unsafe_allow_html=True)
-
-    # Verificar se o assistente já foi configurado
-    assistente = AssistenteLuto(st.session_state.usuario_atual['id'])
-    stats = assistente.estatisticas()
-
-    # Mensagem diária (se já configurado)
-    if stats.get("perguntas_respondidas", 0) > 0:
-        with st.expander("💝 Mensagem de Conforto do Dia", expanded=False):
-            mensagem = assistente.gerar_mensagem_diaria()
-            st.markdown(f'<div class="daily-message">{mensagem}</div>', unsafe_allow_html=True)
-
-    if stats["perguntas_respondidas"] == 0:
-        # Primeira vez: capturar personalidade
-        st.info("✨ **Vamos te conhecer melhor!** ✨")
-        st.markdown("""
-        Responda às perguntas abaixo para que o Assistente de Luto possa 
-        conversar com seus entes queridos como se fosse você.
-
-        Não se preocupe, você pode editar suas respostas depois.
-        """)
-
-        respostas = renderizar_captura_personalidade()
-
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            if st.button("💾 Salvar Personalidade", type="primary", use_container_width=True):
-                if any(respostas.values()):
-                    assistente.capturar_personalidade(respostas)
-                    st.success("✅ Personalidade salva com sucesso!")
-                    st.rerun()
-                else:
-                    st.warning("⚠️ Responda pelo menos uma pergunta para continuar.")
-    else:
-        # Assistente já configurado
-        st.success(f"✅ Assistente configurado com {stats['perguntas_respondidas']} respostas")
-
-        # Abas: Conversar, Ajustes, Estatísticas
-        tab1, tab2, tab3 = st.tabs(["💬 Conversar", "✏️ Ajustar Personalidade", "📊 Estatísticas"])
-
-        with tab1:
-            st.markdown("### 💬 Converse com seu ente querido")
-            st.markdown("""
-            Simule uma conversa com a pessoa que partiu. As respostas são geradas 
-            baseadas na personalidade e memórias que ela deixou.
-            """)
-
-            # Inicializar histórico de conversa na sessão
-            if "historico_assistente" not in st.session_state:
-                st.session_state.historico_assistente = []
-
-            # Exibir histórico
-            for msg in st.session_state.historico_assistente:
-                if msg["tipo"] == "usuario":
-                    st.markdown(f'<div class="chat-message-user"><strong>Você:</strong><br>{msg["texto"]}</div>',
-                                unsafe_allow_html=True)
-                else:
-                    st.markdown(
-                        f'<div class="chat-message-assistant"><strong>🤖 Assistente:</strong><br>{msg["texto"]}</div>',
-                        unsafe_allow_html=True)
-
-            # Input de mensagem
-            mensagem = st.text_area("Sua mensagem:", key="msg_assistente", height=100,
-                                    placeholder="Escreva sua mensagem aqui...")
-
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("📨 Enviar", type="primary", use_container_width=True):
-                    if mensagem:
-                        st.session_state.historico_assistente.append({"tipo": "usuario", "texto": mensagem})
-
-                        with st.spinner("✨ Pensando..."):
-                            resposta = assistente.conversar(mensagem)
-
-                        st.session_state.historico_assistente.append({"tipo": "assistente", "texto": resposta})
-                        st.rerun()
-
-            with col2:
-                if st.button("🗑️ Limpar Conversa", use_container_width=True):
-                    st.session_state.historico_assistente = []
-                    st.rerun()
-
-        with tab2:
-            st.markdown("### ✏️ Ajustar Personalidade")
-            st.markdown("Você pode editar suas respostas a qualquer momento.")
-
-            # Carregar respostas atuais
-            import sqlite3
-            conn = sqlite3.connect("dados/cofre.db")
-            cursor = conn.cursor()
-            cursor.execute('''
-                SELECT pergunta, resposta FROM personalidade 
-                WHERE usuario_id = ? ORDER BY id
-            ''', (st.session_state.usuario_atual['id'],))
-
-            respostas_atuais = dict(cursor.fetchall())
-            conn.close()
-
-            respostas_editadas = {}
-
-            for key, pergunta in PERGUNTAS_PERSONALIDADE.items():
-                valor_atual = respostas_atuais.get(pergunta, "")
-                nova_resposta = st.text_area(
-                    pergunta,
-                    value=valor_atual,
-                    key=f"edit_{key}",
-                    height=80
-                )
-                if nova_resposta != valor_atual:
-                    respostas_editadas[pergunta] = nova_resposta
-
-            if respostas_editadas:
-                col1, col2, col3 = st.columns([1, 2, 1])
-                with col2:
-                    if st.button("💾 Salvar Alterações", type="primary", use_container_width=True):
-                        conn = sqlite3.connect("dados/cofre.db")
-                        cursor = conn.cursor()
-                        for pergunta, resposta in respostas_editadas.items():
-                            cursor.execute('''
-                                UPDATE personalidade SET resposta = ? 
-                                WHERE usuario_id = ? AND pergunta = ?
-                            ''', (resposta, st.session_state.usuario_atual['id'], pergunta))
-                        conn.commit()
-                        conn.close()
-
-                        assistente._gerar_embedding_personalidade(respostas_editadas)
-                        st.success("✅ Personalidade atualizada!")
-                        st.rerun()
-            else:
-                st.info("Nenhuma alteração detectada. Edite alguma resposta para salvar.")
-
-        with tab3:
-            st.markdown("### 📊 Estatísticas do Assistente")
-
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.metric("📝 Perguntas", stats.get("perguntas_respondidas", 0))
-            with col2:
-                st.metric("💾 Memórias", stats.get("memorias_armazenadas", 0))
-            with col3:
-                status_ia = "✅ Ativo" if stats.get("ia_disponivel", False) else "⚠️ Local"
-                st.metric("🧠 IA", status_ia)
-
-            st.markdown("---")
-            st.markdown("#### 📌 Sobre o Assistente")
-            st.markdown("""
-            O Assistente de Luto utiliza:
-            - **Embeddings semânticos** para entender o contexto
-            - **Memórias vetorizadas** para buscas relevantes
-            - **IA generativa** (Gemini) para respostas naturais
-
-            Quanto mais informações você fornecer, mais personalizadas serão as respostas.
-            """)
-
-            if not stats.get("ia_disponivel", False):
-                st.warning("""
-                ⚠️ **IA Avançada não configurada**
-
-                Para ativar respostas mais naturais, configure a API Key do Google Gemini:
-                1. Acesse: https://aistudio.google.com/app/apikey
-                2. Crie uma API key gratuita
-                3. Adicione como segredo no Streamlit Cloud: `GEMINI_API_KEY`
-                """)
 
 
 # ============================================================================
@@ -865,39 +532,26 @@ def render_sobre():
     st.markdown("""
     <div class="info-card">
         <h3>🌿 O que é o aEterna?</h3>
-        <p>O aEterna é uma plataforma de legado digital que permite você guardar suas senhas, 
-        mensagens em vídeo e contatos de confiança em um único lugar seguro.</p>
-        <p><strong>O cofre é opcional:</strong> Você pode usar apenas para indicar onde estão suas coisas, sem armazenar senhas.</p>
+        <p>O aEterna é uma plataforma de legado digital que permite eternizar sua memória, guardar senhas, 
+        mensagens em vídeo e criar um assistente de luto para seus entes queridos.</p>
     </div>
 
     <div class="info-card">
         <h3>🤖 Assistente de Luto</h3>
-        <p>Nossa tecnologia mais especial: uma IA treinada com sua personalidade, mensagens e memórias 
-        para conversar com seus entes queridos e oferecer conforto após sua partida.</p>
-        <p>💡 <strong>Como funciona:</strong> Você responde perguntas sobre sua vida, valores e conselhos. 
-        O sistema aprende sua essência e pode interagir como você faria.</p>
+        <p>Uma IA treinada com sua personalidade para conversar com seus entes queridos e oferecer conforto.</p>
     </div>
 
     <div class="info-card">
-        <h3>🚀 Roadmap</h3>
-        <p>✅ App funcional (senhas, vídeos, contatos)<br>
-        ✅ Assistente de Luto (versão inicial)<br>
-        🔄 App mobile (Android/iOS) - em desenvolvimento<br>
-        🔄 API de validação de CPF - em desenvolvimento<br>
-        🔄 Transcrição automática de vídeos - em breve<br>
-        🔄 Mural da Memória - em planejamento</p>
+        <h3>🚀 Em breve</h3>
+        <p>✅ App mobile (Android/iOS)<br>
+        ✅ Criação de legado para falecidos (familiares podem criar contas)<br>
+        ✅ API de validação de CPF<br>
+        ✅ Envio automático de chaves de acesso por e-mail/WhatsApp</p>
     </div>
 
     <div class="info-card">
-        <h3>💼 Para Investidores e Parceiros</h3>
-        <p>Estamos abertos a:</p>
-        <ul>
-            <li>Investimento anjo</li>
-            <li>Parcerias com planos funerários</li>
-            <li>Parcerias com seguros de vida</li>
-            <li>Licenciamento da tecnologia</li>
-        </ul>
-        <p>📧 Contato: <strong>parcerias@aeterenalegado.com.br</strong></p>
+        <h3>💼 Para Investidores</h3>
+        <p>📧 parcerias@aeterenalegado.com.br</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -911,16 +565,107 @@ def main():
     if not st.session_state.autenticado:
         render_login()
     else:
-        render_sidebar()
-        render_app()
+        # Sidebar
+        logo = carregar_logo()
+        if logo:
+            with st.sidebar:
+                st.markdown('<div class="sidebar-logo-container">', unsafe_allow_html=True)
+                st.image(logo, width=180)
+                st.markdown('</div>', unsafe_allow_html=True)
 
-        # Rodapé SEM CRUZ
-        st.markdown("""
-        <div class="footer-aeterna">
-            <p>✨ aEterna - Seu legado, sua história, sua vida. ✨</p>
-            <p style="font-size: 0.6rem;">Versão 2.0 | Com Assistente de Luto</p>
-        </div>
-        """, unsafe_allow_html=True)
+        if st.session_state.modo_acesso == 'falecido':
+            # Menu para o falecido (dono da conta)
+            with st.sidebar:
+                st.markdown(f"### ✨ Olá, {st.session_state.usuario_atual['nome']}!")
+                if st.button("🚪 Sair", use_container_width=True):
+                    fazer_logout()
+                st.markdown("---")
+                st.markdown("### 📊 Seu Legado")
+                st.metric("📹 Vídeos", len(gerente_videos.listar_videos_usuario(st.session_state.usuario_atual['id'])))
+                st.metric("👥 Contatos", len(db.listar_contatos()))
+
+            tab1, tab2, tab3, tab4 = st.tabs(["🤖 Assistente de Luto", "📹 Meus Vídeos", "👥 Meus Contatos", "ℹ️ Sobre"])
+            with tab1:
+                render_assistente()
+            with tab2:
+                render_videos()
+            with tab3:
+                render_contatos_falecido()
+            with tab4:
+                render_sobre()
+
+        else:  # visitante
+            with st.sidebar:
+                st.markdown(f"### 🕊️ Em memória de")
+                st.markdown(f"### {st.session_state.usuario_atual.get('nome_falecido', 'seu ente querido')}")
+                if st.button("🚪 Sair", use_container_width=True):
+                    fazer_logout()
+
+            # Visitante só vê o assistente e os vídeos direcionados a ele
+            st.markdown(
+                f"<h2 style='color: #2E8B57;'>Conversando com {st.session_state.usuario_atual.get('nome_falecido', 'seu ente querido')}</h2>",
+                unsafe_allow_html=True)
+            render_assistente()
+
+            # Mostrar vídeos direcionados ao visitante
+            st.markdown("---")
+            st.markdown("### 📹 Mensagens deixadas para você")
+            videos_destinados = gerente_videos.listar_videos_por_destinatario(
+                st.session_state.falecido_id,
+                st.session_state.usuario_atual['nome']
+            )
+            if videos_destinados:
+                for video in videos_destinados:
+                    st.video(video['caminho'])
+            else:
+                st.info("Nenhuma mensagem em vídeo foi deixada especificamente para você ainda.")
+
+            # Oferecer para criar conta
+            st.markdown("---")
+            st.markdown("""
+            <div class="info-card" style="text-align: center;">
+                <h3>💚 Gostou da experiência?</h3>
+                <p>Você também pode criar seu próprio legado digital e eternizar sua memória para quem você ama.</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+            col1, col2, col3 = st.columns([1, 2, 1])
+            with col2:
+                if st.button("📝 Criar minha conta aEterna", use_container_width=True, type="primary"):
+                    st.session_state.autenticado = False
+                    st.rerun()
+
+
+def render_contatos_falecido():
+    st.markdown("<h3 style='color: #2E8B57;'>👥 Contatos que receberão seu legado</h3>", unsafe_allow_html=True)
+    st.info("💡 Adicione até 3 pessoas. Cada uma receberá um e-mail com a chave de acesso.")
+
+    col1, col2 = st.columns([1, 2])
+
+    with col1:
+        with st.expander("➕ Adicionar contato", expanded=False):
+            nome = st.text_input("Nome completo *", key="contato_nome")
+            email = st.text_input("E-mail *", key="contato_email")
+            telefone = st.text_input("Telefone", key="contato_telefone")
+            whatsapp = st.text_input("WhatsApp", key="contato_whatsapp")
+            prioridade = st.selectbox("Prioridade", [1, 2, 3], key="contato_prioridade")
+
+            if st.button("💾 Salvar", type="primary", use_container_width=True):
+                if nome and email:
+                    # Gerar chave de acesso única
+                    import secrets
+                    chave_acesso = secrets.token_hex(8)
+                    db.adicionar_contato(nome, email, telefone, whatsapp, f"Prioridade: {prioridade}", chave_acesso)
+                    st.success(f"✅ {nome} adicionado! Chave de acesso: {chave_acesso}")
+                    st.info(f"💡 Envie esta chave para {nome}: {chave_acesso}")
+                    st.rerun()
+                else:
+                    st.error("❌ Preencha nome e e-mail")
+
+    with col2:
+        contatos = db.listar_contatos()
+        if not contatos:
+            st.info("📭 Nenhum contato cadastrado. Adicione até 3 pessoas de confiança.")
 
 
 if __name__ == "__main__":

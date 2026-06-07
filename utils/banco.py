@@ -1,23 +1,20 @@
+# utils/banco.py
 import sqlite3
-import json
-from datetime import datetime
-from typing import List, Dict, Optional
 import os
+from typing import List, Dict, Optional
 
 
 class BancoDados:
     def __init__(self, arquivo_db="dados/cofre.db"):
-        # Garante que a pasta dados existe
         os.makedirs(os.path.dirname(arquivo_db), exist_ok=True)
         self.arquivo_db = arquivo_db
         self._inicializar_banco()
 
     def _inicializar_banco(self):
-        """Cria as tabelas necessárias"""
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
 
-        # Tabela de senhas/serviços
+        # Tabela de senhas
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS senhas (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,7 +28,7 @@ class BancoDados:
             )
         ''')
 
-        # Tabela de vídeos/recados
+        # Tabela de vídeos
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS videos (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -44,14 +41,16 @@ class BancoDados:
             )
         ''')
 
-        # Tabela de contatos/herdeiros
+        # Tabela de contatos (atualizada com chave de acesso)
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS contatos (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 nome TEXT NOT NULL,
                 email TEXT NOT NULL,
                 telefone TEXT,
+                whatsapp TEXT,
                 papel TEXT,
+                chave_acesso TEXT,
                 mensagem_liberacao TEXT,
                 data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
@@ -69,7 +68,7 @@ class BancoDados:
         conn.commit()
         conn.close()
 
-    # ---------- Operações de Senhas ----------
+    # Operações de Senhas
     def adicionar_senha(self, servico: str, usuario: str, senha: str, url: str = "", notas: str = ""):
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
@@ -86,11 +85,7 @@ class BancoDados:
         cursor.execute('SELECT id, servico, usuario, url, notas FROM senhas ORDER BY servico')
         rows = cursor.fetchall()
         conn.close()
-
-        return [
-            {"id": row[0], "servico": row[1], "usuario": row[2], "url": row[3], "notas": row[4]}
-            for row in rows
-        ]
+        return [{"id": row[0], "servico": row[1], "usuario": row[2], "url": row[3], "notas": row[4]} for row in rows]
 
     def obter_senha(self, id_senha: int) -> Optional[Dict]:
         conn = sqlite3.connect(self.arquivo_db)
@@ -98,16 +93,9 @@ class BancoDados:
         cursor.execute('SELECT * FROM senhas WHERE id = ?', (id_senha,))
         row = cursor.fetchone()
         conn.close()
-
         if row:
-            return {
-                "id": row[0],
-                "servico": row[1],
-                "usuario": row[2],
-                "senha_criptografada": row[3],
-                "url": row[4],
-                "notas": row[5]
-            }
+            return {"id": row[0], "servico": row[1], "usuario": row[2], "senha_criptografada": row[3], "url": row[4],
+                    "notas": row[5]}
         return None
 
     def deletar_senha(self, id_senha: int):
@@ -117,7 +105,7 @@ class BancoDados:
         conn.commit()
         conn.close()
 
-    # ---------- Operações de Vídeos ----------
+    # Operações de Vídeos
     def adicionar_video(self, titulo: str, destinatario: str, caminho_arquivo: str = "", url_externa: str = "",
                         notas: str = ""):
         conn = sqlite3.connect(self.arquivo_db)
@@ -135,11 +123,8 @@ class BancoDados:
         cursor.execute('SELECT id, titulo, destinatario, url_externa, notas FROM videos ORDER BY data_criacao DESC')
         rows = cursor.fetchall()
         conn.close()
-
-        return [
-            {"id": row[0], "titulo": row[1], "destinatario": row[2], "url_externa": row[3], "notas": row[4]}
-            for row in rows
-        ]
+        return [{"id": row[0], "titulo": row[1], "destinatario": row[2], "url_externa": row[3], "notas": row[4]} for row
+                in rows]
 
     def deletar_video(self, id_video: int):
         conn = sqlite3.connect(self.arquivo_db)
@@ -148,29 +133,26 @@ class BancoDados:
         conn.commit()
         conn.close()
 
-    # ---------- Operações de Contatos ----------
-    def adicionar_contato(self, nome: str, email: str, telefone: str = "", papel: str = "",
-                          mensagem_liberacao: str = ""):
+    # Operações de Contatos (atualizada)
+    def adicionar_contato(self, nome: str, email: str, telefone: str = "", whatsapp: str = "", papel: str = "",
+                          chave_acesso: str = ""):
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO contatos (nome, email, telefone, papel, mensagem_liberacao)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (nome, email, telefone, papel, mensagem_liberacao))
+            INSERT INTO contatos (nome, email, telefone, whatsapp, papel, chave_acesso)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (nome, email, telefone, whatsapp, papel, chave_acesso))
         conn.commit()
         conn.close()
 
     def listar_contatos(self) -> List[Dict]:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
-        cursor.execute('SELECT id, nome, email, telefone, papel FROM contatos ORDER BY nome')
+        cursor.execute('SELECT id, nome, email, telefone, whatsapp, papel FROM contatos ORDER BY nome')
         rows = cursor.fetchall()
         conn.close()
-
-        return [
-            {"id": row[0], "nome": row[1], "email": row[2], "telefone": row[3], "papel": row[4]}
-            for row in rows
-        ]
+        return [{"id": row[0], "nome": row[1], "email": row[2], "telefone": row[3], "whatsapp": row[4], "papel": row[5]}
+                for row in rows]
 
     def deletar_contato(self, id_contato: int):
         conn = sqlite3.connect(self.arquivo_db)
@@ -179,14 +161,11 @@ class BancoDados:
         conn.commit()
         conn.close()
 
-    # ---------- Configurações ----------
+    # Configurações
     def salvar_config(self, chave: str, valor: str):
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
-        cursor.execute('''
-            INSERT OR REPLACE INTO configuracoes (chave, valor, data_atualizacao)
-            VALUES (?, ?, CURRENT_TIMESTAMP)
-        ''', (chave, valor))
+        cursor.execute('INSERT OR REPLACE INTO configuracoes (chave, valor) VALUES (?, ?)', (chave, valor))
         conn.commit()
         conn.close()
 
