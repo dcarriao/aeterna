@@ -16,54 +16,83 @@
         /* Header */
         .header { background: linear-gradient(135deg, #90EE90 0%, #2E8B57 50%, #1B5E20 100%); padding: 0.8rem 1rem; position: fixed; width: 100%; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .nav { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
-        .logo { display: flex; align-items: center; gap: 8px; }
-        .logo img { height: 40px; }
-        .logo span { font-size: 1.2rem; font-weight: 700; color: white; font-family: 'Playfair Display', serif; }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo img { height: 45px; }
+        .logo span {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: white;
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        .beta-badge { background: #ff9800; color: white; padding: 0.15rem 0.5rem; border-radius: 20px; font-size: 0.6rem; font-weight: 600; margin-left: 0.3rem; vertical-align: middle; }
+
         .menu-toggle { display: none; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
         .nav-links { display: flex; gap: 1.5rem; align-items: center; }
-        .nav-links a { color: white; text-decoration: none; font-weight: 500; font-size: 0.9rem; }
-        .btn-acessar { background: white; color: #2E8B57 !important; padding: 0.4rem 1rem; border-radius: 25px; font-weight: 600; }
-        .beta-badge { background: #ff9800; color: white; padding: 0.15rem 0.5rem; border-radius: 20px; font-size: 0.6rem; font-weight: 600; margin-left: 0.3rem; }
+        .nav-links a { color: white; text-decoration: none; font-weight: 500; font-size: 0.9rem; transition: opacity 0.3s; }
+        .nav-links a:hover { opacity: 0.8; }
+        .btn-acessar { background: white; color: #2E8B57 !important; padding: 0.4rem 1.2rem; border-radius: 25px; font-weight: 600; }
 
         /* Hero */
-        .hero { padding: 90px 1rem 50px; text-align: center; }
-        .hero h1 { font-size: 2rem; font-family: 'Playfair Display', serif; color: #1B5E20; margin-bottom: 0.8rem; }
-        .hero p { font-size: 1rem; color: #555; margin-bottom: 1.5rem; }
-        .btn-primary, .btn-secondary { display: inline-block; padding: 0.7rem 1.2rem; border-radius: 50px; text-decoration: none; font-weight: 600; font-size: 0.9rem; margin: 0.3rem; }
+        .hero { padding: 100px 1rem 50px; text-align: center; }
+        .hero h1 { font-size: 2.2rem; font-family: 'Playfair Display', serif; color: #1B5E20; margin-bottom: 1rem; }
+        .hero p { font-size: 1rem; color: #555; max-width: 700px; margin: 0 auto 1.5rem; }
+        .btn-primary, .btn-secondary { display: inline-block; padding: 0.7rem 1.5rem; border-radius: 50px; text-decoration: none; font-weight: 600; font-size: 0.9rem; margin: 0.3rem; transition: transform 0.2s; }
         .btn-primary { background: linear-gradient(135deg, #2E8B57 0%, #1B5E20 100%); color: white; }
         .btn-primary:hover { transform: translateY(-2px); }
         .btn-secondary { background: transparent; color: #2E8B57; border: 2px solid #2E8B57; }
+        .btn-secondary:hover { background: #2E8B57; color: white; }
 
         /* Sections */
-        .section { padding: 50px 1rem; max-width: 1200px; margin: 0 auto; }
-        .section-title { text-align: center; font-size: 1.8rem; font-family: 'Playfair Display', serif; color: #1B5E20; margin-bottom: 2rem; }
-        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.2rem; }
-        .feature-card { background: white; padding: 1.2rem; border-radius: 15px; text-align: center; box-shadow: 0 3px 12px rgba(0,0,0,0.05); }
+        .section { padding: 60px 1rem; max-width: 1200px; margin: 0 auto; }
+        .section-title { text-align: center; font-size: 2rem; font-family: 'Playfair Display', serif; color: #1B5E20; margin-bottom: 2rem; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+        .feature-card { background: white; padding: 1.5rem; border-radius: 15px; text-align: center; box-shadow: 0 3px 12px rgba(0,0,0,0.05); transition: transform 0.2s; }
+        .feature-card:hover { transform: translateY(-3px); }
         .feature-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
-        .feature-card h3 { font-size: 1rem; color: #2E8B57; margin-bottom: 0.5rem; }
-        .feature-card p { font-size: 0.8rem; }
+        .feature-card h3 { font-size: 1.1rem; color: #2E8B57; margin-bottom: 0.5rem; }
+        .feature-card p { font-size: 0.85rem; color: #666; }
 
-        /* Cards de legado */
+        /* Legado */
         .legado-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
         .legado-card { background: linear-gradient(135deg, #ffffff 0%, #f0faf0 100%); padding: 1.5rem; border-radius: 20px; text-align: center; border: 1px solid #c8e6c8; }
         .legado-card h3 { color: #1B5E20; margin-bottom: 0.5rem; }
-        .legado-card .price { font-size: 1.5rem; color: #2E8B57; font-weight: bold; margin: 0.5rem 0; }
 
         /* Chat preview */
         .chat-preview { background: white; border-radius: 20px; padding: 1.5rem; margin-top: 2rem; }
-        .chat-message { display: flex; margin: 0.8rem 0; }
-        .chat-bubble-user { background: #2E8B57; color: white; padding: 8px 12px; border-radius: 15px 15px 5px 15px; max-width: 70%; margin-left: auto; }
-        .chat-bubble-ia { background: #e8f5e9; color: #333; padding: 8px 12px; border-radius: 15px 15px 15px 5px; max-width: 70%; }
+        .chat-message { margin: 1rem 0; }
+        .chat-bubble-user { background: #2E8B57; color: white; padding: 10px 15px; border-radius: 20px 20px 5px 20px; max-width: 70%; margin-left: auto; }
+        .chat-bubble-ia { background: #e8f5e9; color: #333; padding: 10px 15px; border-radius: 20px 20px 20px 5px; max-width: 70%; }
+
+        /* Futuro */
+        .futuro-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+        .futuro-item { background: white; padding: 1rem; border-radius: 12px; border-left: 3px solid #2E8B57; }
+        .futuro-item h4 { color: #2E8B57; margin-bottom: 0.3rem; }
+        .futuro-item p { font-size: 0.8rem; }
+        .badge { background: #2E8B57; color: white; padding: 0.2rem 0.5rem; border-radius: 20px; font-size: 0.6rem; display: inline-block; margin-bottom: 0.5rem; }
+
+        /* Segurança */
+        .security-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+        .security-card { background: white; padding: 1rem; border-radius: 12px; text-align: center; }
+
+        /* Parcerias */
+        .parcerias { background: linear-gradient(135deg, #1B5E20 0%, #2E8B57 100%); border-radius: 20px; padding: 2rem; text-align: center; color: white; margin: 2rem 0; }
+        .parcerias h2 { font-size: 1.5rem; margin-bottom: 1rem; }
+        .parcerias p { margin-bottom: 1rem; }
+        .btn-parceiro { background: white; color: #2E8B57; padding: 0.6rem 1.5rem; border-radius: 50px; text-decoration: none; font-weight: 600; display: inline-block; }
 
         /* CTA */
-        .cta { background: linear-gradient(135deg, #2E8B57 0%, #1B5E20 100%); padding: 2rem; text-align: center; color: white; border-radius: 25px; margin-top: 2rem; }
+        .cta { background: linear-gradient(135deg, #2E8B57 0%, #1B5E20 100%); padding: 2.5rem; text-align: center; color: white; border-radius: 25px; margin-top: 2rem; }
         .cta .btn-primary { background: white; color: #2E8B57; }
 
         /* Footer */
         .footer { background: #1a1a1a; color: #999; padding: 2rem 1rem 1rem; margin-top: 3rem; }
-        .footer-content { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1.5rem; }
+        .footer-content { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; }
         .footer-links h4 { color: white; font-size: 0.9rem; margin-bottom: 0.8rem; }
-        .footer-links a { color: #999; text-decoration: none; display: block; margin-bottom: 0.4rem; font-size: 0.75rem; }
+        .footer-links a { color: #999; text-decoration: none; display: block; margin-bottom: 0.4rem; font-size: 0.75rem; transition: color 0.3s; cursor: pointer; }
+        .footer-links a:hover { color: #90EE90; }
         .copyright { text-align: center; padding-top: 1.5rem; margin-top: 1.5rem; border-top: 1px solid #333; font-size: 0.65rem; }
 
         @media (max-width: 768px) {
@@ -72,6 +101,7 @@
             .nav-links.show { display: flex; }
             .hero h1 { font-size: 1.6rem; }
             .btn-primary, .btn-secondary { display: block; margin: 0.5rem auto; max-width: 250px; }
+            .section-title { font-size: 1.5rem; }
         }
     </style>
 </head>
@@ -79,15 +109,17 @@
     <header class="header">
         <nav class="nav">
             <div class="logo">
-                <img src="assets/logo.png" alt="aEterna" onerror="this.src='https://via.placeholder.com/40?text=🌿'">
-                <span>aEterna <span class="beta-badge">BETA</span></span>
+                <img src="assets/logo.png" alt="aEterna" onerror="this.src='https://via.placeholder.com/45?text=🌿'">
+                <span>aEterna<span class="beta-badge">BETA</span></span>
             </div>
             <button class="menu-toggle" id="menuToggle">☰</button>
             <div class="nav-links" id="navLinks">
                 <a href="#sobre">Sobre</a>
                 <a href="#legado">Seu Legado</a>
                 <a href="#assistente">Assistente IA</a>
-                <a href="#preco">Preço</a>
+                <a href="#futuro">Futuro</a>
+                <a href="#seguranca">Segurança</a>
+                <a href="#parcerias">Parcerias</a>
                 <a href="https://aeterna.streamlit.app" class="btn-acessar">Acessar</a>
             </div>
         </nav>
@@ -128,14 +160,12 @@
                 <div class="feature-icon">👤</div>
                 <h3>Para você mesmo</h3>
                 <p>Crie seu próprio legado digital enquanto está vivo. Grave mensagens, organize suas senhas e treine seu assistente de luto para quem ficar.</p>
-                <div class="price">Grátis no Beta</div>
                 <a href="https://aeterna.streamlit.app" class="btn-primary" style="display: inline-block; margin-top: 1rem;">Começar →</a>
             </div>
             <div class="legado-card">
                 <div class="feature-icon">🕊️</div>
                 <h3>Em memória de alguém</h3>
                 <p>Seu ente querido faleceu? Você pode criar um legado em memória dele, guardar fotos, vídeos e eternizar sua história.</p>
-                <div class="price">Homenagem Especial</div>
                 <a href="https://aeterna.streamlit.app" class="btn-primary" style="display: inline-block; margin-top: 1rem;">Criar em memória →</a>
             </div>
         </div>
@@ -145,32 +175,16 @@
         <h2 class="section-title">Conheça o Assistente de Luto</h2>
         <div class="chat-preview">
             <div class="chat-message">
-                <div style="width: 100%;">
-                    <div class="chat-bubble-user">
-                        <strong>Você:</strong> Estou com saudades... o que eu faço?
-                    </div>
-                </div>
+                <div class="chat-bubble-user"><strong>Você:</strong> Estou com saudades... o que eu faço?</div>
             </div>
             <div class="chat-message">
-                <div style="width: 100%;">
-                    <div class="chat-bubble-ia">
-                        <strong>🤖 Assistente (como seu ente querido):</strong> "Ei, eu sei que está difícil. Lembre-se do que sempre te falei: a vida continua e você é forte. Chore se precisar, mas siga em frente. Estou orgulhoso de você."
-                    </div>
-                </div>
+                <div class="chat-bubble-ia"><strong>🤖 Assistente:</strong> "Ei, eu sei que está difícil. Lembre-se do que sempre te falei: a vida continua e você é forte. Chore se precisar, mas siga em frente. Estou orgulhoso de você."</div>
             </div>
             <div class="chat-message">
-                <div style="width: 100%;">
-                    <div class="chat-bubble-user">
-                        <strong>Você:</strong> Você se lembra da nossa viagem?
-                    </div>
-                </div>
+                <div class="chat-bubble-user"><strong>Você:</strong> Você se lembra da nossa viagem?</div>
             </div>
             <div class="chat-message">
-                <div style="width: 100%;">
-                    <div class="chat-bubble-ia">
-                        <strong>🤖 Assistente:</strong> "Claro! Aquele pôr do sol... foi mágico. Guarde esses momentos com carinho. Eles são eternos."
-                    </div>
-                </div>
+                <div class="chat-bubble-ia"><strong>🤖 Assistente:</strong> "Claro! Aquele pôr do sol... foi mágico. Guarde esses momentos com carinho. Eles são eternos."</div>
             </div>
             <div style="text-align: center; margin-top: 1rem;">
                 <p style="font-size: 0.7rem; color: #666;">💡 As respostas são geradas por IA baseada na personalidade deixada pelo falecido.</p>
@@ -178,22 +192,68 @@
         </div>
     </section>
 
-    <section id="preco" class="section">
-        <h2 class="section-title">Participe do Beta</h2>
-        <div class="features-grid" style="max-width: 500px; margin: 0 auto;">
-            <div class="feature-card">
-                <div class="feature-icon">🎯</div>
-                <h3>Beta Gratuito</h3>
-                <p>✅ Crie seu legado completo<br>✅ Vídeos ilimitados<br>✅ Até 3 contatos<br>✅ Assistente de Luto IA<br>✅ Sem custo durante o beta</p>
-                <a href="https://aeterna.streamlit.app" class="btn-primary" style="display: inline-block; margin-top: 1rem;">Começar Agora →</a>
+    <section id="futuro" class="section" style="background: #f0faf0; border-radius: 30px;">
+        <h2 class="section-title">O que está por vir</h2>
+        <div class="futuro-grid">
+            <div class="futuro-item">
+                <span class="badge">Em desenvolvimento</span>
+                <h4>📱 App Mobile</h4>
+                <p>Aplicativos nativos para Android e iOS. Acesse seu legado de qualquer lugar.</p>
+            </div>
+            <div class="futuro-item">
+                <span class="badge">Em desenvolvimento</span>
+                <h4>🔗 API de Validação de CPF</h4>
+                <p>Verificação automática de falecimento para liberação do legado.</p>
+            </div>
+            <div class="futuro-item">
+                <span class="badge">Em breve</span>
+                <h4>🎁 Mural da Memória</h4>
+                <p>Espaço interativo onde amigos e familiares podem postar fotos, histórias e mensagens.</p>
+            </div>
+            <div class="futuro-item">
+                <span class="badge">Em breve</span>
+                <h4>📜 Testamento Digital</h4>
+                <p>Registre suas últimas vontades de forma legal e segura, com validação digital.</p>
             </div>
         </div>
-        <p style="text-align: center; margin-top: 1rem; font-size: 0.75rem; color: #666;">⚠️ Os dados criados durante o beta serão migrados para contas pagas quando o serviço se tornar comercial.</p>
+    </section>
+
+    <section id="seguranca" class="section">
+        <h2 class="section-title">🔒 Segurança e LGPD</h2>
+        <div class="security-grid">
+            <div class="security-card">
+                <div class="feature-icon">🔐</div>
+                <h3>Criptografia de ponta a ponta</h3>
+                <p>Algoritmo Fernet + PBKDF2. Seus dados, sua chave. Nem nós acessamos.</p>
+            </div>
+            <div class="security-card">
+                <div class="feature-icon">⚖️</div>
+                <h3>LGPD - Você no controle</h3>
+                <p>Seus dados não são compartilhados. Você pode solicitar exclusão a qualquer momento.</p>
+            </div>
+            <div class="security-card">
+                <div class="feature-icon">💾</div>
+                <h3>Armazenamento Seguro</h3>
+                <p>SQLite criptografado + TLS 1.3. Seus dados sempre protegidos.</p>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 1rem;">
+            <p style="font-size: 0.8rem; color: #666;">🔒 A única pessoa que pode descriptografar seus dados é VOCÊ. Guarde sua senha mestra com segurança.</p>
+        </div>
+    </section>
+
+    <section id="parcerias" class="section">
+        <div class="parcerias">
+            <h2>🚀 Faça parte dessa jornada</h2>
+            <p>Estamos abertos a parcerias estratégicas e investimentos anjo.</p>
+            <p>💼 <strong>Planos funerários e seguros de vida:</strong> o aEterna pode ser o diferencial que seu cliente precisa.</p>
+            <a href="mailto:parcerias@aeterenalegado.com.br" class="btn-parceiro">Quero ser parceiro →</a>
+        </div>
     </section>
 
     <section class="section">
         <div class="cta">
-            <h2>Eternize sua história</h2>
+            <h2>Comece a eternizar sua história</h2>
             <p>Crie um legado digital para você ou em memória de quem você ama.</p>
             <a href="https://aeterna.streamlit.app" class="btn-primary" style="background: white; color: #2E8B57;">Criar meu Legado →</a>
         </div>
@@ -206,12 +266,20 @@
                 <a href="https://aeterna.streamlit.app">Acessar</a>
                 <a href="#legado">Criar Legado</a>
                 <a href="#assistente">Assistente IA</a>
+                <a href="#futuro">Futuro</a>
             </div>
             <div class="footer-links">
-                <h4>Empresa</h4>
-                <a href="#sobre">Sobre</a>
+                <h4>Segurança</h4>
+                <a href="#seguranca">Criptografia</a>
+                <a href="#seguranca">LGPD</a>
                 <a href="#">Política de Privacidade</a>
                 <a href="#">Termos de Uso</a>
+            </div>
+            <div class="footer-links">
+                <h4>Parcerias</h4>
+                <a href="#parcerias">Investidores Anjo</a>
+                <a href="#parcerias">Planos Funerários</a>
+                <a href="#parcerias">Seguros de Vida</a>
             </div>
             <div class="footer-links">
                 <h4>Contato</h4>
@@ -221,7 +289,7 @@
         </div>
         <div class="copyright">
             <p>✨ aEterna - Seu legado, sua história, sua vida. ✨</p>
-            <p>© 2024 aEterna - Versão Beta | Assistente de Luto com IA</p>
+            <p>© 2024 aEterna - Versão Beta | Assistente de Luto com IA | LGPD Compliant</p>
         </div>
     </footer>
 
