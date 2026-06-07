@@ -14,7 +14,6 @@ class BancoDados:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
 
-        # Tabela de senhas
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS senhas (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -28,7 +27,6 @@ class BancoDados:
             )
         ''')
 
-        # Tabela de vídeos
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS videos (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -41,7 +39,6 @@ class BancoDados:
             )
         ''')
 
-        # Tabela de contatos (atualizada com chave de acesso)
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS contatos (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -56,7 +53,6 @@ class BancoDados:
             )
         ''')
 
-        # Tabela de configurações
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS configuracoes (
                 chave TEXT PRIMARY KEY,
@@ -68,7 +64,6 @@ class BancoDados:
         conn.commit()
         conn.close()
 
-    # Operações de Senhas
     def adicionar_senha(self, servico: str, usuario: str, senha: str, url: str = "", notas: str = ""):
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
@@ -105,7 +100,6 @@ class BancoDados:
         conn.commit()
         conn.close()
 
-    # Operações de Vídeos
     def adicionar_video(self, titulo: str, destinatario: str, caminho_arquivo: str = "", url_externa: str = "",
                         notas: str = ""):
         conn = sqlite3.connect(self.arquivo_db)
@@ -133,7 +127,6 @@ class BancoDados:
         conn.commit()
         conn.close()
 
-    # Operações de Contatos (atualizada)
     def adicionar_contato(self, nome: str, email: str, telefone: str = "", whatsapp: str = "", papel: str = "",
                           chave_acesso: str = ""):
         conn = sqlite3.connect(self.arquivo_db)
@@ -161,7 +154,6 @@ class BancoDados:
         conn.commit()
         conn.close()
 
-    # Configurações
     def salvar_config(self, chave: str, valor: str):
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()

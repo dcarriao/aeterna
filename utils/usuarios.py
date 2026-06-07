@@ -44,7 +44,7 @@ class GerenciadorUsuarios:
         return hash_obj.hexdigest(), salt
 
     def criar_usuario(self, nome: str, email: str, cpf: str, senha: str, tipo: str = 'usuario',
-                      telefone: str = '', whatsapp: str = '', foto: str = '', redes: str = '') -> bool:
+                      telefone: str = '', whatsapp: str = '', foto: str = '', redes: str = ''):
         try:
             hash_senha, salt = self._hash_senha(senha)
             conn = sqlite3.connect(self.arquivo_db)
@@ -65,7 +65,7 @@ class GerenciadorUsuarios:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
         cursor.execute(
-            'SELECT id, nome, email, cpf, senha_hash, salt, tipo, foto, redes_sociais FROM usuarios WHERE email = ? AND ativo = 1',
+            'SELECT id, nome, email, cpf, senha_hash, salt, tipo FROM usuarios WHERE email = ? AND ativo = 1',
             (email.lower(),))
         usuario = cursor.fetchone()
         conn.close()
@@ -73,19 +73,17 @@ class GerenciadorUsuarios:
             hash_calculado, _ = self._hash_senha(senha, usuario[5])
             if hash_calculado == usuario[4]:
                 return {"id": usuario[0], "nome": usuario[1], "email": usuario[2], "cpf": usuario[3],
-                        "tipo": usuario[6], "foto": usuario[7] or "", "redes_sociais": usuario[8] or "{}"}
+                        "tipo": usuario[6]}
         return None
 
     def obter_usuario_por_id(self, usuario_id: int) -> dict:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
-        cursor.execute('SELECT id, nome, email, cpf, telefone, whatsapp, tipo FROM usuarios WHERE id = ?',
-                       (usuario_id,))
+        cursor.execute('SELECT id, nome, email FROM usuarios WHERE id = ?', (usuario_id,))
         usuario = cursor.fetchone()
         conn.close()
         if usuario:
-            return {"id": usuario[0], "nome": usuario[1], "email": usuario[2], "cpf": usuario[3],
-                    "telefone": usuario[4], "whatsapp": usuario[5], "tipo": usuario[6]}
+            return {"id": usuario[0], "nome": usuario[1], "email": usuario[2]}
         return None
 
     def criar_usuario_admin_inicial(self):
