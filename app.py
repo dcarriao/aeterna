@@ -265,6 +265,34 @@ def inject_custom_css():
         .stTextArea textarea:focus {
             border-color: #2E8B57 !important;
         }
+
+        /* Chat do assistente */
+        .chat-message-user {
+            background: #e8f5e9;
+            padding: 12px;
+            border-radius: 15px;
+            margin: 8px 0;
+            text-align: right;
+        }
+
+        .chat-message-assistant {
+            background: #f0faf0;
+            padding: 12px;
+            border-radius: 15px;
+            margin: 8px 0;
+            border-left: 3px solid #2E8B57;
+        }
+
+        /* Mensagem diária */
+        .daily-message {
+            background: linear-gradient(135deg, #2E8B57 0%, #1B5E20 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-style: italic;
+            margin: 20px 0;
+        }
     </style>
 
     <link rel="manifest" href="manifest.json">
@@ -293,6 +321,8 @@ if 'pagina' not in st.session_state:
     st.session_state.pagina = 'login'
 if 'crypto' not in st.session_state:
     st.session_state.crypto = None
+if 'historico_assistente' not in st.session_state:
+    st.session_state.historico_assistente = []
 
 
 # ============================================================================
@@ -314,6 +344,7 @@ def fazer_logout():
     st.session_state.usuario_atual = None
     st.session_state.pagina = 'login'
     st.session_state.crypto = None
+    st.session_state.historico_assistente = []
     st.rerun()
 
 
@@ -328,7 +359,6 @@ def render_login():
     logo = carregar_logo()
     logo_sem_fundo = remover_fundo_branco(logo) if logo else None
 
-    # Header com logo
     st.markdown('<div class="aeterna-header" style="padding: 0.8rem;">', unsafe_allow_html=True)
     if logo_sem_fundo:
         col1, col2, col3 = st.columns([1, 2, 1])
@@ -336,27 +366,14 @@ def render_login():
             st.image(logo_sem_fundo, width=180)
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # Abas responsivas
     tab1, tab2 = st.tabs(["🔐 **ENTRAR**", "📝 **CRIAR CONTA**"])
 
-    # ========== ABA DE LOGIN ==========
     with tab1:
         st.markdown("### Bem-vindo de volta!")
 
         with st.form("login_form"):
-            email = st.text_input(
-                "E-mail",
-                placeholder="seu@email.com",
-                key="login_email",
-                help="Digite seu e-mail cadastrado"
-            )
-            senha = st.text_input(
-                "Senha",
-                type="password",
-                placeholder="••••••••",
-                key="login_senha",
-                help="Digite sua senha"
-            )
+            email = st.text_input("E-mail", placeholder="seu@email.com", key="login_email")
+            senha = st.text_input("Senha", type="password", placeholder="••••••••", key="login_senha")
 
             col1, col2, col3 = st.columns([1, 2, 1])
             with col2:
@@ -374,104 +391,54 @@ def render_login():
 
         st.caption("💡 **Teste:** admin@aeterna.com / admin123")
 
-    # ========== ABA DE CADASTRO - VERSÃO MOBILE AMIGÁVEL ==========
     with tab2:
         st.markdown("### ✨ Crie sua conta")
         st.caption("⚠️ O CPF é obrigatório e será usado para validação futura")
 
         with st.form("cadastro_form"):
-            # Campo Nome
             st.markdown("**📝 Nome completo**")
-            nome = st.text_input(
-                "Nome",
-                placeholder="Ex: João Silva",
-                key="cadastro_nome",
-                label_visibility="collapsed"
-            )
+            nome = st.text_input("Nome", placeholder="Ex: João Silva", key="cadastro_nome",
+                                 label_visibility="collapsed")
 
-            # Campo E-mail
             st.markdown("**📧 E-mail**")
-            email = st.text_input(
-                "E-mail",
-                placeholder="seu@email.com",
-                key="cadastro_email",
-                label_visibility="collapsed"
-            )
+            email = st.text_input("E-mail", placeholder="seu@email.com", key="cadastro_email",
+                                  label_visibility="collapsed")
 
-            # Campo CPF
             st.markdown("**🆔 CPF (apenas números)**")
-            cpf = st.text_input(
-                "CPF",
-                placeholder="00000000000",
-                key="cadastro_cpf",
-                max_chars=11,
-                label_visibility="collapsed"
-            )
+            cpf = st.text_input("CPF", placeholder="00000000000", key="cadastro_cpf", max_chars=11,
+                                label_visibility="collapsed")
 
-            # Campo Senha
             st.markdown("**🔒 Senha**")
-            senha = st.text_input(
-                "Senha",
-                type="password",
-                placeholder="Mínimo 6 caracteres",
-                key="cadastro_senha",
-                label_visibility="collapsed"
-            )
+            senha = st.text_input("Senha", type="password", placeholder="Mínimo 6 caracteres", key="cadastro_senha",
+                                  label_visibility="collapsed")
 
-            # Campo Confirmar Senha
             st.markdown("**🔒 Confirmar senha**")
-            confirmar_senha = st.text_input(
-                "Confirmar",
-                type="password",
-                placeholder="Digite a senha novamente",
-                key="cadastro_confirmar",
-                label_visibility="collapsed"
-            )
+            confirmar_senha = st.text_input("Confirmar", type="password", placeholder="Digite a senha novamente",
+                                            key="cadastro_confirmar", label_visibility="collapsed")
 
-            # Separador visual
             st.markdown("---")
-
-            # Opcionais
             st.markdown("#### ✨ Opcional (pode pular)")
 
-            # Foto
             st.markdown("**📷 Foto de perfil**")
-            foto = st.file_uploader(
-                "Foto",
-                type=["png", "jpg", "jpeg"],
-                key="cadastro_foto",
-                label_visibility="collapsed",
-                help="Envie uma foto para personalizar seu perfil"
-            )
+            foto = st.file_uploader("Foto", type=["png", "jpg", "jpeg"], key="cadastro_foto",
+                                    label_visibility="collapsed")
 
-            # Redes sociais
             st.markdown("**🌐 Redes sociais**")
-            redes = st.text_area(
-                "Redes",
-                placeholder="Instagram: @seuusuario\nLinkedIn: linkedin.com/in/seuusuario",
-                key="cadastro_redes",
-                label_visibility="collapsed",
-                height=80
-            )
+            redes = st.text_area("Redes", placeholder="Instagram: @seuusuario\nLinkedIn: linkedin.com/in/seuusuario",
+                                 key="cadastro_redes", label_visibility="collapsed", height=80)
 
             st.markdown("---")
 
-            # Botão de cadastro
             col1, col2, col3 = st.columns([1, 2, 1])
             with col2:
                 submitted = st.form_submit_button("📝 CRIAR CONTA", use_container_width=True, type="primary")
 
             if submitted:
-                # Validações
                 erros = []
-                if not nome:
-                    erros.append("Nome")
-                if not email:
-                    erros.append("E-mail")
-                if not cpf:
-                    erros.append("CPF")
-                if not senha:
-                    erros.append("Senha")
+                if not nome: erros.append("Nome")
+                if not email: erros.append("E-mail")
+                if not cpf: erros.append("CPF")
+                if not senha: erros.append("Senha")
 
                 if erros:
                     st.error(f"❌ Preencha os campos obrigatórios: {', '.join(erros)}")
@@ -533,7 +500,20 @@ def render_app():
     st.markdown('<p style="text-align: center;">Gerencie seu legado digital com segurança</p>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-    tab1, tab2, tab3, tab4 = st.tabs(["🔐 Senhas", "📹 Vídeos", "👥 Contatos", "ℹ️ Sobre"])
+    # Verificar se o usuário configurou o assistente
+    from utils.assistente_ia import AssistenteLuto
+    assistente_temp = AssistenteLuto(st.session_state.usuario_atual['id'])
+    stats = assistente_temp.estatisticas()
+    tem_assistente = stats.get("perguntas_respondidas", 0) > 0
+
+    # Abas
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "🔐 Senhas",
+        "📹 Vídeos",
+        "👥 Contatos",
+        "🤖 Assistente de Luto" + (" ✅" if tem_assistente else ""),
+        "ℹ️ Sobre"
+    ])
 
     with tab1:
         render_senhas()
@@ -542,6 +522,8 @@ def render_app():
     with tab3:
         render_contatos()
     with tab4:
+        render_assistente()
+    with tab5:
         render_sobre()
 
 
@@ -613,9 +595,7 @@ def render_videos():
         with st.expander("🎥 Adicionar vídeo", expanded=False):
             titulo = st.text_input("Título *", key="titulo_video_input")
             destinatario = st.text_input("Para", key="destinatario_video", placeholder="Ex: Para minha filha Ana")
-
             arquivo_video = st.file_uploader("Arquivo de vídeo", type=["mp4", "mov", "avi", "mkv"], key="video_file")
-
             st.caption("📹 Formatos aceitos: MP4, MOV, AVI, MKV | Tamanho máximo: 200MB")
 
             if st.button("💾 Salvar", key="btn_salvar_video", type="primary", use_container_width=True):
@@ -705,6 +685,178 @@ def render_contatos():
 
 
 # ============================================================================
+# ASSISTENTE DE LUTO
+# ============================================================================
+def render_assistente():
+    from utils.assistente_ia import AssistenteLuto
+    from utils.personalidade import renderizar_captura_personalidade, PERGUNTAS_PERSONALIDADE
+
+    st.markdown("<h3 style='color: #2E8B57;'>🤖 Assistente de Luto</h3>", unsafe_allow_html=True)
+
+    # Verificar se o assistente já foi configurado
+    assistente = AssistenteLuto(st.session_state.usuario_atual['id'])
+    stats = assistente.estatisticas()
+
+    # Mensagem diária (se já configurado)
+    if stats.get("perguntas_respondidas", 0) > 0:
+        with st.expander("💝 Mensagem de Conforto do Dia", expanded=False):
+            mensagem = assistente.gerar_mensagem_diaria()
+            st.markdown(f'<div class="daily-message">{mensagem}</div>', unsafe_allow_html=True)
+
+    if stats["perguntas_respondidas"] == 0:
+        # Primeira vez: capturar personalidade
+        st.info("✨ **Vamos te conhecer melhor!** ✨")
+        st.markdown("""
+        Responda às perguntas abaixo para que o Assistente de Luto possa 
+        conversar com seus entes queridos como se fosse você.
+
+        Não se preocupe, você pode editar suas respostas depois.
+        """)
+
+        respostas = renderizar_captura_personalidade()
+
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            if st.button("💾 Salvar Personalidade", type="primary", use_container_width=True):
+                if any(respostas.values()):
+                    assistente.capturar_personalidade(respostas)
+                    st.success("✅ Personalidade salva com sucesso!")
+                    st.rerun()
+                else:
+                    st.warning("⚠️ Responda pelo menos uma pergunta para continuar.")
+    else:
+        # Assistente já configurado
+        st.success(f"✅ Assistente configurado com {stats['perguntas_respondidas']} respostas")
+
+        # Abas: Conversar, Ajustes, Estatísticas
+        tab1, tab2, tab3 = st.tabs(["💬 Conversar", "✏️ Ajustar Personalidade", "📊 Estatísticas"])
+
+        with tab1:
+            st.markdown("### 💬 Converse com seu ente querido")
+            st.markdown("""
+            Simule uma conversa com a pessoa que partiu. As respostas são geradas 
+            baseadas na personalidade e memórias que ela deixou.
+            """)
+
+            # Inicializar histórico de conversa na sessão
+            if "historico_assistente" not in st.session_state:
+                st.session_state.historico_assistente = []
+
+            # Exibir histórico
+            for msg in st.session_state.historico_assistente:
+                if msg["tipo"] == "usuario":
+                    st.markdown(f'<div class="chat-message-user"><strong>Você:</strong><br>{msg["texto"]}</div>',
+                                unsafe_allow_html=True)
+                else:
+                    st.markdown(
+                        f'<div class="chat-message-assistant"><strong>🤖 Assistente:</strong><br>{msg["texto"]}</div>',
+                        unsafe_allow_html=True)
+
+            # Input de mensagem
+            mensagem = st.text_area("Sua mensagem:", key="msg_assistente", height=100,
+                                    placeholder="Escreva sua mensagem aqui...")
+
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("📨 Enviar", type="primary", use_container_width=True):
+                    if mensagem:
+                        st.session_state.historico_assistente.append({"tipo": "usuario", "texto": mensagem})
+
+                        with st.spinner("✨ Pensando..."):
+                            resposta = assistente.conversar(mensagem)
+
+                        st.session_state.historico_assistente.append({"tipo": "assistente", "texto": resposta})
+                        st.rerun()
+
+            with col2:
+                if st.button("🗑️ Limpar Conversa", use_container_width=True):
+                    st.session_state.historico_assistente = []
+                    st.rerun()
+
+        with tab2:
+            st.markdown("### ✏️ Ajustar Personalidade")
+            st.markdown("Você pode editar suas respostas a qualquer momento.")
+
+            # Carregar respostas atuais
+            import sqlite3
+            conn = sqlite3.connect("dados/cofre.db")
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT pergunta, resposta FROM personalidade 
+                WHERE usuario_id = ? ORDER BY id
+            ''', (st.session_state.usuario_atual['id'],))
+
+            respostas_atuais = dict(cursor.fetchall())
+            conn.close()
+
+            respostas_editadas = {}
+
+            for key, pergunta in PERGUNTAS_PERSONALIDADE.items():
+                valor_atual = respostas_atuais.get(pergunta, "")
+                nova_resposta = st.text_area(
+                    pergunta,
+                    value=valor_atual,
+                    key=f"edit_{key}",
+                    height=80
+                )
+                if nova_resposta != valor_atual:
+                    respostas_editadas[pergunta] = nova_resposta
+
+            if respostas_editadas:
+                col1, col2, col3 = st.columns([1, 2, 1])
+                with col2:
+                    if st.button("💾 Salvar Alterações", type="primary", use_container_width=True):
+                        conn = sqlite3.connect("dados/cofre.db")
+                        cursor = conn.cursor()
+                        for pergunta, resposta in respostas_editadas.items():
+                            cursor.execute('''
+                                UPDATE personalidade SET resposta = ? 
+                                WHERE usuario_id = ? AND pergunta = ?
+                            ''', (resposta, st.session_state.usuario_atual['id'], pergunta))
+                        conn.commit()
+                        conn.close()
+
+                        assistente._gerar_embedding_personalidade(respostas_editadas)
+                        st.success("✅ Personalidade atualizada!")
+                        st.rerun()
+            else:
+                st.info("Nenhuma alteração detectada. Edite alguma resposta para salvar.")
+
+        with tab3:
+            st.markdown("### 📊 Estatísticas do Assistente")
+
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("📝 Perguntas", stats.get("perguntas_respondidas", 0))
+            with col2:
+                st.metric("💾 Memórias", stats.get("memorias_armazenadas", 0))
+            with col3:
+                status_ia = "✅ Ativo" if stats.get("ia_disponivel", False) else "⚠️ Local"
+                st.metric("🧠 IA", status_ia)
+
+            st.markdown("---")
+            st.markdown("#### 📌 Sobre o Assistente")
+            st.markdown("""
+            O Assistente de Luto utiliza:
+            - **Embeddings semânticos** para entender o contexto
+            - **Memórias vetorizadas** para buscas relevantes
+            - **IA generativa** (Gemini) para respostas naturais
+
+            Quanto mais informações você fornecer, mais personalizadas serão as respostas.
+            """)
+
+            if not stats.get("ia_disponivel", False):
+                st.warning("""
+                ⚠️ **IA Avançada não configurada**
+
+                Para ativar respostas mais naturais, configure a API Key do Google Gemini:
+                1. Acesse: https://aistudio.google.com/app/apikey
+                2. Crie uma API key gratuita
+                3. Adicione como segredo no Streamlit Cloud: `GEMINI_API_KEY`
+                """)
+
+
+# ============================================================================
 # SOBRE
 # ============================================================================
 def render_sobre():
@@ -719,11 +871,20 @@ def render_sobre():
     </div>
 
     <div class="info-card">
+        <h3>🤖 Assistente de Luto</h3>
+        <p>Nossa tecnologia mais especial: uma IA treinada com sua personalidade, mensagens e memórias 
+        para conversar com seus entes queridos e oferecer conforto após sua partida.</p>
+        <p>💡 <strong>Como funciona:</strong> Você responde perguntas sobre sua vida, valores e conselhos. 
+        O sistema aprende sua essência e pode interagir como você faria.</p>
+    </div>
+
+    <div class="info-card">
         <h3>🚀 Roadmap</h3>
         <p>✅ App funcional (senhas, vídeos, contatos)<br>
+        ✅ Assistente de Luto (versão inicial)<br>
         🔄 App mobile (Android/iOS) - em desenvolvimento<br>
         🔄 API de validação de CPF - em desenvolvimento<br>
-        🔄 Assistente de luto com IA - em planejamento<br>
+        🔄 Transcrição automática de vídeos - em breve<br>
         🔄 Mural da Memória - em planejamento</p>
     </div>
 
@@ -757,7 +918,7 @@ def main():
         st.markdown("""
         <div class="footer-aeterna">
             <p>✨ aEterna - Seu legado, sua história, sua vida. ✨</p>
-            <p style="font-size: 0.6rem;">Versão 2.0 | Desenvolvido com dedicação</p>
+            <p style="font-size: 0.6rem;">Versão 2.0 | Com Assistente de Luto</p>
         </div>
         """, unsafe_allow_html=True)
 

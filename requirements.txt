@@ -1,3 +1,7 @@
 streamlit
 cryptography
 python-dotenv
+sentence-transformers
+chromadb
+google-generativeai
+Pillow
