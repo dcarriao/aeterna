@@ -4,750 +4,239 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>aEterna | Seu Legado Digital Eterno</title>
-    <meta name="description" content="Preserve seu legado digital com segurança. Guarde senhas, mensagens em vídeo e deixe instruções para seus entes queridos.">
-    <meta name="keywords" content="legado digital, testamento digital, senhas, herança digital, LGPD, criptografia, aEterna">
-    <meta name="author" content="aEterna">
+    <meta name="description" content="Preserve seu legado digital com segurança. Guarde senhas, mensagens em vídeo e eternize sua memória com nosso assistente de luto.">
 
-    <!-- Open Graph -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://aeterenalegado.com.br/">
-    <meta property="og:title" content="aEterna - Seu Legado Digital Eterno">
-    <meta property="og:description" content="Preserve suas memórias, senhas e mensagens para sempre.">
-    <meta property="og:image" content="https://aeterenalegado.com.br/assets/logo.png">
-
-    <!-- Fontes -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8f5e9 100%); color: #333; line-height: 1.5; }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f5f5f5 0%, #e8f5e9 100%);
-            color: #333;
-            line-height: 1.5;
-        }
+        /* Header */
+        .header { background: linear-gradient(135deg, #90EE90 0%, #2E8B57 50%, #1B5E20 100%); padding: 0.8rem 1rem; position: fixed; width: 100%; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .nav { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .logo { display: flex; align-items: center; gap: 8px; }
+        .logo img { height: 40px; }
+        .logo span { font-size: 1.2rem; font-weight: 700; color: white; font-family: 'Playfair Display', serif; }
+        .menu-toggle { display: none; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+        .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+        .nav-links a { color: white; text-decoration: none; font-weight: 500; font-size: 0.9rem; }
+        .btn-acessar { background: white; color: #2E8B57 !important; padding: 0.4rem 1rem; border-radius: 25px; font-weight: 600; }
+        .beta-badge { background: #ff9800; color: white; padding: 0.15rem 0.5rem; border-radius: 20px; font-size: 0.6rem; font-weight: 600; margin-left: 0.3rem; }
 
-        /* ========== HEADER RESPONSIVO ========== */
-        .header {
-            background: linear-gradient(135deg, #90EE90 0%, #2E8B57 50%, #1B5E20 100%);
-            padding: 0.8rem 1rem;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
+        /* Hero */
+        .hero { padding: 90px 1rem 50px; text-align: center; }
+        .hero h1 { font-size: 2rem; font-family: 'Playfair Display', serif; color: #1B5E20; margin-bottom: 0.8rem; }
+        .hero p { font-size: 1rem; color: #555; margin-bottom: 1.5rem; }
+        .btn-primary, .btn-secondary { display: inline-block; padding: 0.7rem 1.2rem; border-radius: 50px; text-decoration: none; font-weight: 600; font-size: 0.9rem; margin: 0.3rem; }
+        .btn-primary { background: linear-gradient(135deg, #2E8B57 0%, #1B5E20 100%); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); }
+        .btn-secondary { background: transparent; color: #2E8B57; border: 2px solid #2E8B57; }
 
-        .nav {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
+        /* Sections */
+        .section { padding: 50px 1rem; max-width: 1200px; margin: 0 auto; }
+        .section-title { text-align: center; font-size: 1.8rem; font-family: 'Playfair Display', serif; color: #1B5E20; margin-bottom: 2rem; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.2rem; }
+        .feature-card { background: white; padding: 1.2rem; border-radius: 15px; text-align: center; box-shadow: 0 3px 12px rgba(0,0,0,0.05); }
+        .feature-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .feature-card h3 { font-size: 1rem; color: #2E8B57; margin-bottom: 0.5rem; }
+        .feature-card p { font-size: 0.8rem; }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        /* Cards de legado */
+        .legado-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+        .legado-card { background: linear-gradient(135deg, #ffffff 0%, #f0faf0 100%); padding: 1.5rem; border-radius: 20px; text-align: center; border: 1px solid #c8e6c8; }
+        .legado-card h3 { color: #1B5E20; margin-bottom: 0.5rem; }
+        .legado-card .price { font-size: 1.5rem; color: #2E8B57; font-weight: bold; margin: 0.5rem 0; }
 
-        .logo img {
-            height: 40px;
-        }
+        /* Chat preview */
+        .chat-preview { background: white; border-radius: 20px; padding: 1.5rem; margin-top: 2rem; }
+        .chat-message { display: flex; margin: 0.8rem 0; }
+        .chat-bubble-user { background: #2E8B57; color: white; padding: 8px 12px; border-radius: 15px 15px 5px 15px; max-width: 70%; margin-left: auto; }
+        .chat-bubble-ia { background: #e8f5e9; color: #333; padding: 8px 12px; border-radius: 15px 15px 15px 5px; max-width: 70%; }
 
-        .logo span {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: white;
-            font-family: 'Playfair Display', serif;
-        }
-
-        /* Menu hambúrguer para mobile */
-        .menu-toggle {
-            display: none;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 1.5rem;
-            align-items: center;
-        }
-
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.9rem;
-            transition: opacity 0.3s;
-            white-space: nowrap;
-        }
-
-        .nav-links a:hover {
-            opacity: 0.8;
-        }
-
-        .btn-acessar {
-            background: white;
-            color: #2E8B57 !important;
-            padding: 0.4rem 1rem;
-            border-radius: 25px;
-            font-weight: 600;
-        }
-
-        .beta-badge {
-            background: #ff9800;
-            color: white;
-            padding: 0.15rem 0.5rem;
-            border-radius: 20px;
-            font-size: 0.6rem;
-            font-weight: 600;
-            margin-left: 0.3rem;
-            vertical-align: middle;
-        }
-
-        /* ========== HERO ========== */
-        .hero {
-            padding: 90px 1rem 50px;
-            text-align: center;
-        }
-
-        .hero-content {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .hero h1 {
-            font-size: 2rem;
-            font-family: 'Playfair Display', serif;
-            color: #1B5E20;
-            margin-bottom: 0.8rem;
-        }
-
-        .hero p {
-            font-size: 1rem;
-            color: #555;
-            margin-bottom: 1.5rem;
-        }
-
-        .btn-primary, .btn-secondary {
-            display: inline-block;
-            padding: 0.7rem 1.2rem;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-            margin: 0.3rem;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #2E8B57 0%, #1B5E20 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(46,139,87,0.3);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: #2E8B57;
-            border: 2px solid #2E8B57;
-        }
-
-        .btn-secondary:hover {
-            background: #2E8B57;
-            color: white;
-        }
-
-        .alert-warning {
-            background: #fff3e0;
-            border-left: 4px solid #ff9800;
-            padding: 0.8rem;
-            border-radius: 10px;
-            margin-top: 1.5rem;
-            text-align: left;
-            font-size: 0.8rem;
-        }
-
-        /* ========== SECTIONS ========== */
-        .section {
-            padding: 50px 1rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 1.8rem;
-            font-family: 'Playfair Display', serif;
-            color: #1B5E20;
-            margin-bottom: 2rem;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.2rem;
-        }
-
-        .feature-card {
-            background: white;
-            padding: 1.2rem;
-            border-radius: 15px;
-            box-shadow: 0 3px 12px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
-            text-align: center;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-3px);
-        }
-
-        .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .feature-card h3 {
-            font-size: 1rem;
-            color: #2E8B57;
-            margin-bottom: 0.5rem;
-        }
-
-        .feature-card p {
-            font-size: 0.8rem;
-        }
-
-        .feature-list {
-            list-style: none;
-            padding-left: 0;
-            margin-top: 0.5rem;
-        }
-
-        .feature-list li {
-            font-size: 0.75rem;
-            padding: 0.2rem 0;
-        }
-
-        .feature-list li:before {
-            content: "✓ ";
-            color: #2E8B57;
-            font-weight: bold;
-        }
-
-        /* Como funciona */
-        .how-it-works {
-            background: white;
-            border-radius: 20px;
-            padding: 1.5rem;
-            margin-top: 1rem;
-        }
-
-        .steps {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .step {
-            text-align: center;
-            padding: 0.5rem;
-        }
-
-        .step-number {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #2E8B57 0%, #1B5E20 100%);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin: 0 auto 0.5rem;
-        }
-
-        .step h3 {
-            font-size: 0.9rem;
-            margin-bottom: 0.3rem;
-        }
-
-        .step p {
-            font-size: 0.75rem;
-        }
-
-        /* Futuro */
-        .futuro {
-            background: linear-gradient(135deg, #f0faf0 0%, #ffffff 100%);
-            border-radius: 20px;
-            padding: 1.5rem;
-            margin-top: 1rem;
-        }
-
-        .futuro-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .futuro-item {
-            background: white;
-            padding: 1rem;
-            border-radius: 12px;
-            border-left: 3px solid #2E8B57;
-        }
-
-        .futuro-item h4 {
-            font-size: 0.9rem;
-            color: #2E8B57;
-            margin-bottom: 0.3rem;
-        }
-
-        .futuro-item p {
-            font-size: 0.75rem;
-        }
-
-        .badge {
-            background: #2E8B57;
-            color: white;
-            padding: 0.15rem 0.4rem;
-            border-radius: 20px;
-            font-size: 0.6rem;
-            display: inline-block;
-            margin-bottom: 0.5rem;
-        }
-
-        /* Pricing */
-        .pricing-box {
-            background: white;
-            border-radius: 20px;
-            padding: 1.5rem;
-            text-align: center;
-            max-width: 400px;
-            margin: 1rem auto 0;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-        }
-
-        .pricing-box h3 {
-            font-size: 1.3rem;
-            color: #1B5E20;
-        }
-
-        .pricing-badge {
-            background: #ff9800;
-            color: white;
-            padding: 0.2rem 0.8rem;
-            border-radius: 20px;
-            display: inline-block;
-            margin-bottom: 0.5rem;
-            font-size: 0.7rem;
-        }
-
-        /* Parcerias */
-        .parcerias {
-            background: linear-gradient(135deg, #1B5E20 0%, #2E8B57 100%);
-            border-radius: 20px;
-            padding: 2rem 1.5rem;
-            text-align: center;
-            color: white;
-            margin-top: 2rem;
-        }
-
-        .parcerias h2 {
-            font-size: 1.3rem;
-            margin-bottom: 0.8rem;
-        }
-
-        .parcerias p {
-            font-size: 0.85rem;
-            margin-bottom: 1rem;
-        }
-
-        .btn-parceiro {
-            background: white;
-            color: #2E8B57;
-            padding: 0.6rem 1.2rem;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.85rem;
-            display: inline-block;
-        }
-
-        /* Alertas */
-        .alert-info {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            padding: 0.8rem;
-            border-radius: 10px;
-            margin: 1rem 0;
-            font-size: 0.8rem;
-        }
+        /* CTA */
+        .cta { background: linear-gradient(135deg, #2E8B57 0%, #1B5E20 100%); padding: 2rem; text-align: center; color: white; border-radius: 25px; margin-top: 2rem; }
+        .cta .btn-primary { background: white; color: #2E8B57; }
 
         /* Footer */
-        .footer {
-            background: #1a1a1a;
-            color: #999;
-            padding: 2rem 1rem 1rem;
-            margin-top: 3rem;
-        }
+        .footer { background: #1a1a1a; color: #999; padding: 2rem 1rem 1rem; margin-top: 3rem; }
+        .footer-content { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1.5rem; }
+        .footer-links h4 { color: white; font-size: 0.9rem; margin-bottom: 0.8rem; }
+        .footer-links a { color: #999; text-decoration: none; display: block; margin-bottom: 0.4rem; font-size: 0.75rem; }
+        .copyright { text-align: center; padding-top: 1.5rem; margin-top: 1.5rem; border-top: 1px solid #333; font-size: 0.65rem; }
 
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .footer-links h4 {
-            color: white;
-            font-size: 0.9rem;
-            margin-bottom: 0.8rem;
-        }
-
-        .footer-links a {
-            color: #999;
-            text-decoration: none;
-            display: block;
-            margin-bottom: 0.4rem;
-            font-size: 0.75rem;
-            transition: color 0.3s;
-        }
-
-        .footer-links a:hover {
-            color: #90EE90;
-        }
-
-        .copyright {
-            text-align: center;
-            padding-top: 1.5rem;
-            margin-top: 1.5rem;
-            border-top: 1px solid #333;
-            font-size: 0.65rem;
-        }
-
-        /* ========== RESPONSIVO ========== */
         @media (max-width: 768px) {
-            .menu-toggle {
-                display: block;
-            }
-
-            .nav-links {
-                display: none;
-                width: 100%;
-                flex-direction: column;
-                gap: 0.8rem;
-                padding: 1rem 0 0.5rem;
-            }
-
-            .nav-links.show {
-                display: flex;
-            }
-
-            .nav-links a {
-                white-space: normal;
-                text-align: center;
-            }
-
-            .hero h1 {
-                font-size: 1.6rem;
-            }
-
-            .section-title {
-                font-size: 1.5rem;
-            }
-
-            .btn-primary, .btn-secondary {
-                display: block;
-                margin: 0.5rem auto;
-                text-align: center;
-                max-width: 250px;
-            }
-
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .steps {
-                grid-template-columns: 1fr;
-            }
-
-            .futuro-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .footer-content {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .hero h1 {
-                font-size: 1.4rem;
-            }
-
-            .logo img {
-                height: 32px;
-            }
-
-            .logo span {
-                font-size: 1rem;
-            }
-
-            .section {
-                padding: 35px 1rem;
-            }
+            .menu-toggle { display: block; }
+            .nav-links { display: none; width: 100%; flex-direction: column; gap: 0.8rem; padding-top: 1rem; }
+            .nav-links.show { display: flex; }
+            .hero h1 { font-size: 1.6rem; }
+            .btn-primary, .btn-secondary { display: block; margin: 0.5rem auto; max-width: 250px; }
         }
     </style>
 </head>
 <body>
-    <!-- Header com menu hambúrguer -->
     <header class="header">
         <nav class="nav">
             <div class="logo">
-                <img src="assets/logo.png" alt="aEterna Logo" onerror="this.src='https://via.placeholder.com/40?text=🌿'">
+                <img src="assets/logo.png" alt="aEterna" onerror="this.src='https://via.placeholder.com/40?text=🌿'">
                 <span>aEterna <span class="beta-badge">BETA</span></span>
             </div>
             <button class="menu-toggle" id="menuToggle">☰</button>
             <div class="nav-links" id="navLinks">
                 <a href="#sobre">Sobre</a>
-                <a href="#funcionamento">Como Funciona</a>
-                <a href="#futuro">Futuro</a>
+                <a href="#legado">Seu Legado</a>
+                <a href="#assistente">Assistente IA</a>
                 <a href="#preco">Preço</a>
-                <a href="https://aeterna.streamlit.app" class="btn-acessar">Acessar Cofre</a>
+                <a href="https://aeterna.streamlit.app" class="btn-acessar">Acessar</a>
             </div>
         </nav>
     </header>
 
-    <!-- Hero -->
     <section class="hero">
-        <div class="hero-content">
-            <h1>Seu legado digital, eternizado</h1>
-            <p>Guarde suas senhas, mensagens em vídeo e deixe instruções para quem você ama. Um presente para o futuro.</p>
-            <a href="https://aeterna.streamlit.app" class="btn-primary">Começar a Testar →</a>
-            <a href="#sobre" class="btn-secondary">Saiba Mais</a>
-        </div>
-
-        <div class="alert-warning" style="max-width: 600px; margin: 1.5rem auto 0;">
-            <strong>🧪 Fase de Testes (Beta):</strong><br>
-            O aEterna está em desenvolvimento ativo. Os dados criados durante o beta serão migrados para contas pagas quando o serviço se tornar comercial.
-        </div>
+        <h1>Eternize sua memória<br>Cuide de quem você ama</h1>
+        <p>O aEterna é um legado digital onde você guarda suas mensagens, vídeos e pensamentos<br>para que seus entes queridos possam acessar e conversar com uma IA treinada com sua personalidade.</p>
+        <a href="https://aeterna.streamlit.app" class="btn-primary">Criar meu Legado →</a>
+        <a href="#legado" class="btn-secondary">Saiba Mais</a>
     </section>
 
-    <!-- Sobre / Features -->
     <section id="sobre" class="section">
-        <h2 class="section-title">O que o aEterna oferece</h2>
+        <h2 class="section-title">O que é o aEterna?</h2>
         <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">🔐</div>
-                <h3>Cofre de Senhas</h3>
-                <p>Armazene suas senhas com criptografia. <strong>Opcional</strong> - use apenas para indicar onde estão suas coisas.</p>
-            </div>
             <div class="feature-card">
                 <div class="feature-icon">📹</div>
                 <h3>Mensagens em Vídeo</h3>
-                <p>Grave vídeos com suas palavras e lembranças. Quantos quiser, para quem quiser.</p>
+                <p>Grave vídeos para pessoas específicas. Cada um sabe o que você deixou para ele.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3>Assistente de Luto com IA</h3>
+                <p>Uma inteligência artificial que conversa como você, treinada com sua personalidade e mensagens.</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">👥</div>
-                <h3>Até 3 Pessoas</h3>
-                <p>Indique seus contatos de confiança com ordem de prioridade.</p>
+                <h3>Até 3 Pessoas de Confiança</h3>
+                <p>Cada uma recebe uma chave de acesso exclusiva para seu legado.</p>
             </div>
         </div>
     </section>
 
-    <!-- Como funciona -->
-    <section id="funcionamento" class="section">
-        <h2 class="section-title">Como funciona</h2>
-        <div class="how-it-works">
-            <div class="steps">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <h3>Cadastro</h3>
-                    <p>Você cadastra suas senhas, vídeos e indica até 3 contatos com prioridades.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <h3>Prova de Vida</h3>
-                    <p>Periodicamente, o sistema verifica se você está ativo por e-mail.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <h3>Verificação</h3>
-                    <p>API consulta bases oficiais (CPF) para identificar falecimento.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">4</div>
-                    <h3>Liberação</h3>
-                    <p>O sistema envia orientações para o primeiro contato da lista de prioridade.</p>
-                </div>
+    <section id="legado" class="section" style="background: #e8f5e9; border-radius: 30px;">
+        <h2 class="section-title">Duas formas de usar</h2>
+        <div class="legado-grid">
+            <div class="legado-card">
+                <div class="feature-icon">👤</div>
+                <h3>Para você mesmo</h3>
+                <p>Crie seu próprio legado digital enquanto está vivo. Grave mensagens, organize suas senhas e treine seu assistente de luto para quem ficar.</p>
+                <div class="price">Grátis no Beta</div>
+                <a href="https://aeterna.streamlit.app" class="btn-primary" style="display: inline-block; margin-top: 1rem;">Começar →</a>
             </div>
-
-            <div class="alert-info" style="margin-top: 1rem;">
-                <strong>📌 Prioridade:</strong> Você define a ordem. Se a primeira pessoa não responder, o sistema avança para a próxima.
+            <div class="legado-card">
+                <div class="feature-icon">🕊️</div>
+                <h3>Em memória de alguém</h3>
+                <p>Seu ente querido faleceu? Você pode criar um legado em memória dele, guardar fotos, vídeos e eternizar sua história.</p>
+                <div class="price">Homenagem Especial</div>
+                <a href="https://aeterna.streamlit.app" class="btn-primary" style="display: inline-block; margin-top: 1rem;">Criar em memória →</a>
             </div>
         </div>
     </section>
 
-    <!-- Segurança (resumido) -->
-    <section class="section" style="background: #ffffff; border-radius: 25px;">
-        <h2 class="section-title">🔒 Segurança e LGPD</h2>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">🔐</div>
-                <h3>Criptografia de ponta a ponta</h3>
-                <p>Seus dados, sua chave. Nem nós acessamos suas senhas.</p>
+    <section id="assistente" class="section">
+        <h2 class="section-title">Conheça o Assistente de Luto</h2>
+        <div class="chat-preview">
+            <div class="chat-message">
+                <div style="width: 100%;">
+                    <div class="chat-bubble-user">
+                        <strong>Você:</strong> Estou com saudades... o que eu faço?
+                    </div>
+                </div>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">⚖️</div>
-                <h3>LGPD - Você no controle</h3>
-                <p>Seus dados não são compartilhados. Você pode solicitar exclusão a qualquer momento.</p>
+            <div class="chat-message">
+                <div style="width: 100%;">
+                    <div class="chat-bubble-ia">
+                        <strong>🤖 Assistente (como seu ente querido):</strong> "Ei, eu sei que está difícil. Lembre-se do que sempre te falei: a vida continua e você é forte. Chore se precisar, mas siga em frente. Estou orgulhoso de você."
+                    </div>
+                </div>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">💡</div>
-                <h3>Flexível e opcional</h3>
-                <p>O cofre é opcional. Use apenas para indicar onde estão suas coisas, sem obrigação de guardar senhas.</p>
+            <div class="chat-message">
+                <div style="width: 100%;">
+                    <div class="chat-bubble-user">
+                        <strong>Você:</strong> Você se lembra da nossa viagem?
+                    </div>
+                </div>
             </div>
-        </div>
-    </section>
-
-    <!-- Futuro -->
-    <section id="futuro" class="section">
-        <h2 class="section-title">O que está por vir</h2>
-        <div class="futuro">
-            <div class="futuro-grid">
-                <div class="futuro-item">
-                    <span class="badge">Em desenvolvimento</span>
-                    <h4>📱 App Mobile</h4>
-                    <p>Aplicativos nativos para Android e iOS.</p>
+            <div class="chat-message">
+                <div style="width: 100%;">
+                    <div class="chat-bubble-ia">
+                        <strong>🤖 Assistente:</strong> "Claro! Aquele pôr do sol... foi mágico. Guarde esses momentos com carinho. Eles são eternos."
+                    </div>
                 </div>
-                <div class="futuro-item">
-                    <span class="badge">Em desenvolvimento</span>
-                    <h4>🤖 Assistente de Luto com IA</h4>
-                    <p>IA treinada com suas palavras para oferecer conforto.</p>
-                </div>
-                <div class="futuro-item">
-                    <span class="badge">Em breve</span>
-                    <h4>🎁 Mural da Memória</h4>
-                    <p>Espaço interativo para fotos, histórias e mensagens.</p>
-                </div>
-                <div class="futuro-item">
-                    <span class="badge">Em breve</span>
-                    <h4>📜 Testamento Digital</h4>
-                    <p>Registre suas últimas vontades com validação digital.</p>
-                </div>
+            </div>
+            <div style="text-align: center; margin-top: 1rem;">
+                <p style="font-size: 0.7rem; color: #666;">💡 As respostas são geradas por IA baseada na personalidade deixada pelo falecido.</p>
             </div>
         </div>
     </section>
 
-    <!-- Preço -->
     <section id="preco" class="section">
-        <h2 class="section-title">Planos</h2>
-        <div class="pricing-box">
-            <div class="pricing-badge">🎯 BETA GRATUITO</div>
-            <h3>Participe do Beta</h3>
-            <p style="font-size: 1.3rem; color: #2E8B57; margin: 0.5rem 0;"><strong>Grátis</strong> durante os testes</p>
-            <p>✅ Cofre de senhas ilimitado</p>
-            <p>✅ Vídeos ilimitados</p>
-            <p>✅ Até 3 contatos de confiança</p>
-            <p>✅ Liberação automática via API</p>
-            <p style="margin-top: 0.8rem; font-size: 0.7rem; color: #666;">
-                ⚠️ Os dados criados durante o beta serão mantidos e acessíveis somente através de contas pagas.
-            </p>
-            <a href="https://aeterna.streamlit.app" class="btn-primary" style="margin-top: 1rem; display: inline-block;">Participar do Beta →</a>
+        <h2 class="section-title">Participe do Beta</h2>
+        <div class="features-grid" style="max-width: 500px; margin: 0 auto;">
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h3>Beta Gratuito</h3>
+                <p>✅ Crie seu legado completo<br>✅ Vídeos ilimitados<br>✅ Até 3 contatos<br>✅ Assistente de Luto IA<br>✅ Sem custo durante o beta</p>
+                <a href="https://aeterna.streamlit.app" class="btn-primary" style="display: inline-block; margin-top: 1rem;">Começar Agora →</a>
+            </div>
         </div>
+        <p style="text-align: center; margin-top: 1rem; font-size: 0.75rem; color: #666;">⚠️ Os dados criados durante o beta serão migrados para contas pagas quando o serviço se tornar comercial.</p>
     </section>
 
-    <!-- Parcerias e Investidores -->
     <section class="section">
-        <div class="parcerias">
-            <h2>🚀 Faça parte dessa jornada</h2>
-            <p>Estamos abertos a parcerias estratégicas e investimentos anjo.</p>
-            <p>💼 Planos funerários e seguros de vida: podemos ser o diferencial que seu cliente precisa.</p>
-            <a href="mailto:parcerias@aeterenalegado.com.br" class="btn-parceiro">Quero ser parceiro →</a>
+        <div class="cta">
+            <h2>Eternize sua história</h2>
+            <p>Crie um legado digital para você ou em memória de quem você ama.</p>
+            <a href="https://aeterna.streamlit.app" class="btn-primary" style="background: white; color: #2E8B57;">Criar meu Legado →</a>
         </div>
     </section>
 
-    <!-- CTA Final -->
-    <section class="section">
-        <div style="background: linear-gradient(135deg, #2E8B57 0%, #1B5E20 100%); padding: 2rem 1rem; text-align: center; color: white; border-radius: 25px;">
-            <h2 style="font-size: 1.3rem; margin-bottom: 0.5rem;">Comece a eternizar seu legado</h2>
-            <p style="font-size: 0.85rem; margin-bottom: 1rem;">Participe do beta, é gratuito. Sua família agradecerá.</p>
-            <a href="https://aeterna.streamlit.app" class="btn-primary" style="background: white; color: #2E8B57;">Acessar o aEterna →</a>
-        </div>
-    </section>
-
-    <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-links">
                 <h4>Produto</h4>
-                <a href="https://aeterna.streamlit.app">Acessar Cofre</a>
-                <a href="#futuro">Funcionalidades</a>
-                <a href="#preco">Planos</a>
+                <a href="https://aeterna.streamlit.app">Acessar</a>
+                <a href="#legado">Criar Legado</a>
+                <a href="#assistente">Assistente IA</a>
             </div>
             <div class="footer-links">
                 <h4>Empresa</h4>
                 <a href="#sobre">Sobre</a>
-                <a href="#funcionamento">Como funciona</a>
                 <a href="#">Política de Privacidade</a>
+                <a href="#">Termos de Uso</a>
             </div>
             <div class="footer-links">
                 <h4>Contato</h4>
                 <a href="mailto:contato@aeterenalegado.com.br">contato@aeterenalegado.com.br</a>
                 <a href="mailto:parcerias@aeterenalegado.com.br">parcerias@aeterenalegado.com.br</a>
-                <a href="https://github.com/dcarriao/aeterna"><i class="fab fa-github"></i> GitHub</a>
             </div>
         </div>
         <div class="copyright">
             <p>✨ aEterna - Seu legado, sua história, sua vida. ✨</p>
-            <p style="margin-top: 0.3rem;">© 2024 aEterna - Em desenvolvimento. Versão Beta.</p>
+            <p>© 2024 aEterna - Versão Beta | Assistente de Luto com IA</p>
         </div>
     </footer>
 
-    <!-- Script do menu hambúrguer -->
     <script>
         const menuToggle = document.getElementById('menuToggle');
         const navLinks = document.getElementById('navLinks');
-
         if (menuToggle) {
-            menuToggle.addEventListener('click', function() {
-                navLinks.classList.toggle('show');
-            });
+            menuToggle.addEventListener('click', function() { navLinks.classList.toggle('show'); });
         }
-
-        // Smooth scroll para links internos
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth' });
-                }
-                // Fechar menu mobile após clique
-                if (navLinks.classList.contains('show')) {
-                    navLinks.classList.remove('show');
-                }
+                if (target) { target.scrollIntoView({ behavior: 'smooth' }); }
+                if (navLinks.classList.contains('show')) { navLinks.classList.remove('show'); }
             });
         });
     </script>
