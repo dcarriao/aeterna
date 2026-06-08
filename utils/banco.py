@@ -29,7 +29,7 @@ class BancoDados:
             )
         ''')
 
-        # Tabela de vídeos (atualizada com categoria)
+        # Tabela de vídeos
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS videos (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -55,7 +55,7 @@ class BancoDados:
             )
         ''')
 
-        # Tabela de contatos (atualizada)
+        # Tabela de contatos
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS contatos (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -78,7 +78,7 @@ class BancoDados:
             )
         ''')
 
-        # Tabela de agendamentos (Lembranças Programadas)
+        # Tabela de agendamentos
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS agendamentos (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -152,10 +152,24 @@ class BancoDados:
         conn.close()
 
     # ========================================================================
-    # OPERAÇÕES DE VÍDEOS (COM ACESSO CONTROLADO)
+    # OPERAÇÕES DE VÍDEOS
     # ========================================================================
+    def listar_videos_usuario(self, usuario_id: int) -> List[Dict]:
+        """Lista todos os vídeos de um usuário"""
+        conn = sqlite3.connect(self.arquivo_db)
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT id, titulo, destinatario, caminho_arquivo, categoria, data_criacao 
+            FROM videos WHERE usuario_id = ? ORDER BY data_criacao DESC
+        ''', (usuario_id,))
+        rows = cursor.fetchall()
+        conn.close()
+        return [{"id": r[0], "titulo": r[1], "destinatario": r[2], "caminho": r[3], "categoria": r[4], "data": r[5]} for
+                r in rows]
+
     def adicionar_video_com_acesso(self, usuario_id: int, titulo: str, destinatario: str,
                                    caminho_arquivo: str, contatos_ids: List[int], categoria: str = "geral"):
+        """Adiciona vídeo e define quais contatos podem acessar"""
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
 
@@ -173,19 +187,8 @@ class BancoDados:
         conn.close()
         return video_id
 
-    def listar_videos_usuario(self, usuario_id: int) -> List[Dict]:
-        conn = sqlite3.connect(self.arquivo_db)
-        cursor = conn.cursor()
-        cursor.execute('''
-            SELECT id, titulo, destinatario, caminho_arquivo, categoria, data_criacao 
-            FROM videos WHERE usuario_id = ? ORDER BY data_criacao DESC
-        ''', (usuario_id,))
-        rows = cursor.fetchall()
-        conn.close()
-        return [{"id": r[0], "titulo": r[1], "destinatario": r[2], "caminho": r[3], "categoria": r[4], "data": r[5]} for
-                r in rows]
-
     def listar_videos_por_contato(self, contato_id: int) -> List[Dict]:
+        """Lista vídeos que um contato específico tem acesso"""
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
         cursor.execute('''
@@ -199,14 +202,13 @@ class BancoDados:
         return [{"id": r[0], "titulo": r[1], "destinatario": r[2], "caminho": r[3], "categoria": r[4]} for r in rows]
 
     def deletar_video(self, id_video: int, usuario_id: int) -> bool:
+        """Deleta um vídeo (apenas se for do usuário)"""
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
 
-        # Verificar se o vídeo pertence ao usuário
         cursor.execute("SELECT caminho_arquivo FROM videos WHERE id = ? AND usuario_id = ?", (id_video, usuario_id))
         row = cursor.fetchone()
         if row:
-            # Remover arquivo do disco
             if row[0] and os.path.exists(row[0]):
                 try:
                     os.remove(row[0])
@@ -324,7 +326,7 @@ class BancoDados:
         conn.close()
 
     # ========================================================================
-    # OPERAÇÕES DE AGENDAMENTOS (LEMBRANÇAS PROGRAMADAS)
+    # OPERAÇÕES DE AGENDAMENTOS
     # ========================================================================
     def criar_agendamento(self, usuario_id: int, contato_id: int, tipo: str, data_envio: str,
                           data_termino: str = "", conteudo: str = "", video_id: int = None,
