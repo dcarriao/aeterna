@@ -9,6 +9,34 @@ class BancoDados:
         os.makedirs(os.path.dirname(arquivo_db), exist_ok=True)
         self.arquivo_db = arquivo_db
         self._inicializar_banco()
+        self._migrar_contatos()
+
+    def _migrar_contatos(self):
+        """Adiciona colunas faltantes na tabela contatos"""
+        conn = sqlite3.connect(self.arquivo_db)
+        cursor = conn.cursor()
+
+        cursor.execute("PRAGMA table_info(contatos)")
+        colunas = [col[1] for col in cursor.fetchall()]
+
+        # Colunas que deveriam existir
+        colunas_necessarias = ['parentesco', 'data_nascimento', 'datas_especiais', 'acesso_central_luto', 'sobrenome']
+
+        for coluna in colunas_necessarias:
+            if coluna not in colunas:
+                try:
+                    if coluna == 'acesso_central_luto':
+                        cursor.execute(f'ALTER TABLE contatos ADD COLUMN {coluna} INTEGER DEFAULT 0')
+                    elif coluna == 'sobrenome':
+                        cursor.execute(f'ALTER TABLE contatos ADD COLUMN {coluna} TEXT DEFAULT ""')
+                    else:
+                        cursor.execute(f'ALTER TABLE contatos ADD COLUMN {coluna} TEXT DEFAULT ""')
+                    print(f"✅ Coluna '{coluna}' adicionada à tabela contatos")
+                except Exception as e:
+                    print(f"⚠️ Erro ao adicionar coluna {coluna}: {e}")
+
+        conn.commit()
+        conn.close()
 
     def _inicializar_banco(self):
         conn = sqlite3.connect(self.arquivo_db)
