@@ -14,7 +14,11 @@ class GerenciadorUsuarios:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
 
-        # Tabela de usuários
+        # Verificar se a coluna data_nascimento existe e adicionar se não existir
+        cursor.execute("PRAGMA table_info(usuarios)")
+        colunas = [col[1] for col in cursor.fetchall()]
+
+        # Tabela de usuários (compatível com versão anterior)
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS usuarios (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,6 +39,13 @@ class GerenciadorUsuarios:
                 ultimo_acesso TIMESTAMP
             )
         ''')
+
+        # Adicionar coluna data_nascimento se não existir
+        if 'data_nascimento' not in colunas:
+            try:
+                cursor.execute('ALTER TABLE usuarios ADD COLUMN data_nascimento DATE')
+            except:
+                pass
 
         # Tabela de preferências do usuário
         cursor.execute('''
@@ -156,28 +167,39 @@ class GerenciadorUsuarios:
     def autenticar(self, email: str, senha: str) -> dict:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
-        cursor.execute('''
-            SELECT id, nome, sobrenome, email, cpf, senha_hash, salt, tipo, telefone, whatsapp, plano_id 
-            FROM usuarios WHERE email = ? AND ativo = 1
-        ''', (email.lower(),))
+
+        # Primeiro, verificar quais colunas existem
+        cursor.execute("PRAGMA table_info(usuarios)")
+        colunas = [col[1] for col in cursor.fetchall()]
+
+        # Construir query dinâmica baseada nas colunas existentes
+        query = "SELECT id, nome, sobrenome, email, cpf, senha_hash, salt, tipo, telefone, whatsapp, plano_id"
+        if 'data_nascimento' in colunas:
+            query += ", data_nascimento"
+        query += " FROM usuarios WHERE email = ? AND ativo = 1"
+
+        cursor.execute(query, (email.lower(),))
         usuario = cursor.fetchone()
         conn.close()
 
         if usuario:
-            hash_calculado, _ = self._hash_senha(senha, usuario[6])
-            if hash_calculado == usuario[5]:
-                return {
+            hash_calculado, _ = self._hash_senha(senha, usuario[7])
+            if hash_calculado == usuario[6]:
+                result = {
                     "id": usuario[0],
                     "nome": usuario[1],
                     "sobrenome": usuario[2],
                     "nome_completo": f"{usuario[1]} {usuario[2]}",
                     "email": usuario[3],
                     "cpf": usuario[4],
-                    "tipo": usuario[7],
-                    "telefone": usuario[8] or "",
-                    "whatsapp": usuario[9] or "",
-                    "plano_id": usuario[10]
+                    "tipo": usuario[8],
+                    "telefone": usuario[9] or "",
+                    "whatsapp": usuario[10] or "",
+                    "plano_id": usuario[11]
                 }
+                if 'data_nascimento' in colunas and len(usuario) > 12:
+                    result["data_nascimento"] = usuario[12] or ""
+                return result
         return None
 
     def obter_usuario_por_id(self, usuario_id: int) -> dict:
