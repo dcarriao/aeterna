@@ -22,7 +22,6 @@ class GerenciadorUsuarios:
                 sobrenome TEXT NOT NULL,
                 email TEXT UNIQUE NOT NULL,
                 cpf TEXT UNIQUE NOT NULL,
-                data_nascimento DATE,
                 telefone TEXT,
                 whatsapp TEXT,
                 senha_hash TEXT NOT NULL,
@@ -100,7 +99,7 @@ class GerenciadorUsuarios:
         hash_obj = hashlib.sha256(senha_com_salt)
         return hash_obj.hexdigest(), salt
 
-    def criar_usuario(self, nome: str, sobrenome: str, email: str, cpf: str, data_nascimento: str,
+    def criar_usuario(self, nome: str, sobrenome: str, email: str, cpf: str,
                       senha: str, telefone: str = '', whatsapp: str = '',
                       foto: str = '', redes: str = '') -> bool:
         try:
@@ -116,10 +115,9 @@ class GerenciadorUsuarios:
             conn = sqlite3.connect(self.arquivo_db)
             cursor = conn.cursor()
             cursor.execute('''
-                INSERT INTO usuarios (nome, sobrenome, email, cpf, data_nascimento, telefone, whatsapp, senha_hash, salt, foto, redes_sociais)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (
-            nome, sobrenome, email.lower(), cpf, data_nascimento, telefone, whatsapp, hash_senha, salt, foto, redes))
+                INSERT INTO usuarios (nome, sobrenome, email, cpf, telefone, whatsapp, senha_hash, salt, foto, redes_sociais)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (nome, sobrenome, email.lower(), cpf, telefone, whatsapp, hash_senha, salt, foto, redes))
             conn.commit()
             usuario_id = cursor.lastrowid
 
@@ -135,7 +133,7 @@ class GerenciadorUsuarios:
                 return "email_existente"
             return False
 
-    def criar_usuario_admin(self, nome: str, sobrenome: str, email: str, cpf: str, data_nascimento: str, senha: str):
+    def criar_usuario_admin(self, nome: str, sobrenome: str, email: str, cpf: str, senha: str):
         """Cria um usuário administrador"""
         try:
             hash_senha, salt = self._hash_senha(senha)
@@ -143,9 +141,9 @@ class GerenciadorUsuarios:
             conn = sqlite3.connect(self.arquivo_db)
             cursor = conn.cursor()
             cursor.execute('''
-                INSERT INTO usuarios (nome, sobrenome, email, cpf, data_nascimento, senha_hash, salt, tipo)
-                VALUES (?, ?, ?, ?, ?, ?, ?, 'admin')
-            ''', (nome, sobrenome, email.lower(), cpf, data_nascimento, hash_senha, salt))
+                INSERT INTO usuarios (nome, sobrenome, email, cpf, senha_hash, salt, tipo)
+                VALUES (?, ?, ?, ?, ?, ?, 'admin')
+            ''', (nome, sobrenome, email.lower(), cpf, hash_senha, salt))
             conn.commit()
             usuario_id = cursor.lastrowid
             cursor.execute('INSERT INTO preferencias_usuario (usuario_id) VALUES (?)', (usuario_id,))
@@ -159,15 +157,15 @@ class GerenciadorUsuarios:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT id, nome, sobrenome, email, cpf, data_nascimento, senha_hash, salt, tipo, telefone, whatsapp, plano_id 
+            SELECT id, nome, sobrenome, email, cpf, senha_hash, salt, tipo, telefone, whatsapp, plano_id 
             FROM usuarios WHERE email = ? AND ativo = 1
         ''', (email.lower(),))
         usuario = cursor.fetchone()
         conn.close()
 
         if usuario:
-            hash_calculado, _ = self._hash_senha(senha, usuario[7])
-            if hash_calculado == usuario[6]:
+            hash_calculado, _ = self._hash_senha(senha, usuario[6])
+            if hash_calculado == usuario[5]:
                 return {
                     "id": usuario[0],
                     "nome": usuario[1],
@@ -175,11 +173,10 @@ class GerenciadorUsuarios:
                     "nome_completo": f"{usuario[1]} {usuario[2]}",
                     "email": usuario[3],
                     "cpf": usuario[4],
-                    "data_nascimento": usuario[5],
-                    "tipo": usuario[8],
-                    "telefone": usuario[9] or "",
-                    "whatsapp": usuario[10] or "",
-                    "plano_id": usuario[11]
+                    "tipo": usuario[7],
+                    "telefone": usuario[8] or "",
+                    "whatsapp": usuario[9] or "",
+                    "plano_id": usuario[10]
                 }
         return None
 
@@ -187,7 +184,7 @@ class GerenciadorUsuarios:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT id, nome, sobrenome, email, cpf, data_nascimento, telefone, whatsapp, tipo, plano_id 
+            SELECT id, nome, sobrenome, email, cpf, telefone, whatsapp, tipo, plano_id 
             FROM usuarios WHERE id = ?
         ''', (usuario_id,))
         usuario = cursor.fetchone()
@@ -200,11 +197,10 @@ class GerenciadorUsuarios:
                 "nome_completo": f"{usuario[1]} {usuario[2]}",
                 "email": usuario[3],
                 "cpf": usuario[4],
-                "data_nascimento": usuario[5],
-                "telefone": usuario[6] or "",
-                "whatsapp": usuario[7] or "",
-                "tipo": usuario[8],
-                "plano_id": usuario[9]
+                "telefone": usuario[5] or "",
+                "whatsapp": usuario[6] or "",
+                "tipo": usuario[7],
+                "plano_id": usuario[8]
             }
         return None
 
@@ -319,17 +315,12 @@ class GerenciadorUsuarios:
         conn.close()
 
         if count == 0:
-            senha = self._gerar_senha_admin()
+            senha = "admin123"
             self.criar_usuario_admin(
                 nome="Administrador",
                 sobrenome="aEterna",
                 email="admin@aeterna.com",
                 cpf="00000000000",
-                data_nascimento="1970-01-01",
                 senha=senha
             )
-            print("✅ Usuário admin criado. Verifique o log para a senha.")
-
-    def _gerar_senha_admin(self) -> str:
-        """Retorna senha fixa para o admin"""
-        return "admin123"
+            print("✅ Usuário admin criado com senha: admin123")
