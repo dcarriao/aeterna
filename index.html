@@ -13,20 +13,11 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8f5e9 100%); color: #333; line-height: 1.5; }
 
-        /* Header */
         .header { background: linear-gradient(135deg, #90EE90 0%, #2E8B57 50%, #1B5E20 100%); padding: 0.8rem 1rem; position: fixed; width: 100%; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .nav { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
         .logo { display: flex; align-items: center; gap: 10px; }
         .logo img { height: 45px; }
-        .logo span {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: white;
-            font-family: 'Playfair Display', serif;
-            font-style: italic;
-            letter-spacing: 1px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-        }
+        .logo span { font-size: 1.4rem; font-weight: 700; color: white; font-family: 'Playfair Display', serif; font-style: italic; letter-spacing: 1px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
         .beta-badge { background: #ff9800; color: white; padding: 0.15rem 0.5rem; border-radius: 20px; font-size: 0.6rem; font-weight: 600; margin-left: 0.3rem; vertical-align: middle; }
 
         .menu-toggle { display: none; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
@@ -35,7 +26,6 @@
         .nav-links a:hover { opacity: 0.8; }
         .btn-acessar { background: white; color: #2E8B57 !important; padding: 0.4rem 1.2rem; border-radius: 25px; font-weight: 600; }
 
-        /* Hero */
         .hero { padding: 100px 1rem 50px; text-align: center; }
         .hero h1 { font-size: 2.2rem; font-family: 'Playfair Display', serif; color: #1B5E20; margin-bottom: 1rem; }
         .hero p { font-size: 1rem; color: #555; max-width: 700px; margin: 0 auto 1.5rem; }
@@ -45,7 +35,6 @@
         .btn-secondary { background: transparent; color: #2E8B57; border: 2px solid #2E8B57; }
         .btn-secondary:hover { background: #2E8B57; color: white; }
 
-        /* Sections */
         .section { padding: 60px 1rem; max-width: 1200px; margin: 0 auto; }
         .section-title { text-align: center; font-size: 2rem; font-family: 'Playfair Display', serif; color: #1B5E20; margin-bottom: 2rem; }
         .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
@@ -55,39 +44,53 @@
         .feature-card h3 { font-size: 1.1rem; color: #2E8B57; margin-bottom: 0.5rem; }
         .feature-card p { font-size: 0.85rem; color: #666; }
 
-        /* Legado */
         .legado-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
         .legado-card { background: linear-gradient(135deg, #ffffff 0%, #f0faf0 100%); padding: 1.5rem; border-radius: 20px; text-align: center; border: 1px solid #c8e6c8; }
         .legado-card h3 { color: #1B5E20; margin-bottom: 0.5rem; }
 
-        /* Chat preview */
+        /* Destaque para nova funcionalidade */
+        .nova-funcionalidade {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border: 2px solid #ff9800;
+            position: relative;
+            overflow: hidden;
+        }
+        .nova-funcionalidade::before {
+            content: "✨ NOVIDADE ✨";
+            position: absolute;
+            top: 10px;
+            right: -30px;
+            background: #ff9800;
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.2rem 2rem;
+            transform: rotate(45deg);
+            font-weight: bold;
+        }
+
         .chat-preview { background: white; border-radius: 20px; padding: 1.5rem; margin-top: 2rem; }
         .chat-message { margin: 1rem 0; }
         .chat-bubble-user { background: #2E8B57; color: white; padding: 10px 15px; border-radius: 20px 20px 5px 20px; max-width: 70%; margin-left: auto; }
         .chat-bubble-ia { background: #e8f5e9; color: #333; padding: 10px 15px; border-radius: 20px 20px 20px 5px; max-width: 70%; }
 
-        /* Futuro */
-        .futuro-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+        .futuro-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
         .futuro-item { background: white; padding: 1rem; border-radius: 12px; border-left: 3px solid #2E8B57; }
         .futuro-item h4 { color: #2E8B57; margin-bottom: 0.3rem; }
         .futuro-item p { font-size: 0.8rem; }
         .badge { background: #2E8B57; color: white; padding: 0.2rem 0.5rem; border-radius: 20px; font-size: 0.6rem; display: inline-block; margin-bottom: 0.5rem; }
+        .badge-novo { background: #ff9800; }
 
-        /* Segurança */
         .security-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
         .security-card { background: white; padding: 1rem; border-radius: 12px; text-align: center; }
 
-        /* Parcerias */
         .parcerias { background: linear-gradient(135deg, #1B5E20 0%, #2E8B57 100%); border-radius: 20px; padding: 2rem; text-align: center; color: white; margin: 2rem 0; }
         .parcerias h2 { font-size: 1.5rem; margin-bottom: 1rem; }
         .parcerias p { margin-bottom: 1rem; }
         .btn-parceiro { background: white; color: #2E8B57; padding: 0.6rem 1.5rem; border-radius: 50px; text-decoration: none; font-weight: 600; display: inline-block; }
 
-        /* CTA */
         .cta { background: linear-gradient(135deg, #2E8B57 0%, #1B5E20 100%); padding: 2.5rem; text-align: center; color: white; border-radius: 25px; margin-top: 2rem; }
         .cta .btn-primary { background: white; color: #2E8B57; }
 
-        /* Footer */
         .footer { background: #1a1a1a; color: #999; padding: 2rem 1rem 1rem; margin-top: 3rem; }
         .footer-content { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; }
         .footer-links h4 { color: white; font-size: 0.9rem; margin-bottom: 0.8rem; }
@@ -194,6 +197,15 @@
 
     <section id="futuro" class="section" style="background: #f0faf0; border-radius: 30px;">
         <h2 class="section-title">O que está por vir</h2>
+
+        <!-- Destaque para a nova funcionalidade -->
+        <div class="feature-card nova-funcionalidade" style="margin-bottom: 2rem;">
+            <div class="feature-icon">📅</div>
+            <h3>Mensagens Programadas em Datas Especiais</h3>
+            <p>Você poderá programar mensagens, vídeos e lembranças para serem entregues automaticamente em datas importantes: aniversários, Natal, Dia dos Pais, Dia das Mães, ou qualquer data especial que você escolher.</p>
+            <p style="font-size: 0.8rem; color: #ff9800; margin-top: 0.5rem;">🌟 Em breve - Uma forma de estar presente nos momentos especiais de quem você ama</p>
+        </div>
+
         <div class="futuro-grid">
             <div class="futuro-item">
                 <span class="badge">Em desenvolvimento</span>
@@ -201,9 +213,19 @@
                 <p>Aplicativos nativos para Android e iOS. Acesse seu legado de qualquer lugar.</p>
             </div>
             <div class="futuro-item">
+                <span class="badge badge-novo">Nova funcionalidade</span>
+                <h4>📅 Mensagens Programadas</h4>
+                <p>Programe mensagens, vídeos e lembranças para datas especiais. Aniversários, Natal, Dia dos Pais...</p>
+            </div>
+            <div class="futuro-item">
                 <span class="badge">Em desenvolvimento</span>
                 <h4>🔗 API de Validação de CPF</h4>
                 <p>Verificação automática de falecimento para liberação do legado.</p>
+            </div>
+            <div class="futuro-item">
+                <span class="badge">Em breve</span>
+                <h4>🎁 Presentes e Flores Programados</h4>
+                <p>Além de mensagens, você poderá programar entregas de presentes, flores e homenagens em datas especiais.</p>
             </div>
             <div class="futuro-item">
                 <span class="badge">Em breve</span>
@@ -267,6 +289,12 @@
                 <a href="#legado">Criar Legado</a>
                 <a href="#assistente">Assistente IA</a>
                 <a href="#futuro">Futuro</a>
+            </div>
+            <div class="footer-links">
+                <h4>Funcionalidades</h4>
+                <a href="#assistente">Assistente de Luto</a>
+                <a href="#futuro">Mensagens Programadas</a>
+                <a href="#futuro">App Mobile</a>
             </div>
             <div class="footer-links">
                 <h4>Segurança</h4>
