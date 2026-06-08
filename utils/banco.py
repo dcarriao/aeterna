@@ -1,4 +1,4 @@
-# utils/banco.py
+# utils/banco.py - VERSÃO SIMPLIFICADA E COMPATÍVEL
 import sqlite3
 import os
 from typing import List, Dict, Optional
@@ -9,51 +9,6 @@ class BancoDados:
         os.makedirs(os.path.dirname(arquivo_db), exist_ok=True)
         self.arquivo_db = arquivo_db
         self._inicializar_banco()
-        self._migrar_banco()
-
-    def _migrar_banco(self):
-        conn = sqlite3.connect(self.arquivo_db)
-        cursor = conn.cursor()
-
-        # Videos
-        cursor.execute("PRAGMA table_info(videos)")
-        colunas_videos = [col[1] for col in cursor.fetchall()]
-        if 'usuario_id' not in colunas_videos:
-            try:
-                cursor.execute('ALTER TABLE videos ADD COLUMN usuario_id INTEGER DEFAULT 1')
-            except:
-                pass
-        if 'categoria' not in colunas_videos:
-            try:
-                cursor.execute('ALTER TABLE videos ADD COLUMN categoria TEXT DEFAULT "geral"')
-            except:
-                pass
-
-        # Senhas
-        cursor.execute("PRAGMA table_info(senhas)")
-        colunas_senhas = [col[1] for col in cursor.fetchall()]
-        if 'usuario_id' not in colunas_senhas:
-            try:
-                cursor.execute('ALTER TABLE senhas ADD COLUMN usuario_id INTEGER DEFAULT 1')
-            except:
-                pass
-
-        # Contatos
-        cursor.execute("PRAGMA table_info(contatos)")
-        colunas_contatos = [col[1] for col in cursor.fetchall()]
-        if 'usuario_id' not in colunas_contatos:
-            try:
-                cursor.execute('ALTER TABLE contatos ADD COLUMN usuario_id INTEGER DEFAULT 1')
-            except:
-                pass
-        if 'sobrenome' not in colunas_contatos:
-            try:
-                cursor.execute('ALTER TABLE contatos ADD COLUMN sobrenome TEXT DEFAULT ""')
-            except:
-                pass
-
-        conn.commit()
-        conn.close()
 
     def _inicializar_banco(self):
         conn = sqlite3.connect(self.arquivo_db)
@@ -88,48 +43,19 @@ class BancoDados:
         ''')
 
         cursor.execute('''
-            CREATE TABLE IF NOT EXISTS videos_acesso (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                video_id INTEGER,
-                contato_id INTEGER
-            )
-        ''')
-
-        cursor.execute('''
             CREATE TABLE IF NOT EXISTS contatos (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 usuario_id INTEGER,
                 nome TEXT NOT NULL,
-                sobrenome TEXT NOT NULL,
                 email TEXT NOT NULL,
                 telefone TEXT,
                 whatsapp TEXT,
                 parentesco TEXT,
                 data_nascimento DATE,
-                datas_especiais TEXT,
                 is_prioridade INTEGER DEFAULT 0,
                 prioridade_order INTEGER DEFAULT 0,
-                acesso_central_luto INTEGER DEFAULT 0,
                 chave_acesso TEXT,
-                mensagem_liberacao TEXT,
                 data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        ''')
-
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS agendamentos (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                usuario_id INTEGER,
-                contato_id INTEGER,
-                tipo TEXT,
-                data_envio DATE,
-                data_termino DATE,
-                conteudo TEXT,
-                video_id INTEGER,
-                gerar_por_ia INTEGER DEFAULT 0,
-                status TEXT DEFAULT 'agendado',
-                data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                data_envio_real TIMESTAMP
             )
         ''')
 
@@ -216,24 +142,6 @@ class BancoDados:
         conn.close()
         return video_id
 
-    def adicionar_video_com_acesso(self, usuario_id: int, titulo: str, destinatario: str,
-                                   caminho_arquivo: str, contatos_ids: List[int], categoria: str = "geral"):
-        conn = sqlite3.connect(self.arquivo_db)
-        cursor = conn.cursor()
-        cursor.execute('''
-            INSERT INTO videos (usuario_id, titulo, destinatario, caminho_arquivo, categoria)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (usuario_id, titulo, destinatario, caminho_arquivo, categoria))
-        video_id = cursor.lastrowid
-        for contato_id in contatos_ids:
-            try:
-                cursor.execute('INSERT INTO videos_acesso (video_id, contato_id) VALUES (?, ?)', (video_id, contato_id))
-            except:
-                pass
-        conn.commit()
-        conn.close()
-        return video_id
-
     def deletar_video(self, id_video: int, usuario_id: int) -> bool:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
@@ -245,10 +153,6 @@ class BancoDados:
                     os.remove(row[0])
                 except:
                     pass
-            try:
-                cursor.execute("DELETE FROM videos_acesso WHERE video_id = ?", (id_video,))
-            except:
-                pass
             cursor.execute("DELETE FROM videos WHERE id = ? AND usuario_id = ?", (id_video, usuario_id))
             conn.commit()
             conn.close()
@@ -259,20 +163,16 @@ class BancoDados:
     # ========================================================================
     # CONTATOS
     # ========================================================================
-    def adicionar_contato(self, usuario_id: int, nome: str, sobrenome: str, email: str,
-                          telefone: str = "", whatsapp: str = "", parentesco: str = "",
-                          data_nascimento: str = "", datas_especiais: str = "",
-                          is_prioridade: int = 0, prioridade_order: int = 0,
-                          acesso_central_luto: int = 0, chave_acesso: str = ""):
+    def adicionar_contato(self, usuario_id: int, nome: str, email: str, telefone: str = "", whatsapp: str = "",
+                          parentesco: str = "", data_nascimento: str = "", is_prioridade: int = 0,
+                          prioridade_order: int = 0, chave_acesso: str = ""):
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO contatos (usuario_id, nome, sobrenome, email, telefone, whatsapp, parentesco, 
-                                  data_nascimento, datas_especiais, is_prioridade, prioridade_order, 
-                                  acesso_central_luto, chave_acesso)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (usuario_id, nome, sobrenome, email, telefone, whatsapp, parentesco,
-              data_nascimento, datas_especiais, is_prioridade, prioridade_order, acesso_central_luto, chave_acesso))
+            INSERT INTO contatos (usuario_id, nome, email, telefone, whatsapp, parentesco, data_nascimento, is_prioridade, prioridade_order, chave_acesso)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (usuario_id, nome, email, telefone, whatsapp, parentesco, data_nascimento, is_prioridade, prioridade_order,
+              chave_acesso))
         conn.commit()
         conn.close()
 
@@ -280,31 +180,30 @@ class BancoDados:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT id, nome, IFNULL(sobrenome, ''), email, IFNULL(telefone, ''), IFNULL(whatsapp, ''), IFNULL(parentesco, ''),
-                   IFNULL(data_nascimento, ''), IFNULL(datas_especiais, ''), is_prioridade, prioridade_order, acesso_central_luto
+            SELECT id, nome, email, telefone, whatsapp, parentesco, data_nascimento, is_prioridade, prioridade_order
             FROM contatos WHERE usuario_id = ? ORDER BY prioridade_order, nome
         ''', (usuario_id,))
         rows = cursor.fetchall()
         conn.close()
         return [{
-            "id": r[0], "nome": r[1], "sobrenome": r[2], "nome_completo": f"{r[1]} {r[2]}",
-            "email": r[3], "telefone": r[4] or "", "whatsapp": r[5] or "", "parentesco": r[6] or "",
-            "data_nascimento": r[7] or "", "datas_especiais": r[8] or "", "is_prioridade": r[9],
-            "prioridade_order": r[10], "acesso_central_luto": r[11]
+            "id": r[0], "nome": r[1], "sobrenome": "", "nome_completo": r[1],
+            "email": r[2], "telefone": r[3] or "", "whatsapp": r[4] or "", "parentesco": r[5] or "",
+            "data_nascimento": r[6] or "", "is_prioridade": r[7], "prioridade_order": r[8],
+            "acesso_central_luto": 0
         } for r in rows]
 
     def listar_contatos_prioritarios(self, usuario_id: int) -> List[Dict]:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT id, nome, IFNULL(sobrenome, ''), email, IFNULL(telefone, ''), IFNULL(whatsapp, ''), IFNULL(parentesco, ''), is_prioridade
+            SELECT id, nome, email, telefone, whatsapp, parentesco, is_prioridade
             FROM contatos WHERE usuario_id = ? AND is_prioridade = 1 ORDER BY prioridade_order
         ''', (usuario_id,))
         rows = cursor.fetchall()
         conn.close()
-        return [{"id": r[0], "nome": r[1], "sobrenome": r[2], "nome_completo": f"{r[1]} {r[2]}",
-                 "email": r[3], "telefone": r[4] or "", "whatsapp": r[5] or "", "parentesco": r[6] or "",
-                 "is_prioridade": r[7]} for r in rows]
+        return [{"id": r[0], "nome": r[1], "sobrenome": "", "nome_completo": r[1],
+                 "email": r[2], "telefone": r[3] or "", "whatsapp": r[4] or "", "parentesco": r[5] or "",
+                 "is_prioridade": r[6]} for r in rows]
 
     def contar_contatos_usuario(self, usuario_id: int) -> int:
         conn = sqlite3.connect(self.arquivo_db)
@@ -327,14 +226,14 @@ class BancoDados:
         cursor = conn.cursor()
         if email_falecido:
             cursor.execute('''
-                SELECT c.id, c.nome, IFNULL(c.sobrenome, ''), c.email, IFNULL(c.telefone, ''), IFNULL(c.whatsapp, ''), c.acesso_central_luto, u.id as usuario_id, u.nome as falecido_nome
+                SELECT c.id, c.nome, c.email, u.id as usuario_id, u.nome as falecido_nome
                 FROM contatos c
                 JOIN usuarios u ON c.usuario_id = u.id
                 WHERE c.chave_acesso = ? AND u.email = ?
             ''', (chave_acesso, email_falecido))
         else:
             cursor.execute('''
-                SELECT c.id, c.nome, IFNULL(c.sobrenome, ''), c.email, IFNULL(c.telefone, ''), IFNULL(c.whatsapp, ''), c.acesso_central_luto, u.id as usuario_id, u.nome as falecido_nome
+                SELECT c.id, c.nome, c.email, u.id as usuario_id, u.nome as falecido_nome
                 FROM contatos c
                 JOIN usuarios u ON c.usuario_id = u.id
                 WHERE c.chave_acesso = ?
@@ -343,9 +242,9 @@ class BancoDados:
         conn.close()
         if row:
             return {
-                "id": row[0], "nome": row[1], "sobrenome": row[2], "email": row[3],
-                "telefone": row[4] or "", "whatsapp": row[5] or "",
-                "acesso_central_luto": row[6], "usuario_id": row[7], "falecido_nome": row[8]
+                "id": row[0], "nome": row[1], "sobrenome": "", "email": row[2],
+                "telefone": "", "whatsapp": "",
+                "acesso_central_luto": 1, "usuario_id": row[3], "falecido_nome": row[4]
             }
         return None
 
@@ -353,50 +252,6 @@ class BancoDados:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
         cursor.execute("DELETE FROM contatos WHERE id = ? AND usuario_id = ?", (id_contato, usuario_id))
-        conn.commit()
-        conn.close()
-
-    # ========================================================================
-    # AGENDAMENTOS
-    # ========================================================================
-    def criar_agendamento(self, usuario_id: int, contato_id: int, tipo: str, data_envio: str,
-                          data_termino: str = "", conteudo: str = "", video_id: int = None,
-                          gerar_por_ia: int = 0) -> int:
-        conn = sqlite3.connect(self.arquivo_db)
-        cursor = conn.cursor()
-        cursor.execute('''
-            INSERT INTO agendamentos (usuario_id, contato_id, tipo, data_envio, data_termino, 
-                                      conteudo, video_id, gerar_por_ia, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'agendado')
-        ''', (usuario_id, contato_id, tipo, data_envio, data_termino, conteudo, video_id, gerar_por_ia))
-        conn.commit()
-        agendamento_id = cursor.lastrowid
-        conn.close()
-        return agendamento_id
-
-    def listar_agendamentos_usuario(self, usuario_id: int) -> List[Dict]:
-        conn = sqlite3.connect(self.arquivo_db)
-        cursor = conn.cursor()
-        cursor.execute('''
-            SELECT a.id, a.tipo, a.data_envio, a.data_termino, a.conteudo, a.status,
-                   c.nome, IFNULL(c.sobrenome, ''), c.email
-            FROM agendamentos a
-            JOIN contatos c ON a.contato_id = c.id
-            WHERE a.usuario_id = ?
-            ORDER BY a.data_envio
-        ''', (usuario_id,))
-        rows = cursor.fetchall()
-        conn.close()
-        return [{
-            "id": r[0], "tipo": r[1], "data_envio": r[2], "data_termino": r[3],
-            "conteudo": r[4] or "", "status": r[5],
-            "contato_nome": f"{r[6]} {r[7]}", "contato_email": r[8]
-        } for r in rows]
-
-    def deletar_agendamento(self, id_agendamento: int, usuario_id: int):
-        conn = sqlite3.connect(self.arquivo_db)
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM agendamentos WHERE id = ? AND usuario_id = ?", (id_agendamento, usuario_id))
         conn.commit()
         conn.close()
 
