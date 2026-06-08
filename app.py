@@ -252,6 +252,7 @@ def fazer_login(email, senha):
         st.session_state.modo_acesso = 'falecido'
         st.session_state.falecido_id = usuario['id']
         st.session_state.crypto = GerenciadorCriptografia(senha)
+        gerente_usuarios.atualizar_ultimo_acesso(usuario['id'])
         return True
     return False
 
@@ -348,7 +349,7 @@ def render_login():
                         st.error("❌ E-mail ou senha incorretos")
                 else:
                     st.warning("⚠️ Preencha e-mail e senha")
-        st.caption("💡 **Teste:** admin@aeterna.com / admin123")
+        # Dados de teste removidos
 
     with tab2:
         st.markdown("### Acessar legado de alguém especial")
@@ -447,8 +448,10 @@ def render_login():
                         st.rerun()
                     elif resultado == "cpf_existente":
                         st.error("❌ Este CPF já está cadastrado")
-                    else:
+                    elif resultado == "email_existente":
                         st.error("❌ Este e-mail já está cadastrado")
+                    else:
+                        st.error("❌ Erro ao criar conta. Verifique os dados.")
 
 
 # ============================================================================
@@ -623,26 +626,48 @@ def render_admin_panel():
         conn = sqlite3.connect("dados/cofre.db")
         cursor = conn.cursor()
 
-        cursor.execute("SELECT COUNT(*) FROM usuarios")
-        total_usuarios = cursor.fetchone()[0]
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='usuarios'")
+        if cursor.fetchone():
+            cursor.execute("SELECT COUNT(*) FROM usuarios")
+            total_usuarios = cursor.fetchone()[0]
 
-        cursor.execute("SELECT COUNT(*) FROM usuarios WHERE data_criacao >= date('now', '-30 days')")
-        novos_usuarios = cursor.fetchone()[0]
+            cursor.execute("SELECT COUNT(*) FROM usuarios WHERE data_criacao >= date('now', '-30 days')")
+            novos_usuarios = cursor.fetchone()[0]
 
-        cursor.execute("SELECT COUNT(*) FROM usuarios WHERE tipo = 'admin'")
-        total_admins = cursor.fetchone()[0]
+            cursor.execute("SELECT COUNT(*) FROM usuarios WHERE tipo = 'admin'")
+            total_admins = cursor.fetchone()[0]
+        else:
+            total_usuarios = 0
+            novos_usuarios = 0
+            total_admins = 0
 
-        cursor.execute("SELECT COUNT(*) FROM senhas")
-        total_senhas = cursor.fetchone()[0]
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='senhas'")
+        if cursor.fetchone():
+            cursor.execute("SELECT COUNT(*) FROM senhas")
+            total_senhas = cursor.fetchone()[0]
+        else:
+            total_senhas = 0
 
-        cursor.execute("SELECT COUNT(*) FROM videos")
-        total_videos = cursor.fetchone()[0]
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='videos'")
+        if cursor.fetchone():
+            cursor.execute("SELECT COUNT(*) FROM videos")
+            total_videos = cursor.fetchone()[0]
+        else:
+            total_videos = 0
 
-        cursor.execute("SELECT COUNT(*) FROM contatos")
-        total_contatos = cursor.fetchone()[0]
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='contatos'")
+        if cursor.fetchone():
+            cursor.execute("SELECT COUNT(*) FROM contatos")
+            total_contatos = cursor.fetchone()[0]
+        else:
+            total_contatos = 0
 
-        cursor.execute("SELECT COUNT(DISTINCT usuario_id) FROM personalidade")
-        total_com_ia = cursor.fetchone()[0]
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='personalidade'")
+        if cursor.fetchone():
+            cursor.execute("SELECT COUNT(DISTINCT usuario_id) FROM personalidade")
+            total_com_ia = cursor.fetchone()[0]
+        else:
+            total_com_ia = 0
 
         conn.close()
 
@@ -667,75 +692,104 @@ def render_admin_panel():
 
         conn = sqlite3.connect("dados/cofre.db")
         cursor = conn.cursor()
-        cursor.execute('''
-            SELECT strftime('%Y-%m', data_criacao) as mes, COUNT(*) 
-            FROM usuarios 
-            WHERE data_criacao >= date('now', '-6 months')
-            GROUP BY mes 
-            ORDER BY mes
-        ''')
-        dados_meses = cursor.fetchall()
-        conn.close()
 
-        if dados_meses:
-            meses = [d[0] for d in dados_meses]
-            quantidades = [d[1] for d in dados_meses]
-            st.line_chart({"Usuários": quantidades}, x=meses)
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='usuarios'")
+        if cursor.fetchone():
+            try:
+                cursor.execute('''
+                    SELECT strftime('%Y-%m', data_criacao) as mes, COUNT(*) 
+                    FROM usuarios 
+                    WHERE data_criacao >= date('now', '-6 months')
+                    GROUP BY mes 
+                    ORDER BY mes
+                ''')
+                dados_meses = cursor.fetchall()
+
+                if dados_meses:
+                    meses = [d[0] for d in dados_meses]
+                    quantidades = [d[1] for d in dados_meses]
+                    st.line_chart({"Usuários": quantidades}, x=meses)
+                else:
+                    st.info("Ainda não há dados suficientes para exibir o gráfico.")
+            except Exception as e:
+                st.info("Dados insuficientes para gerar o gráfico.")
+        else:
+            st.info("Nenhum usuário cadastrado ainda.")
+
+        conn.close()
 
     with tab2:
         st.markdown("### 👥 Usuários Cadastrados")
 
         conn = sqlite3.connect("dados/cofre.db")
         cursor = conn.cursor()
-        cursor.execute('''
-            SELECT id, nome, email, cpf, tipo, data_criacao, ultimo_acesso 
-            FROM usuarios 
-            ORDER BY data_criacao DESC
-        ''')
-        usuarios = cursor.fetchall()
+
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='usuarios'")
+        if cursor.fetchone():
+            cursor.execute('''
+                SELECT id, nome, email, cpf, tipo, data_criacao, ultimo_acesso 
+                FROM usuarios 
+                ORDER BY data_criacao DESC
+            ''')
+            usuarios = cursor.fetchall()
+
+            if usuarios:
+                for usuario in usuarios:
+                    with st.expander(f"👤 {usuario[1]} ({usuario[4]})"):
+                        st.markdown(f"**ID:** {usuario[0]}")
+                        st.markdown(f"**Email:** {usuario[2]}")
+                        st.markdown(f"**CPF:** {usuario[3]}")
+                        st.markdown(f"**Tipo:** {usuario[4]}")
+                        st.markdown(f"**Criado em:** {usuario[5]}")
+                        st.markdown(f"**Último acesso:** {usuario[6] or 'Nunca'}")
+
+                        if usuario[4] != 'admin':
+                            if st.button(f"🗑️ Excluir {usuario[1]}", key=f"del_user_{usuario[0]}"):
+                                conn2 = sqlite3.connect("dados/cofre.db")
+                                cursor2 = conn2.cursor()
+                                cursor2.execute("DELETE FROM usuarios WHERE id = ?", (usuario[0],))
+                                conn2.commit()
+                                conn2.close()
+                                st.success(f"✅ Usuário {usuario[1]} excluído!")
+                                st.rerun()
+            else:
+                st.info("Nenhum usuário cadastrado ainda.")
+        else:
+            st.info("Nenhum usuário cadastrado ainda.")
+
         conn.close()
-
-        for usuario in usuarios:
-            with st.expander(f"👤 {usuario[1]} ({usuario[4]})"):
-                st.markdown(f"**ID:** {usuario[0]}")
-                st.markdown(f"**Email:** {usuario[2]}")
-                st.markdown(f"**CPF:** {usuario[3]}")
-                st.markdown(f"**Tipo:** {usuario[4]}")
-                st.markdown(f"**Criado em:** {usuario[5]}")
-                st.markdown(f"**Último acesso:** {usuario[6] or 'Nunca'}")
-
-                if usuario[4] != 'admin':
-                    if st.button(f"🗑️ Excluir {usuario[1]}", key=f"del_user_{usuario[0]}"):
-                        conn = sqlite3.connect("dados/cofre.db")
-                        cursor = conn.cursor()
-                        cursor.execute("DELETE FROM usuarios WHERE id = ?", (usuario[0],))
-                        conn.commit()
-                        conn.close()
-                        st.success(f"✅ Usuário {usuario[1]} excluído!")
-                        st.rerun()
 
     with tab3:
         st.markdown("### 📤 Exportar Dados")
 
-        if st.button("📥 Exportar Usuários (CSV)"):
-            conn = sqlite3.connect("dados/cofre.db")
-            cursor = conn.cursor()
+        conn = sqlite3.connect("dados/cofre.db")
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='usuarios'")
+        if cursor.fetchone():
             cursor.execute('''
                 SELECT id, nome, email, cpf, tipo, data_criacao, ultimo_acesso 
                 FROM usuarios
             ''')
             usuarios = cursor.fetchall()
-            conn.close()
 
-            df = pd.DataFrame(usuarios, columns=["ID", "Nome", "Email", "CPF", "Tipo", "Data Criação", "Último Acesso"])
-            csv = df.to_csv(index=False)
+            if usuarios:
+                df = pd.DataFrame(usuarios,
+                                  columns=["ID", "Nome", "Email", "CPF", "Tipo", "Data Criação", "Último Acesso"])
+                csv = df.to_csv(index=False)
 
-            st.download_button(
-                label="Download CSV",
-                data=csv,
-                file_name="usuarios_aeterna.csv",
-                mime="text/csv"
-            )
+                st.download_button(
+                    label="📥 Exportar Usuários (CSV)",
+                    data=csv,
+                    file_name="usuarios_aeterna.csv",
+                    mime="text/csv"
+                )
+            else:
+                st.info("Nenhum usuário para exportar.")
+        else:
+            st.info("Nenhum usuário para exportar.")
+
+        conn.close()
 
         st.markdown("---")
         st.markdown("### 🌐 Google Analytics")
@@ -781,6 +835,15 @@ def render_sobre():
     <div class="info-card">
         <h3>💼 Para Investidores e Parceiros</h3>
         <p>📧 parcerias@aeterenalegado.com.br</p>
+    </div>
+
+    <div class="info-card">
+        <h3>📱 Funcionalidades Futuras</h3>
+        <p>✅ App mobile (Android/iOS)<br>
+        ✅ Mensagens programadas em datas especiais<br>
+        ✅ Presentes e flores programados<br>
+        ✅ Mural da memória<br>
+        ✅ Testamento digital</p>
     </div>
     """, unsafe_allow_html=True)
 
