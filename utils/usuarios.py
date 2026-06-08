@@ -16,28 +16,25 @@ class GerenciadorUsuarios:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
 
-        # Verificar colunas existentes na tabela usuarios
         cursor.execute("PRAGMA table_info(usuarios)")
         colunas = [col[1] for col in cursor.fetchall()]
 
         # Adicionar colunas faltantes
-        colunas_para_adicionar = ['plano_id', 'foto', 'redes_sociais', 'data_nascimento']
-
-        for coluna in colunas_para_adicionar:
-            if coluna not in colunas:
-                try:
-                    if coluna == 'plano_id':
-                        cursor.execute('ALTER TABLE usuarios ADD COLUMN plano_id INTEGER DEFAULT 1')
-                    elif coluna == 'foto':
-                        cursor.execute('ALTER TABLE usuarios ADD COLUMN foto TEXT')
-                    elif coluna == 'redes_sociais':
-                        cursor.execute('ALTER TABLE usuarios ADD COLUMN redes_sociais TEXT')
-                    elif coluna == 'data_nascimento':
-                        cursor.execute('ALTER TABLE usuarios ADD COLUMN data_nascimento DATE')
-                except:
-                    pass
-
-        # Adicionar coluna sobrenome se não existir
+        if 'plano_id' not in colunas:
+            try:
+                cursor.execute('ALTER TABLE usuarios ADD COLUMN plano_id INTEGER DEFAULT 1')
+            except:
+                pass
+        if 'foto' not in colunas:
+            try:
+                cursor.execute('ALTER TABLE usuarios ADD COLUMN foto TEXT')
+            except:
+                pass
+        if 'redes_sociais' not in colunas:
+            try:
+                cursor.execute('ALTER TABLE usuarios ADD COLUMN redes_sociais TEXT')
+            except:
+                pass
         if 'sobrenome' not in colunas:
             try:
                 cursor.execute('ALTER TABLE usuarios ADD COLUMN sobrenome TEXT DEFAULT ""')
@@ -51,7 +48,6 @@ class GerenciadorUsuarios:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
 
-        # Tabela de usuários
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS usuarios (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -73,7 +69,6 @@ class GerenciadorUsuarios:
             )
         ''')
 
-        # Tabela de preferências do usuário
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS preferencias_usuario (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -83,24 +78,20 @@ class GerenciadorUsuarios:
                 melhor_lembranca TEXT,
                 dia_mais_feliz TEXT,
                 dia_mais_triste TEXT,
-                personalidade_extra TEXT,
-                FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+                personalidade_extra TEXT
             )
         ''')
 
-        # Tabela de personalidade (assistente)
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS personalidade (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 usuario_id INTEGER,
                 pergunta TEXT,
                 resposta TEXT,
-                data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+                data TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
 
-        # Tabela de planos
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS planos (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -118,7 +109,6 @@ class GerenciadorUsuarios:
             )
         ''')
 
-        # Inserir plano padrão se não existir
         cursor.execute("SELECT COUNT(*) FROM planos")
         if cursor.fetchone()[0] == 0:
             cursor.execute('''
@@ -172,7 +162,6 @@ class GerenciadorUsuarios:
     def criar_usuario_admin(self, nome: str, sobrenome: str, email: str, cpf: str, senha: str):
         try:
             hash_senha, salt = self._hash_senha(senha)
-
             conn = sqlite3.connect(self.arquivo_db)
             cursor = conn.cursor()
             cursor.execute('''
@@ -192,9 +181,8 @@ class GerenciadorUsuarios:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
 
-        # Query sem plano_id para compatibilidade
         cursor.execute('''
-            SELECT id, nome, sobrenome, email, cpf, senha_hash, salt, tipo, telefone, whatsapp 
+            SELECT id, nome, IFNULL(sobrenome, '') as sobrenome, email, cpf, senha_hash, salt, tipo, IFNULL(telefone, '') as telefone, IFNULL(whatsapp, '') as whatsapp
             FROM usuarios WHERE email = ? AND ativo = 1
         ''', (email.lower(),))
         usuario = cursor.fetchone()
@@ -221,7 +209,7 @@ class GerenciadorUsuarios:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT id, nome, sobrenome, email, cpf, telefone, whatsapp, tipo 
+            SELECT id, nome, IFNULL(sobrenome, '') as sobrenome, email, cpf, IFNULL(telefone, '') as telefone, IFNULL(whatsapp, '') as whatsapp, tipo
             FROM usuarios WHERE id = ?
         ''', (usuario_id,))
         usuario = cursor.fetchone()
@@ -269,7 +257,7 @@ class GerenciadorUsuarios:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT gostos_musica, gostos_comida, melhor_lembranca, dia_mais_feliz, dia_mais_triste, personalidade_extra
+            SELECT IFNULL(gostos_musica, ''), IFNULL(gostos_comida, ''), IFNULL(melhor_lembranca, ''), IFNULL(dia_mais_feliz, ''), IFNULL(dia_mais_triste, ''), IFNULL(personalidade_extra, '')
             FROM preferencias_usuario WHERE usuario_id = ?
         ''', (usuario_id,))
         row = cursor.fetchone()
@@ -286,7 +274,6 @@ class GerenciadorUsuarios:
         return {}
 
     def obter_plano_usuario(self, usuario_id: int) -> dict:
-        # Retorna plano padrão gratuito
         return {
             "id": 1,
             "nome": "Gratuito",
@@ -311,7 +298,7 @@ class GerenciadorUsuarios:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT id, nome, sobrenome, email, cpf, tipo, telefone, whatsapp, data_criacao, ultimo_acesso 
+            SELECT id, nome, IFNULL(sobrenome, ''), email, cpf, tipo, IFNULL(telefone, ''), IFNULL(whatsapp, ''), data_criacao, ultimo_acesso 
             FROM usuarios ORDER BY data_criacao DESC
         ''')
         usuarios = cursor.fetchall()
