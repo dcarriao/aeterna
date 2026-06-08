@@ -9,16 +9,49 @@ class GerenciadorUsuarios:
     def __init__(self, arquivo_db="dados/cofre.db"):
         self.arquivo_db = arquivo_db
         self._criar_tabelas()
+        self._migrar_banco()
+
+    def _migrar_banco(self):
+        """Adiciona colunas faltantes no banco existente"""
+        conn = sqlite3.connect(self.arquivo_db)
+        cursor = conn.cursor()
+
+        # Verificar colunas existentes na tabela usuarios
+        cursor.execute("PRAGMA table_info(usuarios)")
+        colunas = [col[1] for col in cursor.fetchall()]
+
+        # Adicionar colunas faltantes
+        colunas_para_adicionar = ['plano_id', 'foto', 'redes_sociais', 'data_nascimento']
+
+        for coluna in colunas_para_adicionar:
+            if coluna not in colunas:
+                try:
+                    if coluna == 'plano_id':
+                        cursor.execute('ALTER TABLE usuarios ADD COLUMN plano_id INTEGER DEFAULT 1')
+                    elif coluna == 'foto':
+                        cursor.execute('ALTER TABLE usuarios ADD COLUMN foto TEXT')
+                    elif coluna == 'redes_sociais':
+                        cursor.execute('ALTER TABLE usuarios ADD COLUMN redes_sociais TEXT')
+                    elif coluna == 'data_nascimento':
+                        cursor.execute('ALTER TABLE usuarios ADD COLUMN data_nascimento DATE')
+                except:
+                    pass
+
+        # Adicionar coluna sobrenome se não existir
+        if 'sobrenome' not in colunas:
+            try:
+                cursor.execute('ALTER TABLE usuarios ADD COLUMN sobrenome TEXT DEFAULT ""')
+            except:
+                pass
+
+        conn.commit()
+        conn.close()
 
     def _criar_tabelas(self):
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
 
-        # Verificar se a coluna data_nascimento existe e adicionar se não existir
-        cursor.execute("PRAGMA table_info(usuarios)")
-        colunas = [col[1] for col in cursor.fetchall()]
-
-        # Tabela de usuários (compatível com versão anterior)
+        # Tabela de usuários
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS usuarios (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,13 +72,6 @@ class GerenciadorUsuarios:
                 ultimo_acesso TIMESTAMP
             )
         ''')
-
-        # Adicionar coluna data_nascimento se não existir
-        if 'data_nascimento' not in colunas:
-            try:
-                cursor.execute('ALTER TABLE usuarios ADD COLUMN data_nascimento DATE')
-            except:
-                pass
 
         # Tabela de preferências do usuário
         cursor.execute('''
@@ -132,7 +158,6 @@ class GerenciadorUsuarios:
             conn.commit()
             usuario_id = cursor.lastrowid
 
-            # Criar preferências vazias
             cursor.execute('INSERT INTO preferencias_usuario (usuario_id) VALUES (?)', (usuario_id,))
             conn.commit()
             conn.close()
@@ -145,7 +170,6 @@ class GerenciadorUsuarios:
             return False
 
     def criar_usuario_admin(self, nome: str, sobrenome: str, email: str, cpf: str, senha: str):
-        """Cria um usuário administrador"""
         try:
             hash_senha, salt = self._hash_senha(senha)
 
@@ -168,9 +192,9 @@ class GerenciadorUsuarios:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
 
-        # Query simples sem data_nascimento
+        # Query sem plano_id para compatibilidade
         cursor.execute('''
-            SELECT id, nome, sobrenome, email, cpf, senha_hash, salt, tipo, telefone, whatsapp, plano_id 
+            SELECT id, nome, sobrenome, email, cpf, senha_hash, salt, tipo, telefone, whatsapp 
             FROM usuarios WHERE email = ? AND ativo = 1
         ''', (email.lower(),))
         usuario = cursor.fetchone()
@@ -189,7 +213,7 @@ class GerenciadorUsuarios:
                     "tipo": usuario[7],
                     "telefone": usuario[8] or "",
                     "whatsapp": usuario[9] or "",
-                    "plano_id": usuario[10]
+                    "plano_id": 1
                 }
         return None
 
@@ -197,7 +221,7 @@ class GerenciadorUsuarios:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT id, nome, sobrenome, email, cpf, telefone, whatsapp, tipo, plano_id 
+            SELECT id, nome, sobrenome, email, cpf, telefone, whatsapp, tipo 
             FROM usuarios WHERE id = ?
         ''', (usuario_id,))
         usuario = cursor.fetchone()
@@ -213,7 +237,7 @@ class GerenciadorUsuarios:
                 "telefone": usuario[5] or "",
                 "whatsapp": usuario[6] or "",
                 "tipo": usuario[7],
-                "plano_id": usuario[8]
+                "plano_id": 1
             }
         return None
 
@@ -262,31 +286,19 @@ class GerenciadorUsuarios:
         return {}
 
     def obter_plano_usuario(self, usuario_id: int) -> dict:
-        conn = sqlite3.connect(self.arquivo_db)
-        cursor = conn.cursor()
-        cursor.execute('''
-            SELECT p.id, p.nome, p.preco, p.max_contatos, p.max_prioridades, p.max_mensagens_ia, 
-                   p.max_videos_total, p.max_videos_por_categoria, p.tem_agendamento, p.tem_videos_ia
-            FROM planos p
-            JOIN usuarios u ON u.plano_id = p.id
-            WHERE u.id = ?
-        ''', (usuario_id,))
-        plano = cursor.fetchone()
-        conn.close()
-        if plano:
-            return {
-                "id": plano[0],
-                "nome": plano[1],
-                "preco": plano[2],
-                "max_contatos": plano[3],
-                "max_prioridades": plano[4],
-                "max_mensagens_ia": plano[5],
-                "max_videos_total": plano[6],
-                "max_videos_por_categoria": plano[7],
-                "tem_agendamento": plano[8],
-                "tem_videos_ia": plano[9]
-            }
-        return None
+        # Retorna plano padrão gratuito
+        return {
+            "id": 1,
+            "nome": "Gratuito",
+            "preco": 0,
+            "max_contatos": 5,
+            "max_prioridades": 3,
+            "max_mensagens_ia": 50,
+            "max_videos_total": 10,
+            "max_videos_por_categoria": 5,
+            "tem_agendamento": 1,
+            "tem_videos_ia": 0
+        }
 
     def atualizar_ultimo_acesso(self, usuario_id: int):
         conn = sqlite3.connect(self.arquivo_db)
@@ -320,7 +332,6 @@ class GerenciadorUsuarios:
         ]
 
     def criar_usuario_admin_inicial(self):
-        """Cria usuário admin inicial se não existir"""
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM usuarios")
