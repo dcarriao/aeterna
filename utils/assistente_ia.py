@@ -45,7 +45,7 @@ class AssistenteLuto:
             return "\n".join([f"{p}: {r}" for p, r in resultados])
         return ""
 
-    def _buscar_preferencias(self) -> str:
+    def _buscar_preferencias(self) -> dict:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
         cursor.execute('''
@@ -55,14 +55,14 @@ class AssistenteLuto:
         row = cursor.fetchone()
         conn.close()
         if row:
-            preferencias = []
-            if row[0]: preferencias.append(f"Música favorita: {row[0]}")
-            if row[1]: preferencias.append(f"Comida favorita: {row[1]}")
-            if row[2]: preferencias.append(f"Melhor lembrança: {row[2]}")
-            if row[3]: preferencias.append(f"Dia mais feliz: {row[3]}")
-            if row[4]: preferencias.append(f"Dia mais triste: {row[4]}")
-            return "\n".join(preferencias)
-        return ""
+            return {
+                "musica": row[0] or "",
+                "comida": row[1] or "",
+                "lembranca": row[2] or "",
+                "dia_feliz": row[3] or "",
+                "dia_triste": row[4] or ""
+            }
+        return {}
 
     def _buscar_nome_usuario(self) -> str:
         conn = sqlite3.connect(self.arquivo_db)
@@ -78,27 +78,50 @@ class AssistenteLuto:
         nome = self._buscar_nome_usuario()
         mensagem_lower = mensagem.lower()
 
-        if personalidade or preferencias:
-            contexto = personalidade
-            if preferencias:
-                contexto += f"\n\nPREFERÊNCIAS PESSOAIS:\n{preferencias}"
+        # Verificar palavras-chave
+        tem_saudade = any(p in mensagem_lower for p in ['saudade', 'falta', 'lembra', 'memoria', 'lembranca'])
+        tem_conselho = any(p in mensagem_lower for p in ['conselho', 'ajuda', 'duvida', 'decidir'])
+        tem_triste = any(p in mensagem_lower for p in ['triste', 'dificil', 'chorando', 'deprimido'])
+        tem_feliz = any(p in mensagem_lower for p in ['feliz', 'alegria', 'conquista', 'consegui'])
+        tem_musica = any(p in mensagem_lower for p in ['musica', 'cancao', 'cantar'])
+        tem_comida = any(p in mensagem_lower for p in ['comida', 'comer', 'restaurante'])
 
-            if any(p in mensagem_lower for p in ['saudade', 'falta', 'lembra', 'memória']):
-                return f"Também sinto sua falta. Lembre-se que o amor que compartilhamos nunca acaba. Estou sempre com você."
-            elif any(p in mensagem_lower for p in ['música', 'canção', 'cantar']):
-                return f"Ah, eu adorava música! {preferencias.split('Música favorita: ')[1].split('\n')[0] if 'Música favorita:' in preferencias else 'Eu gostava muito de ouvir minhas músicas favoritas com você.'} Era especial, né?"
-            elif any(p in mensagem_lower for p in ['comida', 'comer', 'restaurante']):
-                return f"Que saudade de comer {preferencias.split('Comida favorita: ')[1].split('\n')[0] if 'Comida favorita:' in preferencias else 'minha comida favorita'} com você! Era sempre uma alegria."
-            elif any(p in mensagem_lower for p in ['conselho', 'ajuda', 'dúvida', 'decidir']):
-                return f"Confie no seu coração. Você é mais forte do que imagina. Nunca desista dos seus sonhos."
-            elif any(p in mensagem_lower for p in ['triste', 'difícil', 'chorando', 'deprimido']):
-                if 'Dia mais triste:' in preferencias:
-                    return f"Eu sei como é difícil. Lembra quando {preferencias.split('Dia mais triste: ')[1].split('\n')[0]}? Superamos juntos. Você também vai superar."
-                return f"Sei que está difícil. Mas você vai superar. Chore se precisar, mas não desista. Eu acredito em você."
-            elif any(p in mensagem_lower for p in ['feliz', 'alegria', 'conquista', 'consegui']):
-                if 'Dia mais feliz:' in preferencias:
-                    return f"Que orgulho! Lembra do dia mais feliz da minha vida? {preferencias.split('Dia mais feliz: ')[1].split('\n')[0]} Ver você feliz me faz lembrar disso."
+        if personalidade or preferencias:
+            if tem_saudade:
+                return "Também sinto sua falta. Lembre-se que o amor que compartilhamos nunca acaba. Estou sempre com você."
+
+            elif tem_musica and preferencias.get("musica"):
+                musica = preferencias["musica"]
+                if musica:
+                    return f"Ah, eu adorava música! {musica} Era especial, né? Que saudade de ouvir com você."
+                else:
+                    return "Ah, eu adorava música! Era sempre um momento especial compartilhar isso com você."
+
+            elif tem_comida and preferencias.get("comida"):
+                comida = preferencias["comida"]
+                if comida:
+                    return f"Que saudade de comer {comida} com você! Era sempre uma alegria."
+                else:
+                    return "Que saudade das nossas refeições juntos! Era sempre uma alegria."
+
+            elif tem_conselho:
+                return "Confie no seu coração. Você é mais forte do que imagina. Nunca desista dos seus sonhos."
+
+            elif tem_triste:
+                if preferencias.get("dia_triste"):
+                    triste = preferencias["dia_triste"]
+                    return f"Eu sei como é difícil. Lembra de quando {triste}? Superamos juntos. Você também vai superar."
+                return "Sei que está difícil. Mas você vai superar. Chore se precisar, mas não desista. Eu acredito em você."
+
+            elif tem_feliz:
+                if preferencias.get("dia_feliz"):
+                    feliz = preferencias["dia_feliz"]
+                    return f"Que orgulho! Lembra do dia mais feliz da minha vida? {feliz} Ver você feliz me faz lembrar disso."
+                if preferencias.get("lembranca"):
+                    lembranca = preferencias["lembranca"]
+                    return f"Que orgulho de você! Lembra de {lembranca}? Eu sabia que conseguiria. Continue assim."
                 return f"Que orgulho de você! Eu sabia que conseguiria. Continue assim, celebrando cada vitória."
+
             else:
                 respostas_base = [
                     f"Que bom receber sua mensagem. Continue vivendo sua vida com alegria. É o que eu mais quero para você.",
@@ -124,10 +147,10 @@ class AssistenteLuto:
         nome = self._buscar_nome_usuario()
         preferencias = self._buscar_preferencias()
 
-        if preferencias:
+        if preferencias.get("lembranca"):
             mensagens = [
                 f"Bom dia! Lembre-se de viver intensamente. Aproveite cada momento como eu sempre fiz. 🌅",
-                f"✨ Lembre-se de {preferencias.split('Melhor lembrança: ')[1].split('\n')[0] if 'Melhor lembrança:' in preferencias else 'dos bons momentos'} com carinho. Estou sempre com você.",
+                f"✨ Lembre-se de {preferencias['lembranca']} com carinho. Estou sempre com você.",
                 f"💫 Cada vez que você sorri, eu sorrio junto. Espalhe alegria por onde passar. É o que eu mais quero para você.",
                 f"🌿 A vida é um presente. Aproveite cada momento, cada abraço, cada sorriso. Tenho muito orgulho de você."
             ]

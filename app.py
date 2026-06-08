@@ -113,62 +113,50 @@ def inject_custom_css():
 
         .footer-aeterna { text-align: center; padding: 1rem; color: #808080; font-size: 0.7rem; border-top: 1px solid #d0e8d0; margin-top: 2rem; }
 
-        .chat-container {
-            max-height: 500px;
-            overflow-y: auto;
-            padding: 1rem;
+        .chat-wrapper {
             background: #f8f9fa;
-            border-radius: 15px;
-            margin-bottom: 1rem;
+            border-radius: 12px;
+            padding: 15px;
+            height: 450px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
         .chat-message-user {
             background: #2E8B57;
             color: white;
             padding: 10px 15px;
             border-radius: 20px 20px 5px 20px;
-            margin: 10px 0;
+            margin: 8px 0;
             text-align: right;
             max-width: 80%;
-            float: right;
-            clear: both;
+            align-self: flex-end;
+            word-wrap: break-word;
         }
-        .chat-message-assistant {
+        .chat-message-bot {
             background: white;
             color: #333;
             padding: 10px 15px;
             border-radius: 20px 20px 20px 5px;
-            margin: 10px 0;
+            margin: 8px 0;
             text-align: left;
             max-width: 80%;
-            float: left;
-            clear: both;
+            align-self: flex-start;
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            word-wrap: break-word;
         }
-        .chat-name-assistant { font-size: 0.7rem; color: #2E8B57; margin-left: 10px; margin-bottom: 2px; }
-        .chat-name-user { font-size: 0.7rem; color: #666; margin-right: 10px; text-align: right; }
-        .chat-clearfix { clear: both; }
-
-        .ia-warning {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 0.75rem;
-            margin-bottom: 15px;
+        .chat-name-user {
+            font-size: 0.7rem;
+            color: #666;
+            text-align: right;
+            margin-bottom: -5px;
         }
-
-        .stTextInput > div > div > input {
-            color: #1a1a1a !important;
-            background-color: #ffffff !important;
-            border: 1px solid #c8e6c8 !important;
-            border-radius: 10px !important;
-            padding: 12px !important;
-            font-size: 16px !important;
-        }
-
-        .stTextInput > div > div > input::placeholder {
-            color: #888888 !important;
-            opacity: 1 !important;
+        .chat-name-bot {
+            font-size: 0.7rem;
+            color: #2E8B57;
+            text-align: left;
+            margin-bottom: -5px;
+            margin-left: 5px;
         }
 
         .stTextInput label, .stTextArea label, .stSelectbox label {
@@ -212,8 +200,7 @@ def inject_custom_css():
         }
 
         @media (max-width: 768px) {
-            .chat-message-user, .chat-message-assistant { max-width: 95%; }
-            .stTextInput > div > div > input { font-size: 16px !important; padding: 12px !important; }
+            .chat-message-user, .chat-message-bot { max-width: 95%; }
             .stTextInput label, .stTextArea label { font-size: 0.85rem !important; }
         }
     </style>
@@ -470,74 +457,143 @@ def render_login():
 
 
 # ============================================================================
-# ASSISTENTE DE LUTO
+# ASSISTENTE DE LUTO - VERSÃO CHAT EXPANSÍVEL
 # ============================================================================
 def render_assistente():
+    """Renderiza o assistente de luto no estilo chat expansível"""
     assistente = AssistenteLuto(st.session_state.falecido_id)
 
     nome_falecido = st.session_state.usuario_atual.get('nome_falecido', 'seu ente querido')
     if st.session_state.modo_acesso == 'falecido':
-        nome_falecido = st.session_state.usuario_atual.get('nome_completo',
-                                                           st.session_state.usuario_atual.get('nome', 'você'))
+        nome_falecido = st.session_state.usuario_atual.get('nome_completo') or \
+                        st.session_state.usuario_atual.get('nome') or \
+                        "você"
 
-    st.markdown(f"<h3 style='color: #2E8B57;'>🤖 Conversando com {nome_falecido}</h3>", unsafe_allow_html=True)
+    # Layout de duas colunas: chat (2/3) e informações (1/3)
+    col_chat, col_info = st.columns([2, 1])
 
-    st.markdown(f"""
-    <div class="ia-warning">
-        💡 <strong>Importante:</strong> Esta é uma conversa gerada por IA baseada na personalidade de <strong>{nome_falecido}</strong>. 
-        As respostas são simulações e podem não representar exatamente o que a pessoa pensava. Use com carinho.
-    </div>
-    """, unsafe_allow_html=True)
+    with col_chat:
+        # Cabeçalho do chat
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(135deg, #2E8B57 0%, #1B5E20 100%);
+            padding: 12px;
+            border-radius: 15px 15px 0 0;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+        ">
+            💬 Conversando com {nome_falecido}
+        </div>
+        """, unsafe_allow_html=True)
 
-    if "historico_assistente" not in st.session_state:
-        st.session_state.historico_assistente = []
+        # Aviso importante em um expander (só abre se clicar)
+        with st.expander("⚠️ Sobre esta conversa (clique para ler)"):
+            st.markdown(f"""
+            💡 **Importante:** Esta é uma conversa gerada por IA baseada na personalidade de **{nome_falecido}**. 
 
-    chat_container = st.container()
+            As respostas são simulações e podem não representar exatamente o que a pessoa pensava ou sentia. 
 
-    with chat_container:
-        st.markdown('<div class="chat-container" id="chat">', unsafe_allow_html=True)
+            **Use com carinho e parcimônia.** O objetivo é ajudar no processo de luto, não criar dependência.
+            """)
 
-        if not st.session_state.historico_assistente:
-            msg_inicial = f"Olá! Esta é uma conversa simulada baseada em como {nome_falecido} era. Pode me perguntar qualquer coisa."
-            st.markdown(f'<div class="chat-name-assistant">{nome_falecido}</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="chat-message-assistant">{msg_inicial}</div>', unsafe_allow_html=True)
-            st.markdown('<div class="chat-clearfix"></div>', unsafe_allow_html=True)
-            st.session_state.historico_assistente.append({"tipo": "assistente", "texto": msg_inicial})
+        # Container do chat
+        chat_container = st.container()
 
-        for msg in st.session_state.historico_assistente:
-            if msg["tipo"] == "usuario":
-                st.markdown(f'<div class="chat-name-user">Você</div>', unsafe_allow_html=True)
-                st.markdown(f'<div class="chat-message-user">{msg["texto"]}</div>', unsafe_allow_html=True)
-            else:
-                st.markdown(f'<div class="chat-name-assistant">{nome_falecido}</div>', unsafe_allow_html=True)
-                st.markdown(f'<div class="chat-message-assistant">{msg["texto"]}</div>', unsafe_allow_html=True)
-            st.markdown('<div class="chat-clearfix"></div>', unsafe_allow_html=True)
+        with chat_container:
+            # Inicializar histórico
+            if "historico_assistente" not in st.session_state:
+                st.session_state.historico_assistente = []
 
-        st.markdown('</div>', unsafe_allow_html=True)
+            # Mostrar mensagens do chat
+            if not st.session_state.historico_assistente:
+                msg_inicial = f"Olá! Sou uma simulação baseada em como {nome_falecido} era. Pode me perguntar qualquer coisa. 💚"
+                st.session_state.historico_assistente.append({"tipo": "bot", "texto": msg_inicial})
 
-    col1, col2 = st.columns([4, 1])
-    with col1:
-        mensagem = st.text_input("Sua mensagem:", key="msg_assistente",
-                                 placeholder=f"Escreva sua mensagem para {nome_falecido}...",
-                                 label_visibility="collapsed")
-    with col2:
-        enviar = st.button("📨 Enviar", key="btn_enviar", type="primary", use_container_width=True)
+            # Exibir mensagens como se fosse um chat
+            for msg in st.session_state.historico_assistente:
+                if msg["tipo"] == "usuario":
+                    st.markdown(f'<div class="chat-name-user">Você</div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="chat-message-user">{msg["texto"]}</div>', unsafe_allow_html=True)
+                else:
+                    st.markdown(f'<div class="chat-name-bot">{nome_falecido}</div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="chat-message-bot">{msg["texto"]}</div>', unsafe_allow_html=True)
 
-    if enviar and mensagem:
-        st.session_state.historico_assistente.append({"tipo": "usuario", "texto": mensagem})
-        with st.spinner(f"{nome_falecido} está pensando..."):
-            resposta = assistente.conversar(mensagem)
-        st.session_state.historico_assistente.append({"tipo": "assistente", "texto": resposta})
-        st.rerun()
+        # Input de mensagem
+        col_input, col_btn = st.columns([4, 1])
+        with col_input:
+            mensagem = st.text_area("Sua mensagem:", key="msg_assistente",
+                                    placeholder=f"Escreva sua mensagem para {nome_falecido}...",
+                                    label_visibility="collapsed",
+                                    height=80)
+        with col_btn:
+            enviar = st.button("📨 Enviar", key="btn_enviar", type="primary", use_container_width=True)
+
+        if enviar and mensagem:
+            st.session_state.historico_assistente.append({"tipo": "usuario", "texto": mensagem})
+            with st.spinner(f"{nome_falecido} está pensando..."):
+                resposta = assistente.conversar(mensagem)
+            st.session_state.historico_assistente.append({"tipo": "bot", "texto": resposta})
+            st.rerun()
+
+        # Botão para limpar conversa
+        if st.button("🗑️ Limpar conversa", key="clear_chat", use_container_width=True):
+            st.session_state.historico_assistente = []
+            st.rerun()
+
+    with col_info:
+        # Informações sobre o assistente
+        st.markdown("""
+        <div style="
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #2E8B57;
+        ">
+            <h4 style="color: #2E8B57; margin-top: 0;">🤖 Sobre este assistente</h4>
+            <p style="font-size: 0.8rem; margin-bottom: 8px;">O Assistente de Luto do aEterna foi treinado com:</p>
+            <ul style="font-size: 0.75rem; padding-left: 20px;">
+                <li>✅ Sua personalidade (respostas às perguntas)</li>
+                <li>✅ Suas preferências (música, comida, lembranças)</li>
+                <li>✅ Mensagens e textos que você deixou</li>
+            </ul>
+            <p style="font-size: 0.7rem; color: #666; margin-top: 10px;">💡 Quanto mais informações você fornecer, mais personalizadas serão as respostas.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Dicas de conversa
+        with st.expander("💬 Dicas de conversa"):
+            st.markdown("""
+            - Pergunte sobre lembranças felizes
+            - Peça conselhos para decisões importantes  
+            - Conte sobre suas conquistas
+            - Fale sobre momentos especiais que viveram juntos
+            - Pergunte sobre músicas ou comidas favoritas
+            """)
+
+        # Estatísticas
+        stats = assistente.estatisticas()
+        st.markdown(f"""
+        <div style="
+            background: #e8f5e9;
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+        ">
+            <p style="margin: 0; font-size: 0.8rem;">📊</p>
+            <p style="margin: 0; font-weight: bold;">{stats.get('perguntas_respondidas', 0)} perguntas respondidas</p>
+            <p style="margin: 0; font-size: 0.7rem; color: #666;">sobre a personalidade</p>
+        </div>
+        """, unsafe_allow_html=True)
 
 
 # ============================================================================
-# VÍDEOS (ATUALIZADO - COM CATEGORIAS E ACESSO CONTROLADO)
+# VÍDEOS
 # ============================================================================
 def render_videos():
     st.markdown("<h3 style='color: #2E8B57;'>📹 Mensagens em Vídeo</h3>", unsafe_allow_html=True)
 
-    # Verificar limite de vídeos do plano
     plano = gerente_usuarios.obter_plano_usuario(st.session_state.usuario_atual['id'])
     videos_atual = len(db.listar_videos_usuario(st.session_state.usuario_atual['id']))
     max_videos = plano.get("max_videos_total", 10) if plano else 10
@@ -577,10 +633,9 @@ def render_videos():
 
             if st.button("💾 Salvar", key="btn_salvar_video", type="primary", use_container_width=True):
                 if titulo and arquivo_video:
-                    # Definir quais contatos terão acesso
                     contatos_ids = []
                     if categoria == "Para pessoa específica" and contatos:
-                        contatos_ids = [contatos[0]['id']]  # Simplificado - apenas o contato selecionado
+                        contatos_ids = [contatos[0]['id']]
 
                     caminho = gerente_videos.salvar_video(
                         arquivo_video,
@@ -620,7 +675,7 @@ def render_videos():
 
 
 # ============================================================================
-# PREFERÊNCIAS DO USUÁRIO (ASSISTENTE)
+# PREFERÊNCIAS DO USUÁRIO
 # ============================================================================
 def render_preferencias():
     st.markdown("<h3 style='color: #2E8B57;'>🧠 Sobre você</h3>", unsafe_allow_html=True)
@@ -674,7 +729,7 @@ def render_preferencias():
 
 
 # ============================================================================
-# CONTATOS (COMPLETO)
+# CONTATOS
 # ============================================================================
 def render_contatos():
     st.markdown("<h3 style='color: #2E8B57;'>👥 Contatos de Confiança</h3>", unsafe_allow_html=True)
@@ -698,7 +753,7 @@ def render_contatos():
 
 
 # ============================================================================
-# LEMBRANÇAS PROGRAMADAS (AGENDAMENTOS)
+# LEMBRANÇAS PROGRAMADAS
 # ============================================================================
 def render_agendamentos():
     st.markdown("<h3 style='color: #2E8B57;'>📅 Lembranças Programadas</h3>", unsafe_allow_html=True)
@@ -991,8 +1046,13 @@ def main():
                 st.markdown('</div>', unsafe_allow_html=True)
 
         if st.session_state.modo_acesso == 'falecido':
+            is_admin = st.session_state.usuario_atual.get('tipo') == 'admin'
+            nome_exibido = st.session_state.usuario_atual.get('nome_completo') or \
+                           st.session_state.usuario_atual.get('nome') or \
+                           "Usuário"
+
             with st.sidebar:
-                st.markdown(f"### ✨ Olá, {st.session_state.usuario_atual['nome_completo']}!")
+                st.markdown(f"### ✨ Olá, {nome_exibido}!")
                 if st.button("🚪 Sair", use_container_width=True):
                     fazer_logout()
                 st.markdown("---")
@@ -1002,7 +1062,7 @@ def main():
                 st.metric("📹 Vídeos", len(videos))
                 st.metric("👥 Contatos", len(contatos))
 
-            if st.session_state.usuario_atual.get('tipo') == 'admin':
+            if is_admin:
                 tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
                     "🤖 Assistente", "📹 Vídeos", "👥 Contatos", "🧠 Preferências",
                     "📅 Lembranças", "👑 Admin", "ℹ️ Sobre"
@@ -1038,11 +1098,13 @@ def main():
                 with tab6:
                     render_sobre()
         else:
+            nome_falecido = st.session_state.usuario_atual.get('nome_falecido', 'seu ente querido')
+            nome_visitante = st.session_state.usuario_atual.get('nome', 'Visitante')
+
             with st.sidebar:
-                nome_falecido = st.session_state.usuario_atual.get('nome_falecido', 'seu ente querido')
                 st.markdown(f"### 🕊️ Em memória de")
                 st.markdown(f"### {nome_falecido}")
-                st.markdown(f"**Seu nome:** {st.session_state.usuario_atual.get('nome', 'Visitante')}")
+                st.markdown(f"**Seu nome:** {nome_visitante}")
                 if st.button("🚪 Sair", use_container_width=True):
                     fazer_logout()
 

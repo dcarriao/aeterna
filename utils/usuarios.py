@@ -135,6 +135,26 @@ class GerenciadorUsuarios:
                 return "email_existente"
             return False
 
+    def criar_usuario_admin(self, nome: str, sobrenome: str, email: str, cpf: str, data_nascimento: str, senha: str):
+        """Cria um usuário administrador"""
+        try:
+            hash_senha, salt = self._hash_senha(senha)
+
+            conn = sqlite3.connect(self.arquivo_db)
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO usuarios (nome, sobrenome, email, cpf, data_nascimento, senha_hash, salt, tipo)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'admin')
+            ''', (nome, sobrenome, email.lower(), cpf, data_nascimento, hash_senha, salt))
+            conn.commit()
+            usuario_id = cursor.lastrowid
+            cursor.execute('INSERT INTO preferencias_usuario (usuario_id) VALUES (?)', (usuario_id,))
+            conn.commit()
+            conn.close()
+            return True
+        except sqlite3.IntegrityError:
+            return False
+
     def autenticar(self, email: str, senha: str) -> dict:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
@@ -236,7 +256,7 @@ class GerenciadorUsuarios:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT p.id, p.nombre, p.preco, p.max_contatos, p.max_prioridades, p.max_mensagens_ia, 
+            SELECT p.id, p.nome, p.preco, p.max_contatos, p.max_prioridades, p.max_mensagens_ia, 
                    p.max_videos_total, p.max_videos_por_categoria, p.tem_agendamento, p.tem_videos_ia
             FROM planos p
             JOIN usuarios u ON u.plano_id = p.id
@@ -291,6 +311,7 @@ class GerenciadorUsuarios:
         ]
 
     def criar_usuario_admin_inicial(self):
+        """Cria usuário admin inicial se não existir"""
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM usuarios")
@@ -299,20 +320,16 @@ class GerenciadorUsuarios:
 
         if count == 0:
             senha = self._gerar_senha_admin()
-            self.criar_usuario(
+            self.criar_usuario_admin(
                 nome="Administrador",
                 sobrenome="aEterna",
                 email="admin@aeterna.com",
                 cpf="00000000000",
                 data_nascimento="1970-01-01",
-                senha=senha,
-                tipo="admin"
+                senha=senha
             )
             print("✅ Usuário admin criado. Verifique o log para a senha.")
 
     def _gerar_senha_admin(self) -> str:
-        import random
-        import string
-        senha = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
-        print(f"⚠️ SENHA ADMIN: {senha}")
-        return senha
+        """Retorna senha fixa para o admin"""
+        return "admin123"
