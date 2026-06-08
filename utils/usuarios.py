@@ -168,38 +168,29 @@ class GerenciadorUsuarios:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
 
-        # Primeiro, verificar quais colunas existem
-        cursor.execute("PRAGMA table_info(usuarios)")
-        colunas = [col[1] for col in cursor.fetchall()]
-
-        # Construir query dinâmica baseada nas colunas existentes
-        query = "SELECT id, nome, sobrenome, email, cpf, senha_hash, salt, tipo, telefone, whatsapp, plano_id"
-        if 'data_nascimento' in colunas:
-            query += ", data_nascimento"
-        query += " FROM usuarios WHERE email = ? AND ativo = 1"
-
-        cursor.execute(query, (email.lower(),))
+        # Query simples sem data_nascimento
+        cursor.execute('''
+            SELECT id, nome, sobrenome, email, cpf, senha_hash, salt, tipo, telefone, whatsapp, plano_id 
+            FROM usuarios WHERE email = ? AND ativo = 1
+        ''', (email.lower(),))
         usuario = cursor.fetchone()
         conn.close()
 
         if usuario:
-            hash_calculado, _ = self._hash_senha(senha, usuario[7])
-            if hash_calculado == usuario[6]:
-                result = {
+            hash_calculado, _ = self._hash_senha(senha, usuario[6])
+            if hash_calculado == usuario[5]:
+                return {
                     "id": usuario[0],
                     "nome": usuario[1],
                     "sobrenome": usuario[2],
                     "nome_completo": f"{usuario[1]} {usuario[2]}",
                     "email": usuario[3],
                     "cpf": usuario[4],
-                    "tipo": usuario[8],
-                    "telefone": usuario[9] or "",
-                    "whatsapp": usuario[10] or "",
-                    "plano_id": usuario[11]
+                    "tipo": usuario[7],
+                    "telefone": usuario[8] or "",
+                    "whatsapp": usuario[9] or "",
+                    "plano_id": usuario[10]
                 }
-                if 'data_nascimento' in colunas and len(usuario) > 12:
-                    result["data_nascimento"] = usuario[12] or ""
-                return result
         return None
 
     def obter_usuario_por_id(self, usuario_id: int) -> dict:
