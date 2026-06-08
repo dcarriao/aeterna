@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 import json
 import sqlite3
+import secrets
 from utils.banco import BancoDados
 from utils.criptografia import GerenciadorCriptografia
 from utils.usuarios import GerenciadorUsuarios
@@ -67,12 +68,16 @@ def remover_fundo_branco(imagem):
 def inject_custom_css():
     st.markdown("""
     <style>
+        /* Remover botão de deploy */
         .stDeployButton { display: none !important; }
         header[data-testid="stHeader"] { background: transparent !important; }
         .stApp > header { display: none !important; }
+
+        /* Layout */
         .main .block-container { padding-top: 0.5rem; padding-bottom: 1rem; }
         .stApp { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8f5e9 100%); }
 
+        /* Header */
         .aeterna-header {
             background: linear-gradient(135deg, #90EE90 0%, #2E8B57 50%, #1B5E20 100%);
             padding: 0.8rem;
@@ -82,6 +87,7 @@ def inject_custom_css():
         }
         .aeterna-header h2 { color: #1B5E20 !important; margin: 0; }
 
+        /* Cards */
         .info-card {
             background: white;
             padding: 1rem;
@@ -90,6 +96,7 @@ def inject_custom_css():
             margin: 0.75rem 0;
         }
 
+        /* Botões */
         .stButton > button {
             background: linear-gradient(135deg, #3CB371 0%, #1B5E20 100%);
             color: white;
@@ -97,13 +104,20 @@ def inject_custom_css():
             border-radius: 8px;
             transition: all 0.3s ease;
         }
+        .stButton > button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(46, 139, 87, 0.3);
+        }
 
+        /* Sidebar */
         [data-testid="stSidebar"] { background: linear-gradient(180deg, #e8f5e9 0%, #f0faf0 100%); }
         .sidebar-logo-container { display: flex; justify-content: center; padding: 20px 0; }
         [data-testid="stSidebar"] img { max-width: 220px !important; background: transparent !important; }
 
+        /* Footer */
         .footer-aeterna { text-align: center; padding: 1rem; color: #808080; font-size: 0.7rem; border-top: 1px solid #d0e8d0; margin-top: 2rem; }
 
+        /* Chat */
         .chat-container {
             max-height: 500px;
             overflow-y: auto;
@@ -148,15 +162,65 @@ def inject_custom_css():
             margin-bottom: 15px;
         }
 
+        /* ========== CORREÇÃO DAS CORES DOS INPUTS ========== */
+        .stTextInput > div > div > input {
+            color: #1a1a1a !important;
+            background-color: #ffffff !important;
+            border: 1px solid #c8e6c8 !important;
+            border-radius: 10px !important;
+            padding: 12px !important;
+            font-size: 16px !important;
+        }
+
+        .stTextInput > div > div > input::placeholder {
+            color: #888888 !important;
+            opacity: 1 !important;
+        }
+
         .stTextInput label, .stTextArea label, .stSelectbox label {
-            font-weight: 600 !important;
             color: #1B5E20 !important;
-            font-size: 0.85rem !important;
+            font-weight: 600 !important;
+            font-size: 0.9rem !important;
+            margin-bottom: 5px !important;
+        }
+
+        .stTextArea textarea {
+            color: #1a1a1a !important;
+            background-color: #ffffff !important;
+            border: 1px solid #c8e6c8 !important;
+            border-radius: 10px !important;
+            font-size: 16px !important;
+        }
+
+        .stTextArea textarea::placeholder {
+            color: #888888 !important;
+        }
+
+        .stSelectbox > div > div {
+            background-color: #ffffff !important;
+            border: 1px solid #c8e6c8 !important;
+            border-radius: 10px !important;
+        }
+
+        .stFileUploader > div > button {
+            background-color: #f0faf0 !important;
+            color: #2E8B57 !important;
+            border: 1px solid #c8e6c8 !important;
+        }
+
+        .stMarkdown h3, .stMarkdown h4 {
+            color: #1B5E20 !important;
+        }
+
+        hr {
+            margin: 20px 0 !important;
+            border-color: #d0e8d0 !important;
         }
 
         @media (max-width: 768px) {
             .chat-message-user, .chat-message-assistant { max-width: 95%; }
-            .stTextInput label, .stTextArea label { font-size: 0.8rem !important; }
+            .stTextInput > div > div > input { font-size: 16px !important; padding: 12px !important; }
+            .stTextInput label, .stTextArea label { font-size: 0.85rem !important; }
         }
     </style>
     """, unsafe_allow_html=True)
@@ -201,7 +265,6 @@ def fazer_login(email, senha):
 
 
 def fazer_login_visitante(visitante_nome, chave_acesso, falecido_email):
-    import sqlite3
     conn = sqlite3.connect("dados/cofre.db")
     cursor = conn.cursor()
     cursor.execute("SELECT id, nome FROM usuarios WHERE email = ?", (falecido_email,))
@@ -357,13 +420,13 @@ def render_login():
                                             key="cadastro_confirmar", label_visibility="collapsed")
 
             st.markdown("---")
-            st.markdown("#### ✨ Opcional")
+            st.markdown("#### ✨ Opcional (pode pular)")
             st.markdown("**📷 Foto de perfil**")
             foto = st.file_uploader("foto", type=["png", "jpg", "jpeg"], key="cadastro_foto",
                                     label_visibility="collapsed")
             st.markdown("**🌐 Redes sociais**")
-            redes = st.text_area("redes", placeholder="Instagram: @seuusuario", key="cadastro_redes",
-                                 label_visibility="collapsed", height=80)
+            redes = st.text_area("redes", placeholder="Instagram: @seuusuario\nLinkedIn: linkedin.com/in/seuusuario",
+                                 key="cadastro_redes", label_visibility="collapsed", height=80)
 
             col1, col2, col3 = st.columns([1, 2, 1])
             with col2:
@@ -478,6 +541,7 @@ def render_videos():
             destinatario = st.text_input("Para quem é este vídeo?", key="destinatario_video",
                                          placeholder="Ex: Para minha filha Ana")
             arquivo_video = st.file_uploader("Arquivo de vídeo", type=["mp4", "mov", "avi", "mkv"], key="video_file")
+            st.caption("📹 Formatos aceitos: MP4, MOV, AVI, MKV")
 
             if st.button("💾 Salvar", key="btn_salvar_video", type="primary", use_container_width=True):
                 if titulo and arquivo_video:
@@ -526,11 +590,12 @@ def render_contatos_falecido():
 
             if st.button("💾 Salvar", type="primary", use_container_width=True):
                 if nome and email:
-                    import secrets
                     chave_acesso = secrets.token_hex(8)
                     db.adicionar_contato(nome, email, telefone, whatsapp, f"Prioridade: {prioridade}", chave_acesso)
-                    st.success(f"✅ {nome} adicionado! Chave: {chave_acesso}")
-                    st.info(f"💡 Envie esta chave para {nome}: {chave_acesso}")
+                    st.success(f"✅ {nome} adicionado!")
+                    st.info(f"🔑 Chave de acesso para {nome}: `{chave_acesso}`")
+                    st.warning(
+                        "📌 Guarde esta chave e envie para a pessoa. Ela será necessária para acessar seu legado.")
                     st.rerun()
                 else:
                     st.error("❌ Preencha nome e e-mail")
@@ -539,6 +604,19 @@ def render_contatos_falecido():
         contatos = db.listar_contatos()
         if not contatos:
             st.info("📭 Nenhum contato cadastrado.")
+        else:
+            for i, contato in enumerate(contatos):
+                st.markdown(f"""
+                <div class="info-card" style="padding: 0.75rem;">
+                    <strong>{i + 1}º - 👤 {contato['nome']}</strong><br>
+                    📧 {contato['email']}<br>
+                    📱 {contato['telefone'] or 'Não informado'}<br>
+                    🏷️ {contato['papel']}
+                </div>
+                """, unsafe_allow_html=True)
+                if st.button(f"🗑️ Remover {contato['nome']}", key=f"del_contato_{contato['id']}"):
+                    db.deletar_contato(contato['id'])
+                    st.rerun()
 
 
 # ============================================================================
@@ -546,10 +624,48 @@ def render_contatos_falecido():
 # ============================================================================
 def render_sobre():
     st.markdown("<h3 style='color: #2E8B57;'>✨ Sobre o aEterna</h3>", unsafe_allow_html=True)
+
     st.markdown("""
-    <div class="info-card"><h3>🌿 O que é o aEterna?</h3><p>Plataforma de legado digital para eternizar sua memória.</p></div>
-    <div class="info-card"><h3>🤖 Assistente de Luto</h3><p>IA treinada com sua personalidade para conversar com quem você ama.</p></div>
-    <div class="info-card"><h3>💼 Para Investidores</h3><p>📧 parcerias@aeterenalegado.com.br</p></div>
+    <div class="info-card">
+        <h3>🌿 O que é o aEterna?</h3>
+        <p>O aEterna é uma plataforma de legado digital que permite você guardar suas senhas, 
+        mensagens em vídeo e contatos de confiança em um único lugar seguro.</p>
+        <p><strong>O cofre é opcional:</strong> Você pode usar apenas para indicar onde estão suas coisas, sem armazenar senhas.</p>
+    </div>
+
+    <div class="info-card">
+        <h3>🤖 Assistente de Luto</h3>
+        <p>Nossa tecnologia mais especial: uma IA treinada com sua personalidade, mensagens e memórias 
+        para conversar com seus entes queridos e oferecer conforto após sua partida.</p>
+    </div>
+
+    <div class="info-card">
+        <h3>🔒 Segurança e LGPD</h3>
+        <p>✅ Criptografia de ponta a ponta (Fernet + PBKDF2)<br>
+        ✅ Seus dados, sua chave - nem nós acessamos<br>
+        ✅ 100% compatível com a Lei Geral de Proteção de Dados<br>
+        ✅ Você pode solicitar exclusão a qualquer momento</p>
+    </div>
+
+    <div class="info-card">
+        <h3>🚀 Roadmap</h3>
+        <p>✅ App funcional (senhas, vídeos, contatos, assistente IA)<br>
+        🔄 App mobile (Android/iOS) - em desenvolvimento<br>
+        🔄 API de validação de CPF - em desenvolvimento<br>
+        🔄 Mural da Memória - em planejamento</p>
+    </div>
+
+    <div class="info-card">
+        <h3>💼 Para Investidores e Parceiros</h3>
+        <p>Estamos abertos a:</p>
+        <ul>
+            <li>💎 Investimento anjo</li>
+            <li>🤝 Parcerias com planos funerários</li>
+            <li>🏦 Parcerias com seguros de vida</li>
+            <li>📜 Licenciamento da tecnologia</li>
+        </ul>
+        <p>📧 Contato: <strong>parcerias@aeterenalegado.com.br</strong></p>
+    </div>
     """, unsafe_allow_html=True)
 
 
@@ -576,8 +692,10 @@ def main():
                     fazer_logout()
                 st.markdown("---")
                 st.markdown("### 📊 Seu Legado")
-                st.metric("📹 Vídeos", len(gerente_videos.listar_videos_usuario(st.session_state.usuario_atual['id'])))
-                st.metric("👥 Contatos", len(db.listar_contatos()))
+                videos = gerente_videos.listar_videos_usuario(st.session_state.usuario_atual['id'])
+                contatos = db.listar_contatos()
+                st.metric("📹 Vídeos", len(videos))
+                st.metric("👥 Contatos", len(contatos))
 
             tab1, tab2, tab3, tab4 = st.tabs(["🤖 Assistente de Luto", "📹 Meus Vídeos", "👥 Meus Contatos", "ℹ️ Sobre"])
             with tab1:
@@ -602,7 +720,7 @@ def main():
             st.markdown("""
             <div class="info-card" style="text-align: center;">
                 <h3>💚 Gostou da experiência?</h3>
-                <p>Você também pode criar seu próprio legado digital.</p>
+                <p>Você também pode criar seu próprio legado digital e eternizar sua memória para quem você ama.</p>
             </div>
             """, unsafe_allow_html=True)
             col1, col2, col3 = st.columns([1, 2, 1])
@@ -611,9 +729,12 @@ def main():
                     st.session_state.autenticado = False
                     st.rerun()
 
-        st.markdown(
-            '<div class="footer-aeterna"><p>✨ aEterna - Seu legado, sua história, sua vida. ✨</p><p style="font-size: 0.6rem;">Versão 2.0 | Assistente de Luto com IA</p></div>',
-            unsafe_allow_html=True)
+        st.markdown("""
+        <div class="footer-aeterna">
+            <p>✨ aEterna - Seu legado, sua história, sua vida. ✨</p>
+            <p style="font-size: 0.6rem;">Versão 2.0 | Assistente de Luto com IA | LGPD Compliant</p>
+        </div>
+        """, unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
