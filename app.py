@@ -5,6 +5,7 @@ from datetime import datetime
 import json
 import sqlite3
 import secrets
+import pandas as pd
 from utils.banco import BancoDados
 from utils.criptografia import GerenciadorCriptografia
 from utils.usuarios import GerenciadorUsuarios
@@ -68,16 +69,13 @@ def remover_fundo_branco(imagem):
 def inject_custom_css():
     st.markdown("""
     <style>
-        /* Remover botão de deploy */
         .stDeployButton { display: none !important; }
         header[data-testid="stHeader"] { background: transparent !important; }
         .stApp > header { display: none !important; }
 
-        /* Layout */
         .main .block-container { padding-top: 0.5rem; padding-bottom: 1rem; }
         .stApp { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8f5e9 100%); }
 
-        /* Header */
         .aeterna-header {
             background: linear-gradient(135deg, #90EE90 0%, #2E8B57 50%, #1B5E20 100%);
             padding: 0.8rem;
@@ -87,7 +85,6 @@ def inject_custom_css():
         }
         .aeterna-header h2 { color: #1B5E20 !important; margin: 0; }
 
-        /* Cards */
         .info-card {
             background: white;
             padding: 1rem;
@@ -96,7 +93,6 @@ def inject_custom_css():
             margin: 0.75rem 0;
         }
 
-        /* Botões */
         .stButton > button {
             background: linear-gradient(135deg, #3CB371 0%, #1B5E20 100%);
             color: white;
@@ -109,15 +105,12 @@ def inject_custom_css():
             box-shadow: 0 4px 12px rgba(46, 139, 87, 0.3);
         }
 
-        /* Sidebar */
         [data-testid="stSidebar"] { background: linear-gradient(180deg, #e8f5e9 0%, #f0faf0 100%); }
         .sidebar-logo-container { display: flex; justify-content: center; padding: 20px 0; }
         [data-testid="stSidebar"] img { max-width: 220px !important; background: transparent !important; }
 
-        /* Footer */
         .footer-aeterna { text-align: center; padding: 1rem; color: #808080; font-size: 0.7rem; border-top: 1px solid #d0e8d0; margin-top: 2rem; }
 
-        /* Chat */
         .chat-container {
             max-height: 500px;
             overflow-y: auto;
@@ -162,7 +155,6 @@ def inject_custom_css():
             margin-bottom: 15px;
         }
 
-        /* ========== CORREÇÃO DAS CORES DOS INPUTS ========== */
         .stTextInput > div > div > input {
             color: #1a1a1a !important;
             background-color: #ffffff !important;
@@ -465,7 +457,6 @@ def render_login():
 def render_assistente():
     assistente = AssistenteLuto(st.session_state.falecido_id)
 
-    # Buscar nome do falecido
     nome_falecido = "seu ente querido"
     conn = sqlite3.connect("dados/cofre.db")
     cursor = conn.cursor()
@@ -593,9 +584,8 @@ def render_contatos_falecido():
                     chave_acesso = secrets.token_hex(8)
                     db.adicionar_contato(nome, email, telefone, whatsapp, f"Prioridade: {prioridade}", chave_acesso)
                     st.success(f"✅ {nome} adicionado!")
-                    st.info(f"🔑 Chave de acesso para {nome}: `{chave_acesso}`")
-                    st.warning(
-                        "📌 Guarde esta chave e envie para a pessoa. Ela será necessária para acessar seu legado.")
+                    st.info(f"🔑 Chave de acesso: `{chave_acesso}`")
+                    st.warning("📌 Guarde esta chave e envie para a pessoa.")
                     st.rerun()
                 else:
                     st.error("❌ Preencha nome e e-mail")
@@ -617,6 +607,147 @@ def render_contatos_falecido():
                 if st.button(f"🗑️ Remover {contato['nome']}", key=f"del_contato_{contato['id']}"):
                     db.deletar_contato(contato['id'])
                     st.rerun()
+
+
+# ============================================================================
+# PAINEL ADMINISTRATIVO
+# ============================================================================
+def render_admin_panel():
+    st.markdown("<h2 style='color: #2E8B57;'>👑 Painel Administrativo</h2>", unsafe_allow_html=True)
+
+    tab1, tab2, tab3 = st.tabs(["📊 Estatísticas", "👥 Usuários", "📤 Exportar"])
+
+    with tab1:
+        st.markdown("### 📊 Estatísticas do Sistema")
+
+        conn = sqlite3.connect("dados/cofre.db")
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT COUNT(*) FROM usuarios")
+        total_usuarios = cursor.fetchone()[0]
+
+        cursor.execute("SELECT COUNT(*) FROM usuarios WHERE data_criacao >= date('now', '-30 days')")
+        novos_usuarios = cursor.fetchone()[0]
+
+        cursor.execute("SELECT COUNT(*) FROM usuarios WHERE tipo = 'admin'")
+        total_admins = cursor.fetchone()[0]
+
+        cursor.execute("SELECT COUNT(*) FROM senhas")
+        total_senhas = cursor.fetchone()[0]
+
+        cursor.execute("SELECT COUNT(*) FROM videos")
+        total_videos = cursor.fetchone()[0]
+
+        cursor.execute("SELECT COUNT(*) FROM contatos")
+        total_contatos = cursor.fetchone()[0]
+
+        cursor.execute("SELECT COUNT(DISTINCT usuario_id) FROM personalidade")
+        total_com_ia = cursor.fetchone()[0]
+
+        conn.close()
+
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("👥 Total Usuários", total_usuarios, delta=f"+{novos_usuarios} últimos 30 dias")
+        with col2:
+            st.metric("🔐 Senhas", total_senhas)
+        with col3:
+            st.metric("📹 Vídeos", total_videos)
+        with col4:
+            st.metric("🤖 Assistente IA", total_com_ia)
+
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("👥 Contatos", total_contatos)
+        with col2:
+            st.metric("👑 Admins", total_admins)
+
+        st.markdown("---")
+        st.markdown("### 📈 Gráfico de Usuários por Mês")
+
+        conn = sqlite3.connect("dados/cofre.db")
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT strftime('%Y-%m', data_criacao) as mes, COUNT(*) 
+            FROM usuarios 
+            WHERE data_criacao >= date('now', '-6 months')
+            GROUP BY mes 
+            ORDER BY mes
+        ''')
+        dados_meses = cursor.fetchall()
+        conn.close()
+
+        if dados_meses:
+            meses = [d[0] for d in dados_meses]
+            quantidades = [d[1] for d in dados_meses]
+            st.line_chart({"Usuários": quantidades}, x=meses)
+
+    with tab2:
+        st.markdown("### 👥 Usuários Cadastrados")
+
+        conn = sqlite3.connect("dados/cofre.db")
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT id, nome, email, cpf, tipo, data_criacao, ultimo_acesso 
+            FROM usuarios 
+            ORDER BY data_criacao DESC
+        ''')
+        usuarios = cursor.fetchall()
+        conn.close()
+
+        for usuario in usuarios:
+            with st.expander(f"👤 {usuario[1]} ({usuario[4]})"):
+                st.markdown(f"**ID:** {usuario[0]}")
+                st.markdown(f"**Email:** {usuario[2]}")
+                st.markdown(f"**CPF:** {usuario[3]}")
+                st.markdown(f"**Tipo:** {usuario[4]}")
+                st.markdown(f"**Criado em:** {usuario[5]}")
+                st.markdown(f"**Último acesso:** {usuario[6] or 'Nunca'}")
+
+                if usuario[4] != 'admin':
+                    if st.button(f"🗑️ Excluir {usuario[1]}", key=f"del_user_{usuario[0]}"):
+                        conn = sqlite3.connect("dados/cofre.db")
+                        cursor = conn.cursor()
+                        cursor.execute("DELETE FROM usuarios WHERE id = ?", (usuario[0],))
+                        conn.commit()
+                        conn.close()
+                        st.success(f"✅ Usuário {usuario[1]} excluído!")
+                        st.rerun()
+
+    with tab3:
+        st.markdown("### 📤 Exportar Dados")
+
+        if st.button("📥 Exportar Usuários (CSV)"):
+            conn = sqlite3.connect("dados/cofre.db")
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT id, nome, email, cpf, tipo, data_criacao, ultimo_acesso 
+                FROM usuarios
+            ''')
+            usuarios = cursor.fetchall()
+            conn.close()
+
+            df = pd.DataFrame(usuarios, columns=["ID", "Nome", "Email", "CPF", "Tipo", "Data Criação", "Último Acesso"])
+            csv = df.to_csv(index=False)
+
+            st.download_button(
+                label="Download CSV",
+                data=csv,
+                file_name="usuarios_aeterna.csv",
+                mime="text/csv"
+            )
+
+        st.markdown("---")
+        st.markdown("### 🌐 Google Analytics")
+        st.markdown("""
+        Para estatísticas detalhadas de visitas (origem, localização, dispositivos), 
+        configure o Google Analytics no seu site:
+
+        1. Acesse [Google Analytics](https://analytics.google.com)
+        2. Crie uma conta gratuita
+        3. Adicione o código de rastreamento no `index.html`
+        4. Em 24h você terá dados completos
+        """)
 
 
 # ============================================================================
@@ -648,23 +779,8 @@ def render_sobre():
     </div>
 
     <div class="info-card">
-        <h3>🚀 Roadmap</h3>
-        <p>✅ App funcional (senhas, vídeos, contatos, assistente IA)<br>
-        🔄 App mobile (Android/iOS) - em desenvolvimento<br>
-        🔄 API de validação de CPF - em desenvolvimento<br>
-        🔄 Mural da Memória - em planejamento</p>
-    </div>
-
-    <div class="info-card">
         <h3>💼 Para Investidores e Parceiros</h3>
-        <p>Estamos abertos a:</p>
-        <ul>
-            <li>💎 Investimento anjo</li>
-            <li>🤝 Parcerias com planos funerários</li>
-            <li>🏦 Parcerias com seguros de vida</li>
-            <li>📜 Licenciamento da tecnologia</li>
-        </ul>
-        <p>📧 Contato: <strong>parcerias@aeterenalegado.com.br</strong></p>
+        <p>📧 parcerias@aeterenalegado.com.br</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -697,15 +813,29 @@ def main():
                 st.metric("📹 Vídeos", len(videos))
                 st.metric("👥 Contatos", len(contatos))
 
-            tab1, tab2, tab3, tab4 = st.tabs(["🤖 Assistente de Luto", "📹 Meus Vídeos", "👥 Meus Contatos", "ℹ️ Sobre"])
-            with tab1:
-                render_assistente()
-            with tab2:
-                render_videos()
-            with tab3:
-                render_contatos_falecido()
-            with tab4:
-                render_sobre()
+            if st.session_state.usuario_atual.get('tipo') == 'admin':
+                tab1, tab2, tab3, tab4, tab5 = st.tabs(
+                    ["🤖 Assistente", "📹 Vídeos", "👥 Contatos", "👑 Admin", "ℹ️ Sobre"])
+                with tab1:
+                    render_assistente()
+                with tab2:
+                    render_videos()
+                with tab3:
+                    render_contatos_falecido()
+                with tab4:
+                    render_admin_panel()
+                with tab5:
+                    render_sobre()
+            else:
+                tab1, tab2, tab3, tab4 = st.tabs(["🤖 Assistente", "📹 Vídeos", "👥 Contatos", "ℹ️ Sobre"])
+                with tab1:
+                    render_assistente()
+                with tab2:
+                    render_videos()
+                with tab3:
+                    render_contatos_falecido()
+                with tab4:
+                    render_sobre()
         else:
             with st.sidebar:
                 nome_falecido = st.session_state.usuario_atual.get('nome_falecido', 'seu ente querido')
@@ -720,7 +850,7 @@ def main():
             st.markdown("""
             <div class="info-card" style="text-align: center;">
                 <h3>💚 Gostou da experiência?</h3>
-                <p>Você também pode criar seu próprio legado digital e eternizar sua memória para quem você ama.</p>
+                <p>Você também pode criar seu próprio legado digital.</p>
             </div>
             """, unsafe_allow_html=True)
             col1, col2, col3 = st.columns([1, 2, 1])

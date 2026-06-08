@@ -6,6 +6,15 @@
     <title>aEterna | Seu Legado Digital Eterno</title>
     <meta name="description" content="Preserve seu legado digital com segurança. Guarde senhas, mensagens em vídeo e eternize sua memória com nosso assistente de luto.">
 
+    <!-- Google Analytics - Substitua G-SEU_ID pelo seu código -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-SEU_ID"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-SEU_ID');
+    </script>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -48,7 +57,6 @@
         .legado-card { background: linear-gradient(135deg, #ffffff 0%, #f0faf0 100%); padding: 1.5rem; border-radius: 20px; text-align: center; border: 1px solid #c8e6c8; }
         .legado-card h3 { color: #1B5E20; margin-bottom: 0.5rem; }
 
-        /* Destaque para nova funcionalidade */
         .nova-funcionalidade {
             background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
             border: 2px solid #ff9800;
@@ -198,7 +206,6 @@
     <section id="futuro" class="section" style="background: #f0faf0; border-radius: 30px;">
         <h2 class="section-title">O que está por vir</h2>
 
-        <!-- Destaque para a nova funcionalidade -->
         <div class="feature-card nova-funcionalidade" style="margin-bottom: 2rem;">
             <div class="feature-icon">📅</div>
             <h3>Mensagens Programadas em Datas Especiais</h3>
@@ -320,7 +327,7 @@
             <p>© 2024 aEterna - Versão Beta | Assistente de Luto com IA | LGPD Compliant</p>
         </div>
     </footer>
-
+    
     <script>
         const menuToggle = document.getElementById('menuToggle');
         const navLinks = document.getElementById('navLinks');
