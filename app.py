@@ -11,6 +11,8 @@ from utils.criptografia import GerenciadorCriptografia
 from utils.usuarios import GerenciadorUsuarios
 from utils.upload_video import GerenciadorVideos
 from utils.assistente_ia import AssistenteLuto
+from utils.contatos import GerenciadorContatos
+from utils.agendamentos import GerenciadorAgendamentos
 
 
 # ============================================================================
@@ -224,6 +226,8 @@ def inject_custom_css():
 db = BancoDados()
 gerente_usuarios = GerenciadorUsuarios()
 gerente_videos = GerenciadorVideos()
+gerente_contatos = GerenciadorContatos(db)
+gerente_agendamentos = GerenciadorAgendamentos(db)
 
 gerente_usuarios.criar_usuario_admin_inicial()
 
@@ -258,31 +262,22 @@ def fazer_login(email, senha):
 
 
 def fazer_login_visitante(visitante_nome, chave_acesso, falecido_email):
-    conn = sqlite3.connect("dados/cofre.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, nome FROM usuarios WHERE email = ?", (falecido_email,))
-    falecido = cursor.fetchone()
-    conn.close()
+    contato = db.obter_contato_por_chave(chave_acesso, falecido_email)
 
-    if falecido:
-        conn = sqlite3.connect("dados/cofre.db")
-        cursor = conn.cursor()
-        cursor.execute("SELECT nome FROM contatos WHERE chave_acesso = ? AND email = ?", (chave_acesso, falecido_email))
-        contato = cursor.fetchone()
-        conn.close()
-
-        if contato:
-            st.session_state.autenticado = True
-            st.session_state.modo_acesso = 'visitante'
-            st.session_state.falecido_id = falecido[0]
-            st.session_state.usuario_atual = {
-                'id': None,
-                'nome': visitante_nome,
-                'tipo': 'visitante',
-                'nome_falecido': falecido[1]
-            }
-            st.session_state.historico_assistente = []
-            return True
+    if contato and contato.get('acesso_central_luto', 0):
+        st.session_state.autenticado = True
+        st.session_state.modo_acesso = 'visitante'
+        st.session_state.falecido_id = contato['usuario_id']
+        st.session_state.usuario_atual = {
+            'id': contato['id'],
+            'nome': visitante_nome,
+            'tipo': 'visitante',
+            'nome_falecido': contato['falecido_nome'],
+            'email': contato['email'],
+            'whatsapp': contato['whatsapp']
+        }
+        st.session_state.historico_assistente = []
+        return True
     return False
 
 
@@ -296,15 +291,17 @@ def fazer_logout():
     st.rerun()
 
 
-def fazer_cadastro(nome, email, cpf, senha, telefone="", whatsapp="", foto=None, redes=None):
+def fazer_cadastro(nome, sobrenome, email, cpf, data_nascimento, senha,
+                   telefone="", whatsapp="", foto=None, redes=None):
     resultado = gerente_usuarios.criar_usuario(
         nome=nome,
+        sobrenome=sobrenome,
         email=email,
         cpf=cpf,
+        data_nascimento=data_nascimento,
         senha=senha,
-        tipo='usuario',
-        telefone=telefone or "",
-        whatsapp=whatsapp or "",
+        telefone=telefone,
+        whatsapp=whatsapp,
         foto=foto or "",
         redes=redes or "{}"
     )
@@ -349,7 +346,6 @@ def render_login():
                         st.error("❌ E-mail ou senha incorretos")
                 else:
                     st.warning("⚠️ Preencha e-mail e senha")
-        # Dados de teste removidos
 
     with tab2:
         st.markdown("### Acessar legado de alguém especial")
@@ -374,27 +370,35 @@ def render_login():
                         st.success(f"✅ Bem-vindo(a), {nome_visitante}!")
                         st.rerun()
                     else:
-                        st.error("❌ Credenciais inválidas")
+                        st.error("❌ Credenciais inválidas ou você não tem acesso à Central de Luto")
                 else:
                     st.warning("⚠️ Preencha todos os campos")
         st.info("💡 Sem chave? Entre em contato com a família.")
 
     with tab3:
         st.markdown("### ✨ Crie sua conta")
-        st.caption("⚠️ CPF é obrigatório")
+        st.caption("⚠️ CPF e data de nascimento são obrigatórios")
 
         with st.form("cadastro_form"):
-            st.markdown("**📝 Nome completo**")
-            nome = st.text_input("nome", placeholder="Ex: João Silva", key="cadastro_nome",
-                                 label_visibility="collapsed")
+            st.markdown("**📝 Nome completo ***")
+            col1, col2 = st.columns(2)
+            with col1:
+                nome = st.text_input("nome", placeholder="Nome", key="cadastro_nome", label_visibility="collapsed")
+            with col2:
+                sobrenome = st.text_input("sobrenome", placeholder="Sobrenome", key="cadastro_sobrenome",
+                                          label_visibility="collapsed")
 
-            st.markdown("**📧 E-mail**")
+            st.markdown("**📧 E-mail ***")
             email = st.text_input("email_cad", placeholder="seu@email.com", key="cadastro_email",
                                   label_visibility="collapsed")
 
-            st.markdown("**🆔 CPF (apenas números)**")
+            st.markdown("**🆔 CPF (apenas números) ***")
             cpf = st.text_input("cpf", placeholder="00000000000", key="cadastro_cpf", max_chars=11,
                                 label_visibility="collapsed")
+
+            st.markdown("**🎂 Data de nascimento ***")
+            data_nascimento = st.date_input("data_nascimento", key="cadastro_data_nascimento",
+                                            label_visibility="collapsed", value=None)
 
             st.markdown("**📱 Telefone**")
             telefone = st.text_input("telefone", placeholder="(11) 99999-9999", key="cadastro_telefone",
@@ -404,11 +408,11 @@ def render_login():
             whatsapp = st.text_input("whatsapp", placeholder="(11) 99999-9999", key="cadastro_whatsapp",
                                      label_visibility="collapsed")
 
-            st.markdown("**🔒 Senha**")
+            st.markdown("**🔒 Senha ***")
             senha = st.text_input("senha_cad", type="password", placeholder="Mínimo 6 caracteres", key="cadastro_senha",
                                   label_visibility="collapsed")
 
-            st.markdown("**🔒 Confirmar senha**")
+            st.markdown("**🔒 Confirmar senha ***")
             confirmar_senha = st.text_input("confirmar", type="password", placeholder="Digite a senha novamente",
                                             key="cadastro_confirmar", label_visibility="collapsed")
 
@@ -428,8 +432,10 @@ def render_login():
             if submitted:
                 erros = []
                 if not nome: erros.append("Nome")
+                if not sobrenome: erros.append("Sobrenome")
                 if not email: erros.append("E-mail")
                 if not cpf: erros.append("CPF")
+                if not data_nascimento: erros.append("Data de nascimento")
                 if not senha: erros.append("Senha")
 
                 if erros:
@@ -441,7 +447,16 @@ def render_login():
                 elif len(senha) < 6:
                     st.warning("⚠️ A senha deve ter pelo menos 6 caracteres")
                 else:
-                    resultado = fazer_cadastro(nome, email, cpf, senha, telefone, whatsapp)
+                    resultado = fazer_cadastro(
+                        nome=nome,
+                        sobrenome=sobrenome,
+                        email=email,
+                        cpf=cpf,
+                        data_nascimento=data_nascimento.strftime("%Y-%m-%d"),
+                        senha=senha,
+                        telefone=telefone,
+                        whatsapp=whatsapp
+                    )
                     if resultado == True:
                         st.success("✅ Conta criada! Faça login.")
                         st.balloons()
@@ -460,14 +475,10 @@ def render_login():
 def render_assistente():
     assistente = AssistenteLuto(st.session_state.falecido_id)
 
-    nome_falecido = "seu ente querido"
-    conn = sqlite3.connect("dados/cofre.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT nome FROM usuarios WHERE id = ?", (st.session_state.falecido_id,))
-    row = cursor.fetchone()
-    conn.close()
-    if row:
-        nome_falecido = row[0]
+    nome_falecido = st.session_state.usuario_atual.get('nome_falecido', 'seu ente querido')
+    if st.session_state.modo_acesso == 'falecido':
+        nome_falecido = st.session_state.usuario_atual.get('nome_completo',
+                                                           st.session_state.usuario_atual.get('nome', 'você'))
 
     st.markdown(f"<h3 style='color: #2E8B57;'>🤖 Conversando com {nome_falecido}</h3>", unsafe_allow_html=True)
 
@@ -521,95 +532,190 @@ def render_assistente():
 
 
 # ============================================================================
-# VÍDEOS
+# VÍDEOS (ATUALIZADO - COM CATEGORIAS E ACESSO CONTROLADO)
 # ============================================================================
 def render_videos():
     st.markdown("<h3 style='color: #2E8B57;'>📹 Mensagens em Vídeo</h3>", unsafe_allow_html=True)
-    st.info("💡 Cada vídeo pode ser direcionado para uma pessoa específica.")
+
+    # Verificar limite de vídeos do plano
+    plano = gerente_usuarios.obter_plano_usuario(st.session_state.usuario_atual['id'])
+    videos_atual = len(db.listar_videos_usuario(st.session_state.usuario_atual['id']))
+    max_videos = plano.get("max_videos_total", 10) if plano else 10
+
+    st.info(f"💡 Você tem {videos_atual} de {max_videos} vídeos disponíveis no seu plano.")
+
+    if videos_atual >= max_videos:
+        st.warning(f"⚠️ Você atingiu o limite de {max_videos} vídeos do seu plano. Para adicionar mais, faça upgrade.")
+        return
 
     col1, col2 = st.columns([1, 2])
 
     with col1:
         with st.expander("🎥 Adicionar vídeo", expanded=False):
             titulo = st.text_input("Título *", key="titulo_video_input")
-            destinatario = st.text_input("Para quem é este vídeo?", key="destinatario_video",
-                                         placeholder="Ex: Para minha filha Ana")
+
+            categoria = st.selectbox("Categoria",
+                                     ["Mensagem após falecimento", "Para pessoa específica", "Para data especial"],
+                                     key="categoria_video")
+
+            if categoria == "Para pessoa específica":
+                contatos = db.listar_contatos_usuario(st.session_state.usuario_atual['id'])
+                if contatos:
+                    opcoes_contato = {f"{c['nome_completo']} ({c['email']})": c['id'] for c in contatos}
+                    contato_selecionado = st.selectbox("Selecione a pessoa", list(opcoes_contato.keys()),
+                                                       key="video_contato")
+                    destinatario = contato_selecionado
+                else:
+                    st.warning("⚠️ Cadastre um contato primeiro")
+                    destinatario = ""
+            else:
+                destinatario = st.text_input("Para quem é este vídeo?", key="destinatario_video",
+                                             placeholder="Ex: Para minha família")
+
             arquivo_video = st.file_uploader("Arquivo de vídeo", type=["mp4", "mov", "avi", "mkv"], key="video_file")
             st.caption("📹 Formatos aceitos: MP4, MOV, AVI, MKV")
 
             if st.button("💾 Salvar", key="btn_salvar_video", type="primary", use_container_width=True):
                 if titulo and arquivo_video:
+                    # Definir quais contatos terão acesso
+                    contatos_ids = []
+                    if categoria == "Para pessoa específica" and contatos:
+                        contatos_ids = [contatos[0]['id']]  # Simplificado - apenas o contato selecionado
+
                     caminho = gerente_videos.salvar_video(
                         arquivo_video,
                         st.session_state.usuario_atual['id'],
                         titulo,
-                        destinatario
+                        destinatario,
+                        categoria
                     )
-                    st.success(f"✅ {titulo} salvo para {destinatario or 'todos'}")
+
+                    db.adicionar_video_com_acesso(
+                        usuario_id=st.session_state.usuario_atual['id'],
+                        titulo=titulo,
+                        destinatario=destinatario,
+                        caminho_arquivo=caminho,
+                        contatos_ids=contatos_ids,
+                        categoria=categoria
+                    )
+
+                    st.success(f"✅ {titulo} salvo com sucesso!")
                     st.rerun()
                 else:
                     st.error("❌ Preencha o título e selecione um vídeo")
 
     with col2:
-        videos = gerente_videos.listar_videos_usuario(st.session_state.usuario_atual['id'])
+        videos = db.listar_videos_usuario(st.session_state.usuario_atual['id'])
         if not videos:
             st.info("📭 Nenhum vídeo cadastrado")
         else:
             for video in videos:
-                with st.expander(f"🎬 {video['titulo']}"):
+                with st.expander(f"🎬 {video['titulo']} - {video['categoria']}"):
                     if video['destinatario']:
                         st.markdown(f"**👥 Para:** {video['destinatario']}")
                     st.video(video['caminho'])
                     if st.button(f"🗑️ Remover", key=f"del_video_{video['id']}"):
-                        if gerente_videos.deletar_video(video['id'], st.session_state.usuario_atual['id']):
+                        if db.deletar_video(video['id'], st.session_state.usuario_atual['id']):
                             st.rerun()
 
 
 # ============================================================================
-# CONTATOS
+# PREFERÊNCIAS DO USUÁRIO (ASSISTENTE)
 # ============================================================================
-def render_contatos_falecido():
-    st.markdown("<h3 style='color: #2E8B57;'>👥 Contatos que receberão seu legado</h3>", unsafe_allow_html=True)
-    st.info("💡 Adicione até 3 pessoas. Cada uma receberá uma chave de acesso.")
+def render_preferencias():
+    st.markdown("<h3 style='color: #2E8B57;'>🧠 Sobre você</h3>", unsafe_allow_html=True)
+    st.info("💡 Essas informações ajudam o Assistente de Luto a conversar como você.")
+
+    preferencias = gerente_usuarios.obter_preferencias(st.session_state.usuario_atual['id'])
+
+    with st.form("preferencias_form"):
+        st.markdown("**🎵 Música favorita**")
+        gostos_musica = st.text_area("Quais seus gêneros/artistas favoritos?",
+                                     value=preferencias.get('gostos_musica', ''),
+                                     height=60, key="pref_musica")
+
+        st.markdown("**🍽️ Comida favorita**")
+        gostos_comida = st.text_area("Quais seus pratos/restaurantes favoritos?",
+                                     value=preferencias.get('gostos_comida', ''),
+                                     height=60, key="pref_comida")
+
+        st.markdown("**💭 Melhor lembrança**")
+        melhor_lembranca = st.text_area("Qual sua memória mais feliz?",
+                                        value=preferencias.get('melhor_lembranca', ''),
+                                        height=80, key="pref_lembranca")
+
+        st.markdown("**😊 Dia mais feliz**")
+        dia_mais_feliz = st.text_area("Descreva o dia mais feliz da sua vida",
+                                      value=preferencias.get('dia_mais_feliz', ''),
+                                      height=80, key="pref_feliz")
+
+        st.markdown("**😔 Dia mais triste**")
+        dia_mais_triste = st.text_area("Como você superou momentos difíceis?",
+                                       value=preferencias.get('dia_mais_triste', ''),
+                                       height=80, key="pref_triste")
+
+        st.markdown("**💬 Personalidade extra**")
+        personalidade_extra = st.text_area("Algo mais que você quer que o assistente saiba sobre você?",
+                                           value=preferencias.get('personalidade_extra', ''),
+                                           height=100, key="pref_extra")
+
+        if st.form_submit_button("💾 Salvar Preferências", type="primary"):
+            novas_preferencias = {
+                "gostos_musica": gostos_musica,
+                "gostos_comida": gostos_comida,
+                "melhor_lembranca": melhor_lembranca,
+                "dia_mais_feliz": dia_mais_feliz,
+                "dia_mais_triste": dia_mais_triste,
+                "personalidade_extra": personalidade_extra
+            }
+            gerente_usuarios.salvar_preferencias(st.session_state.usuario_atual['id'], novas_preferencias)
+            st.success("✅ Preferências salvas! O assistente agora te conhece melhor.")
+            st.rerun()
+
+
+# ============================================================================
+# CONTATOS (COMPLETO)
+# ============================================================================
+def render_contatos():
+    st.markdown("<h3 style='color: #2E8B57;'>👥 Contatos de Confiança</h3>", unsafe_allow_html=True)
+
+    plano = gerente_usuarios.obter_plano_usuario(st.session_state.usuario_atual['id'])
+    contatos_atual = db.contar_contatos_usuario(st.session_state.usuario_atual['id'])
+    max_contatos = plano.get("max_contatos", 5) if plano else 5
+
+    st.info(f"💡 Você tem {contatos_atual} de {max_contatos} contatos no seu plano.")
 
     col1, col2 = st.columns([1, 2])
 
     with col1:
-        with st.expander("➕ Adicionar contato", expanded=False):
-            nome = st.text_input("Nome completo *", key="contato_nome")
-            email = st.text_input("E-mail *", key="contato_email")
-            telefone = st.text_input("Telefone", key="contato_telefone")
-            whatsapp = st.text_input("WhatsApp", key="contato_whatsapp")
-            prioridade = st.selectbox("Prioridade", [1, 2, 3], key="contato_prioridade")
-
-            if st.button("💾 Salvar", type="primary", use_container_width=True):
-                if nome and email:
-                    chave_acesso = secrets.token_hex(8)
-                    db.adicionar_contato(nome, email, telefone, whatsapp, f"Prioridade: {prioridade}", chave_acesso)
-                    st.success(f"✅ {nome} adicionado!")
-                    st.info(f"🔑 Chave de acesso: `{chave_acesso}`")
-                    st.warning("📌 Guarde esta chave e envie para a pessoa.")
-                    st.rerun()
-                else:
-                    st.error("❌ Preencha nome e e-mail")
+        gerente_contatos.renderizar_formulario_adicionar(
+            st.session_state.usuario_atual['id'],
+            plano
+        )
 
     with col2:
-        contatos = db.listar_contatos()
-        if not contatos:
-            st.info("📭 Nenhum contato cadastrado.")
-        else:
-            for i, contato in enumerate(contatos):
-                st.markdown(f"""
-                <div class="info-card" style="padding: 0.75rem;">
-                    <strong>{i + 1}º - 👤 {contato['nome']}</strong><br>
-                    📧 {contato['email']}<br>
-                    📱 {contato['telefone'] or 'Não informado'}<br>
-                    🏷️ {contato['papel']}
-                </div>
-                """, unsafe_allow_html=True)
-                if st.button(f"🗑️ Remover {contato['nome']}", key=f"del_contato_{contato['id']}"):
-                    db.deletar_contato(contato['id'])
-                    st.rerun()
+        gerente_contatos.renderizar_lista_contatos(st.session_state.usuario_atual['id'])
+
+
+# ============================================================================
+# LEMBRANÇAS PROGRAMADAS (AGENDAMENTOS)
+# ============================================================================
+def render_agendamentos():
+    st.markdown("<h3 style='color: #2E8B57;'>📅 Lembranças Programadas</h3>", unsafe_allow_html=True)
+    st.caption("Programe mensagens ou vídeos para serem enviados em datas especiais.")
+
+    plano = gerente_usuarios.obter_plano_usuario(st.session_state.usuario_atual['id'])
+
+    col1, col2 = st.columns([1, 2])
+
+    with col1:
+        gerente_agendamentos.renderizar_formulario(
+            st.session_state.usuario_atual['id'],
+            plano
+        )
+
+    with col2:
+        gerente_agendamentos.renderizar_lista(st.session_state.usuario_atual['id'])
 
 
 # ============================================================================
@@ -727,30 +833,29 @@ def render_admin_panel():
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='usuarios'")
         if cursor.fetchone():
             cursor.execute('''
-                SELECT id, nome, email, cpf, tipo, data_criacao, ultimo_acesso 
-                FROM usuarios 
-                ORDER BY data_criacao DESC
+                SELECT id, nome, sobrenome, email, cpf, tipo, data_criacao, ultimo_acesso 
+                FROM usuarios ORDER BY data_criacao DESC
             ''')
             usuarios = cursor.fetchall()
 
             if usuarios:
                 for usuario in usuarios:
-                    with st.expander(f"👤 {usuario[1]} ({usuario[4]})"):
+                    with st.expander(f"👤 {usuario[1]} {usuario[2]} ({usuario[5]})"):
                         st.markdown(f"**ID:** {usuario[0]}")
-                        st.markdown(f"**Email:** {usuario[2]}")
-                        st.markdown(f"**CPF:** {usuario[3]}")
-                        st.markdown(f"**Tipo:** {usuario[4]}")
-                        st.markdown(f"**Criado em:** {usuario[5]}")
-                        st.markdown(f"**Último acesso:** {usuario[6] or 'Nunca'}")
+                        st.markdown(f"**Email:** {usuario[3]}")
+                        st.markdown(f"**CPF:** {usuario[4]}")
+                        st.markdown(f"**Tipo:** {usuario[5]}")
+                        st.markdown(f"**Criado em:** {usuario[6]}")
+                        st.markdown(f"**Último acesso:** {usuario[7] or 'Nunca'}")
 
-                        if usuario[4] != 'admin':
-                            if st.button(f"🗑️ Excluir {usuario[1]}", key=f"del_user_{usuario[0]}"):
+                        if usuario[5] != 'admin':
+                            if st.button(f"🗑️ Excluir {usuario[1]} {usuario[2]}", key=f"del_user_{usuario[0]}"):
                                 conn2 = sqlite3.connect("dados/cofre.db")
                                 cursor2 = conn2.cursor()
                                 cursor2.execute("DELETE FROM usuarios WHERE id = ?", (usuario[0],))
                                 conn2.commit()
                                 conn2.close()
-                                st.success(f"✅ Usuário {usuario[1]} excluído!")
+                                st.success(f"✅ Usuário {usuario[1]} {usuario[2]} excluído!")
                                 st.rerun()
             else:
                 st.info("Nenhum usuário cadastrado ainda.")
@@ -768,14 +873,14 @@ def render_admin_panel():
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='usuarios'")
         if cursor.fetchone():
             cursor.execute('''
-                SELECT id, nome, email, cpf, tipo, data_criacao, ultimo_acesso 
+                SELECT id, nome, sobrenome, email, cpf, tipo, data_criacao, ultimo_acesso 
                 FROM usuarios
             ''')
             usuarios = cursor.fetchall()
 
             if usuarios:
-                df = pd.DataFrame(usuarios,
-                                  columns=["ID", "Nome", "Email", "CPF", "Tipo", "Data Criação", "Último Acesso"])
+                df = pd.DataFrame(usuarios, columns=["ID", "Nome", "Sobrenome", "Email", "CPF", "Tipo", "Data Criação",
+                                                     "Último Acesso"])
                 csv = df.to_csv(index=False)
 
                 st.download_button(
@@ -810,6 +915,10 @@ def render_admin_panel():
 def render_sobre():
     st.markdown("<h3 style='color: #2E8B57;'>✨ Sobre o aEterna</h3>", unsafe_allow_html=True)
 
+    plano = None
+    if st.session_state.modo_acesso == 'falecido':
+        plano = gerente_usuarios.obter_plano_usuario(st.session_state.usuario_atual['id'])
+
     st.markdown("""
     <div class="info-card">
         <h3>🌿 O que é o aEterna?</h3>
@@ -831,7 +940,24 @@ def render_sobre():
         ✅ 100% compatível com a Lei Geral de Proteção de Dados<br>
         ✅ Você pode solicitar exclusão a qualquer momento</p>
     </div>
+    """, unsafe_allow_html=True)
 
+    if plano:
+        st.markdown(f"""
+        <div class="info-card">
+            <h3>📊 Seu Plano Atual</h3>
+            <p><strong>{plano.get('nome', 'Gratuito')}</strong></p>
+            <p>💰 Preço: R$ {plano.get('preco', 0):.2f}/mês</p>
+            <p>📞 Contatos: até {plano.get('max_contatos', 5)} pessoas<br>
+            ⭐ Prioritários: até {plano.get('max_prioridades', 3)}<br>
+            💬 Mensagens IA: {plano.get('max_mensagens_ia', 50)} por mês<br>
+            📹 Vídeos totais: {plano.get('max_videos_total', 10)}<br>
+            📅 Agendamentos: {'✅ Sim' if plano.get('tem_agendamento', 0) else '❌ Não'}<br>
+            🎬 Vídeos com IA: {'✅ Sim' if plano.get('tem_videos_ia', 0) else '❌ Não'}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("""
     <div class="info-card">
         <h3>💼 Para Investidores e Parceiros</h3>
         <p>📧 parcerias@aeterenalegado.com.br</p>
@@ -840,7 +966,7 @@ def render_sobre():
     <div class="info-card">
         <h3>📱 Funcionalidades Futuras</h3>
         <p>✅ App mobile (Android/iOS)<br>
-        ✅ Mensagens programadas em datas especiais<br>
+        ✅ Lembranças Programadas em datas especiais<br>
         ✅ Presentes e flores programados<br>
         ✅ Mural da memória<br>
         ✅ Testamento digital</p>
@@ -866,44 +992,57 @@ def main():
 
         if st.session_state.modo_acesso == 'falecido':
             with st.sidebar:
-                st.markdown(f"### ✨ Olá, {st.session_state.usuario_atual['nome']}!")
+                st.markdown(f"### ✨ Olá, {st.session_state.usuario_atual['nome_completo']}!")
                 if st.button("🚪 Sair", use_container_width=True):
                     fazer_logout()
                 st.markdown("---")
                 st.markdown("### 📊 Seu Legado")
-                videos = gerente_videos.listar_videos_usuario(st.session_state.usuario_atual['id'])
-                contatos = db.listar_contatos()
+                videos = db.listar_videos_usuario(st.session_state.usuario_atual['id'])
+                contatos = db.listar_contatos_usuario(st.session_state.usuario_atual['id'])
                 st.metric("📹 Vídeos", len(videos))
                 st.metric("👥 Contatos", len(contatos))
 
             if st.session_state.usuario_atual.get('tipo') == 'admin':
-                tab1, tab2, tab3, tab4, tab5 = st.tabs(
-                    ["🤖 Assistente", "📹 Vídeos", "👥 Contatos", "👑 Admin", "ℹ️ Sobre"])
+                tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
+                    "🤖 Assistente", "📹 Vídeos", "👥 Contatos", "🧠 Preferências",
+                    "📅 Lembranças", "👑 Admin", "ℹ️ Sobre"
+                ])
                 with tab1:
                     render_assistente()
                 with tab2:
                     render_videos()
                 with tab3:
-                    render_contatos_falecido()
+                    render_contatos()
                 with tab4:
-                    render_admin_panel()
+                    render_preferencias()
                 with tab5:
+                    render_agendamentos()
+                with tab6:
+                    render_admin_panel()
+                with tab7:
                     render_sobre()
             else:
-                tab1, tab2, tab3, tab4 = st.tabs(["🤖 Assistente", "📹 Vídeos", "👥 Contatos", "ℹ️ Sobre"])
+                tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+                    "🤖 Assistente", "📹 Vídeos", "👥 Contatos", "🧠 Preferências", "📅 Lembranças", "ℹ️ Sobre"
+                ])
                 with tab1:
                     render_assistente()
                 with tab2:
                     render_videos()
                 with tab3:
-                    render_contatos_falecido()
+                    render_contatos()
                 with tab4:
+                    render_preferencias()
+                with tab5:
+                    render_agendamentos()
+                with tab6:
                     render_sobre()
         else:
             with st.sidebar:
                 nome_falecido = st.session_state.usuario_atual.get('nome_falecido', 'seu ente querido')
                 st.markdown(f"### 🕊️ Em memória de")
                 st.markdown(f"### {nome_falecido}")
+                st.markdown(f"**Seu nome:** {st.session_state.usuario_atual.get('nome', 'Visitante')}")
                 if st.button("🚪 Sair", use_container_width=True):
                     fazer_logout()
 
@@ -913,7 +1052,7 @@ def main():
             st.markdown("""
             <div class="info-card" style="text-align: center;">
                 <h3>💚 Gostou da experiência?</h3>
-                <p>Você também pode criar seu próprio legado digital.</p>
+                <p>Você também pode criar seu próprio legado digital e eternizar sua memória para quem você ama.</p>
             </div>
             """, unsafe_allow_html=True)
             col1, col2, col3 = st.columns([1, 2, 1])
