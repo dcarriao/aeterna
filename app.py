@@ -220,11 +220,14 @@ def inject_custom_css():
 # ============================================================================
 # INICIALIZAÇÃO
 # ============================================================================
+
+# Migração automática do banco de dados
 try:
     from utils.migrar import executar_migracao
+
     executar_migracao()
-except:
-    pass
+except Exception as e:
+    print(f"Migração: {e}")
 
 db = BancoDados()
 gerente_usuarios = GerenciadorUsuarios()
@@ -490,14 +493,14 @@ def render_videos():
                         titulo,
                         destinatario
                     )
-                    db.adicionar_video(titulo, destinatario, caminho, "", "")
+                    db.adicionar_video(st.session_state.usuario_atual['id'], titulo, destinatario, caminho)
                     st.success(f"✅ {titulo} salvo para {destinatario or 'todos'}")
                     st.rerun()
                 else:
                     st.error("❌ Preencha o título e selecione um vídeo")
 
     with col2:
-        videos = db.listar_videos()
+        videos = db.listar_videos_usuario(st.session_state.usuario_atual['id'])
         if not videos:
             st.info("📭 Nenhum vídeo cadastrado")
         else:
@@ -505,10 +508,10 @@ def render_videos():
                 with st.expander(f"🎬 {video['titulo']}"):
                     if video['destinatario']:
                         st.markdown(f"**👥 Para:** {video['destinatario']}")
-                    if video['url_externa']:
-                        st.video(video['url_externa'])
+                    if video['caminho'] and os.path.exists(video['caminho']):
+                        st.video(video['caminho'])
                     if st.button(f"🗑️ Remover", key=f"del_video_{video['id']}"):
-                        db.deletar_video(video['id'])
+                        db.deletar_video(video['id'], st.session_state.usuario_atual['id'])
                         st.rerun()
 
 
@@ -517,96 +520,62 @@ def render_videos():
 # ============================================================================
 def render_contatos():
     st.markdown("<h3 style='color: #2E8B57;'>👥 Contatos de Confiança</h3>", unsafe_allow_html=True)
-    st.info("💡 Adicione até 3 pessoas. Cada uma receberá uma chave de acesso.")
+    st.info("💡 Adicione contatos que receberão seu legado.")
 
     col1, col2 = st.columns([1, 2])
 
     with col1:
         with st.expander("➕ Adicionar contato", expanded=False):
-            nome = st.text_input("Nome completo *", key="contato_nome")
+            nome = st.text_input("Nome *", key="contato_nome")
+            sobrenome = st.text_input("Sobrenome", key="contato_sobrenome")
             email = st.text_input("E-mail *", key="contato_email")
             telefone = st.text_input("Telefone", key="contato_telefone")
             whatsapp = st.text_input("WhatsApp", key="contato_whatsapp")
-            papel = st.selectbox("Papel/Relação",
-                                 ["Filho(a)", "Cônjuge", "Irmão(ã)", "Amigo(a)", "Advogado(a)", "Outro"],
-                                 key="contato_papel")
+            parentesco = st.selectbox("Parentesco",
+                                      ["Filho(a)", "Cônjuge", "Irmão(ã)", "Amigo(a)", "Advogado(a)", "Outro"],
+                                      key="contato_parentesco")
+            is_prioridade = st.checkbox("Prioritário", key="contato_prioridade")
 
             if st.button("💾 Salvar", type="primary", use_container_width=True):
                 if nome and email:
                     chave_acesso = secrets.token_hex(8)
-                    db.adicionar_contato(nome, email, telefone, whatsapp, papel, chave_acesso)
-                    st.success(f"✅ {nome} adicionado!")
+                    db.adicionar_contato(
+                        usuario_id=st.session_state.usuario_atual['id'],
+                        nome=nome,
+                        sobrenome=sobrenome,
+                        email=email,
+                        telefone=telefone,
+                        whatsapp=whatsapp,
+                        parentesco=parentesco,
+                        is_prioridade=1 if is_prioridade else 0,
+                        prioridade_order=0,
+                        chave_acesso=chave_acesso
+                    )
+                    st.success(f"✅ {nome} {sobrenome} adicionado!")
                     st.info(f"🔑 Chave de acesso: `{chave_acesso}`")
                     st.rerun()
                 else:
                     st.error("❌ Preencha nome e e-mail")
 
     with col2:
-        contatos = db.listar_contatos()
+        contatos = db.listar_contatos_usuario(st.session_state.usuario_atual['id'])
         if not contatos:
             st.info("📭 Nenhum contato cadastrado")
         else:
-            for i, contato in enumerate(contatos):
-                st.markdown(f"""
-                <div class="info-card" style="padding: 0.75rem;">
-                    <strong>{i + 1}º - 👤 {contato['nome']}</strong><br>
-                    📧 {contato['email']}<br>
-                    📱 {contato['telefone'] or 'Não informado'}<br>
-                    🏷️ {contato['papel']}
-                </div>
-                """, unsafe_allow_html=True)
+            for contato in contatos:
+                with st.expander(f"👤 {contato['nome_completo']}"):
+                    st.markdown(f"**Email:** {contato['email']}")
+                    if contato['telefone']:
+                        st.markdown(f"**Telefone:** {contato['telefone']}")
+                    if contato['whatsapp']:
+                        st.markdown(f"**WhatsApp:** {contato['whatsapp']}")
+                    if contato['parentesco']:
+                        st.markdown(f"**Parentesco:** {contato['parentesco']}")
+                    st.markdown(f"**Prioritário:** {'✅ Sim' if contato['is_prioridade'] else '❌ Não'}")
 
-                if st.button(f"🗑️ Remover {contato['nome']}", key=f"del_contato_{contato['id']}"):
-                    db.deletar_contato(contato['id'])
-                    st.rerun()
-
-        st.markdown("""
-        <div class="info-card" style="background: #fff3e0;">
-            <strong>📌 Como funciona:</strong><br>
-            A liberação será feita automaticamente via API de validação de CPF (em desenvolvimento).<br>
-            Quando confirmado o falecimento, o primeiro contato receberá todas as orientações.
-        </div>
-        """, unsafe_allow_html=True)
-
-
-# ============================================================================
-# PAINEL ADMIN
-# ============================================================================
-def render_admin_panel():
-    st.markdown("<h2 style='color: #2E8B57;'>👑 Painel Administrativo</h2>", unsafe_allow_html=True)
-
-    tab1, tab2 = st.tabs(["📊 Estatísticas", "👥 Usuários"])
-
-    with tab1:
-        st.markdown("### 📊 Estatísticas do Sistema")
-
-        usuarios = gerente_usuarios.listar_usuarios()
-        senhas = db.listar_senhas()
-        videos = db.listar_videos()
-        contatos = db.listar_contatos()
-
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            st.metric("👥 Total Usuários", len(usuarios))
-        with col2:
-            st.metric("🔐 Senhas", len(senhas))
-        with col3:
-            st.metric("📹 Vídeos", len(videos))
-        with col4:
-            st.metric("👥 Contatos", len(contatos))
-
-    with tab2:
-        st.markdown("### 👥 Usuários Cadastrados")
-
-        if not usuarios:
-            st.info("Nenhum usuário cadastrado ainda.")
-        else:
-            for usuario in usuarios:
-                with st.expander(f"👤 {usuario['nome']}"):
-                    st.markdown(f"**Email:** {usuario['email']}")
-                    st.markdown(f"**CPF:** {usuario['cpf']}")
-                    st.markdown(f"**Tipo:** {usuario['tipo']}")
-                    st.markdown(f"**Criado em:** {usuario['data_criacao']}")
+                    if st.button(f"🗑️ Remover", key=f"del_contato_{contato['id']}"):
+                        db.deletar_contato(contato['id'], st.session_state.usuario_atual['id'])
+                        st.rerun()
 
 
 # ============================================================================
@@ -643,6 +612,46 @@ def render_sobre():
 
 
 # ============================================================================
+# PAINEL ADMIN
+# ============================================================================
+def render_admin_panel():
+    st.markdown("<h2 style='color: #2E8B57;'>👑 Painel Administrativo</h2>", unsafe_allow_html=True)
+
+    tab1, tab2 = st.tabs(["📊 Estatísticas", "👥 Usuários"])
+
+    with tab1:
+        st.markdown("### 📊 Estatísticas do Sistema")
+
+        usuarios = gerente_usuarios.listar_usuarios()
+        senhas = db.listar_senhas_usuario(st.session_state.usuario_atual['id'])
+        videos = db.listar_videos_usuario(st.session_state.usuario_atual['id'])
+        contatos = db.listar_contatos_usuario(st.session_state.usuario_atual['id'])
+
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("👥 Total Usuários", len(usuarios))
+        with col2:
+            st.metric("🔐 Senhas", len(senhas))
+        with col3:
+            st.metric("📹 Vídeos", len(videos))
+        with col4:
+            st.metric("👥 Contatos", len(contatos))
+
+    with tab2:
+        st.markdown("### 👥 Usuários Cadastrados")
+
+        if not usuarios:
+            st.info("Nenhum usuário cadastrado ainda.")
+        else:
+            for usuario in usuarios:
+                with st.expander(f"👤 {usuario['nome']}"):
+                    st.markdown(f"**Email:** {usuario['email']}")
+                    st.markdown(f"**CPF:** {usuario['cpf']}")
+                    st.markdown(f"**Tipo:** {usuario['tipo']}")
+                    st.markdown(f"**Criado em:** {usuario['data_criacao']}")
+
+
+# ============================================================================
 # MAIN
 # ============================================================================
 def main():
@@ -667,8 +676,8 @@ def main():
                 fazer_logout()
             st.markdown("---")
             st.markdown("### 📊 Seu Legado")
-            st.metric("📹 Vídeos", len(db.listar_videos()))
-            st.metric("👥 Contatos", len(db.listar_contatos()))
+            st.metric("📹 Vídeos", len(db.listar_videos_usuario(st.session_state.usuario_atual['id'])))
+            st.metric("👥 Contatos", len(db.listar_contatos_usuario(st.session_state.usuario_atual['id'])))
 
         if is_admin:
             tab1, tab2, tab3, tab4 = st.tabs(["🤖 Assistente", "📹 Vídeos", "👥 Contatos", "👑 Admin"])
