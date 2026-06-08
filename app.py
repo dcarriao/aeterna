@@ -220,6 +220,12 @@ def inject_custom_css():
 # ============================================================================
 # INICIALIZAÇÃO
 # ============================================================================
+try:
+    from utils.migrar import executar_migracao
+    executar_migracao()
+except:
+    pass
+
 db = BancoDados()
 gerente_usuarios = GerenciadorUsuarios()
 gerente_videos = GerenciadorVideos()
