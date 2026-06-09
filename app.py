@@ -423,9 +423,13 @@ def render_login():
 # ASSISTENTE DE LUTO
 # ============================================================================
 def render_assistente():
-    """Renderiza o assistente de luto como um chat expansível"""
-    assistente = AssistenteLuto(st.session_state.falecido_id)
+    """Renderiza o assistente de luto como um chat funcional"""
 
+    # Verificar se o assistente já foi criado
+    if 'assistente_obj' not in st.session_state:
+        st.session_state.assistente_obj = AssistenteLuto(st.session_state.falecido_id)
+
+    assistente = st.session_state.assistente_obj
     nome_falecido = st.session_state.usuario_atual.get('nome_completo', 'seu ente querido')
 
     # CSS para o chat
@@ -476,27 +480,6 @@ def render_assistente():
             box-shadow: 0 1px 1px rgba(0,0,0,0.05);
         }
 
-        .message-time {
-            font-size: 0.6rem;
-            color: #999;
-            margin-top: 3px;
-            text-align: right;
-        }
-
-        .chat-input-area {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .chat-input-area input {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 25px;
-            font-size: 14px;
-        }
-
         .chat-warning {
             background: #fff3cd;
             padding: 8px 12px;
@@ -505,6 +488,17 @@ def render_assistente():
             color: #856404;
             margin-bottom: 15px;
             text-align: center;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        /* Esconder o botão de submit padrão do Streamlit */
+        .stButton button[key="btn_enviar"] {
+            background-color: #128C7E;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -517,63 +511,66 @@ def render_assistente():
     </div>
     """, unsafe_allow_html=True)
 
-    # Container do chat
-    chat_container = st.container()
-
-    with chat_container:
-        st.markdown('<div class="chat-container">', unsafe_allow_html=True)
-
-        if "historico_assistente" not in st.session_state:
-            st.session_state.historico_assistente = []
-
-        if not st.session_state.historico_assistente:
-            msg_inicial = f"Olá! Sou uma simulação baseada em como {nome_falecido} era. Pode me perguntar qualquer coisa. 💚"
-            st.session_state.historico_assistente.append({"tipo": "bot", "texto": msg_inicial})
-
-        for msg in st.session_state.historico_assistente:
-            if msg["tipo"] == "user":
-                st.markdown(f"""
-                <div class="message-row user">
-                    <div class="message-bubble user">
-                        {msg["texto"]}
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-            else:
-                st.markdown(f"""
-                <div class="message-row bot">
-                    <div class="message-bubble bot">
-                        <strong>{nome_falecido}:</strong><br>{msg["texto"]}
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    # Área de input
-    col_input, col_send, col_clear = st.columns([4, 1, 1])
-
-    with col_input:
-        mensagem = st.text_input("msg", key="msg_assistente",
-                                 placeholder="Digite sua mensagem...",
-                                 label_visibility="collapsed")
-
-    with col_send:
-        enviar = st.button("📤 Enviar", key="btn_enviar", type="primary", use_container_width=True)
-
-    with col_clear:
-        limpar = st.button("🗑️ Limpar", key="clear_chat", use_container_width=True)
-
-    if enviar and mensagem:
-        st.session_state.historico_assistente.append({"tipo": "user", "texto": mensagem})
-        with st.spinner(f"{nome_falecido} está pensando..."):
-            resposta = assistente.conversar(mensagem)
-        st.session_state.historico_assistente.append({"tipo": "bot", "texto": resposta})
-        st.rerun()
-
-    if limpar:
+    # Inicializar histórico no session state se não existir
+    if 'historico_assistente' not in st.session_state:
         st.session_state.historico_assistente = []
-        st.rerun()
+
+    if not st.session_state.historico_assistente:
+        msg_inicial = f"Olá! Sou uma simulação baseada em como {nome_falecido} era. Pode me perguntar qualquer coisa. 💚"
+        st.session_state.historico_assistente.append({"tipo": "bot", "texto": msg_inicial})
+
+    # Exibir mensagens
+    st.markdown('<div class="chat-container">', unsafe_allow_html=True)
+
+    for msg in st.session_state.historico_assistente:
+        if msg["tipo"] == "user":
+            st.markdown(f"""
+            <div class="message-row user">
+                <div class="message-bubble user">
+                    {msg["texto"]}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown(f"""
+            <div class="message-row bot">
+                <div class="message-bubble bot">
+                    <strong>{nome_falecido}:</strong><br>{msg["texto"]}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Usar um formulário para evitar reload completo
+    with st.form(key="chat_form", clear_on_submit=True):
+        col1, col2, col3 = st.columns([4, 1, 1])
+
+        with col1:
+            mensagem = st.text_input("msg", key="nova_mensagem",
+                                     placeholder="Digite sua mensagem...",
+                                     label_visibility="collapsed")
+
+        with col2:
+            enviar = st.form_submit_button("📤 Enviar", use_container_width=True)
+
+        with col3:
+            limpar = st.form_submit_button("🗑️ Limpar", use_container_width=True)
+
+        if enviar and mensagem:
+            # Adicionar mensagem do usuário
+            st.session_state.historico_assistente.append({"tipo": "user", "texto": mensagem})
+
+            # Gerar resposta da IA
+            with st.spinner(f"{nome_falecido} está pensando..."):
+                resposta = assistente.conversar(mensagem)
+            st.session_state.historico_assistente.append({"tipo": "bot", "texto": resposta})
+
+            st.rerun()
+
+        if limpar:
+            st.session_state.historico_assistente = []
+            st.rerun()
 
 # ============================================================================
 # VÍDEOS
