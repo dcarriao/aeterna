@@ -9,6 +9,7 @@ class BancoDados:
         os.makedirs(os.path.dirname(arquivo_db), exist_ok=True)
         self.arquivo_db = arquivo_db
         self._inicializar_banco()
+        self._migrar_documentos()
 
     def _inicializar_banco(self):
         conn = sqlite3.connect(self.arquivo_db)
@@ -180,6 +181,22 @@ class BancoDados:
                 notas TEXT,
                 data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
+        ''')
+
+        # TABELA DE DOCUMENTOS (adicione esta parte)
+        cursor.execute('''
+               CREATE TABLE IF NOT EXISTS documentos (
+                   id INTEGER PRIMARY KEY AUTOINCREMENT,
+                   usuario_id INTEGER,
+                   tipo TEXT NOT NULL,
+                   titulo TEXT NOT NULL,
+                   descricao TEXT,
+                   caminho_arquivo TEXT,
+                   nome_original TEXT,
+                   tamanho INTEGER,
+                   data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                   FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+               )
         ''')
 
         conn.commit()
@@ -503,6 +520,26 @@ class BancoDados:
                   preferencias.get('personalidade_extra', ''),
                   usuario_id))
 
+        conn.commit()
+        conn.close()
+
+    def _migrar_documentos(self):
+        """Adiciona tabela de documentos se não existir"""
+        conn = sqlite3.connect(self.arquivo_db)
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS documentos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                usuario_id INTEGER,
+                tipo TEXT NOT NULL,
+                titulo TEXT NOT NULL,
+                descricao TEXT,
+                caminho_arquivo TEXT,
+                nome_original TEXT,
+                tamanho INTEGER,
+                data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
         conn.commit()
         conn.close()
 
