@@ -554,6 +554,65 @@ class BancoDados:
         }
 
     # ========================================================================
+    # DOCUMENTOS
+    # ========================================================================
+    def adicionar_documento(self, usuario_id: int, tipo: str, titulo: str, descricao: str,
+                            caminho_arquivo: str, nome_original: str, tamanho: int):
+        conn = sqlite3.connect(self.arquivo_db)
+        cursor = conn.cursor()
+
+        # Criar tabela se não existir
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS documentos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                usuario_id INTEGER,
+                tipo TEXT NOT NULL,
+                titulo TEXT NOT NULL,
+                descricao TEXT,
+                caminho_arquivo TEXT,
+                nome_original TEXT,
+                tamanho INTEGER,
+                data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+            )
+        ''')
+
+        cursor.execute('''
+            INSERT INTO documentos (usuario_id, tipo, titulo, descricao, caminho_arquivo, nome_original, tamanho)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (usuario_id, tipo, titulo, descricao, caminho_arquivo, nome_original, tamanho))
+
+        conn.commit()
+        conn.close()
+
+    def listar_documentos_usuario(self, usuario_id: int) -> List[Dict]:
+        conn = sqlite3.connect(self.arquivo_db)
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT id, tipo, titulo, descricao, caminho_arquivo, nome_original, tamanho, data_criacao
+            FROM documentos WHERE usuario_id = ? ORDER BY data_criacao DESC
+        ''', (usuario_id,))
+        rows = cursor.fetchall()
+        conn.close()
+        return [{
+            "id": r[0],
+            "tipo": r[1],
+            "titulo": r[2],
+            "descricao": r[3] or "",
+            "caminho_arquivo": r[4],
+            "nome_original": r[5],
+            "tamanho": r[6],
+            "data_criacao": r[7]
+        } for r in rows]
+
+    def deletar_documento(self, id_documento: int, usuario_id: int):
+        conn = sqlite3.connect(self.arquivo_db)
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM documentos WHERE id = ? AND usuario_id = ?", (id_documento, usuario_id))
+        conn.commit()
+        conn.close()
+
+    # ========================================================================
     # CONFIGURAÇÕES
     # ========================================================================
     def salvar_config(self, chave: str, valor: str):
