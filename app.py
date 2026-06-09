@@ -423,40 +423,59 @@ def render_login():
 # ASSISTENTE DE LUTO
 # ============================================================================
 def render_assistente():
-    """Renderiza o assistente de luto como uma janela de chat lateral"""
+    """Renderiza o assistente de luto como um widget de chat flutuante"""
     assistente = AssistenteLuto(st.session_state.falecido_id)
 
     nome_falecido = st.session_state.usuario_atual.get('nome_completo', 'seu ente querido')
 
-    # CSS para o chat como janela lateral
+    # CSS para o chat como widget flutuante
     st.markdown("""
     <style>
-        /* Container principal - layout de duas colunas */
-        .chat-lateral-container {
+        /* Widget do chat - fixo no canto inferior direito */
+        .chat-widget-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 999;
+            width: 350px;
+            max-width: 90vw;
+        }
+
+        /* Botão flutuante para abrir/fechar */
+        .chat-toggle-btn {
+            background: #075e54;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
             display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+            margin-left: auto;
         }
 
-        /* Conteúdo principal (esquerda) - ocupa 60% */
-        .chat-main-content {
-            flex: 1.5;
-            min-width: 200px;
+        .chat-toggle-btn:hover {
+            transform: scale(1.05);
+            background: #128C7E;
         }
 
-        /* Widget do chat (direita) - ocupa 35% */
-        .chat-widget {
-            width: 35%;
+        /* Janela do chat (inicialmente fechada) */
+        .chat-window {
             background: white;
             border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
             overflow: hidden;
-            position: sticky;
-            top: 20px;
-            align-self: flex-start;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            display: none;
         }
 
-        /* Cabeçalho do chat */
+        .chat-window.open {
+            display: block;
+        }
+
         .chat-header {
             background: #075e54;
             padding: 12px 16px;
@@ -464,6 +483,7 @@ def render_assistente():
             display: flex;
             align-items: center;
             gap: 10px;
+            cursor: pointer;
         }
 
         .chat-avatar {
@@ -491,7 +511,16 @@ def render_assistente():
             opacity: 0.8;
         }
 
-        /* Corpo do chat */
+        .chat-close {
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        .chat-close:hover {
+            opacity: 1;
+        }
+
         .chat-body {
             height: 350px;
             overflow-y: auto;
@@ -541,7 +570,6 @@ def render_assistente():
             text-align: right;
         }
 
-        /* Rodapé do chat */
         .chat-footer {
             padding: 10px;
             background: white;
@@ -578,142 +606,88 @@ def render_assistente():
             background: #075e54;
         }
 
-        .chat-clear-btn {
-            background: transparent !important;
-            color: #999 !important;
-            border: 1px solid #ddd !important;
-            border-radius: 20px !important;
-            width: auto !important;
-            padding: 0 12px !important;
-        }
-
-        .chat-clear-btn:hover {
-            background: #f0f0f0 !important;
-            color: #666 !important;
-        }
-
-        /* Aviso IA pequeno */
         .ia-warning-small {
             background: #fff3cd;
-            border-left: 3px solid #ffc107;
             padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 0.7rem;
-            margin-bottom: 10px;
+            font-size: 0.65rem;
+            color: #856404;
+            text-align: center;
         }
 
-        @media (max-width: 768px) {
-            .chat-lateral-container {
-                flex-direction: column;
-            }
-            .chat-widget {
-                width: 100%;
-                position: static;
-            }
+        /* Esconder o botão padrão do Streamlit */
+        .stButton > button {
+            display: none;
         }
     </style>
+
+    <script>
+        function toggleChat() {
+            var chat = document.getElementById('chatWindow');
+            if (chat) {
+                chat.classList.toggle('open');
+            }
+        }
+    </script>
     """, unsafe_allow_html=True)
 
-    # Estrutura de duas colunas: conteúdo principal (esquerda) e chat (direita)
-    st.markdown('<div class="chat-lateral-container">', unsafe_allow_html=True)
-
-    # ==================== CONTEÚDO PRINCIPAL (ESQUERDA) ====================
-    st.markdown('<div class="chat-main-content">', unsafe_allow_html=True)
-
-    st.markdown("""
-    <div class="info-card">
-        <h3>🤖 Sobre o Assistente de Luto</h3>
-        <p>O assistente foi treinado com a personalidade, preferências e mensagens deixadas por esta pessoa.</p>
-        <p><strong>Dicas:</strong></p>
-        <ul>
-            <li>Pergunte sobre lembranças felizes</li>
-            <li>Peça conselhos</li>
-            <li>Converse como se estivesse falando com a pessoa</li>
-        </ul>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Estatísticas do assistente
-    stats = assistente.estatisticas()
-    st.markdown(f"""
-    <div class="info-card" style="text-align: center;">
-        <p>📊 <strong>{stats.get('perguntas_respondidas', 0)}</strong> perguntas respondidas sobre a personalidade</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    # ==================== WIDGET DO CHAT (DIREITA) ====================
-    st.markdown('<div class="chat-widget">', unsafe_allow_html=True)
-
-    # Cabeçalho
-    st.markdown(f"""
-    <div class="chat-header">
-        <div class="chat-avatar">🤖</div>
-        <div class="chat-header-info">
-            <div class="chat-header-name">{nome_falecido}</div>
-            <div class="chat-header-status">Assistente IA • Online</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Aviso expander pequeno
-    with st.expander("⚠️ Sobre esta conversa"):
-        st.markdown(f"""
-        💡 Esta conversa é gerada por IA baseada na personalidade de **{nome_falecido}**.
-        As respostas são simulações. Use com carinho.
-        """)
-
-    # Corpo do chat
-    st.markdown('<div class="chat-body">', unsafe_allow_html=True)
-
+    # Inicializar histórico
     if "historico_assistente" not in st.session_state:
         st.session_state.historico_assistente = []
 
     if not st.session_state.historico_assistente:
-        msg_inicial = f"Olá! Sou uma simulação baseada em como {nome_falecido} era. Pode me perguntar qualquer coisa. 💚"
+        msg_inicial = f"Olá! Sou uma simulação baseada em como {nome_falecido} era. 💚"
         st.session_state.historico_assistente.append({"tipo": "bot", "texto": msg_inicial})
 
+    # Widget do chat
+    st.markdown(f'''
+    <div class="chat-widget-container">
+        <div class="chat-window" id="chatWindow">
+            <div class="chat-header" onclick="toggleChat()">
+                <div class="chat-avatar">🤖</div>
+                <div class="chat-header-info">
+                    <div class="chat-header-name">{nome_falecido}</div>
+                    <div class="chat-header-status">Clique para minimizar</div>
+                </div>
+                <div class="chat-close">−</div>
+            </div>
+            <div class="chat-body">
+    ''', unsafe_allow_html=True)
+
+    # Mensagens
     for msg in st.session_state.historico_assistente:
         if msg["tipo"] == "user":
-            st.markdown(f"""
+            st.markdown(f'''
             <div class="message-row user">
-                <div class="message-bubble user">
-                    {msg["texto"]}
-                </div>
+                <div class="message-bubble user">{msg["texto"]}</div>
             </div>
-            """, unsafe_allow_html=True)
+            ''', unsafe_allow_html=True)
         else:
-            st.markdown(f"""
+            st.markdown(f'''
             <div class="message-row bot">
-                <div class="message-bubble bot">
-                    {msg["texto"]}
-                </div>
+                <div class="message-bubble bot">{msg["texto"]}</div>
             </div>
-            """, unsafe_allow_html=True)
+            ''', unsafe_allow_html=True)
 
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('''
+            </div>
+            <div class="chat-footer">
+                <input type="text" id="chatInput" placeholder="Digite sua mensagem..." onkeypress="if(event.keyCode==13) document.getElementById('chatSendBtn').click()">
+                <button id="chatSendBtn">📤</button>
+            </div>
+            <div class="ia-warning-small">
+                💡 Conversa simulada por IA
+            </div>
+        </div>
+        <div class="chat-toggle-btn" onclick="toggleChat()">
+            💬
+        </div>
+    </div>
+    ''', unsafe_allow_html=True)
 
-    # Rodapé com input
-    st.markdown('<div class="chat-footer">', unsafe_allow_html=True)
+    # Input e botão do chat (via session state)
+    mensagem = st.text_input("chat_input", key="chat_input", label_visibility="collapsed", placeholder="")
+    enviar = st.button("chat_send", key="chat_send")
 
-    mensagem = st.text_input("msg", key="msg_assistente",
-                             placeholder="Digite sua mensagem...",
-                             label_visibility="collapsed")
-
-    col_btn, col_clear = st.columns([1, 1])
-    with col_btn:
-        enviar = st.button("📤", key="btn_enviar", use_container_width=True)
-    with col_clear:
-        limpar = st.button("🗑️", key="clear_chat", use_container_width=True)
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    st.markdown('</div>', unsafe_allow_html=True)  # Fecha chat-widget
-
-    st.markdown('</div>', unsafe_allow_html=True)  # Fecha container principal
-
-    # Processar mensagem
     if enviar and mensagem:
         st.session_state.historico_assistente.append({"tipo": "user", "texto": mensagem})
         with st.spinner("..."):
@@ -721,9 +695,6 @@ def render_assistente():
         st.session_state.historico_assistente.append({"tipo": "bot", "texto": resposta})
         st.rerun()
 
-    if limpar:
-        st.session_state.historico_assistente = []
-        st.rerun()
 
 # ============================================================================
 # VÍDEOS
