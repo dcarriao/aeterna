@@ -219,14 +219,6 @@ def inject_custom_css():
     """, unsafe_allow_html=True)
 
 # ============================================================================
-# RESET DO BANCO (APENAS UMA VEZ)
-# ============================================================================
-
-# Verifica se o banco existe e se precisa resetar
-if os.path.exists("dados/cofre.db"):
-    print("🔄 Resetando banco de dados...")
-    resetar_banco()
-    print("✅ Banco resetado com sucesso!")
 
 # ============================================================================
 # INICIALIZAÇÃO NORMAL
