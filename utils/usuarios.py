@@ -9,40 +9,6 @@ class GerenciadorUsuarios:
     def __init__(self, arquivo_db="dados/cofre.db"):
         self.arquivo_db = arquivo_db
         self._criar_tabelas()
-        self._migrar_banco()
-
-    def _migrar_banco(self):
-        """Adiciona colunas faltantes no banco existente"""
-        conn = sqlite3.connect(self.arquivo_db)
-        cursor = conn.cursor()
-
-        cursor.execute("PRAGMA table_info(usuarios)")
-        colunas = [col[1] for col in cursor.fetchall()]
-
-        # Adicionar colunas faltantes
-        if 'plano_id' not in colunas:
-            try:
-                cursor.execute('ALTER TABLE usuarios ADD COLUMN plano_id INTEGER DEFAULT 1')
-            except:
-                pass
-        if 'foto' not in colunas:
-            try:
-                cursor.execute('ALTER TABLE usuarios ADD COLUMN foto TEXT')
-            except:
-                pass
-        if 'redes_sociais' not in colunas:
-            try:
-                cursor.execute('ALTER TABLE usuarios ADD COLUMN redes_sociais TEXT')
-            except:
-                pass
-        if 'sobrenome' not in colunas:
-            try:
-                cursor.execute('ALTER TABLE usuarios ADD COLUMN sobrenome TEXT DEFAULT ""')
-            except:
-                pass
-
-        conn.commit()
-        conn.close()
 
     def _criar_tabelas(self):
         conn = sqlite3.connect(self.arquivo_db)
@@ -55,6 +21,7 @@ class GerenciadorUsuarios:
                 sobrenome TEXT NOT NULL,
                 email TEXT UNIQUE NOT NULL,
                 cpf TEXT UNIQUE NOT NULL,
+                data_nascimento DATE NOT NULL,
                 telefone TEXT,
                 whatsapp TEXT,
                 senha_hash TEXT NOT NULL,
@@ -78,7 +45,8 @@ class GerenciadorUsuarios:
                 melhor_lembranca TEXT,
                 dia_mais_feliz TEXT,
                 dia_mais_triste TEXT,
-                personalidade_extra TEXT
+                personalidade_extra TEXT,
+                FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
             )
         ''')
 
@@ -88,7 +56,8 @@ class GerenciadorUsuarios:
                 usuario_id INTEGER,
                 pergunta TEXT,
                 resposta TEXT,
-                data TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
             )
         ''')
 
@@ -98,12 +67,12 @@ class GerenciadorUsuarios:
                 nome TEXT NOT NULL,
                 preco REAL DEFAULT 0,
                 descricao TEXT,
-                max_contatos INTEGER DEFAULT 5,
+                max_contatos INTEGER DEFAULT 10,
                 max_prioridades INTEGER DEFAULT 3,
                 max_mensagens_ia INTEGER DEFAULT 50,
                 max_videos_total INTEGER DEFAULT 10,
                 max_videos_por_categoria INTEGER DEFAULT 5,
-                tem_agendamento INTEGER DEFAULT 0,
+                tem_agendamento INTEGER DEFAULT 1,
                 tem_videos_ia INTEGER DEFAULT 0,
                 ativo INTEGER DEFAULT 1
             )
@@ -113,7 +82,7 @@ class GerenciadorUsuarios:
         if cursor.fetchone()[0] == 0:
             cursor.execute('''
                 INSERT INTO planos (nome, preco, descricao, max_contatos, max_prioridades, max_mensagens_ia, max_videos_total, max_videos_por_categoria, tem_agendamento, tem_videos_ia)
-                VALUES ('Gratuito', 0, 'Plano básico gratuito', 5, 3, 50, 10, 5, 1, 0)
+                VALUES ('Gratuito', 0, 'Plano básico gratuito', 10, 3, 50, 10, 5, 1, 0)
             ''')
 
         conn.commit()
@@ -126,7 +95,7 @@ class GerenciadorUsuarios:
         hash_obj = hashlib.sha256(senha_com_salt)
         return hash_obj.hexdigest(), salt
 
-    def criar_usuario(self, nome: str, sobrenome: str, email: str, cpf: str,
+    def criar_usuario(self, nome: str, sobrenome: str, email: str, cpf: str, data_nascimento: str,
                       senha: str, telefone: str = '', whatsapp: str = '',
                       foto: str = '', redes: str = '') -> bool:
         try:
@@ -142,9 +111,10 @@ class GerenciadorUsuarios:
             conn = sqlite3.connect(self.arquivo_db)
             cursor = conn.cursor()
             cursor.execute('''
-                INSERT INTO usuarios (nome, sobrenome, email, cpf, telefone, whatsapp, senha_hash, salt, foto, redes_sociais)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (nome, sobrenome, email.lower(), cpf, telefone, whatsapp, hash_senha, salt, foto, redes))
+                INSERT INTO usuarios (nome, sobrenome, email, cpf, data_nascimento, telefone, whatsapp, senha_hash, salt, foto, redes_sociais)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+            nome, sobrenome, email.lower(), cpf, data_nascimento, telefone, whatsapp, hash_senha, salt, foto, redes))
             conn.commit()
             usuario_id = cursor.lastrowid
 
@@ -159,15 +129,15 @@ class GerenciadorUsuarios:
                 return "email_existente"
             return False
 
-    def criar_usuario_admin(self, nome: str, sobrenome: str, email: str, cpf: str, senha: str):
+    def criar_usuario_admin(self, nome: str, sobrenome: str, email: str, cpf: str, data_nascimento: str, senha: str):
         try:
             hash_senha, salt = self._hash_senha(senha)
             conn = sqlite3.connect(self.arquivo_db)
             cursor = conn.cursor()
             cursor.execute('''
-                INSERT INTO usuarios (nome, sobrenome, email, cpf, senha_hash, salt, tipo)
-                VALUES (?, ?, ?, ?, ?, ?, 'admin')
-            ''', (nome, sobrenome, email.lower(), cpf, hash_senha, salt))
+                INSERT INTO usuarios (nome, sobrenome, email, cpf, data_nascimento, senha_hash, salt, tipo)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'admin')
+            ''', (nome, sobrenome, email.lower(), cpf, data_nascimento, hash_senha, salt))
             conn.commit()
             usuario_id = cursor.lastrowid
             cursor.execute('INSERT INTO preferencias_usuario (usuario_id) VALUES (?)', (usuario_id,))
@@ -180,17 +150,16 @@ class GerenciadorUsuarios:
     def autenticar(self, email: str, senha: str) -> dict:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
-
         cursor.execute('''
-            SELECT id, nome, IFNULL(sobrenome, '') as sobrenome, email, cpf, senha_hash, salt, tipo, IFNULL(telefone, '') as telefone, IFNULL(whatsapp, '') as whatsapp
+            SELECT id, nome, sobrenome, email, cpf, data_nascimento, senha_hash, salt, tipo, telefone, whatsapp, plano_id 
             FROM usuarios WHERE email = ? AND ativo = 1
         ''', (email.lower(),))
         usuario = cursor.fetchone()
         conn.close()
 
         if usuario:
-            hash_calculado, _ = self._hash_senha(senha, usuario[6])
-            if hash_calculado == usuario[5]:
+            hash_calculado, _ = self._hash_senha(senha, usuario[7])
+            if hash_calculado == usuario[6]:
                 return {
                     "id": usuario[0],
                     "nome": usuario[1],
@@ -198,10 +167,11 @@ class GerenciadorUsuarios:
                     "nome_completo": f"{usuario[1]} {usuario[2]}",
                     "email": usuario[3],
                     "cpf": usuario[4],
-                    "tipo": usuario[7],
-                    "telefone": usuario[8] or "",
-                    "whatsapp": usuario[9] or "",
-                    "plano_id": 1
+                    "data_nascimento": usuario[5],
+                    "tipo": usuario[8],
+                    "telefone": usuario[9] or "",
+                    "whatsapp": usuario[10] or "",
+                    "plano_id": usuario[11]
                 }
         return None
 
@@ -209,7 +179,7 @@ class GerenciadorUsuarios:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT id, nome, IFNULL(sobrenome, '') as sobrenome, email, cpf, IFNULL(telefone, '') as telefone, IFNULL(whatsapp, '') as whatsapp, tipo
+            SELECT id, nome, sobrenome, email, cpf, data_nascimento, telefone, whatsapp, tipo, plano_id 
             FROM usuarios WHERE id = ?
         ''', (usuario_id,))
         usuario = cursor.fetchone()
@@ -222,10 +192,11 @@ class GerenciadorUsuarios:
                 "nome_completo": f"{usuario[1]} {usuario[2]}",
                 "email": usuario[3],
                 "cpf": usuario[4],
-                "telefone": usuario[5] or "",
-                "whatsapp": usuario[6] or "",
-                "tipo": usuario[7],
-                "plano_id": 1
+                "data_nascimento": usuario[5],
+                "telefone": usuario[6] or "",
+                "whatsapp": usuario[7] or "",
+                "tipo": usuario[8],
+                "plano_id": usuario[9]
             }
         return None
 
@@ -257,7 +228,7 @@ class GerenciadorUsuarios:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT IFNULL(gostos_musica, ''), IFNULL(gostos_comida, ''), IFNULL(melhor_lembranca, ''), IFNULL(dia_mais_feliz, ''), IFNULL(dia_mais_triste, ''), IFNULL(personalidade_extra, '')
+            SELECT gostos_musica, gostos_comida, melhor_lembranca, dia_mais_feliz, dia_mais_triste, personalidade_extra
             FROM preferencias_usuario WHERE usuario_id = ?
         ''', (usuario_id,))
         row = cursor.fetchone()
@@ -274,11 +245,35 @@ class GerenciadorUsuarios:
         return {}
 
     def obter_plano_usuario(self, usuario_id: int) -> dict:
+        conn = sqlite3.connect(self.arquivo_db)
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT p.id, p.nome, p.preco, p.max_contatos, p.max_prioridades, p.max_mensagens_ia, 
+                   p.max_videos_total, p.max_videos_por_categoria, p.tem_agendamento, p.tem_videos_ia
+            FROM planos p
+            JOIN usuarios u ON u.plano_id = p.id
+            WHERE u.id = ?
+        ''', (usuario_id,))
+        plano = cursor.fetchone()
+        conn.close()
+        if plano:
+            return {
+                "id": plano[0],
+                "nome": plano[1],
+                "preco": plano[2],
+                "max_contatos": plano[3],
+                "max_prioridades": plano[4],
+                "max_mensagens_ia": plano[5],
+                "max_videos_total": plano[6],
+                "max_videos_por_categoria": plano[7],
+                "tem_agendamento": plano[8],
+                "tem_videos_ia": plano[9]
+            }
         return {
             "id": 1,
             "nome": "Gratuito",
             "preco": 0,
-            "max_contatos": 5,
+            "max_contatos": 10,
             "max_prioridades": 3,
             "max_mensagens_ia": 50,
             "max_videos_total": 10,
@@ -298,7 +293,7 @@ class GerenciadorUsuarios:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT id, nome, IFNULL(sobrenome, ''), email, cpf, tipo, IFNULL(telefone, ''), IFNULL(whatsapp, ''), data_criacao, ultimo_acesso 
+            SELECT id, nome, sobrenome, email, cpf, tipo, telefone, whatsapp, data_criacao, ultimo_acesso 
             FROM usuarios ORDER BY data_criacao DESC
         ''')
         usuarios = cursor.fetchall()
@@ -332,6 +327,7 @@ class GerenciadorUsuarios:
                 sobrenome="aEterna",
                 email="admin@aeterna.com",
                 cpf="00000000000",
+                data_nascimento="1970-01-01",
                 senha=senha
             )
             print("✅ Usuário admin criado com senha: admin123")

@@ -1,4 +1,4 @@
-# utils/banco.py - VERSÃO COMPLETA
+# utils/banco.py
 import sqlite3
 import os
 from typing import List, Dict, Optional
@@ -14,18 +14,53 @@ class BancoDados:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
 
-        # Tabela de senhas
+        # Tabela de usuários
         cursor.execute('''
-            CREATE TABLE IF NOT EXISTS senhas (
+            CREATE TABLE IF NOT EXISTS usuarios (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nome TEXT NOT NULL,
+                sobrenome TEXT NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                cpf TEXT UNIQUE NOT NULL,
+                data_nascimento DATE NOT NULL,
+                telefone TEXT,
+                whatsapp TEXT,
+                senha_hash TEXT NOT NULL,
+                salt TEXT NOT NULL,
+                foto TEXT,
+                redes_sociais TEXT,
+                tipo TEXT DEFAULT 'usuario',
+                plano_id INTEGER DEFAULT 1,
+                ativo INTEGER DEFAULT 1,
+                data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                ultimo_acesso TIMESTAMP
+            )
+        ''')
+
+        # Tabela de preferências do usuário (gostos)
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS preferencias_usuario (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                usuario_id INTEGER UNIQUE,
+                gostos_musica TEXT,
+                gostos_comida TEXT,
+                melhor_lembranca TEXT,
+                dia_mais_feliz TEXT,
+                dia_mais_triste TEXT,
+                personalidade_extra TEXT,
+                FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+            )
+        ''')
+
+        # Tabela de personalidade para assistente
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS personalidade (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 usuario_id INTEGER,
-                servico TEXT NOT NULL,
-                usuario TEXT NOT NULL,
-                senha_criptografada TEXT NOT NULL,
-                url TEXT,
-                notas TEXT,
-                data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                pergunta TEXT,
+                resposta TEXT,
+                data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
             )
         ''')
 
@@ -37,14 +72,13 @@ class BancoDados:
                 titulo TEXT NOT NULL,
                 destinatario TEXT,
                 caminho_arquivo TEXT,
-                url_externa TEXT,
                 categoria TEXT DEFAULT 'geral',
                 notas TEXT,
                 data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
 
-        # Tabela de acesso aos vídeos
+        # Tabela de acesso aos vídeos (quem pode ver)
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS videos_acesso (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -73,11 +107,12 @@ class BancoDados:
                 acesso_central_luto INTEGER DEFAULT 0,
                 chave_acesso TEXT,
                 mensagem_liberacao TEXT,
-                data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
             )
         ''')
 
-        # Tabela de agendamentos
+        # Tabela de agendamentos (mensagens programadas)
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS agendamentos (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -91,9 +126,38 @@ class BancoDados:
                 gerar_por_ia INTEGER DEFAULT 0,
                 status TEXT DEFAULT 'agendado',
                 data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                data_envio_real TIMESTAMP
+                data_envio_real TIMESTAMP,
+                FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+                FOREIGN KEY (contato_id) REFERENCES contatos(id),
+                FOREIGN KEY (video_id) REFERENCES videos(id)
             )
         ''')
+
+        # Tabela de planos
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS planos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nome TEXT NOT NULL,
+                preco REAL DEFAULT 0,
+                descricao TEXT,
+                max_contatos INTEGER DEFAULT 10,
+                max_prioridades INTEGER DEFAULT 3,
+                max_mensagens_ia INTEGER DEFAULT 50,
+                max_videos_total INTEGER DEFAULT 10,
+                max_videos_por_categoria INTEGER DEFAULT 5,
+                tem_agendamento INTEGER DEFAULT 1,
+                tem_videos_ia INTEGER DEFAULT 0,
+                ativo INTEGER DEFAULT 1
+            )
+        ''')
+
+        # Inserir plano padrão
+        cursor.execute("SELECT COUNT(*) FROM planos")
+        if cursor.fetchone()[0] == 0:
+            cursor.execute('''
+                INSERT INTO planos (nome, preco, descricao, max_contatos, max_prioridades, max_mensagens_ia, max_videos_total, max_videos_por_categoria, tem_agendamento, tem_videos_ia)
+                VALUES ('Gratuito', 0, 'Plano básico gratuito', 10, 3, 50, 10, 5, 1, 0)
+            ''')
 
         # Tabela de configurações
         cursor.execute('''
@@ -104,11 +168,51 @@ class BancoDados:
             )
         ''')
 
+        # Tabela de senhas
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS senhas (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                usuario_id INTEGER,
+                servico TEXT NOT NULL,
+                usuario TEXT NOT NULL,
+                senha_criptografada TEXT NOT NULL,
+                url TEXT,
+                notas TEXT,
+                data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+
         conn.commit()
         conn.close()
 
     # ========================================================================
-    # OPERAÇÕES DE SENHAS
+    # USUÁRIOS
+    # ========================================================================
+    def listar_contatos_prioritarios(self, usuario_id: int) -> List[Dict]:
+        conn = sqlite3.connect(self.arquivo_db)
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT id, nome, sobrenome, email, telefone, whatsapp, parentesco, is_prioridade
+            FROM contatos 
+            WHERE usuario_id = ? AND is_prioridade = 1
+            ORDER BY prioridade_order
+        ''', (usuario_id,))
+        rows = cursor.fetchall()
+        conn.close()
+        return [{"id": r[0], "nome": r[1], "sobrenome": r[2], "nome_completo": f"{r[1]} {r[2]}".strip(),
+                 "email": r[3], "telefone": r[4] or "", "whatsapp": r[5] or "", "parentesco": r[6] or "",
+                 "is_prioridade": r[7]} for r in rows]
+
+    def contar_contatos_prioritarios(self, usuario_id: int) -> int:
+        conn = sqlite3.connect(self.arquivo_db)
+        cursor = conn.cursor()
+        cursor.execute('SELECT COUNT(*) FROM contatos WHERE usuario_id = ? AND is_prioridade = 1', (usuario_id,))
+        count = cursor.fetchone()[0]
+        conn.close()
+        return count
+
+    # ========================================================================
+    # SENHAS
     # ========================================================================
     def adicionar_senha(self, usuario_id: int, servico: str, usuario: str, senha: str, url: str = "", notas: str = ""):
         conn = sqlite3.connect(self.arquivo_db)
@@ -148,23 +252,19 @@ class BancoDados:
         conn.close()
 
     # ========================================================================
-    # OPERAÇÕES DE VÍDEOS
+    # VÍDEOS
     # ========================================================================
     def listar_videos_usuario(self, usuario_id: int) -> List[Dict]:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
-        try:
-            cursor.execute('''
-                SELECT id, titulo, destinatario, caminho_arquivo, categoria, data_criacao 
-                FROM videos WHERE usuario_id = ? ORDER BY data_criacao DESC
-            ''', (usuario_id,))
-            rows = cursor.fetchall()
-            conn.close()
-            return [{"id": r[0], "titulo": r[1], "destinatario": r[2], "caminho": r[3],
-                     "categoria": r[4] if len(r) > 4 else "geral", "data": r[5]} for r in rows]
-        except:
-            conn.close()
-            return []
+        cursor.execute('''
+            SELECT id, titulo, destinatario, caminho_arquivo, categoria, data_criacao 
+            FROM videos WHERE usuario_id = ? ORDER BY data_criacao DESC
+        ''', (usuario_id,))
+        rows = cursor.fetchall()
+        conn.close()
+        return [{"id": r[0], "titulo": r[1], "destinatario": r[2], "caminho": r[3],
+                 "categoria": r[4] if len(r) > 4 else "geral", "data": r[5]} for r in rows]
 
     def adicionar_video(self, usuario_id: int, titulo: str, destinatario: str, caminho_arquivo: str,
                         categoria: str = "geral"):
@@ -211,10 +311,6 @@ class BancoDados:
                     os.remove(row[0])
                 except:
                     pass
-            try:
-                cursor.execute("DELETE FROM videos_acesso WHERE video_id = ?", (id_video,))
-            except:
-                pass
             cursor.execute("DELETE FROM videos WHERE id = ? AND usuario_id = ?", (id_video, usuario_id))
             conn.commit()
             conn.close()
@@ -223,7 +319,7 @@ class BancoDados:
         return False
 
     # ========================================================================
-    # OPERAÇÕES DE CONTATOS
+    # CONTATOS
     # ========================================================================
     def adicionar_contato(self, usuario_id: int, nome: str, sobrenome: str, email: str,
                           telefone: str = "", whatsapp: str = "", parentesco: str = "",
@@ -263,38 +359,15 @@ class BancoDados:
             "parentesco": r[6] or "",
             "data_nascimento": r[7] or "",
             "datas_especiais": r[8] or "",
-            "is_prioridade": r[9] if len(r) > 9 else 0,
-            "prioridade_order": r[10] if len(r) > 10 else 0,
-            "acesso_central_luto": r[11] if len(r) > 11 else 0
+            "is_prioridade": r[9] or 0,
+            "prioridade_order": r[10] or 0,
+            "acesso_central_luto": r[11] or 0
         } for r in rows]
-
-    def listar_contatos_prioritarios(self, usuario_id: int) -> List[Dict]:
-        conn = sqlite3.connect(self.arquivo_db)
-        cursor = conn.cursor()
-        cursor.execute('''
-            SELECT id, nome, sobrenome, email, telefone, whatsapp, parentesco, is_prioridade
-            FROM contatos 
-            WHERE usuario_id = ? AND is_prioridade = 1
-            ORDER BY prioridade_order
-        ''', (usuario_id,))
-        rows = cursor.fetchall()
-        conn.close()
-        return [{"id": r[0], "nome": r[1], "sobrenome": r[2], "nome_completo": f"{r[1]} {r[2]}".strip(),
-                 "email": r[3], "telefone": r[4] or "", "whatsapp": r[5] or "", "parentesco": r[6] or "",
-                 "is_prioridade": r[7]} for r in rows]
 
     def contar_contatos_usuario(self, usuario_id: int) -> int:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
         cursor.execute('SELECT COUNT(*) FROM contatos WHERE usuario_id = ?', (usuario_id,))
-        count = cursor.fetchone()[0]
-        conn.close()
-        return count
-
-    def contar_contatos_prioritarios(self, usuario_id: int) -> int:
-        conn = sqlite3.connect(self.arquivo_db)
-        cursor = conn.cursor()
-        cursor.execute('SELECT COUNT(*) FROM contatos WHERE usuario_id = ? AND is_prioridade = 1', (usuario_id,))
         count = cursor.fetchone()[0]
         conn.close()
         return count
@@ -322,9 +395,9 @@ class BancoDados:
             return {
                 "id": row[0], "nome": row[1], "sobrenome": row[2] or "", "email": row[3],
                 "telefone": row[4] or "", "whatsapp": row[5] or "",
-                "acesso_central_luto": row[6] if len(row) > 6 else 0,
-                "usuario_id": row[7] if len(row) > 7 else 0,
-                "falecido_nome": row[8] if len(row) > 8 else ""
+                "acesso_central_luto": row[6] or 0,
+                "usuario_id": row[7],
+                "falecido_nome": row[8]
             }
         return None
 
@@ -336,7 +409,7 @@ class BancoDados:
         conn.close()
 
     # ========================================================================
-    # OPERAÇÕES DE AGENDAMENTOS
+    # AGENDAMENTOS (LEMBRANÇAS PROGRAMADAS)
     # ========================================================================
     def criar_agendamento(self, usuario_id: int, contato_id: int, tipo: str, data_envio: str,
                           data_termino: str = "", conteudo: str = "", video_id: int = None,
@@ -378,6 +451,107 @@ class BancoDados:
         cursor.execute("DELETE FROM agendamentos WHERE id = ? AND usuario_id = ?", (id_agendamento, usuario_id))
         conn.commit()
         conn.close()
+
+    # ========================================================================
+    # PREFERÊNCIAS (GOSTOS)
+    # ========================================================================
+    def salvar_preferencias(self, usuario_id: int, preferencias: dict):
+        conn = sqlite3.connect(self.arquivo_db)
+        cursor = conn.cursor()
+
+        cursor.execute('SELECT COUNT(*) FROM preferencias_usuario WHERE usuario_id = ?', (usuario_id,))
+        if cursor.fetchone()[0] == 0:
+            cursor.execute('''
+                INSERT INTO preferencias_usuario (usuario_id, gostos_musica, gostos_comida, melhor_lembranca, dia_mais_feliz, dia_mais_triste, personalidade_extra)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (usuario_id,
+                  preferencias.get('gostos_musica', ''),
+                  preferencias.get('gostos_comida', ''),
+                  preferencias.get('melhor_lembranca', ''),
+                  preferencias.get('dia_mais_feliz', ''),
+                  preferencias.get('dia_mais_triste', ''),
+                  preferencias.get('personalidade_extra', '')))
+        else:
+            cursor.execute('''
+                UPDATE preferencias_usuario SET 
+                    gostos_musica = ?,
+                    gostos_comida = ?,
+                    melhor_lembranca = ?,
+                    dia_mais_feliz = ?,
+                    dia_mais_triste = ?,
+                    personalidade_extra = ?
+                WHERE usuario_id = ?
+            ''', (preferencias.get('gostos_musica', ''),
+                  preferencias.get('gostos_comida', ''),
+                  preferencias.get('melhor_lembranca', ''),
+                  preferencias.get('dia_mais_feliz', ''),
+                  preferencias.get('dia_mais_triste', ''),
+                  preferencias.get('personalidade_extra', ''),
+                  usuario_id))
+
+        conn.commit()
+        conn.close()
+
+    def obter_preferencias(self, usuario_id: int) -> dict:
+        conn = sqlite3.connect(self.arquivo_db)
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT gostos_musica, gostos_comida, melhor_lembranca, dia_mais_feliz, dia_mais_triste, personalidade_extra
+            FROM preferencias_usuario WHERE usuario_id = ?
+        ''', (usuario_id,))
+        row = cursor.fetchone()
+        conn.close()
+        if row:
+            return {
+                "gostos_musica": row[0] or "",
+                "gostos_comida": row[1] or "",
+                "melhor_lembranca": row[2] or "",
+                "dia_mais_feliz": row[3] or "",
+                "dia_mais_triste": row[4] or "",
+                "personalidade_extra": row[5] or ""
+            }
+        return {}
+
+    # ========================================================================
+    # PLANOS
+    # ========================================================================
+    def obter_plano_usuario(self, usuario_id: int) -> dict:
+        conn = sqlite3.connect(self.arquivo_db)
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT p.id, p.nome, p.preco, p.max_contatos, p.max_prioridades, p.max_mensagens_ia, 
+                   p.max_videos_total, p.max_videos_por_categoria, p.tem_agendamento, p.tem_videos_ia
+            FROM planos p
+            JOIN usuarios u ON u.plano_id = p.id
+            WHERE u.id = ?
+        ''', (usuario_id,))
+        plano = cursor.fetchone()
+        conn.close()
+        if plano:
+            return {
+                "id": plano[0],
+                "nome": plano[1],
+                "preco": plano[2],
+                "max_contatos": plano[3],
+                "max_prioridades": plano[4],
+                "max_mensagens_ia": plano[5],
+                "max_videos_total": plano[6],
+                "max_videos_por_categoria": plano[7],
+                "tem_agendamento": plano[8],
+                "tem_videos_ia": plano[9]
+            }
+        return {
+            "id": 1,
+            "nome": "Gratuito",
+            "preco": 0,
+            "max_contatos": 10,
+            "max_prioridades": 3,
+            "max_mensagens_ia": 50,
+            "max_videos_total": 10,
+            "max_videos_por_categoria": 5,
+            "tem_agendamento": 1,
+            "tem_videos_ia": 0
+        }
 
     # ========================================================================
     # CONFIGURAÇÕES
