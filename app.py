@@ -423,154 +423,265 @@ def render_login():
 # ASSISTENTE DE LUTO
 # ============================================================================
 def render_assistente():
-    """Renderiza o assistente de luto como um chat funcional"""
+    """Renderiza o assistente de luto em uma janela expansível no canto direito"""
 
-    # Verificar se o assistente já foi criado
     if 'assistente_obj' not in st.session_state:
         st.session_state.assistente_obj = AssistenteLuto(st.session_state.falecido_id)
 
     assistente = st.session_state.assistente_obj
     nome_falecido = st.session_state.usuario_atual.get('nome_completo', 'seu ente querido')
 
-    # CSS para o chat
-    st.markdown("""
-    <style>
-        .chat-container {
-            background: #e5ddd5;
-            border-radius: 12px;
-            padding: 15px;
-            height: 400px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 15px;
-        }
-
-        .message-row {
-            display: flex;
-            margin-bottom: 12px;
-        }
-
-        .message-row.user {
-            justify-content: flex-end;
-        }
-
-        .message-row.bot {
-            justify-content: flex-start;
-        }
-
-        .message-bubble {
-            max-width: 70%;
-            padding: 10px 14px;
-            border-radius: 18px;
-            font-size: 0.85rem;
-            word-wrap: break-word;
-        }
-
-        .message-bubble.user {
-            background: #dcf8c5;
-            color: #075e54;
-            border-bottom-right-radius: 4px;
-        }
-
-        .message-bubble.bot {
-            background: white;
-            color: #1a1a1a;
-            border-bottom-left-radius: 4px;
-            box-shadow: 0 1px 1px rgba(0,0,0,0.05);
-        }
-
-        .chat-warning {
-            background: #fff3cd;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 0.7rem;
-            color: #856404;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .chat-input-area {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        /* Esconder o botão de submit padrão do Streamlit */
-        .stButton button[key="btn_enviar"] {
-            background-color: #128C7E;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-
-    # Aviso
-    st.markdown(f"""
-    <div class="chat-warning">
-        💡 Esta é uma conversa gerada por IA baseada na personalidade de <strong>{nome_falecido}</strong>. 
-        As respostas são simulações. Use com carinho.
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Inicializar histórico no session state se não existir
+    # Inicializar histórico
     if 'historico_assistente' not in st.session_state:
         st.session_state.historico_assistente = []
 
     if not st.session_state.historico_assistente:
-        msg_inicial = f"Olá! Sou uma simulação baseada em como {nome_falecido} era. Pode me perguntar qualquer coisa. 💚"
+        msg_inicial = f"Olá! Sou uma simulação baseada em como {nome_falecido} era. 💚"
         st.session_state.historico_assistente.append({"tipo": "bot", "texto": msg_inicial})
 
-    # Exibir mensagens
-    st.markdown('<div class="chat-container">', unsafe_allow_html=True)
+    # Layout com duas colunas: conteúdo principal e chat
+    col_conteudo, col_chat = st.columns([2, 1])
 
-    for msg in st.session_state.historico_assistente:
-        if msg["tipo"] == "user":
-            st.markdown(f"""
-            <div class="message-row user">
-                <div class="message-bubble user">
-                    {msg["texto"]}
+    # ==================== COLUNA ESQUERDA (CONTEÚDO PRINCIPAL) ====================
+    with col_conteudo:
+        st.markdown("""
+        <div style="background: white; border-radius: 15px; padding: 20px;">
+            <h3 style="color: #2E8B57;">🤖 Sobre o Assistente de Luto</h3>
+            <p>O assistente foi treinado com a personalidade, preferências e mensagens deixadas por <strong>{}</strong>.</p>
+            <p><strong>Dicas para conversar:</strong></p>
+            <ul>
+                <li>💬 Pergunte sobre lembranças felizes</li>
+                <li>💬 Peça conselhos para decisões importantes</li>
+                <li>💬 Conte sobre suas conquistas</li>
+                <li>💬 Compartilhe como está se sentindo</li>
+            </ul>
+        </div>
+        """.format(nome_falecido), unsafe_allow_html=True)
+
+        # Espaço para logo ou outras informações
+        st.image("assets/logo.png", width=200)
+        st.caption("aEterna - Seu Legado Digital")
+
+    # ==================== COLUNA DIREITA (CHAT EXPANSÍVEL) ====================
+    with col_chat:
+        # CSS para o chat expansível
+        st.markdown("""
+        <style>
+            .chat-expandable {
+                background: white;
+                border-radius: 15px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                overflow: hidden;
+                transition: all 0.3s ease;
+            }
+
+            .chat-header {
+                background: #075e54;
+                padding: 12px 16px;
+                color: white;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .chat-header-left {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .chat-avatar {
+                background: #128C7E;
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 16px;
+            }
+
+            .chat-header-info {
+                flex: 1;
+            }
+
+            .chat-header-name {
+                font-weight: bold;
+                font-size: 0.9rem;
+            }
+
+            .chat-header-status {
+                font-size: 0.6rem;
+                opacity: 0.8;
+            }
+
+            .chat-body {
+                height: 350px;
+                overflow-y: auto;
+                padding: 12px;
+                background: #e5ddd5;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .message-row {
+                display: flex;
+                margin-bottom: 10px;
+            }
+
+            .message-row.user {
+                justify-content: flex-end;
+            }
+
+            .message-row.bot {
+                justify-content: flex-start;
+            }
+
+            .message-bubble {
+                max-width: 85%;
+                padding: 8px 12px;
+                border-radius: 16px;
+                font-size: 0.8rem;
+                word-wrap: break-word;
+            }
+
+            .message-bubble.user {
+                background: #dcf8c5;
+                color: #075e54;
+                border-bottom-right-radius: 4px;
+            }
+
+            .message-bubble.bot {
+                background: white;
+                color: #1a1a1a;
+                border-bottom-left-radius: 4px;
+            }
+
+            .chat-footer {
+                padding: 10px;
+                background: white;
+                border-top: 1px solid #eee;
+            }
+
+            .chat-input-area {
+                display: flex;
+                gap: 8px;
+            }
+
+            .chat-input-area input {
+                flex: 1;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 20px;
+                font-size: 0.8rem;
+                outline: none;
+            }
+
+            .chat-input-area input:focus {
+                border-color: #128C7E;
+            }
+
+            .chat-input-area button {
+                background: #128C7E;
+                color: white;
+                border: none;
+                border-radius: 50%;
+                width: 36px;
+                height: 36px;
+                cursor: pointer;
+            }
+
+            .chat-warning-small {
+                background: #fff3cd;
+                padding: 6px 10px;
+                font-size: 0.6rem;
+                color: #856404;
+                text-align: center;
+            }
+
+            /* Ícone de expandir/recolher */
+            .expand-icon {
+                font-size: 20px;
+                cursor: pointer;
+            }
+        </style>
+
+        <script>
+            function toggleChat() {
+                var body = document.getElementById('chatBody');
+                var icon = document.getElementById('expandIcon');
+                if (body.style.display === 'none') {
+                    body.style.display = 'flex';
+                    icon.innerHTML = '−';
+                } else {
+                    body.style.display = 'none';
+                    icon.innerHTML = '+';
+                }
+            }
+        </script>
+        """, unsafe_allow_html=True)
+
+        # Chat expansível
+        st.markdown(f"""
+        <div class="chat-expandable">
+            <div class="chat-header" onclick="toggleChat()">
+                <div class="chat-header-left">
+                    <div class="chat-avatar">🤖</div>
+                    <div class="chat-header-info">
+                        <div class="chat-header-name">Conversar com {nome_falecido}</div>
+                        <div class="chat-header-status">Clique para expandir/recolher</div>
+                    </div>
+                </div>
+                <div class="expand-icon" id="expandIcon">−</div>
+            </div>
+            <div id="chatBody" style="display: block;">
+                <div class="chat-body" id="chatMessages">
+        """, unsafe_allow_html=True)
+
+        # Exibir mensagens
+        for msg in st.session_state.historico_assistente:
+            if msg["tipo"] == "user":
+                st.markdown(f"""
+                <div class="message-row user">
+                    <div class="message-bubble user">{msg["texto"]}</div>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+                <div class="message-row bot">
+                    <div class="message-bubble bot">{msg["texto"]}</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+        st.markdown("""
+                </div>
+                <div class="chat-footer">
+                    <div class="chat-warning-small">
+                        💡 Conversa simulada por IA baseada na personalidade
+                    </div>
                 </div>
             </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.markdown(f"""
-            <div class="message-row bot">
-                <div class="message-bubble bot">
-                    <strong>{nome_falecido}:</strong><br>{msg["texto"]}
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+        </div>
+        """, unsafe_allow_html=True)
 
-    st.markdown('</div>', unsafe_allow_html=True)
+        # Formulário de envio (fora do HTML)
+        with st.form(key="chat_form", clear_on_submit=True):
+            col1, col2 = st.columns([4, 1])
+            with col1:
+                mensagem = st.text_input("msg", key="nova_mensagem",
+                                         placeholder="Digite sua mensagem...",
+                                         label_visibility="collapsed")
+            with col2:
+                enviar = st.form_submit_button("📤", use_container_width=True)
 
-    # Usar um formulário para evitar reload completo
-    with st.form(key="chat_form", clear_on_submit=True):
-        col1, col2, col3 = st.columns([4, 1, 1])
+            if enviar and mensagem:
+                st.session_state.historico_assistente.append({"tipo": "user", "texto": mensagem})
+                with st.spinner("..."):
+                    resposta = assistente.conversar(mensagem)
+                st.session_state.historico_assistente.append({"tipo": "bot", "texto": resposta})
+                st.rerun()
 
-        with col1:
-            mensagem = st.text_input("msg", key="nova_mensagem",
-                                     placeholder="Digite sua mensagem...",
-                                     label_visibility="collapsed")
-
-        with col2:
-            enviar = st.form_submit_button("📤 Enviar", use_container_width=True)
-
-        with col3:
-            limpar = st.form_submit_button("🗑️ Limpar", use_container_width=True)
-
-        if enviar and mensagem:
-            # Adicionar mensagem do usuário
-            st.session_state.historico_assistente.append({"tipo": "user", "texto": mensagem})
-
-            # Gerar resposta da IA
-            with st.spinner(f"{nome_falecido} está pensando..."):
-                resposta = assistente.conversar(mensagem)
-            st.session_state.historico_assistente.append({"tipo": "bot", "texto": resposta})
-
-            st.rerun()
-
-        if limpar:
-            st.session_state.historico_assistente = []
-            st.rerun()
 
 # ============================================================================
 # VÍDEOS
