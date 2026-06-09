@@ -490,15 +490,11 @@ def render_login():
 # ASSISTENTE DE LUTO - VERSÃO CORRIGIDA
 # ============================================================================
 def render_assistente():
-    """Renderiza o assistente de luto em uma janela de chat no canto direito"""
+    """Renderiza o assistente de luto com chat funcional"""
 
-    if 'assistente_obj' not in st.session_state:
-        st.session_state.assistente_obj = AssistenteLuto(st.session_state.falecido_id)
-
-    assistente = st.session_state.assistente_obj
     nome_falecido = st.session_state.usuario_atual.get('nome_completo', 'seu ente querido')
 
-    # Inicializar histórico
+    # Inicializar histórico no session state
     if 'historico_assistente' not in st.session_state:
         st.session_state.historico_assistente = []
 
@@ -519,21 +515,22 @@ def render_assistente():
             <ul>
                 <li>💬 Pergunte sobre lembranças felizes</li>
                 <li>💬 Peça conselhos para decisões importantes</li>
-                <li>💬 Conte sobre suas conquistas</li>
                 <li>💬 Compartilhe como está se sentindo</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
 
-        # Estatísticas
-        stats = assistente.estatisticas()
+        # Criar assistente se não existir
+        if 'assistente_obj' not in st.session_state:
+            st.session_state.assistente_obj = AssistenteLuto(st.session_state.falecido_id)
+
+        stats = st.session_state.assistente_obj.estatisticas()
         st.markdown(f"""
         <div class="info-card" style="text-align: center;">
             <p>📊 <strong>{stats.get('perguntas_respondidas', 0)}</strong> perguntas respondidas sobre a personalidade</p>
         </div>
         """, unsafe_allow_html=True)
 
-        # Logo
         logo = carregar_logo()
         if logo:
             st.image(logo, width=200)
@@ -541,14 +538,132 @@ def render_assistente():
 
     # ==================== COLUNA DIREITA (CHAT) ====================
     with col_chat:
-        # Widget do chat
-        st.markdown(f"""
+        # CSS do chat
+        st.markdown("""
+        <style>
+            .chat-widget {
+                background: white;
+                border-radius: 15px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                overflow: hidden;
+                position: sticky;
+                top: 20px;
+                border: 1px solid #e0e0e0;
+            }
+            .chat-header {
+                background: #075e54;
+                padding: 12px 16px;
+                color: white;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .chat-avatar {
+                background: #128C7E;
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 18px;
+            }
+            .chat-header-name {
+                font-weight: bold;
+                font-size: 0.9rem;
+            }
+            .chat-body {
+                height: 350px;
+                overflow-y: auto;
+                padding: 15px;
+                background: #e5ddd5;
+                display: flex;
+                flex-direction: column;
+            }
+            .message-row {
+                display: flex;
+                margin-bottom: 12px;
+                width: 100%;
+            }
+            .message-row.user {
+                justify-content: flex-end;
+            }
+            .message-row.bot {
+                justify-content: flex-start;
+            }
+            .message-bubble {
+                max-width: 80%;
+                padding: 10px 14px;
+                border-radius: 18px;
+                font-size: 0.85rem;
+                word-wrap: break-word;
+            }
+            .message-bubble.user {
+                background: #dcf8c5;
+                color: #075e54;
+                border-bottom-right-radius: 4px;
+            }
+            .message-bubble.bot {
+                background: white;
+                color: #1a1a1a;
+                border-bottom-left-radius: 4px;
+                box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+            }
+            .chat-footer {
+                padding: 12px;
+                background: white;
+                border-top: 1px solid #eee;
+            }
+            .chat-warning {
+                background: #fff3cd;
+                padding: 6px 10px;
+                font-size: 0.65rem;
+                color: #856404;
+                text-align: center;
+            }
+            .chat-input-group {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+            }
+            .chat-input-group input {
+                flex: 1;
+                padding: 10px 12px;
+                border: 1px solid #ddd;
+                border-radius: 25px;
+                font-size: 0.85rem;
+                outline: none;
+            }
+            .chat-input-group input:focus {
+                border-color: #128C7E;
+            }
+            .chat-input-group button {
+                background: #128C7E;
+                color: white;
+                border: none;
+                border-radius: 25px;
+                padding: 8px 16px;
+                cursor: pointer;
+                font-weight: 500;
+            }
+            .chat-input-group button:hover {
+                background: #075e54;
+            }
+            .chat-clear-btn {
+                background: #f0f0f0 !important;
+                color: #666 !important;
+            }
+            .chat-clear-btn:hover {
+                background: #e0e0e0 !important;
+            }
+        </style>
+
         <div class="chat-widget">
             <div class="chat-header">
                 <div class="chat-avatar">🤖</div>
                 <div class="chat-header-name">Conversar com {nome_falecido}</div>
             </div>
-            <div class="chat-body" id="chatMessages">
+            <div class="chat-body">
         """, unsafe_allow_html=True)
 
         # Exibir mensagens
@@ -572,106 +687,36 @@ def render_assistente():
             <div class="chat-footer">
         """, unsafe_allow_html=True)
 
-        # Input e botões
-        mensagem = st.text_input("chat_mensagem", key="chat_input_msg",
-                                 placeholder="Digite sua mensagem...",
-                                 label_visibility="collapsed")
+        # Formulário para não recarregar a página inteira
+        with st.form(key="chat_form", clear_on_submit=True):
+            col_input, col_send, col_clear = st.columns([4, 1, 1])
 
-        col1, col2 = st.columns(2)
-        with col1:
-            enviar = st.button("📤 Enviar", key="chat_enviar", use_container_width=True, type="primary")
-        with col2:
-            limpar = st.button("🗑️ Limpar", key="chat_limpar", use_container_width=True)
+            with col_input:
+                mensagem = st.text_input("mensagem", key="nova_mensagem",
+                                         placeholder="Digite sua mensagem...",
+                                         label_visibility="collapsed")
+
+            with col_send:
+                enviar = st.form_submit_button("📤 Enviar", use_container_width=True)
+
+            with col_clear:
+                limpar = st.form_submit_button("🗑️ Limpar", use_container_width=True)
 
         st.markdown('</div></div>', unsafe_allow_html=True)
 
         # Processar mensagem
         if enviar and mensagem:
             st.session_state.historico_assistente.append({"tipo": "user", "texto": mensagem})
-            with st.spinner("..."):
-                resposta = assistente.conversar(mensagem)
-            st.session_state.historico_assistente.append({"tipo": "bot", "texto": resposta})
+
+            if 'assistente_obj' in st.session_state:
+                with st.spinner("..."):
+                    resposta = st.session_state.assistente_obj.conversar(mensagem)
+                st.session_state.historico_assistente.append({"tipo": "bot", "texto": resposta})
             st.rerun()
 
         if limpar:
             st.session_state.historico_assistente = []
             st.rerun()
-
-
-# ============================================================================
-# VÍDEOS
-# ============================================================================
-def render_videos():
-    st.markdown("<h3 style='color: #2E8B57;'>📹 Mensagens em Vídeo</h3>", unsafe_allow_html=True)
-    st.info("💡 Cada vídeo pode ser direcionado para uma pessoa específica.")
-
-    plano = db.obter_plano_usuario(st.session_state.usuario_atual['id'])
-    videos_atual = len(db.listar_videos_usuario(st.session_state.usuario_atual['id']))
-    max_videos = plano.get("max_videos_total", 10) if plano else 10
-
-    st.info(f"📊 Você tem {videos_atual} de {max_videos} vídeos no seu plano.")
-
-    col1, col2 = st.columns([1, 2])
-
-    with col1:
-        with st.expander("🎥 Adicionar vídeo", expanded=False):
-            titulo = st.text_input("Título *", key="titulo_video_input")
-
-            categoria = st.selectbox("Categoria",
-                                     ["Mensagem após falecimento", "Para pessoa específica", "Para data especial"],
-                                     key="categoria_video")
-
-            if categoria == "Para pessoa específica":
-                contatos = db.listar_contatos_usuario(st.session_state.usuario_atual['id'])
-                if contatos:
-                    opcoes_contato = {c['nome_completo']: c['id'] for c in contatos}
-                    contato_selecionado = st.selectbox("Selecione a pessoa", list(opcoes_contato.keys()),
-                                                       key="video_contato")
-                    destinatario = contato_selecionado
-                else:
-                    st.warning("⚠️ Cadastre um contato primeiro")
-                    destinatario = ""
-            else:
-                destinatario = st.text_input("Para quem é este vídeo?", key="destinatario_video",
-                                             placeholder="Ex: Para minha família")
-
-            arquivo_video = st.file_uploader("Arquivo de vídeo", type=["mp4", "mov", "avi", "mkv"], key="video_file")
-            st.caption("📹 Formatos aceitos: MP4, MOV, AVI, MKV")
-
-            if st.button("💾 Salvar", key="btn_salvar_video", type="primary", use_container_width=True):
-                if titulo and arquivo_video:
-                    caminho = gerente_videos.salvar_video(
-                        arquivo_video,
-                        st.session_state.usuario_atual['id'],
-                        titulo,
-                        destinatario
-                    )
-                    db.adicionar_video(
-                        usuario_id=st.session_state.usuario_atual['id'],
-                        titulo=titulo,
-                        destinatario=destinatario,
-                        caminho_arquivo=caminho,
-                        categoria=categoria
-                    )
-                    st.success(f"✅ {titulo} salvo com sucesso!")
-                    st.rerun()
-                else:
-                    st.error("❌ Preencha o título e selecione um vídeo")
-
-    with col2:
-        videos = db.listar_videos_usuario(st.session_state.usuario_atual['id'])
-        if not videos:
-            st.info("📭 Nenhum vídeo cadastrado")
-        else:
-            for video in videos:
-                with st.expander(f"🎬 {video['titulo']} - {video['categoria']}"):
-                    if video['destinatario']:
-                        st.markdown(f"**👥 Para:** {video['destinatario']}")
-                    if video['caminho'] and os.path.exists(video['caminho']):
-                        st.video(video['caminho'])
-                    if st.button(f"🗑️ Remover", key=f"del_video_{video['id']}"):
-                        db.deletar_video(video['id'], st.session_state.usuario_atual['id'])
-                        st.rerun()
 
 
 # ============================================================================
