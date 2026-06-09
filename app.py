@@ -10,6 +10,7 @@ from utils.criptografia import GerenciadorCriptografia
 from utils.usuarios import GerenciadorUsuarios
 from utils.upload_video import GerenciadorVideos
 from utils.assistente_ia import AssistenteLuto
+from utils.email_service import EmailService, processar_agendamentos
 
 
 # ============================================================================
@@ -484,22 +485,76 @@ def render_assistente():
 # ============================================================================
 def render_videos():
     st.markdown("<h3 style='color: #2E8B57;'>📹 Mensagens em Vídeo</h3>", unsafe_allow_html=True)
-    st.info("💡 Cada vídeo pode ser direcionado para uma pessoa específica.")
+
+    plano = db.obter_plano_usuario(st.session_state.usuario_atual['id'])
+    videos_atual = len(db.listar_videos_usuario(st.session_state.usuario_atual['id']))
+    max_videos = plano.get("max_videos_total", 10) if plano else 10
+
+    st.info(f"📊 Você tem {videos_atual} de {max_videos} vídeos no seu plano.")
+
+    if videos_atual >= max_videos:
+        st.warning(f"⚠️ Você atingiu o limite de {max_videos} vídeos do seu plano.")
+        return
 
     col1, col2 = st.columns([1, 2])
 
     with col1:
         with st.expander("🎥 Adicionar vídeo", expanded=False):
             titulo = st.text_input("Título *", key="titulo_video")
-            destinatario = st.text_input("Para quem?", key="destinatario_video", placeholder="Ex: Para minha filha Ana")
+
+            categoria = st.selectbox("Categoria",
+                                     ["Mensagem após falecimento", "Para pessoa específica", "Para data especial"],
+                                     key="categoria_video")
+
+            # Seleção de contatos que terão acesso
+            st.markdown("**👥 Quem pode ver este vídeo?**")
+
+            contatos = db.listar_contatos_usuario(st.session_state.usuario_atual['id'])
+            if not contatos:
+                st.warning("⚠️ Cadastre contatos primeiro para definir quem pode ver o vídeo")
+                contatos_selecionados = []
+            else:
+                opcoes_contato = {c['nome_completo']: c['id'] for c in contatos}
+                contatos_selecionados_nomes = st.multiselect(
+                    "Selecione os contatos que terão acesso ao vídeo",
+                    list(opcoes_contato.keys()),
+                    key="video_contatos_acesso"
+                )
+                contatos_selecionados = [opcoes_contato[nome] for nome in contatos_selecionados_nomes]
+
+            # Destinatário específico (para categoria "Para pessoa específica")
+            if categoria == "Para pessoa específica" and contatos:
+                destinatario_nome = st.selectbox("Para quem é este vídeo?", list(opcoes_contato.keys()),
+                                                 key="video_destinatario_especifico")
+                destinatario = destinatario_nome
+            else:
+                destinatario = st.text_input("Para quem é este vídeo? (opcional)", key="destinatario_video",
+                                             placeholder="Ex: Para minha família")
+
             arquivo_video = st.file_uploader("Arquivo de vídeo", type=["mp4", "mov", "avi", "mkv"], key="video_file")
+            st.caption("📹 Formatos aceitos: MP4, MOV, AVI, MKV")
 
             if st.button("💾 Salvar", key="salvar_video", type="primary", use_container_width=True):
                 if titulo and arquivo_video:
-                    caminho = gerente_videos.salvar_video(arquivo_video, st.session_state.usuario_atual['id'], titulo,
-                                                          destinatario)
-                    db.adicionar_video(st.session_state.usuario_atual['id'], titulo, destinatario, caminho)
-                    st.success(f"✅ {titulo} salvo!")
+                    caminho = gerente_videos.salvar_video(
+                        arquivo_video,
+                        st.session_state.usuario_atual['id'],
+                        titulo,
+                        destinatario,
+                        categoria
+                    )
+
+                    # Salvar vídeo com acesso para os contatos selecionados
+                    video_id = db.adicionar_video_com_acesso(
+                        usuario_id=st.session_state.usuario_atual['id'],
+                        titulo=titulo,
+                        destinatario=destinatario,
+                        caminho_arquivo=caminho,
+                        contatos_ids=contatos_selecionados,
+                        categoria=categoria
+                    )
+
+                    st.success(f"✅ {titulo} salvo! {len(contatos_selecionados)} contato(s) terão acesso.")
                     st.rerun()
                 else:
                     st.error("❌ Preencha o título e selecione um vídeo")
@@ -510,10 +565,17 @@ def render_videos():
             st.info("📭 Nenhum vídeo cadastrado")
         else:
             for video in videos:
-                with st.expander(f"🎬 {video['titulo']}"):
-                    if video['destinatario']:
+                # Buscar contatos que têm acesso a este vídeo
+                contatos_acesso = db.listar_contatos_por_video(video['id'])
+                nomes_acesso = [c['nome_completo'] for c in contatos_acesso]
+
+                with st.expander(f"🎬 {video['titulo']} - {video.get('categoria', 'geral')}"):
+                    if video.get('destinatario'):
                         st.markdown(f"**👥 Para:** {video['destinatario']}")
+                    st.markdown(
+                        f"**🔓 Acesso para:** {', '.join(nomes_acesso) if nomes_acesso else 'Todos os contatos'}")
                     st.video(video['caminho'])
+
                     if st.button(f"🗑️ Remover", key=f"del_video_{video['id']}"):
                         db.deletar_video(video['id'], st.session_state.usuario_atual['id'])
                         st.rerun()
@@ -674,7 +736,12 @@ def render_preferencias():
 # ============================================================================
 def render_agendamentos():
     st.markdown("<h3 style='color: #2E8B57;'>📅 Lembranças Programadas</h3>", unsafe_allow_html=True)
-    st.caption("Programe mensagens ou vídeos para serem enviados em datas especiais.")
+    st.caption("Programe mensagens para serem enviadas em datas especiais.")
+
+    # Processar agendamentos automaticamente
+    enviados = processar_agendamentos()
+    if enviados > 0:
+        st.success(f"✨ {enviados} lembrança(s) programada(s) foram enviadas hoje!")
 
     plano = db.obter_plano_usuario(st.session_state.usuario_atual['id'])
 
@@ -690,17 +757,38 @@ def render_agendamentos():
             if not contatos:
                 st.warning("⚠️ Cadastre um contato primeiro")
             else:
-                opcoes_contato = {c['nome_completo']: c['id'] for c in contatos}
-                contato_selecionado = st.selectbox("Para quem?", list(opcoes_contato.keys()), key="agendamento_contato")
-                contato_id = opcoes_contato[contato_selecionado]
+                opcoes_contato = {c['nome_completo']: c for c in contatos}
+                contato_selecionado_nome = st.selectbox("Para quem?", list(opcoes_contato.keys()),
+                                                        key="agendamento_contato")
+                contato_selecionado = opcoes_contato[contato_selecionado_nome]
+                contato_id = contato_selecionado['id']
 
-                tipo = st.selectbox("Tipo", ["texto", "vídeo"], key="agendamento_tipo")
-                data_envio = st.date_input("Data de envio", min_value=datetime.now().date(), key="agendamento_data")
-                data_termino = st.date_input("Data de término (opcional)", key="agendamento_termino", value=None)
+                # Verificar se o contato tem e-mail
+                if not contato_selecionado.get('email'):
+                    st.warning("⚠️ Este contato não tem e-mail cadastrado. Adicione um e-mail para receber mensagens.")
+
+                tipo = st.selectbox("Tipo de mensagem", ["texto", "vídeo"], key="agendamento_tipo")
+
+                col_d1, col_d2 = st.columns(2)
+                with col_d1:
+                    data_envio = st.date_input("Data de envio", min_value=datetime.now().date(), key="agendamento_data")
+                with col_d2:
+                    data_termino = st.date_input("Data de término (opcional)", key="agendamento_termino", value=None)
+
+                # Forma de envio
+                forma_envio = st.selectbox("Como enviar?", ["E-mail", "WhatsApp (em breve)"], key="forma_envio")
 
                 conteudo = ""
+                video_id = None
+
                 if tipo == "texto":
-                    conteudo = st.text_area("Digite sua mensagem:", height=100, key="agendamento_texto")
+                    opcao_texto = st.radio("Como criar?", ["Escrever manualmente", "Gerar com IA (em breve)"],
+                                           key="agendamento_opcao")
+                    if opcao_texto == "Escrever manualmente":
+                        conteudo = st.text_area("Digite sua mensagem:", height=150, key="agendamento_texto")
+                    else:
+                        st.info("🤖 Geração por IA disponível em breve!")
+                        conteudo = st.text_area("Digite sua mensagem:", height=150, key="agendamento_texto_ia")
                 else:
                     videos = db.listar_videos_usuario(st.session_state.usuario_atual['id'])
                     if videos:
@@ -712,20 +800,33 @@ def render_agendamentos():
                         st.warning("⚠️ Você não tem vídeos cadastrados.")
                         return
 
+                # Data especial (opcional)
+                data_especial = st.text_input("Data especial (opcional)", key="agendamento_data_especial",
+                                              placeholder="Ex: Aniversário, Natal, Dia dos Pais...")
+
                 if st.button("💾 Agendar", type="primary", use_container_width=True):
                     if tipo == "texto" and not conteudo:
                         st.error("❌ Digite uma mensagem")
+                    elif not contato_selecionado.get('email') and forma_envio == "E-mail":
+                        st.error("❌ Este contato não tem e-mail cadastrado")
                     else:
+                        # Adicionar data especial ao conteúdo
+                        mensagem_final = conteudo
+                        if data_especial:
+                            mensagem_final = f"✨ {data_especial} ✨\n\n{conteudo}"
+
                         db.criar_agendamento(
                             usuario_id=st.session_state.usuario_atual['id'],
                             contato_id=contato_id,
                             tipo=tipo,
                             data_envio=data_envio.strftime("%Y-%m-%d"),
                             data_termino=data_termino.strftime("%Y-%m-%d") if data_termino else "",
-                            conteudo=conteudo,
-                            video_id=video_id if tipo == "vídeo" else None
+                            conteudo=mensagem_final,
+                            video_id=video_id,
+                            gerar_por_ia=1 if tipo == "texto" and opcao_texto == "Gerar com IA (em breve)" else 0
                         )
-                        st.success(f"✅ Agendado para {data_envio.strftime('%d/%m/%Y')}!")
+                        st.success(f"✅ Lembrança agendada para {data_envio.strftime('%d/%m/%Y')}!")
+                        st.info(f"📧 Será enviada por e-mail para {contato_selecionado['email']}")
                         st.rerun()
 
     with col2:
@@ -735,13 +836,18 @@ def render_agendamentos():
         else:
             for agend in agendamentos:
                 with st.expander(f"📌 {agend['tipo'].upper()} para {agend['contato_nome']} - {agend['data_envio']}"):
-                    st.markdown(f"**Para:** {agend['contato_nome']}")
+                    st.markdown(f"**Para:** {agend['contato_nome']} ({agend['contato_email']})")
                     st.markdown(f"**Data de envio:** {agend['data_envio']}")
+                    if agend['data_termino']:
+                        st.markdown(f"**Data de término:** {agend['data_termino']}")
                     st.markdown(f"**Status:** {agend['status']}")
-                    if st.button(f"🗑️ Cancelar", key=f"del_agend_{agend['id']}"):
-                        db.deletar_agendamento(agend['id'], st.session_state.usuario_atual['id'])
-                        st.rerun()
+                    if agend['conteudo']:
+                        st.markdown(f"**Mensagem:** {agend['conteudo'][:200]}...")
 
+                    if agend['status'] == 'agendado':
+                        if st.button(f"❌ Cancelar", key=f"del_agend_{agend['id']}"):
+                            db.deletar_agendamento(agend['id'], st.session_state.usuario_atual['id'])
+                            st.rerun()
 
 # ============================================================================
 # COFRE DIGITAL

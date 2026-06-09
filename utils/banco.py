@@ -318,6 +318,20 @@ class BancoDados:
         conn.close()
         return False
 
+    def listar_contatos_por_video(self, video_id: int) -> List[Dict]:
+        """Lista contatos que têm acesso a um vídeo específico"""
+        conn = sqlite3.connect(self.arquivo_db)
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT c.id, c.nome, c.sobrenome
+            FROM contatos c
+            JOIN videos_acesso va ON c.id = va.contato_id
+            WHERE va.video_id = ?
+        ''', (video_id,))
+        rows = cursor.fetchall()
+        conn.close()
+        return [{"id": r[0], "nome_completo": f"{r[1]} {r[2]}".strip()} for r in rows]
+
     # ========================================================================
     # CONTATOS
     # ========================================================================
