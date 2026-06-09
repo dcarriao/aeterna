@@ -423,27 +423,87 @@ def render_login():
 # ASSISTENTE DE LUTO
 # ============================================================================
 def render_assistente():
-    """Renderiza o assistente de luto no estilo chat do WhatsApp (lado direito)"""
+    """Renderiza o assistente de luto como uma janela de chat lateral"""
     assistente = AssistenteLuto(st.session_state.falecido_id)
 
     nome_falecido = st.session_state.usuario_atual.get('nome_completo', 'seu ente querido')
 
-    # CSS para o chat estilo WhatsApp
+    # CSS para o chat como janela lateral
     st.markdown("""
     <style>
-        .chat-window {
-            background: #e5ddd5;
-            border-radius: 12px;
-            height: 500px;
+        /* Container principal - layout de duas colunas */
+        .chat-lateral-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        /* Conteúdo principal (esquerda) - ocupa 60% */
+        .chat-main-content {
+            flex: 1.5;
+            min-width: 200px;
+        }
+
+        /* Widget do chat (direita) - ocupa 35% */
+        .chat-widget {
+            width: 35%;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: sticky;
+            top: 20px;
+            align-self: flex-start;
+        }
+
+        /* Cabeçalho do chat */
+        .chat-header {
+            background: #075e54;
+            padding: 12px 16px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-avatar {
+            background: #128C7E;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .chat-header-info {
+            flex: 1;
+        }
+
+        .chat-header-name {
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .chat-header-status {
+            font-size: 0.65rem;
+            opacity: 0.8;
+        }
+
+        /* Corpo do chat */
+        .chat-body {
+            height: 350px;
             overflow-y: auto;
-            padding: 15px;
+            padding: 12px;
+            background: #e5ddd5;
             display: flex;
             flex-direction: column;
         }
 
         .message-row {
             display: flex;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .message-row.user {
@@ -455,10 +515,10 @@ def render_assistente():
         }
 
         .message-bubble {
-            max-width: 70%;
-            padding: 10px 14px;
-            border-radius: 18px;
-            position: relative;
+            max-width: 85%;
+            padding: 8px 12px;
+            border-radius: 16px;
+            font-size: 0.8rem;
             word-wrap: break-word;
         }
 
@@ -472,188 +532,193 @@ def render_assistente():
             background: white;
             color: #1a1a1a;
             border-bottom-left-radius: 4px;
-            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
-        }
-
-        .message-name {
-            font-size: 0.7rem;
-            margin-bottom: 3px;
-            padding-left: 12px;
-        }
-
-        .message-name.user {
-            text-align: right;
-            color: #075e54;
-        }
-
-        .message-name.bot {
-            text-align: left;
-            color: #128C7E;
         }
 
         .message-time {
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             color: #999;
-            margin-top: 4px;
+            margin-top: 3px;
             text-align: right;
         }
 
-        .chat-input-area {
-            margin-top: 15px;
+        /* Rodapé do chat */
+        .chat-footer {
+            padding: 10px;
+            background: white;
+            border-top: 1px solid #eee;
             display: flex;
-            gap: 10px;
-            align-items: center;
+            gap: 8px;
         }
 
-        .chat-input {
+        .chat-footer input {
             flex: 1;
-            padding: 12px 15px;
+            padding: 8px 12px;
             border: 1px solid #ddd;
-            border-radius: 25px;
-            font-size: 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
             outline: none;
         }
 
-        .chat-input:focus {
+        .chat-footer input:focus {
             border-color: #128C7E;
         }
 
-        .chat-send-btn {
+        .chat-footer button {
             background: #128C7E;
             color: white;
             border: none;
             border-radius: 50%;
-            width: 45px;
-            height: 45px;
+            width: 36px;
+            height: 36px;
             cursor: pointer;
-            font-size: 18px;
-            transition: all 0.2s;
+            font-size: 14px;
         }
 
-        .chat-send-btn:hover {
+        .chat-footer button:hover {
             background: #075e54;
-            transform: scale(1.02);
         }
 
         .chat-clear-btn {
-            background: transparent;
-            border: 1px solid #ddd;
-            border-radius: 25px;
-            padding: 10px 15px;
-            cursor: pointer;
-            color: #666;
-            font-size: 12px;
+            background: transparent !important;
+            color: #999 !important;
+            border: 1px solid #ddd !important;
+            border-radius: 20px !important;
+            width: auto !important;
+            padding: 0 12px !important;
         }
 
         .chat-clear-btn:hover {
-            background: #f0f0f0;
+            background: #f0f0f0 !important;
+            color: #666 !important;
+        }
+
+        /* Aviso IA pequeno */
+        .ia-warning-small {
+            background: #fff3cd;
+            border-left: 3px solid #ffc107;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .chat-lateral-container {
+                flex-direction: column;
+            }
+            .chat-widget {
+                width: 100%;
+                position: static;
+            }
         }
     </style>
     """, unsafe_allow_html=True)
 
-    # Cabeçalho do chat
+    # Estrutura de duas colunas: conteúdo principal (esquerda) e chat (direita)
+    st.markdown('<div class="chat-lateral-container">', unsafe_allow_html=True)
+
+    # ==================== CONTEÚDO PRINCIPAL (ESQUERDA) ====================
+    st.markdown('<div class="chat-main-content">', unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class="info-card">
+        <h3>🤖 Sobre o Assistente de Luto</h3>
+        <p>O assistente foi treinado com a personalidade, preferências e mensagens deixadas por esta pessoa.</p>
+        <p><strong>Dicas:</strong></p>
+        <ul>
+            <li>Pergunte sobre lembranças felizes</li>
+            <li>Peça conselhos</li>
+            <li>Converse como se estivesse falando com a pessoa</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Estatísticas do assistente
+    stats = assistente.estatisticas()
     st.markdown(f"""
-    <div style="
-        background: #075e54;
-        padding: 12px 16px;
-        border-radius: 12px 12px 0 0;
-        color: white;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    ">
-        <div style="
-            background: #128C7E;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-        ">🤖</div>
-        <div>
-            <div style="font-weight: bold;">{nome_falecido}</div>
-            <div style="font-size: 0.7rem; opacity: 0.8;">Assistente de Luto - IA</div>
+    <div class="info-card" style="text-align: center;">
+        <p>📊 <strong>{stats.get('perguntas_respondidas', 0)}</strong> perguntas respondidas sobre a personalidade</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # ==================== WIDGET DO CHAT (DIREITA) ====================
+    st.markdown('<div class="chat-widget">', unsafe_allow_html=True)
+
+    # Cabeçalho
+    st.markdown(f"""
+    <div class="chat-header">
+        <div class="chat-avatar">🤖</div>
+        <div class="chat-header-info">
+            <div class="chat-header-name">{nome_falecido}</div>
+            <div class="chat-header-status">Assistente IA • Online</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # Aviso em expander (só abre se clicar)
-    with st.expander("⚠️ Sobre esta conversa (clique para ler)"):
+    # Aviso expander pequeno
+    with st.expander("⚠️ Sobre esta conversa"):
         st.markdown(f"""
-        💡 **Importante:** Esta é uma conversa gerada por IA baseada na personalidade de **{nome_falecido}**. 
-
-        As respostas são simulações e podem não representar exatamente o que a pessoa pensava ou sentia. 
-
-        **Use com carinho e parcimônia.** O objetivo é ajudar no processo de luto, não criar dependência.
+        💡 Esta conversa é gerada por IA baseada na personalidade de **{nome_falecido}**.
+        As respostas são simulações. Use com carinho.
         """)
 
-    # Container do chat
-    chat_container = st.container()
+    # Corpo do chat
+    st.markdown('<div class="chat-body">', unsafe_allow_html=True)
 
-    with chat_container:
-        st.markdown('<div class="chat-window" id="chat-window">', unsafe_allow_html=True)
+    if "historico_assistente" not in st.session_state:
+        st.session_state.historico_assistente = []
 
-        if "historico_assistente" not in st.session_state:
-            st.session_state.historico_assistente = []
+    if not st.session_state.historico_assistente:
+        msg_inicial = f"Olá! Sou uma simulação baseada em como {nome_falecido} era. Pode me perguntar qualquer coisa. 💚"
+        st.session_state.historico_assistente.append({"tipo": "bot", "texto": msg_inicial})
 
-        # Mensagem inicial
-        if not st.session_state.historico_assistente:
-            msg_inicial = f"Olá! Sou uma simulação baseada em como {nome_falecido} era. Pode me perguntar qualquer coisa. 💚"
-            st.session_state.historico_assistente.append(
-                {"tipo": "bot", "texto": msg_inicial, "time": datetime.now().strftime("%H:%M")})
-
-        # Exibir mensagens
-        for msg in st.session_state.historico_assistente:
-            if msg["tipo"] == "user":
-                st.markdown(f"""
-                <div class="message-row user">
-                    <div class="message-bubble user">
-                        {msg["texto"]}
-                        <div class="message-time">{msg.get("time", "")}</div>
-                    </div>
+    for msg in st.session_state.historico_assistente:
+        if msg["tipo"] == "user":
+            st.markdown(f"""
+            <div class="message-row user">
+                <div class="message-bubble user">
+                    {msg["texto"]}
                 </div>
-                """, unsafe_allow_html=True)
-            else:
-                st.markdown(f"""
-                <div class="message-row bot">
-                    <div class="message-bubble bot">
-                        {msg["texto"]}
-                        <div class="message-time">{msg.get("time", "")}</div>
-                    </div>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown(f"""
+            <div class="message-row bot">
+                <div class="message-bubble bot">
+                    {msg["texto"]}
                 </div>
-                """, unsafe_allow_html=True)
+            </div>
+            """, unsafe_allow_html=True)
 
-        st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    # Input area
-    col1, col2, col3 = st.columns([5, 1, 1])
+    # Rodapé com input
+    st.markdown('<div class="chat-footer">', unsafe_allow_html=True)
 
-    with col1:
-        mensagem = st.text_input("mensagem", key="msg_assistente",
-                                 placeholder=f"Digite sua mensagem para {nome_falecido}...",
-                                 label_visibility="collapsed")
+    mensagem = st.text_input("msg", key="msg_assistente",
+                             placeholder="Digite sua mensagem...",
+                             label_visibility="collapsed")
 
-    with col2:
-        enviar = st.button("📤 Enviar", key="btn_enviar", type="primary", use_container_width=True)
+    col_btn, col_clear = st.columns([1, 1])
+    with col_btn:
+        enviar = st.button("📤", key="btn_enviar", use_container_width=True)
+    with col_clear:
+        limpar = st.button("🗑️", key="clear_chat", use_container_width=True)
 
-    with col3:
-        limpar = st.button("🗑️ Limpar", key="clear_chat", use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
+    st.markdown('</div>', unsafe_allow_html=True)  # Fecha chat-widget
+
+    st.markdown('</div>', unsafe_allow_html=True)  # Fecha container principal
+
+    # Processar mensagem
     if enviar and mensagem:
-        st.session_state.historico_assistente.append({
-            "tipo": "user",
-            "texto": mensagem,
-            "time": datetime.now().strftime("%H:%M")
-        })
-        with st.spinner(f"{nome_falecido} está pensando..."):
+        st.session_state.historico_assistente.append({"tipo": "user", "texto": mensagem})
+        with st.spinner("..."):
             resposta = assistente.conversar(mensagem)
-        st.session_state.historico_assistente.append({
-            "tipo": "bot",
-            "texto": resposta,
-            "time": datetime.now().strftime("%H:%M")
-        })
+        st.session_state.historico_assistente.append({"tipo": "bot", "texto": resposta})
         st.rerun()
 
     if limpar:
