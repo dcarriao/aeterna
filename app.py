@@ -439,13 +439,13 @@ def render_assistente():
         msg_inicial = f"Olá! Sou uma simulação baseada em como {nome_falecido} era. 💚"
         st.session_state.historico_assistente.append({"tipo": "bot", "texto": msg_inicial})
 
-    # Layout com duas colunas: conteúdo principal e chat
+    # Layout com duas colunas
     col_conteudo, col_chat = st.columns([2, 1])
 
-    # ==================== COLUNA ESQUERDA (CONTEÚDO PRINCIPAL) ====================
+    # ==================== COLUNA ESQUERDA ====================
     with col_conteudo:
         st.markdown("""
-        <div style="background: white; border-radius: 15px; padding: 20px;">
+        <div style="background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px;">
             <h3 style="color: #2E8B57;">🤖 Sobre o Assistente de Luto</h3>
             <p>O assistente foi treinado com a personalidade, preferências e mensagens deixadas por <strong>{}</strong>.</p>
             <p><strong>Dicas para conversar:</strong></p>
@@ -458,21 +458,24 @@ def render_assistente():
         </div>
         """.format(nome_falecido), unsafe_allow_html=True)
 
-        # Espaço para logo ou outras informações
-        st.image("assets/logo.png", width=200)
-        st.caption("aEterna - Seu Legado Digital")
+        # Logo
+        logo = carregar_logo()
+        if logo:
+            st.image(logo, width=180)
+        st.caption("aEterna - Assistente de Luto com IA")
 
-    # ==================== COLUNA DIREITA (CHAT EXPANSÍVEL) ====================
+    # ==================== COLUNA DIREITA (CHAT) ====================
     with col_chat:
-        # CSS para o chat expansível
+        # CSS para o chat
         st.markdown("""
         <style>
-            .chat-expandable {
+            .chat-widget {
                 background: white;
                 border-radius: 15px;
                 box-shadow: 0 4px 15px rgba(0,0,0,0.1);
                 overflow: hidden;
-                transition: all 0.3s ease;
+                position: sticky;
+                top: 20px;
             }
 
             .chat-header {
@@ -493,17 +496,13 @@ def render_assistente():
 
             .chat-avatar {
                 background: #128C7E;
-                width: 32px;
-                height: 32px;
+                width: 36px;
+                height: 36px;
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 16px;
-            }
-
-            .chat-header-info {
-                flex: 1;
+                font-size: 18px;
             }
 
             .chat-header-name {
@@ -512,14 +511,22 @@ def render_assistente():
             }
 
             .chat-header-status {
-                font-size: 0.6rem;
+                font-size: 0.65rem;
                 opacity: 0.8;
             }
 
+            .expand-icon {
+                font-size: 20px;
+                cursor: pointer;
+                background: none;
+                border: none;
+                color: white;
+            }
+
             .chat-body {
-                height: 350px;
+                height: 400px;
                 overflow-y: auto;
-                padding: 12px;
+                padding: 15px;
                 background: #e5ddd5;
                 display: flex;
                 flex-direction: column;
@@ -527,7 +534,8 @@ def render_assistente():
 
             .message-row {
                 display: flex;
-                margin-bottom: 10px;
+                margin-bottom: 12px;
+                width: 100%;
             }
 
             .message-row.user {
@@ -539,10 +547,10 @@ def render_assistente():
             }
 
             .message-bubble {
-                max-width: 85%;
-                padding: 8px 12px;
-                border-radius: 16px;
-                font-size: 0.8rem;
+                max-width: 80%;
+                padding: 10px 14px;
+                border-radius: 18px;
+                font-size: 0.85rem;
                 word-wrap: break-word;
             }
 
@@ -556,59 +564,76 @@ def render_assistente():
                 background: white;
                 color: #1a1a1a;
                 border-bottom-left-radius: 4px;
+                box-shadow: 0 1px 1px rgba(0,0,0,0.05);
             }
 
             .chat-footer {
-                padding: 10px;
+                padding: 12px;
                 background: white;
                 border-top: 1px solid #eee;
             }
 
             .chat-input-area {
                 display: flex;
-                gap: 8px;
+                gap: 10px;
+                align-items: center;
             }
 
-            .chat-input-area input {
+            .chat-input {
                 flex: 1;
-                padding: 10px;
+                padding: 10px 15px;
                 border: 1px solid #ddd;
-                border-radius: 20px;
-                font-size: 0.8rem;
+                border-radius: 25px;
+                font-size: 0.85rem;
                 outline: none;
             }
 
-            .chat-input-area input:focus {
+            .chat-input:focus {
                 border-color: #128C7E;
             }
 
-            .chat-input-area button {
+            .chat-send {
                 background: #128C7E;
                 color: white;
                 border: none;
                 border-radius: 50%;
-                width: 36px;
-                height: 36px;
+                width: 40px;
+                height: 40px;
                 cursor: pointer;
+                font-size: 16px;
+                transition: all 0.2s;
             }
 
-            .chat-warning-small {
+            .chat-send:hover {
+                background: #075e54;
+            }
+
+            .chat-clear {
+                background: transparent;
+                border: 1px solid #ddd;
+                border-radius: 25px;
+                padding: 8px 15px;
+                cursor: pointer;
+                font-size: 0.75rem;
+                color: #666;
+                transition: all 0.2s;
+            }
+
+            .chat-clear:hover {
+                background: #f0f0f0;
+            }
+
+            .chat-warning {
                 background: #fff3cd;
                 padding: 6px 10px;
-                font-size: 0.6rem;
+                font-size: 0.65rem;
                 color: #856404;
                 text-align: center;
-            }
-
-            /* Ícone de expandir/recolher */
-            .expand-icon {
-                font-size: 20px;
-                cursor: pointer;
             }
         </style>
 
         <script>
-            function toggleChat() {
+            function toggleChatBody() {
                 var body = document.getElementById('chatBody');
                 var icon = document.getElementById('expandIcon');
                 if (body.style.display === 'none') {
@@ -619,68 +644,91 @@ def render_assistente():
                     icon.innerHTML = '+';
                 }
             }
+
+            function scrollToBottom() {
+                var container = document.getElementById('chatMessages');
+                if (container) {
+                    container.scrollTop = container.scrollHeight;
+                }
+            }
         </script>
         """, unsafe_allow_html=True)
 
-        # Chat expansível
+        # Widget do chat
         st.markdown(f"""
-        <div class="chat-expandable">
-            <div class="chat-header" onclick="toggleChat()">
+        <div class="chat-widget">
+            <div class="chat-header" onclick="toggleChatBody()">
                 <div class="chat-header-left">
                     <div class="chat-avatar">🤖</div>
-                    <div class="chat-header-info">
+                    <div>
                         <div class="chat-header-name">Conversar com {nome_falecido}</div>
                         <div class="chat-header-status">Clique para expandir/recolher</div>
                     </div>
                 </div>
-                <div class="expand-icon" id="expandIcon">−</div>
+                <button class="expand-icon" id="expandIcon">−</button>
             </div>
-            <div id="chatBody" style="display: block;">
+            <div id="chatBody" style="display: flex; flex-direction: column;">
                 <div class="chat-body" id="chatMessages">
         """, unsafe_allow_html=True)
 
-        # Exibir mensagens
+        # Exibir mensagens dentro do chat body
         for msg in st.session_state.historico_assistente:
             if msg["tipo"] == "user":
                 st.markdown(f"""
                 <div class="message-row user">
-                    <div class="message-bubble user">{msg["texto"]}</div>
+                    <div class="message-bubble user">
+                        {msg["texto"]}
+                    </div>
                 </div>
                 """, unsafe_allow_html=True)
             else:
                 st.markdown(f"""
                 <div class="message-row bot">
-                    <div class="message-bubble bot">{msg["texto"]}</div>
+                    <div class="message-bubble bot">
+                        {msg["texto"]}
+                    </div>
                 </div>
                 """, unsafe_allow_html=True)
 
         st.markdown("""
                 </div>
+                <div class="chat-warning">
+                    💡 Conversa simulada por IA baseada na personalidade
+                </div>
                 <div class="chat-footer">
-                    <div class="chat-warning-small">
-                        💡 Conversa simulada por IA baseada na personalidade
-                    </div>
+                    <form id="chatForm" style="width: 100%;">
+                        <div class="chat-input-area">
+                            <input type="text" class="chat-input" id="chatInput" placeholder="Digite sua mensagem..." autocomplete="off">
+                            <button type="submit" class="chat-send">📤</button>
+                            <button type="button" class="chat-clear" id="clearChat">🗑️ Limpar</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-        # Formulário de envio (fora do HTML)
-        with st.form(key="chat_form", clear_on_submit=True):
-            col1, col2 = st.columns([4, 1])
-            with col1:
-                mensagem = st.text_input("msg", key="nova_mensagem",
-                                         placeholder="Digite sua mensagem...",
-                                         label_visibility="collapsed")
-            with col2:
-                enviar = st.form_submit_button("📤", use_container_width=True)
+        # Processar mensagem usando session state
+        col1, col2, col3 = st.columns([4, 1, 1])
+        with col1:
+            mensagem = st.text_input("msg_input", key="chat_msg_input",
+                                     placeholder="Digite sua mensagem...",
+                                     label_visibility="collapsed")
+        with col2:
+            enviar = st.button("📤 Enviar", key="chat_send_btn", use_container_width=True)
+        with col3:
+            limpar = st.button("🗑️ Limpar", key="chat_clear_btn", use_container_width=True)
 
-            if enviar and mensagem:
-                st.session_state.historico_assistente.append({"tipo": "user", "texto": mensagem})
-                with st.spinner("..."):
-                    resposta = assistente.conversar(mensagem)
-                st.session_state.historico_assistente.append({"tipo": "bot", "texto": resposta})
-                st.rerun()
+        if enviar and mensagem:
+            st.session_state.historico_assistente.append({"tipo": "user", "texto": mensagem})
+            with st.spinner("..."):
+                resposta = assistente.conversar(mensagem)
+            st.session_state.historico_assistente.append({"tipo": "bot", "texto": resposta})
+            st.rerun()
+
+        if limpar:
+            st.session_state.historico_assistente = []
+            st.rerun()
 
 
 # ============================================================================
