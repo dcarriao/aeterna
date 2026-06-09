@@ -10,6 +10,8 @@ from utils.criptografia import GerenciadorCriptografia
 from utils.usuarios import GerenciadorUsuarios
 from utils.upload_video import GerenciadorVideos
 from utils.assistente_ia import AssistenteLuto
+import os
+from reset_banco import resetar_banco
 
 
 # ============================================================================
@@ -216,9 +218,18 @@ def inject_custom_css():
     </style>
     """, unsafe_allow_html=True)
 
+# ============================================================================
+# RESET DO BANCO (APENAS UMA VEZ)
+# ============================================================================
+
+# Verifica se o banco existe e se precisa resetar
+if os.path.exists("dados/cofre.db"):
+    print("🔄 Resetando banco de dados...")
+    resetar_banco()
+    print("✅ Banco resetado com sucesso!")
 
 # ============================================================================
-# INICIALIZAÇÃO
+# INICIALIZAÇÃO NORMAL
 # ============================================================================
 db = BancoDados()
 gerente_usuarios = GerenciadorUsuarios()
