@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+
+    <!-- SEO -->
+    <title>aEterna | Assistente de Luto com IA - Presença Digital para Quem Ficou</title>
+    <meta name="description" content="aEterna: assistente de luto com inteligência artificial. Mantenha viva a memória de quem você ama através de conversas simuladas, mensagens programadas e um espaço para eternizar lembranças.">
+    <meta name="keywords" content="assistente de luto, luto com IA, mensagens programadas, legado emocional, presença digital, memórias eternas, conversar com quem partiu">
+    <meta name="author" content="aEterna">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://aeterenalegado.com.br/">
+    <meta property="og:title" content="aEterna - Assistente de Luto com IA | Presença Digital">
+    <meta property="og:description" content="Mantenha viva a memória de quem você ama. Converse com uma IA treinada com a personalidade do seu ente querido.">
+    <meta property="og:image" content="https://aeterenalegado.com.br/assets/logo.png">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #fafafa; color: #333; line-height: 1.5; }
+
+        /* Header */
+        .header { background: linear-gradient(135deg, #1B5E20 0%, #2E8B57 100%); padding: 0.8rem 2rem; position: fixed; width: 100%; top: 0; z-index: 1000; box-shadow: 0 2px 15px rgba(0,0,0,0.1); }
+        .nav { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo img { height: 45px; }
+        .logo span { font-size: 1.5rem; font-weight: 700; color: white; font-family: 'Playfair Display', serif; font-style: italic; letter-spacing: 1px; }
+        .beta-badge { background: #ff9800; color: white; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.6rem; font-weight: 600; margin-left: 0.5rem; vertical-align: middle; }
+
+        .menu-toggle { display: none; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+        .nav-links { display: flex; gap: 2rem; align-items: center; }
+        .nav-links a { color: white; text-decoration: none; font-weight: 500; font-size: 0.9rem; transition: opacity 0.3s; }
+        .nav-links a:hover { opacity: 0.8; }
+        .btn-acessar { background: white; color: #2E8B57 !important; padding: 0.5rem 1.5rem; border-radius: 30px; font-weight: 600; }
+
+        /* Hero */
+        .hero { padding: 120px 2rem 80px; text-align: center; background: linear-gradient(135deg, #e8f5e9 0%, #f5f5f5 100%); }
+        .hero h1 { font-size: 2.5rem; font-family: 'Playfair Display', serif; color: #1B5E20; margin-bottom: 1rem; max-width: 800px; margin-left: auto; margin-right: auto; }
+        .hero p { font-size: 1.1rem; color: #555; max-width: 700px; margin: 0 auto 2rem; }
+        .btn-primary, .btn-secondary { display: inline-block; padding: 0.8rem 2rem; border-radius: 50px; text-decoration: none; font-weight: 600; font-size: 1rem; margin: 0.5rem; transition: all 0.3s; }
+        .btn-primary { background: linear-gradient(135deg, #2E8B57 0%, #1B5E20 100%); color: white; box-shadow: 0 4px 15px rgba(46,139,87,0.3); }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(46,139,87,0.4); }
+        .btn-secondary { background: transparent; color: #2E8B57; border: 2px solid #2E8B57; }
+        .btn-secondary:hover { background: #2E8B57; color: white; }
+
+        /* Sections */
+        .section { padding: 80px 2rem; max-width: 1200px; margin: 0 auto; }
+        .section-title { text-align: center; font-size: 2rem; font-family: 'Playfair Display', serif; color: #1B5E20; margin-bottom: 1rem; }
+        .section-subtitle { text-align: center; color: #666; margin-bottom: 3rem; font-size: 1rem; }
+
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+        .feature-card { background: white; padding: 2rem; border-radius: 20px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.05); transition: all 0.3s; }
+        .feature-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .feature-icon { font-size: 3rem; margin-bottom: 1rem; }
+        .feature-card h3 { font-size: 1.2rem; color: #2E8B57; margin-bottom: 0.8rem; }
+        .feature-card p { font-size: 0.9rem; color: #666; line-height: 1.6; }
+
+        /* Diferencial */
+        .diferencial { background: linear-gradient(135deg, #1B5E20 0%, #2E8B57 100%); color: white; border-radius: 30px; padding: 3rem; text-align: center; margin: 2rem 0; }
+        .diferencial h2 { font-size: 1.8rem; margin-bottom: 1rem; }
+        .diferencial p { font-size: 1rem; opacity: 0.9; max-width: 700px; margin: 0 auto; }
+
+        /* Chat Preview */
+        .chat-preview { background: #e5ddd5; border-radius: 20px; padding: 1.5rem; max-width: 500px; margin: 2rem auto; }
+        .chat-message { margin: 1rem 0; }
+        .chat-bubble-user { background: #dcf8c5; color: #075e54; padding: 10px 15px; border-radius: 18px 18px 5px 18px; max-width: 80%; margin-left: auto; }
+        .chat-bubble-ia { background: white; color: #333; padding: 10px 15px; border-radius: 18px 18px 18px 5px; max-width: 80%; }
+
+        /* Mensagens Programadas */
+        .programadas { background: #f0faf0; border-radius: 30px; padding: 3rem; margin-top: 2rem; }
+        .programadas-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+        .programada-item { background: white; padding: 1.2rem; border-radius: 15px; border-left: 4px solid #2E8B57; }
+        .programada-item h4 { color: #2E8B57; margin-bottom: 0.5rem; }
+
+        /* Parcerias */
+        .parcerias { background: linear-gradient(135deg, #1B5E20 0%, #2E8B57 100%); border-radius: 30px; padding: 3rem; text-align: center; color: white; margin: 2rem 0; }
+        .parcerias h2 { font-size: 1.8rem; margin-bottom: 1rem; }
+        .btn-parceiro { background: white; color: #2E8B57; padding: 0.7rem 2rem; border-radius: 50px; text-decoration: none; font-weight: 600; display: inline-block; margin-top: 1rem; }
+
+        /* Footer */
+        .footer { background: #1a1a1a; color: #999; padding: 3rem 2rem 1.5rem; margin-top: 4rem; }
+        .footer-content { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; }
+        .footer-links h4 { color: white; font-size: 1rem; margin-bottom: 1rem; }
+        .footer-links a { color: #999; text-decoration: none; display: block; margin-bottom: 0.5rem; font-size: 0.8rem; transition: color 0.3s; }
+        .footer-links a:hover { color: #90EE90; }
+        .copyright { text-align: center; padding-top: 2rem; margin-top: 2rem; border-top: 1px solid #333; font-size: 0.7rem; }
+
+        @media (max-width: 768px) {
+            .header { padding: 0.8rem 1rem; }
+            .menu-toggle { display: block; }
+            .nav-links { display: none; width: 100%; flex-direction: column; gap: 1rem; padding: 1rem 0; }
+            .nav-links.show { display: flex; }
+            .hero { padding: 100px 1rem 50px; }
+            .hero h1 { font-size: 1.8rem; }
+            .section-title { font-size: 1.6rem; }
+            .section { padding: 50px 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">
+                <img src="assets/logo.png" alt="aEterna" onerror="this.src='https://via.placeholder.com/45?text=🌿'">
+                <span>aEterna<span class="beta-badge">BETA</span></span>
+            </div>
+            <button class="menu-toggle" id="menuToggle">☰</button>
+            <div class="nav-links" id="navLinks">
+                <a href="#sobre">Sobre</a>
+                <a href="#assistente">Assistente IA</a>
+                <a href="#programadas">Mensagens</a>
+                <a href="#parcerias">Parcerias</a>
+                <a href="https://aeterna.streamlit.app" class="btn-acessar">Acessar</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero">
+        <h1>Mantenha viva a memória de quem você ama</h1>
+        <p>O aEterna é um assistente de luto com inteligência artificial que conversa como seu ente querido, oferecendo conforto e acolhimento para quem ficou.</p>
+        <a href="https://aeterna.streamlit.app" class="btn-primary">Começar →</a>
+        <a href="#assistente" class="btn-secondary">Saiba Mais</a>
+    </section>
+
+    <!-- Diferencial Principal -->
+    <div class="diferencial">
+        <h2>💚 Diferente de um simples cofre digital</h2>
+        <p>Nosso foco não é guardar senhas. É guardar memórias, sentimentos e a presença digital de quem se foi. Para acalentar o coração de quem fica.</p>
+    </div>
+
+    <!-- Funcionalidades -->
+    <section id="sobre" class="section">
+        <h2 class="section-title">Como o aEterna pode ajudar</h2>
+        <p class="section-subtitle">Tecnologia a serviço do coração</p>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3>Assistente de Luto com IA</h3>
+                <p>Treinado com a personalidade, valores e lembranças do seu ente querido. Converse como se ele estivesse ali.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📅</div>
+                <h3>Mensagens Programadas</h3>
+                <p>Receba mensagens e vídeos em datas especiais: aniversários, Natal, Dia dos Pais... Um abraço no momento certo.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎬</div>
+                <h3>Vídeos e Lembranças</h3>
+                <p>Grave vídeos com suas palavras, conselhos e memórias. Cada vídeo pode ser direcionado para quem você quiser.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Preview do Assistente -->
+    <section id="assistente" class="section" style="background: #f0faf0; border-radius: 30px;">
+        <h2 class="section-title">Veja como funciona</h2>
+        <div class="chat-preview">
+            <div class="chat-message">
+                <div class="chat-bubble-user"><strong>Você:</strong> Estou com saudades...</div>
+            </div>
+            <div class="chat-message">
+                <div class="chat-bubble-ia"><strong>🤖 Assistente:</strong> "Ei, eu sei que está difícil. Lembre-se do que sempre te disse: a vida continua e você é forte. Chore se precisar, mas siga em frente. Estou orgulhoso de você. ❤️"</div>
+            </div>
+            <div class="chat-message">
+                <div class="chat-bubble-user"><strong>Você:</strong> Você se lembra da nossa viagem?</div>
+            </div>
+            <div class="chat-message">
+                <div class="chat-bubble-ia"><strong>🤖 Assistente:</strong> "Claro! Aquele pôr do sol... Foi mágico. Guarde esses momentos com carinho. Eles são eternos."</div>
+            </div>
+        </div>
+        <p style="text-align: center; margin-top: 1rem; font-size: 0.8rem; color: #666;">💡 As respostas são geradas por IA baseada na personalidade deixada pelo falecido.</p>
+    </section>
+
+    <!-- Mensagens Programadas -->
+    <section id="programadas" class="section">
+        <h2 class="section-title">📅 Mensagens Programadas</h2>
+        <p class="section-subtitle">Esteja presente nos momentos especiais, mesmo à distância</p>
+        <div class="programadas">
+            <div class="programadas-grid">
+                <div class="programada-item">
+                    <h4>🎂 Aniversários</h4>
+                    <p>Receba uma mensagem especial no dia do seu aniversário.</p>
+                </div>
+                <div class="programada-item">
+                    <h4>🎄 Datas Comemorativas</h4>
+                    <p>Natal, Ano Novo, Dia dos Pais, Dia das Mães...</p>
+                </div>
+                <div class="programada-item">
+                    <h4>💌 Qualquer data especial</h4>
+                    <p>Você escolhe a data e a mensagem. Pode ser texto ou vídeo.</p>
+                </div>
+                <div class="programada-item">
+                    <h4>🎁 Futuro: Presentes e Flores</h4>
+                    <p>Em breve, envio de presentes programados para datas especiais.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Para quem já perdeu alguém -->
+    <section class="section" style="text-align: center;">
+        <div style="background: white; border-radius: 30px; padding: 3rem;">
+            <div class="feature-icon">🕊️</div>
+            <h2 style="color: #1B5E20; margin-bottom: 1rem;">Para quem já perdeu alguém</h2>
+            <p style="max-width: 600px; margin: 0 auto 2rem;">Seu ente querido faleceu? Você pode criar um legado em memória dele, guardar vídeos e eternizar sua história com o Assistente de Luto.</p>
+            <a href="https://aeterna.streamlit.app" class="btn-primary">Criar legado em memória →</a>
+        </div>
+    </section>
+
+    <!-- Parcerias -->
+    <section id="parcerias" class="section">
+        <div class="parcerias">
+            <h2>🚀 Faça parte dessa jornada</h2>
+            <p>Estamos abertos a parcerias estratégicas e investimentos anjo. O acolhimento digital é o futuro.</p>
+            <p>💼 <strong>Planos funerários e seguros de vida:</strong> o aEterna pode ser o diferencial que seu cliente precisa.</p>
+            <a href="mailto:parcerias@aeterenalegado.com.br" class="btn-parceiro">Quero ser parceiro →</a>
+        </div>
+    </section>
+
+    <!-- CTA Final -->
+    <section class="section">
+        <div style="background: linear-gradient(135deg, #2E8B57 0%, #1B5E20 100%); padding: 3rem; text-align: center; color: white; border-radius: 30px;">
+            <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">Comece hoje mesmo</h2>
+            <p>O aEterna está em fase beta e é gratuito. Crie seu legado ou homenageie quem você ama.</p>
+            <a href="https://aeterna.streamlit.app" class="btn-primary" style="background: white; color: #2E8B57; margin-top: 1rem;">Acessar o aEterna →</a>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <h4>aEterna</h4>
+                <a href="#assistente">Assistente de Luto</a>
+                <a href="#programadas">Mensagens Programadas</a>
+                <a href="#sobre">Sobre</a>
+            </div>
+            <div class="footer-links">
+                <h4>Parcerias</h4>
+                <a href="#parcerias">Investidores</a>
+                <a href="#parcerias">Planos Funerários</a>
+                <a href="#parcerias">Seguros de Vida</a>
+            </div>
+            <div class="footer-links">
+                <h4>Contato</h4>
+                <a href="mailto:contato@aeterenalegado.com.br">contato@aeterenalegado.com.br</a>
+                <a href="mailto:parcerias@aeterenalegado.com.br">parcerias@aeterenalegado.com.br</a>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>✨ aEterna - Assistente de Luto com IA | Presença Digital para Quem Ficou ✨</p>
+            <p>© 2024 aEterna - Beta | Acolhimento e memória através da tecnologia</p>
+        </div>
+    </footer>
+
+    <script>
+        const menuToggle = document.getElementById('menuToggle');
+        const navLinks = document.getElementById('navLinks');
+        if (menuToggle) {
+            menuToggle.addEventListener('click', function() { navLinks.classList.toggle('show'); });
+        }
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) { target.scrollIntoView({ behavior: 'smooth' }); }
+                if (navLinks.classList.contains('show')) { navLinks.classList.remove('show'); }
+            });
+        });
+    </script>
+</body>
+</html>

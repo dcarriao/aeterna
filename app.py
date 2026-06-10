@@ -11,6 +11,9 @@ from utils.usuarios import GerenciadorUsuarios
 from utils.upload_video import GerenciadorVideos
 from utils.assistente_ia import AssistenteLuto
 from utils.email_service import EmailService, processar_agendamentos
+from styles.theme import aplicar_tema
+from components.landing import render_landing
+from components.chat_luto import render_chat_luto
 
 
 # ============================================================================
@@ -34,6 +37,8 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+aplicar_tema()
 
 
 # ============================================================================
@@ -397,88 +402,7 @@ def render_login():
 # ASSISTENTE DE LUTO (CHAT DENTRO DA CAIXA)
 # ============================================================================
 def render_assistente():
-    nome_falecido = st.session_state.usuario_atual.get('nome_completo', 'seu ente querido')
-
-    if 'historico_assistente' not in st.session_state:
-        st.session_state.historico_assistente = []
-
-    if not st.session_state.historico_assistente:
-        st.session_state.historico_assistente.append(
-            {"tipo": "bot", "texto": f"Olá! Sou uma simulação baseada em como {nome_falecido} era. 💚"})
-
-    if 'assistente_obj' not in st.session_state:
-        st.session_state.assistente_obj = AssistenteLuto(st.session_state.falecido_id)
-
-    col_conteudo, col_chat = st.columns([2, 1])
-
-    with col_conteudo:
-        st.markdown(f"""
-        <div style="background: white; border-radius: 15px; padding: 15px;">
-            <h3 style="color: #2E8B57;">🤖 Sobre o Assistente de Luto</h3>
-            <p>O assistente foi treinado com a personalidade de <strong>{nome_falecido}</strong>.</p>
-            <p><strong>Dicas:</strong></p>
-            <ul>
-                <li>💬 Pergunte sobre lembranças felizes</li>
-                <li>💬 Peça conselhos</li>
-                <li>💬 Compartilhe como está se sentindo</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-
-        stats = st.session_state.assistente_obj.estatisticas()
-        st.markdown(f"""
-        <div class="info-card" style="text-align: center;">
-            <p>📊 <strong>{stats.get('perguntas_respondidas', 0)}</strong> perguntas respondidas sobre a personalidade</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-        logo = carregar_logo()
-        if logo:
-            st.image(logo, width=180)
-        st.caption("aEterna - Assistente de Luto com IA")
-
-    with col_chat:
-        st.markdown(f"""
-        <div class="chat-widget">
-            <div class="chat-header">
-                <div class="chat-avatar">🤖</div>
-                <div class="chat-header-name">Conversar com {nome_falecido}</div>
-            </div>
-            <div class="chat-body">
-        """, unsafe_allow_html=True)
-
-        for msg in st.session_state.historico_assistente:
-            if msg["tipo"] == "user":
-                st.markdown(
-                    f'<div class="message-row user"><div class="message-bubble user">{msg["texto"]}</div></div>',
-                    unsafe_allow_html=True)
-            else:
-                st.markdown(f'<div class="message-row bot"><div class="message-bubble bot">{msg["texto"]}</div></div>',
-                            unsafe_allow_html=True)
-
-        st.markdown("""
-            </div>
-            <div class="chat-warning">💡 Conversa simulada por IA</div>
-            <div class="chat-footer">
-        """, unsafe_allow_html=True)
-
-        with st.form(key="chat_form", clear_on_submit=True):
-            col1, col2 = st.columns([4, 1])
-            with col1:
-                mensagem = st.text_input("msg", key="nova_mensagem", placeholder="Digite sua mensagem...",
-                                         label_visibility="collapsed")
-            with col2:
-                enviar = st.form_submit_button("📤", use_container_width=True)
-
-        st.markdown('</div></div>', unsafe_allow_html=True)
-
-        if enviar and mensagem:
-            st.session_state.historico_assistente.append({"tipo": "user", "texto": mensagem})
-            with st.spinner("..."):
-                resposta = st.session_state.assistente_obj.conversar(mensagem)
-            st.session_state.historico_assistente.append({"tipo": "bot", "texto": resposta})
-            st.rerun()
-
+    render_chat_luto()
 
 # ============================================================================
 # VÍDEOS

@@ -1,0 +1,49 @@
+import streamlit as st
+
+def render_landing():
+    st.markdown("""
+    <section class="ae-hero">
+        <div class="ae-title">Seu legado, suas mensagens e seus ensinamentos para quem você ama.</div>
+        <div class="ae-subtitle">
+            A aEterna ajuda você a preservar memórias, orientações, vídeos, documentos
+            e mensagens importantes para que sua história continue presente.
+        </div>
+    </section>
+    """, unsafe_allow_html=True)
+
+    c1, c2, c3 = st.columns(3)
+
+    with c1:
+        st.markdown("""
+        <div class="ae-card">
+            <h3>Mensagens para o futuro</h3>
+            <p>Deixe vídeos, cartas e orientações para familiares e pessoas especiais.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with c2:
+        st.markdown("""
+        <div class="ae-card">
+            <h3>Cofre digital</h3>
+            <p>Organize informações importantes, contatos de confiança e documentos.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with c3:
+        st.markdown("""
+        <div class="ae-card">
+            <h3>Assistente de luto</h3>
+            <p>Um espaço acolhedor para preservar memórias e conversar com respeito.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("### Como funciona")
+    st.write("""
+    1. Você cria sua conta.
+    2. Cadastra contatos de confiança.
+    3. Registra mensagens, vídeos e orientações.
+    4. Define quem poderá acessar cada conteúdo no momento certo.
+    """)
+
+    st.markdown("### Comece em beta")
+    st.write("A versão beta está aberta para testes e melhorias antes do lançamento pago.")
