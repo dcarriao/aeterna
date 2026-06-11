@@ -226,14 +226,6 @@ def aplicar_css_mobile():
         padding: 12px !important;
     }
 
-    .ae-chat-body {
-        height: 260px !important;
-        min-height: 260px !important;
-        max-height: 260px !important;
-        padding: 12px !important;
-        overflow-y: auto !important;
-    }
-
     .ae-chat-shell {
         margin-top: 0.5rem !important;
     }

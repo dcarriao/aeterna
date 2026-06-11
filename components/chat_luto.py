@@ -174,16 +174,38 @@ div[data-testid="stForm"] {
 @media (max-width: 900px) {
     .ae-chat-shell {
         max-width: 100% !important;
-        margin-left: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border-radius: 18px !important;
+        overflow: hidden !important;
     }
-    
+
     .ae-chat-body {
-        height: 330px !important;
-        min-height: 330px !important;
+        height: 240px !important;
+        min-height: 240px !important;
+        max-height: 240px !important;
+        overflow-y: auto !important;
+        padding: 12px !important;
+        border-radius: 0 !important;
     }
-    
+
+    .ae-chat-warning {
+        display: none !important;
+    }
+
+    .ae-input-label {
+        color: #2b1747 !important;
+        font-size: 0.82rem !important;
+        margin-top: 8px !important;
+    }
+
     .ae-memory-card {
-        min-height: auto !important;
+        display: none !important;
+    }
+
+    .ae-message-bubble {
+        max-width: 90% !important;
+        font-size: 0.86rem !important;
     }
 }
 </style>
@@ -221,48 +243,36 @@ def _inicializar_chat():
         })
 
 
+import html
+
 def _render_mensagens():
-    partes = ['<div class="ae-chat-body" id="ae-chat-body">']
+    historico = st.session_state.get("historico_assistente", [])
 
-    for msg in st.session_state.historico_assistente:
-        tipo = "user" if msg.get("tipo") == "user" else "bot"
-        texto = _safe_text(msg.get("texto", ""))
+    if not historico:
+        historico = [{
+            "tipo": "bot",
+            "texto": "Olá. Este é um espaço de acolhimento baseado nas memórias de Administrador aEterna."
+        }]
 
-        partes.append(
-            f'<div class="ae-message-row {tipo}">'
-            f'<div class="ae-message-bubble {tipo}">{texto}</div>'
-            f'</div>'
-        )
+    partes = ['<div class="ae-chat-body">']
+
+    for msg in historico:
+        tipo = msg.get("tipo", "bot")
+        texto = html.escape(msg.get("texto", "")).replace("\n", "<br>")
+
+        classe = "user" if tipo == "user" else "bot"
+
+        partes.append(f"""
+        <div class="ae-message-row {classe}">
+            <div class="ae-message-bubble {classe}">
+                {texto}
+            </div>
+        </div>
+        """)
 
     partes.append("</div>")
+
     st.markdown("".join(partes), unsafe_allow_html=True)
-
-
-def _render_card_esquerdo(nome_referencia: str):
-    nome = _safe_text(nome_referencia)
-
-    html_card = (
-        '<div class="ae-memory-card">'
-        '<h2>Assistente de Memória</h2>'
-        '<p>Um espaço reservado para conversar com acolhimento sobre lembranças, saudade, ensinamentos e histórias ligadas a '
-        f'<strong style="color:#f2c572;">{nome}</strong>.</p>'
-        '<p>A proposta não é substituir uma pessoa nem apoio psicológico, mas ajudar a preservar presença, contexto, valores e memórias.</p>'
-        '<div class="ae-memory-separator"></div>'
-        '<div class="ae-memory-feature"><div class="ae-memory-icon">💬</div><div><strong>Conversa acolhedora</strong><span>Fale sobre saudade, emoções, lembranças e momentos importantes.</span></div></div>'
-        '<div class="ae-memory-feature"><div class="ae-memory-icon">🕊️</div><div><strong>Memórias e saudade</strong><span>Reviva histórias, recordações e ensinamentos que marcaram sua vida.</span></div></div>'
-        '<div class="ae-memory-feature"><div class="ae-memory-icon">✨</div><div><strong>Legado familiar</strong><span>Preserve valores, conselhos e caminhos que você deseja manter vivos.</span></div></div>'
-        '<div class="ae-memory-feature"><div class="ae-memory-icon">🔒</div><div><strong>Uso privado</strong><span>Suas conversas são pessoais e devem ser tratadas com cuidado.</span></div></div>'
-        '<div class="ae-suggestion-box"><strong>💡 Sugestões para começar:</strong>'
-        '<ul>'
-        '<li>Estou sentindo saudade hoje.</li>'
-        '<li>Qual conselho combinaria com este momento?</li>'
-        '<li>Me ajude a lembrar de uma história importante.</li>'
-        '<li>Quero registrar uma mensagem para minha família.</li>'
-        '</ul></div>'
-        '</div>'
-    )
-
-    st.markdown(html_card, unsafe_allow_html=True)
 
 
 def render_chat_luto():
