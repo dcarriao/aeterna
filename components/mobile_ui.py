@@ -227,9 +227,19 @@ def aplicar_css_mobile():
     }
 
     .ae-chat-body {
-        height: 48vh !important;
-        min-height: 320px !important;
+        height: 260px !important;
+        min-height: 260px !important;
+        max-height: 260px !important;
         padding: 12px !important;
+        overflow-y: auto !important;
+    }
+
+    .ae-chat-shell {
+        margin-top: 0.5rem !important;
+    }
+    
+    .ae-chat-warning {
+        display: none !important;
     }
 
     .ae-message-bubble {
