@@ -950,7 +950,6 @@ def render_admin_panel():
 # ============================================================================
 def main():
     inject_custom_css()
-    aplicar_css_mobile()
 
     if not st.session_state.autenticado:
         render_login_compacto(
@@ -961,6 +960,7 @@ def main():
             fazer_cadastro
         )
     else:
+        aplicar_css_mobile()
         aplicar_css_dashboard()
         nome_exibido = st.session_state.usuario_atual.get(
             "nome_completo",
