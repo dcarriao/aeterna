@@ -15,13 +15,11 @@ def _css_login_compacto():
     background: transparent;
 }
 
-/* Reduz espaço geral da página */
 .block-container {
     padding-top: 1.2rem !important;
     padding-bottom: 1.2rem !important;
 }
 
-/* Header tipográfico, sem imagem */
 .ae-login-header {
     text-align: center;
     margin-bottom: 0.45rem;
@@ -66,7 +64,7 @@ def _css_login_compacto():
 
 .ae-login-subtitle {
     text-align: center;
-    color: rgba(255,255,255,0.76);
+    color: rgba(255,255,255,0.86);
     font-size: 0.9rem;
     line-height: 1.42;
     margin-bottom: 0.95rem;
@@ -77,16 +75,6 @@ def _css_login_compacto():
     font-size: 1.05rem;
     font-weight: 900;
     margin-bottom: 0.6rem;
-}
-
-.ae-login-tip {
-    background: #fff6dd;
-    color: #6d4a14;
-    border: 1px solid #ead9b6;
-    border-radius: 14px;
-    padding: 0.75rem;
-    font-size: 0.82rem;
-    margin: 0.7rem 0;
 }
 
 .ae-login-footer {
@@ -105,7 +93,6 @@ def _css_login_compacto():
     background: rgba(255,255,255,0.08);
     border: 1px solid rgba(212,175,55,0.20);
     border-bottom: 0;
-    backdrop-filter: blur(12px);
 }
 
 .ae-login-secondary-title {
@@ -117,23 +104,42 @@ def _css_login_compacto():
 }
 
 .ae-login-secondary-text {
-    color: rgba(255,255,255,0.68);
+    color: rgba(255,255,255,0.84);
     text-align: center;
     font-size: 0.78rem;
     margin-bottom: 0.05rem;
 }
 
 div[data-testid="stForm"] {
-    background: rgba(255,255,255,0.97);
+    background: rgba(255,255,255,0.98);
     border: 1px solid rgba(212,175,55,0.34);
     border-radius: 26px;
     padding: 1.25rem 1.45rem 1rem;
     box-shadow: 0 28px 90px rgba(0, 0, 0, 0.34);
 }
 
+div[data-testid="stForm"] label,
+div[data-testid="stForm"] label p,
+div[data-testid="stWidgetLabel"],
+div[data-testid="stWidgetLabel"] p {
+    color: #2b1845 !important;
+    font-weight: 800 !important;
+    opacity: 1 !important;
+}
+
 .stTextInput > div > div > input,
-.stDateInput > div > div > input {
+.stDateInput > div > div > input,
+.stTextArea textarea {
     border-radius: 12px !important;
+    color: #1b0f2e !important;
+    background: #ffffff !important;
+    border: 1px solid rgba(27, 15, 46, 0.35) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #8a7b95 !important;
+    opacity: 1 !important;
 }
 
 div.stButton > button,
@@ -144,13 +150,11 @@ button[data-testid*="baseButton"] {
     min-height: 2.65rem !important;
 }
 
-/* Força o botão principal em dourado na maioria das versões do Streamlit */
 div[data-testid="stFormSubmitButton"] button,
 button[data-testid="baseButton-primary"],
 button[data-testid="stBaseButton-primary"],
 div.stButton > button[kind="primary"],
-button[kind="primary"],
-.stForm button[kind="primary"] {
+button[kind="primary"] {
     background: linear-gradient(135deg, #f8dc92 0%, #d4af37 55%, #b77a46 100%) !important;
     color: #1b0f2e !important;
     border: none !important;
@@ -158,16 +162,6 @@ button[kind="primary"],
     box-shadow: 0 8px 24px rgba(212,175,55,0.25) !important;
 }
 
-div[data-testid="stFormSubmitButton"] button:hover,
-button[data-testid="baseButton-primary"]:hover,
-button[data-testid="stBaseButton-primary"]:hover,
-div.stButton > button[kind="primary"]:hover,
-button[kind="primary"]:hover {
-    filter: brightness(1.05);
-    transform: translateY(-1px);
-}
-
-/* Botões secundários */
 div.stButton > button,
 button[data-testid="baseButton-secondary"],
 button[data-testid="stBaseButton-secondary"],
@@ -177,7 +171,6 @@ button[kind="secondary"] {
     border: 1px solid rgba(212,175,55,0.38) !important;
 }
 
-/* Botões abaixo dos blocos escuros também em dourado */
 .ae-login-secondary-block + div button,
 .ae-login-secondary-block + div [data-testid="baseButton-secondary"],
 .ae-login-secondary-block + div [data-testid="stBaseButton-secondary"] {
@@ -186,31 +179,79 @@ button[kind="secondary"] {
     border: 0 !important;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
     .block-container {
-        padding-top: 0.8rem !important;
-    }
-
-    div[data-testid="stForm"] {
-        padding: 1.1rem;
-        border-radius: 22px;
+        padding-top: 0.65rem !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        padding-bottom: 2rem !important;
     }
 
     .ae-logo-text {
-        font-size: 2.35rem;
+        font-size: 2.35rem !important;
     }
 
     .ae-logo-symbol {
-        font-size: 1.9rem;
+        font-size: 1.9rem !important;
     }
 
     .ae-logo-subtitle {
-        font-size: 0.52rem;
-        letter-spacing: 0.14em;
+        font-size: 0.5rem !important;
+        letter-spacing: 0.13em !important;
+        color: rgba(242,197,114,0.92) !important;
     }
 
     .ae-login-title {
-        font-size: 1.35rem;
+        font-size: 1.28rem !important;
+        color: #ffffff !important;
+        margin-top: 0.45rem !important;
+    }
+
+    .ae-login-subtitle {
+        font-size: 0.82rem !important;
+        color: rgba(255,255,255,0.92) !important;
+        margin-bottom: 0.7rem !important;
+    }
+
+    div[data-testid="stForm"] {
+        padding: 1rem !important;
+        border-radius: 22px !important;
+    }
+
+    .ae-login-mode-title {
+        color: #1b0f2e !important;
+        font-size: 1rem !important;
+    }
+
+    div[data-testid="column"] {
+        width: 100% !important;
+        flex: 1 1 100% !important;
+        min-width: 100% !important;
+    }
+
+    div[data-testid="stForm"] label,
+    div[data-testid="stForm"] label p,
+    div[data-testid="stWidgetLabel"],
+    div[data-testid="stWidgetLabel"] p {
+        color: #2b1845 !important;
+        font-size: 0.88rem !important;
+        font-weight: 800 !important;
+        opacity: 1 !important;
+    }
+
+    .stTextInput > div > div > input,
+    .stDateInput > div > div > input,
+    .stTextArea textarea {
+        min-height: 44px !important;
+        font-size: 16px !important;
+        color: #1b0f2e !important;
+        background: #ffffff !important;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+        color: #8a7b95 !important;
+        opacity: 1 !important;
     }
 }
 </style>
@@ -222,7 +263,6 @@ def _set_mode(mode: str):
 
 
 def _render_logo():
-    # Não usa imagem para evitar retângulo preto/fundo embutido.
     st.markdown("""
     <div class="ae-login-header">
         <div class="ae-logo-text"><span class="ae-logo-symbol">∞</span>aEterna</div>
@@ -238,10 +278,8 @@ def _render_logo():
 def _render_login_principal(fazer_login):
     with st.form("login_form_compacto"):
         st.markdown('<div class="ae-login-mode-title">Acessar minha conta</div>', unsafe_allow_html=True)
-
         email = st.text_input("E-mail", key="login_email_compacto")
         senha = st.text_input("Senha", type="password", key="login_senha_compacto")
-
         submitted = st.form_submit_button("Entrar", use_container_width=True, type="primary")
 
         if submitted:
@@ -255,24 +293,12 @@ def _render_login_principal(fazer_login):
 
         st.markdown('<div class="ae-login-footer">Legados Digitais e Segurança Pós-Morte</div>', unsafe_allow_html=True)
 
-    st.markdown("""
-    <div class="ae-login-secondary-block">
-        <div class="ae-login-secondary-title">Novo por aqui?</div>
-        <div class="ae-login-secondary-text">Crie sua conta para começar seu legado digital.</div>
-    </div>
-    """, unsafe_allow_html=True)
-
+    st.markdown('<div class="ae-login-secondary-block"><div class="ae-login-secondary-title">Novo por aqui?</div><div class="ae-login-secondary-text">Crie sua conta para começar seu legado digital.</div></div>', unsafe_allow_html=True)
     if st.button("Criar conta", use_container_width=True):
         _set_mode("cadastro")
         st.rerun()
 
-    st.markdown("""
-    <div class="ae-login-secondary-block">
-        <div class="ae-login-secondary-title">Recebeu uma chave?</div>
-        <div class="ae-login-secondary-text">Acesse um legado compartilhado com você.</div>
-    </div>
-    """, unsafe_allow_html=True)
-
+    st.markdown('<div class="ae-login-secondary-block"><div class="ae-login-secondary-title">Recebeu uma chave?</div><div class="ae-login-secondary-text">Acesse um legado compartilhado com você.</div></div>', unsafe_allow_html=True)
     if st.button("Acessar legado com chave", use_container_width=True):
         _set_mode("visitante")
         st.rerun()
@@ -281,15 +307,10 @@ def _render_login_principal(fazer_login):
 def _render_visitante(fazer_login_visitante):
     with st.form("visitante_form_compacto"):
         st.markdown('<div class="ae-login-mode-title">Acessar legado de alguém</div>', unsafe_allow_html=True)
-        st.markdown(
-            '<div class="ae-login-tip">Use esta opção apenas se você recebeu uma chave de acesso da família ou de um contato autorizado.</div>',
-            unsafe_allow_html=True,
-        )
-
+        st.info("Use esta opção apenas se você recebeu uma chave de acesso autorizada.")
         nome_visitante = st.text_input("Seu nome", key="visitante_nome_compacto")
         email_falecido = st.text_input("E-mail da pessoa responsável pelo legado", key="visitante_email_compacto")
         chave = st.text_input("Chave de acesso", type="password", key="visitante_chave_compacto")
-
         submitted = st.form_submit_button("Acessar legado", use_container_width=True, type="primary")
 
         if submitted:
@@ -319,7 +340,6 @@ def _render_cadastro(fazer_cadastro):
         email = st.text_input("E-mail *", key="cadastro_email_compacto")
         cpf = st.text_input("CPF (11 números) *", key="cadastro_cpf_compacto", max_chars=11)
         data_nascimento = st.date_input("Data de nascimento *", key="cadastro_data_compacto", value=None)
-
         senha = st.text_input("Senha *", type="password", key="cadastro_senha_compacto")
         confirmar_senha = st.text_input("Confirmar senha *", type="password", key="cadastro_confirmar_compacto")
 
@@ -339,17 +359,7 @@ def _render_cadastro(fazer_cadastro):
             elif len(senha) < 6:
                 st.warning("A senha deve ter pelo menos 6 caracteres.")
             else:
-                resultado = fazer_cadastro(
-                    nome,
-                    sobrenome,
-                    email,
-                    cpf,
-                    data_nascimento.strftime("%Y-%m-%d"),
-                    senha,
-                    telefone,
-                    whatsapp,
-                )
-
+                resultado = fazer_cadastro(nome, sobrenome, email, cpf, data_nascimento.strftime("%Y-%m-%d"), senha, telefone, whatsapp)
                 if resultado is True:
                     st.success("Conta criada! Faça login.")
                     _set_mode("login")
@@ -380,7 +390,6 @@ def render_login_compacto(
 
     with center:
         _render_logo()
-
         mode = st.session_state.login_mode
 
         if mode == "cadastro":
