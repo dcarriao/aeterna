@@ -281,44 +281,71 @@ def render_chat_luto():
 
     nome_referencia = _obter_nome_referencia()
 
-    with st.expander("💜 Sobre o Assistente de Memória", expanded=False):
-        _render_card_esquerdo(nome_referencia)
-
-    st.markdown('<div class="ae-chat-shell">', unsafe_allow_html=True)
-
-    st.markdown("""
-<div class="ae-chat-header">
-    <div class="ae-chat-avatar">💜</div>
-    <div>
-        <div class="ae-chat-title">Assistente aEterna</div>
-        <div class="ae-chat-subtitle">Memória, legado e acolhimento</div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-    _render_mensagens()
-
+    st.markdown("### Assistente de Luto")
     st.markdown(
-        '<div class="ae-chat-warning">Este assistente não substitui psicólogo, terapeuta ou atendimento de emergência.</div>',
-        unsafe_allow_html=True,
+        f"""
+        Este espaço foi criado para apoiar conversas de memória, saudade e continuidade.  
+        Conversar com **{nome_referencia}**.
+        """
     )
 
-    with st.form("form_assistente_luto", clear_on_submit=True):
-        st.markdown(
-            '<div class="ae-input-label">Digite sua mensagem</div>',
-            unsafe_allow_html=True
-        )
+    historico = st.session_state.get("historico_assistente", [])
 
+    if not historico:
+        historico = [{
+            "tipo": "bot",
+            "texto": f"Olá. Este é um espaço de acolhimento baseado nas memórias de {nome_referencia}."
+        }]
+
+    for msg in historico:
+        tipo = msg.get("tipo", "bot")
+        texto = msg.get("texto", "")
+
+        if tipo == "user":
+            st.markdown(
+                f"""
+                <div style="
+                    background:#2b1747;
+                    color:white;
+                    padding:12px 14px;
+                    border-radius:16px;
+                    margin:8px 0 8px auto;
+                    max-width:85%;
+                    text-align:left;
+                ">
+                    {texto}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+        else:
+            st.markdown(
+                f"""
+                <div style="
+                    background:white;
+                    color:#1b0f2e;
+                    padding:12px 14px;
+                    border-radius:16px;
+                    margin:8px auto 8px 0;
+                    max-width:85%;
+                    border:1px solid rgba(0,0,0,0.08);
+                ">
+                    {texto}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+    with st.form("form_assistente_luto", clear_on_submit=True):
         mensagem = st.text_area(
-            "Mensagem",
+            "Digite sua mensagem",
             placeholder="Escreva aqui...",
-            height=82,
-            label_visibility="collapsed",
+            height=90,
             key="mensagem_assistente_luto",
         )
 
         enviar = st.form_submit_button(
-            "Enviar mensagem",
+            "Enviar",
             use_container_width=True,
             type="primary"
         )
@@ -327,8 +354,6 @@ def render_chat_luto():
             "Limpar conversa",
             use_container_width=True
         )
-
-    st.markdown("</div>", unsafe_allow_html=True)
 
     if limpar:
         st.session_state.historico_assistente = []
@@ -343,10 +368,7 @@ def render_chat_luto():
         try:
             resposta = st.session_state.assistente_obj.conversar(mensagem.strip())
         except Exception as exc:
-            resposta = (
-                "Desculpe, tive uma dificuldade para responder agora. "
-                "Tente novamente em alguns instantes."
-            )
+            resposta = "Desculpe, tive uma dificuldade para responder agora. Tente novamente em alguns instantes."
             st.error(f"Erro no assistente: {exc}")
 
         st.session_state.historico_assistente.append({
