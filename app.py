@@ -14,7 +14,12 @@ from utils.email_service import EmailService, processar_agendamentos
 from styles.theme import aplicar_tema
 from components.landing import render_landing
 from components.chat_luto import render_chat_luto
-
+from components.login_compacto import render_login_compacto
+from components.dashboard_ui import (
+    aplicar_css_dashboard,
+    render_sidebar_premium,
+    render_painel_inicial
+)
 
 # ============================================================================
 # CONFIGURAÇÃO DA PÁGINA
@@ -314,6 +319,7 @@ def fazer_cadastro(nome, sobrenome, email, cpf, data_nascimento, senha,
 # TELA DE LOGIN
 # ============================================================================
 def render_login():
+    aplicar_css_dashboard()
     logo = carregar_logo()
     logo_sem_fundo = remover_fundo_branco(logo) if logo else None
 
@@ -945,31 +951,69 @@ def main():
     inject_custom_css()
 
     if not st.session_state.autenticado:
-        render_login()
+        render_login_compacto(
+            carregar_logo,
+            remover_fundo_branco,
+            fazer_login,
+            fazer_login_visitante,
+            fazer_cadastro
+        )
     else:
-        logo = carregar_logo()
-        if logo:
-            with st.sidebar:
-                st.markdown('<div class="sidebar-logo-container">', unsafe_allow_html=True)
-                st.image(logo, width=180)
-                st.markdown('</div>', unsafe_allow_html=True)
+        aplicar_css_dashboard()
+        nome_exibido = st.session_state.usuario_atual.get(
+            "nome_completo",
+            "Usuário"
+        )
 
-        nome_exibido = st.session_state.usuario_atual.get('nome_completo', 'Usuário')
-        is_admin = st.session_state.usuario_atual.get('tipo') == 'admin'
+        is_admin = (
+                st.session_state.usuario_atual.get("tipo") == "admin"
+        )
 
-        with st.sidebar:
-            st.markdown(f"### ✨ Olá, {nome_exibido}!")
-            if st.button("🚪 Sair", use_container_width=True):
-                fazer_logout()
-            st.markdown("---")
-            st.markdown("### 📊 Seu Legado")
-            st.metric("📹 Vídeos", len(db.listar_videos_usuario(st.session_state.usuario_atual['id'])))
-            st.metric("👥 Contatos", len(db.listar_contatos_usuario(st.session_state.usuario_atual['id'])))
+        qtd_videos = len(
+            db.listar_videos_usuario(
+                st.session_state.usuario_atual["id"]
+            )
+        )
+
+        qtd_contatos = len(
+            db.listar_contatos_usuario(
+                st.session_state.usuario_atual["id"]
+            )
+        )
+
+        # Ajustaremos depois para dados reais
+        qtd_cofre = 0
+        qtd_memorias = 0
+
+        render_sidebar_premium(
+            nome_exibido=nome_exibido,
+            qtd_videos=qtd_videos,
+            qtd_contatos=qtd_contatos,
+            qtd_cofre=qtd_cofre,
+            qtd_memorias=qtd_memorias,
+            is_admin=is_admin,
+            fazer_logout=fazer_logout
+        )
 
         if is_admin:
-            tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
-                "🤖 Assistente", "📹 Vídeos", "👥 Contatos", "🧠 Perfil", "📅 Lembranças", "📁 Cofre", "👑 Admin"
+            tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
+                "🏠 Painel",
+                "💬 Assistente",
+                "🎥 Vídeos",
+                "👥 Família",
+                "👤 Perfil",
+                "📝 Lembranças",
+                "🔒 Cofre",
+                "👑 Admin"
             ])
+            with tab0:
+                render_painel_inicial(
+                    nome_exibido,
+                    qtd_videos,
+                    qtd_contatos,
+                    qtd_cofre,
+                    qtd_memorias
+                )
             with tab1:
                 render_assistente()
             with tab2:
@@ -985,9 +1029,23 @@ def main():
             with tab7:
                 render_admin_panel()
         else:
-            tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-                "🤖 Assistente", "📹 Vídeos", "👥 Contatos", "🧠 Perfil", "📅 Lembranças", "📁 Cofre"
+            tab0, tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+                "🏠 Painel",
+                "💬 Assistente",
+                "🎥 Vídeos",
+                "👥 Família",
+                "👤 Perfil",
+                "📝 Lembranças",
+                "🔒 Cofre"
             ])
+            with tab0:
+                render_painel_inicial(
+                    nome_exibido,
+                    qtd_videos,
+                    qtd_contatos,
+                    qtd_cofre,
+                    qtd_memorias
+                )
             with tab1:
                 render_assistente()
             with tab2:
