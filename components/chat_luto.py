@@ -172,9 +172,19 @@ div[data-testid="stForm"] {
     background: transparent !important;
 }
 @media (max-width: 900px) {
-    .ae-memory-card { min-height: auto; margin-bottom: 1rem; }
-    .ae-chat-shell { max-width: 100%; margin-left: 0; }
-    .ae-chat-body { height: 360px; }
+    .ae-chat-shell {
+        max-width: 100% !important;
+        margin-left: 0 !important;
+    }
+    
+    .ae-chat-body {
+        height: 330px !important;
+        min-height: 330px !important;
+    }
+    
+    .ae-memory-card {
+        min-height: auto !important;
+    }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -261,15 +271,12 @@ def render_chat_luto():
 
     nome_referencia = _obter_nome_referencia()
 
-    col_info, col_chat = st.columns([1.08, 0.92], gap="large")
-
-    with col_info:
+    with st.expander("💜 Sobre o Assistente de Memória", expanded=False):
         _render_card_esquerdo(nome_referencia)
 
-    with col_chat:
-        st.markdown('<div class="ae-chat-shell">', unsafe_allow_html=True)
+    st.markdown('<div class="ae-chat-shell">', unsafe_allow_html=True)
 
-        st.markdown("""
+    st.markdown("""
 <div class="ae-chat-header">
     <div class="ae-chat-avatar">💜</div>
     <div>
@@ -279,54 +286,62 @@ def render_chat_luto():
 </div>
 """, unsafe_allow_html=True)
 
-        _render_mensagens()
+    _render_mensagens()
 
+    st.markdown(
+        '<div class="ae-chat-warning">Este assistente não substitui psicólogo, terapeuta ou atendimento de emergência.</div>',
+        unsafe_allow_html=True,
+    )
+
+    with st.form("form_assistente_luto", clear_on_submit=True):
         st.markdown(
-            '<div class="ae-chat-warning">Este assistente não substitui psicólogo, terapeuta ou atendimento de emergência.</div>',
-            unsafe_allow_html=True,
+            '<div class="ae-input-label">Digite sua mensagem</div>',
+            unsafe_allow_html=True
         )
 
-        with st.form("form_assistente_luto", clear_on_submit=True):
-            st.markdown('<div class="ae-input-label">Digite sua mensagem</div>', unsafe_allow_html=True)
-            mensagem = st.text_area(
-                "Mensagem",
-                placeholder="Escreva aqui...",
-                height=82,
-                label_visibility="collapsed",
-                key="mensagem_assistente_luto",
+        mensagem = st.text_area(
+            "Mensagem",
+            placeholder="Escreva aqui...",
+            height=82,
+            label_visibility="collapsed",
+            key="mensagem_assistente_luto",
+        )
+
+        enviar = st.form_submit_button(
+            "Enviar mensagem",
+            use_container_width=True,
+            type="primary"
+        )
+
+        limpar = st.form_submit_button(
+            "Limpar conversa",
+            use_container_width=True
+        )
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    if limpar:
+        st.session_state.historico_assistente = []
+        st.rerun()
+
+    if enviar and mensagem.strip():
+        st.session_state.historico_assistente.append({
+            "tipo": "user",
+            "texto": mensagem.strip(),
+        })
+
+        try:
+            resposta = st.session_state.assistente_obj.conversar(mensagem.strip())
+        except Exception as exc:
+            resposta = (
+                "Desculpe, tive uma dificuldade para responder agora. "
+                "Tente novamente em alguns instantes."
             )
+            st.error(f"Erro no assistente: {exc}")
 
-            col_send, col_clear = st.columns([0.72, 0.28])
+        st.session_state.historico_assistente.append({
+            "tipo": "bot",
+            "texto": resposta,
+        })
 
-            with col_send:
-                enviar = st.form_submit_button("Enviar mensagem", use_container_width=True, type="primary")
-
-            with col_clear:
-                limpar = st.form_submit_button("Limpar", use_container_width=True)
-
-        st.markdown("</div>", unsafe_allow_html=True)
-
-        if limpar:
-            st.session_state.historico_assistente = []
-            st.rerun()
-
-        if enviar and mensagem.strip():
-            st.session_state.historico_assistente.append({
-                "tipo": "user",
-                "texto": mensagem.strip(),
-            })
-
-            try:
-                resposta = st.session_state.assistente_obj.conversar(mensagem.strip())
-            except Exception as exc:
-                resposta = (
-                    "Desculpe, tive uma dificuldade para responder agora. "
-                    "Tente novamente em alguns instantes."
-                )
-                st.error(f"Erro no assistente: {exc}")
-
-            st.session_state.historico_assistente.append({
-                "tipo": "bot",
-                "texto": resposta,
-            })
-            st.rerun()
+        st.rerun()
