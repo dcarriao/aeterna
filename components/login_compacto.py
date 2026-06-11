@@ -175,11 +175,13 @@ button[kind="secondary"] {
 
 @media (max-width: 768px) {
     .ae-login-title {
-        color: #ffffff !important;
+        color: #2b1747 !important;
+        text-shadow: none !important;
     }
-    
+
     .ae-login-subtitle {
-        color: rgba(255,255,255,0.92) !important;
+        color: #4a3a66 !important;
+        text-shadow: none !important;
     }
     
     .ae-login-secondary-title {

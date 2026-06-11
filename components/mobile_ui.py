@@ -287,6 +287,25 @@ def aplicar_css_mobile():
     footer {
         visibility: hidden !important;
     }
+    /* Oculta toolbar Streamlit Cloud / GitHub / Fork */
+    [data-testid="stToolbar"],
+    [data-testid="stHeaderActionElements"],
+    [data-testid="stStatusWidget"],
+    [data-testid="stDecoration"],
+    [data-testid="stMainMenu"],
+    .stToolbar,
+    .stDeployButton,
+    header button,
+    header a,
+    header [role="button"],
+    iframe[title*="streamlit"],
+    iframe[title*="GitHub"],
+    iframe[title*="Fork"] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
 }
 </style>
 """, unsafe_allow_html=True)
