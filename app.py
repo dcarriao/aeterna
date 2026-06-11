@@ -20,6 +20,7 @@ from components.dashboard_ui import (
     render_sidebar_premium,
     render_painel_inicial
 )
+from components.mobile_ui import aplicar_css_mobile
 
 # ============================================================================
 # CONFIGURAÇÃO DA PÁGINA
@@ -949,6 +950,7 @@ def render_admin_panel():
 # ============================================================================
 def main():
     inject_custom_css()
+    aplicar_css_mobile()
 
     if not st.session_state.autenticado:
         render_login_compacto(
