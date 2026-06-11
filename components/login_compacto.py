@@ -55,26 +55,20 @@ def _css_login_compacto():
 }
 
 .ae-login-title {
-    text-align: center;
     color: #ffffff;
-    font-size: 1.55rem;
-    font-weight: 900;
-    margin: 0.5rem 0 0.25rem;
 }
 
 .ae-login-subtitle {
-    text-align: center;
     color: rgba(255,255,255,0.86);
-    font-size: 0.9rem;
-    line-height: 1.42;
-    margin-bottom: 0.95rem;
 }
 
 .ae-login-mode-title {
     color: #1b0f2e;
-    font-size: 1.05rem;
-    font-weight: 900;
-    margin-bottom: 0.6rem;
+}
+
+div[data-testid="stForm"] label,
+div[data-testid="stForm"] label p {
+    color: #2b1845 !important;
 }
 
 .ae-login-footer {
@@ -180,78 +174,29 @@ button[kind="secondary"] {
 }
 
 @media (max-width: 768px) {
-    .block-container {
-        padding-top: 0.65rem !important;
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
-        padding-bottom: 2rem !important;
-    }
-
-    .ae-logo-text {
-        font-size: 2.35rem !important;
-    }
-
-    .ae-logo-symbol {
-        font-size: 1.9rem !important;
-    }
-
-    .ae-logo-subtitle {
-        font-size: 0.5rem !important;
-        letter-spacing: 0.13em !important;
-        color: rgba(242,197,114,0.92) !important;
-    }
-
     .ae-login-title {
-        font-size: 1.28rem !important;
         color: #ffffff !important;
-        margin-top: 0.45rem !important;
     }
-
+    
     .ae-login-subtitle {
-        font-size: 0.82rem !important;
         color: rgba(255,255,255,0.92) !important;
-        margin-bottom: 0.7rem !important;
     }
-
-    div[data-testid="stForm"] {
-        padding: 1rem !important;
-        border-radius: 22px !important;
+    
+    .ae-login-secondary-title {
+        color: #f2c572 !important;
     }
-
-    .ae-login-mode-title {
-        color: #1b0f2e !important;
-        font-size: 1rem !important;
+    
+    .ae-login-secondary-text {
+        color: rgba(255,255,255,0.92) !important;
     }
-
-    div[data-testid="column"] {
-        width: 100% !important;
-        flex: 1 1 100% !important;
-        min-width: 100% !important;
-    }
-
+    
     div[data-testid="stForm"] label,
     div[data-testid="stForm"] label p,
     div[data-testid="stWidgetLabel"],
     div[data-testid="stWidgetLabel"] p {
         color: #2b1845 !important;
-        font-size: 0.88rem !important;
+        opacity: 1 !important;
         font-weight: 800 !important;
-        opacity: 1 !important;
-    }
-
-    .stTextInput > div > div > input,
-    .stDateInput > div > div > input,
-    .stTextArea textarea {
-        min-height: 44px !important;
-        font-size: 16px !important;
-        color: #1b0f2e !important;
-        background: #ffffff !important;
-    }
-
-    input::placeholder,
-    textarea::placeholder {
-        color: #8a7b95 !important;
-        opacity: 1 !important;
     }
 }
 </style>

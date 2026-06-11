@@ -10,6 +10,22 @@ def aplicar_css_mobile():
         color: #1b0f2e !important;
     }
     
+    .stToolbar,
+    [data-testid="stToolbar"],
+    [data-testid="stDecoration"],
+    [data-testid="stStatusWidget"],
+    [data-testid="stHeaderActionElements"],
+    header [title="View source"],
+    header a[href*="github"],
+    header a[href*="streamlit"],
+    .viewerBadge_container__1QSob,
+    #MainMenu,
+    footer {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+    }
+    
     div[data-testid="stFormSubmitButton"] button {
         background: linear-gradient(135deg, #f8dc92, #d4af37 62%, #b77a46) !important;
         color: #1b0f2e !important;
