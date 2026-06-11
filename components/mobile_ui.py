@@ -4,6 +4,17 @@ def aplicar_css_mobile():
     st.markdown("""
 <style>
 @media (max-width: 768px) {
+    input,
+    textarea,
+    select {
+        color: #1b0f2e !important;
+    }
+    
+    input::placeholder,
+    textarea::placeholder {
+        color: #8a7b95 !important;
+        opacity: 1 !important;
+    }
     .block-container {
         padding-top: 0.65rem !important;
         padding-left: 1rem !important;
@@ -75,18 +86,21 @@ def aplicar_css_mobile():
     .stMarkdown li,
     .stText,
     label,
+    small,
+    span,
     div[data-testid="stWidgetLabel"],
     div[data-testid="stWidgetLabel"] p {
         color: #2b1747 !important;
     }
 
-    .ae-memory-card,
-    .ae-memory-card *,
-    .ae-chat-header,
-    .ae-chat-header *,
-    .ae-dashboard-hero,
-    .ae-dashboard-hero *,
-    [data-testid="stSidebar"],
+    .ae-dashboard-hero * {
+        color: inherit !important;
+    }
+    
+    .ae-chat-header * {
+        color: white !important;
+    }
+    
     [data-testid="stSidebar"] * {
         color: inherit !important;
     }
