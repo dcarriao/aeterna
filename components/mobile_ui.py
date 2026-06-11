@@ -10,6 +10,18 @@ def aplicar_css_mobile():
         color: #1b0f2e !important;
     }
     
+    div[data-testid="stFormSubmitButton"] button {
+        background: linear-gradient(135deg, #f8dc92, #d4af37 62%, #b77a46) !important;
+        color: #1b0f2e !important;
+        border: none !important;
+    }
+    
+    div[data-testid="stFormSubmitButton"] button[kind="secondary"] {
+        background: rgba(255,255,255,0.95) !important;
+        color: #1b0f2e !important;
+        border: 1px solid rgba(212,175,55,0.38) !important;
+    }
+    
     input::placeholder,
     textarea::placeholder {
         color: #8a7b95 !important;
