@@ -54,12 +54,39 @@ def render_chat_luto():
 
     st.markdown('<div class="ae-assistente-page">', unsafe_allow_html=True)
 
-    st.markdown("## Assistente de Luto")
+    st.markdown("## Assistente de Legado")
     if st.session_state.get("ultimo_erro_openai"):
         st.error(f"Erro OpenAI: {st.session_state['ultimo_erro_openai']}")
     st.markdown(
-        f"Este espaço foi criado para apoiar conversas de memória, saudade e continuidade.  \n"
-        f"Conversar com **{nome_referencia}**."
+        """
+    Este espaço existe para ajudar a construir e preservar o seu legado digital.
+
+    Você pode conversar livremente sobre qualquer assunto que desejar.
+
+    Também posso sugerir temas importantes para registrar histórias, valores, aprendizados, conselhos e lembranças que poderão ajudar sua família e pessoas queridas no futuro.
+
+    ### 💡 Sugestões de conversa
+
+    • Minha infância
+
+    • Minha família
+
+    • Como conheci meu amor
+
+    • Meus filhos
+
+    • Minha carreira
+
+    • Meus maiores aprendizados
+
+    • Sonhos realizados
+
+    • Momentos difíceis que superei
+
+    • Conselhos para o futuro
+
+    • Histórias engraçadas
+    """
     )
 
     historico = st.session_state.get("historico_assistente", [])
@@ -67,7 +94,7 @@ def render_chat_luto():
     if not historico:
         historico = [{
             "tipo": "bot",
-            "texto": f"Olá. Este é um espaço de memória e acolhimento baseado no legado de {nome_referencia}. Você pode falar sobre saudade, lembranças, conselhos ou momentos importantes."
+            "texto": f"Olá. Este é um espaço de criação de Histórias, valores e ensinamentos para o futuro de {nome_referencia}. Você pode falar sobre saudade, lembranças, conselhos ou momentos importantes."
         }]
 
     for msg in historico:
@@ -162,7 +189,8 @@ def _inicializar_chat():
         st.session_state.historico_assistente.append({
             "tipo": "bot",
             "texto": (
-                f"Olá. Este é um espaço de memória e acolhimento baseado no legado de {nome}. "
-                "Você pode falar sobre saudade, lembranças, conselhos ou momentos importantes."
+                "Olá. Este é o seu Assistente de Legado.\n\n"
+                "Estou aqui para ajudar a preservar histórias, valores, aprendizados e lembranças importantes da sua vida.\n\n"
+                "Você pode conversar livremente sobre qualquer assunto ou utilizar as sugestões de temas para construir um legado mais rico para sua família e pessoas queridas."
             )
         })
