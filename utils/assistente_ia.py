@@ -511,15 +511,6 @@ Formato:
             "Para eu ajudar melhor, registre algumas lembranças, valores, histórias, músicas, comidas, frases marcantes ou momentos importantes."
         )
 
-#    def conversar(self, mensagem: str, contexto_adicional: str = "") -> str:
-#        contexto = self._montar_contexto(contexto_adicional)
-
-#       resposta_ia = self._responder_com_openai(mensagem, contexto)
-#        if resposta_ia:
-#            return resposta_ia
-
-#        return self._responder_fallback(mensagem, contexto)
-
     def conversar(self, mensagem: str, contexto_adicional: str = "") -> str:
         contexto = self._montar_contexto(contexto_adicional)
 
@@ -528,7 +519,7 @@ Formato:
         if resposta:
             return resposta
 
-        return "DEBUG: _responder_com_openai retornou None"
+        return self._responder_fallback(mensagem, contexto)
 
     def gerar_mensagem_diaria(self) -> str:
         nome = self._buscar_nome_usuario()
