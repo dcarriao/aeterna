@@ -1,4 +1,41 @@
 import streamlit as st
+import sqlite3
+from pathlib import Path
+from components.legal_texts import (
+    TERMOS_USO,
+    POLITICA_PRIVACIDADE,
+    CONSENTIMENTO_LGPD,
+)
+
+
+def _salvar_consentimento_usuario(email):
+    base_dir = Path(__file__).resolve().parent.parent
+    db_path = base_dir / "dados" / "cofre.db"
+
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT id FROM usuarios WHERE email = ?", (email,))
+    row = cursor.fetchone()
+
+    if row:
+        usuario_id = row[0]
+
+        cursor.execute("""
+            INSERT INTO consentimentos (
+                usuario_id,
+                aceite_termos,
+                aceite_privacidade,
+                aceite_lgpd,
+                versao_termos,
+                versao_privacidade
+            )
+            VALUES (?, 1, 1, 1, '1.0', '1.0')
+        """, (usuario_id,))
+
+        conn.commit()
+
+    conn.close()
 
 
 def _css_login_compacto():
@@ -294,11 +331,38 @@ def _render_cadastro(fazer_cadastro):
             telefone = st.text_input("Telefone", key="cadastro_telefone_compacto")
             whatsapp = st.text_input("WhatsApp", key="cadastro_whatsapp_compacto")
 
+        with st.expander("Termos de Uso"):
+            st.markdown(TERMOS_USO)
+
+        with st.expander("Política de Privacidade"):
+            st.markdown(POLITICA_PRIVACIDADE)
+
+        with st.expander("Consentimento LGPD"):
+            st.markdown(CONSENTIMENTO_LGPD)
+
+        aceite_termos = st.checkbox(
+            "Li e aceito os Termos de Uso.",
+            key="aceite_termos_cadastro"
+        )
+
+        aceite_privacidade = st.checkbox(
+            "Li e aceito a Política de Privacidade.",
+            key="aceite_privacidade_cadastro"
+        )
+
+        aceite_lgpd = st.checkbox(
+            "Autorizo o tratamento dos meus dados pessoais conforme a LGPD.",
+            key="aceite_lgpd_cadastro"
+        )
+
         submitted = st.form_submit_button("Criar conta", use_container_width=True, type="primary")
 
         if submitted:
             if not nome or not sobrenome or not email or not cpf or not data_nascimento or not senha:
                 st.error("Preencha todos os campos obrigatórios.")
+            elif not aceite_termos or not aceite_privacidade or not aceite_lgpd:
+                st.error(
+                    "Para criar sua conta, é necessário aceitar os Termos de Uso, a Política de Privacidade e o Consentimento LGPD.")
             elif len(cpf) != 11 or not cpf.isdigit():
                 st.error("CPF inválido.")
             elif senha != confirmar_senha:
@@ -308,6 +372,7 @@ def _render_cadastro(fazer_cadastro):
             else:
                 resultado = fazer_cadastro(nome, sobrenome, email, cpf, data_nascimento.strftime("%Y-%m-%d"), senha, telefone, whatsapp)
                 if resultado is True:
+                    _salvar_consentimento_usuario(email)
                     st.success("Conta criada! Faça login.")
                     _set_mode("login")
                     st.rerun()
