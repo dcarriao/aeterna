@@ -515,14 +515,28 @@ Formato:
             "Para eu ajudar melhor, registre algumas lembranças, valores, histórias, músicas, comidas, frases marcantes ou momentos importantes."
         )
 
+#    def conversar(self, mensagem: str, contexto_adicional: str = "") -> str:
+#        contexto = self._montar_contexto(contexto_adicional)
+
+#       resposta_ia = self._responder_com_openai(mensagem, contexto)
+#        if resposta_ia:
+#            return resposta_ia
+
+#        return self._responder_fallback(mensagem, contexto)
+
     def conversar(self, mensagem: str, contexto_adicional: str = "") -> str:
         contexto = self._montar_contexto(contexto_adicional)
 
-        resposta_ia = self._responder_com_openai(mensagem, contexto)
-        if resposta_ia:
-            return resposta_ia
+        api_key = None
+        try:
+            api_key = os.getenv("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY")
+        except Exception as exc:
+            return f"DEBUG: não consegui ler st.secrets. Erro: {exc}"
 
-        return self._responder_fallback(mensagem, contexto)
+        if not api_key:
+            return "DEBUG: OPENAI_API_KEY não encontrada."
+
+        return "DEBUG: OPENAI_API_KEY encontrada. A próxima etapa é testar a chamada OpenAI."
 
     def gerar_mensagem_diaria(self) -> str:
         nome = self._buscar_nome_usuario()
