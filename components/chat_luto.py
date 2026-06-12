@@ -11,6 +11,7 @@ def _safe_text(value: str) -> str:
 def render_chat_luto():
     _inicializar_chat()
     db = BancoDados()
+    db.migrar_memoria()
 
     nome_referencia = _obter_nome_referencia()
 

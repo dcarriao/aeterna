@@ -418,6 +418,31 @@ class BancoDados:
         conn.commit()
         conn.close()
 
+    def migrar_memoria(self):
+        conn = sqlite3.connect(self.arquivo_db)
+        cursor = conn.cursor()
+
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS memorias (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            usuario_id INTEGER NOT NULL,
+            categoria TEXT,
+            titulo TEXT,
+            conteudo TEXT NOT NULL,
+            origem TEXT DEFAULT 'assistente',
+            data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(usuario_id) REFERENCES usuarios(id)
+        )
+        """)
+
+        cursor.execute("""
+        CREATE INDEX IF NOT EXISTS idx_memorias_usuario
+        ON memorias(usuario_id)
+        """)
+
+        conn.commit()
+        conn.close()
+
     def contar_contatos_usuario(self, usuario_id: int) -> int:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
