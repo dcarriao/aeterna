@@ -55,6 +55,8 @@ def render_chat_luto():
     st.markdown('<div class="ae-assistente-page">', unsafe_allow_html=True)
 
     st.markdown("## Assistente de Luto")
+    if st.session_state.get("ultimo_erro_openai"):
+        st.error(f"Erro OpenAI: {st.session_state['ultimo_erro_openai']}")
     st.markdown(
         f"Este espaço foi criado para apoiar conversas de memória, saudade e continuidade.  \n"
         f"Conversar com **{nome_referencia}**."
