@@ -418,7 +418,7 @@ Formato:
 
     def _classificar_intencao(self, mensagem: str) -> Dict[str, bool]:
         texto = mensagem.lower()
-
+        # só para deploy
         return {
             "saudade": any(p in texto for p in ["saudade", "falta", "sinto falta", "lembrar", "lembrança", "memória"]),
             "conselho": any(p in texto for p in ["conselho", "ajuda", "dúvida", "duvida", "decidir", "decisão", "decisao"]),
