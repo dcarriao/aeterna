@@ -1,6 +1,7 @@
 import html
 import streamlit as st
 from utils.assistente_ia import AssistenteLuto
+from utils.banco import BancoDados
 
 
 def _safe_text(value: str) -> str:
@@ -9,6 +10,7 @@ def _safe_text(value: str) -> str:
 
 def render_chat_luto():
     _inicializar_chat()
+    db = BancoDados()
 
     nome_referencia = _obter_nome_referencia()
 
@@ -111,6 +113,14 @@ def render_chat_luto():
                 f'<div class="ae-simple-bubble-bot">{texto}</div>',
                 unsafe_allow_html=True
             )
+            if len(texto) > 80:
+                if st.button(
+                        "💾 Salvar como memória",
+                        key="salvar_{hash(texto)}"
+                ):
+                    usuario = st.session_state.get("usuario_atual")
+                    db.salvar_memoria(usuario["id"], texto)
+                    st.success("Memória salva no legado.")
 
     with st.form("form_assistente_luto", clear_on_submit=True):
         mensagem = st.text_area(

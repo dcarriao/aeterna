@@ -395,6 +395,29 @@ class BancoDados:
             "acesso_central_luto": r[11] or 0
         } for r in rows]
 
+    def salvar_memoria(self, usuario_id: int,  conteudo: str):
+        conn = sqlite3.connect(self.arquivo_db)
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            INSERT INTO memorias (
+                usuario_id,
+                categoria,
+                titulo,
+                conteudo,
+                origem
+            )
+            VALUES (?, ?, ?, ?, ?)
+        """, (
+            usuario_id,
+            "livre",
+            "Memória registrada via assistente",
+            conteudo,
+            "assistente"
+        ))
+        conn.commit()
+        conn.close()
+
     def contar_contatos_usuario(self, usuario_id: int) -> int:
         conn = sqlite3.connect(self.arquivo_db)
         cursor = conn.cursor()
