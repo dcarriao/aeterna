@@ -323,7 +323,12 @@ def _render_cadastro(fazer_cadastro):
 
         email = st.text_input("E-mail *", key="cadastro_email_compacto")
         cpf = st.text_input("CPF (11 números) *", key="cadastro_cpf_compacto", max_chars=11)
-        data_nascimento = st.date_input("Data de nascimento *", key="cadastro_data_compacto", value=None)
+        data_nascimento = st.date_input("Data de nascimento *",
+                                        key="cadastro_data_compacto",
+                                        value=date(1990, 1, 1),
+                                        min_value=date(1900, 1, 1),
+                                        max_value=date.today(),
+                                        format="DD/MM/YYYY")
         senha = st.text_input("Senha *", type="password", key="cadastro_senha_compacto")
         confirmar_senha = st.text_input("Confirmar senha *", type="password", key="cadastro_confirmar_compacto")
 
