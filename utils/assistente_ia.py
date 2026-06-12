@@ -408,7 +408,7 @@ Formato:
             return None
 
         except Exception as exc:
-            st.warning(f"OpenAI não respondeu, usando fallback local. Detalhe: {exc}")
+            st.error(f"Erro OpenAI: {exc}")
             return None
 
     def _classificar_intencao(self, mensagem: str) -> Dict[str, bool]:
