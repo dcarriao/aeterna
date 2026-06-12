@@ -2,3 +2,4 @@ streamlit
 cryptography
 python-dotenv
 Pillow
+openai>=1.93.0
