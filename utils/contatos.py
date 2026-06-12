@@ -1,7 +1,7 @@
 # utils/contatos.py
 import streamlit as st
 import sqlite3
-from datetime import datetime
+from datetime import date
 
 
 class GerenciadorContatos:
@@ -40,7 +40,14 @@ class GerenciadorContatos:
         with col1:
             parentesco = st.text_input("Grau de parentesco", key="contato_parentesco",
                                        placeholder="Ex: Filho, Esposa, Amigo")
-            data_nascimento = st.date_input("Data de nascimento", key="contato_data_nascimento", value=None)
+            data_nascimento = st.date_input(
+                                "Data de nascimento",
+                                value=date(1990, 1, 1),
+                                min_value=date(1900, 1, 1),
+                                max_value=date.today(),
+                                format="DD/MM/YYYY",
+                                key="contato_data_nascimento"
+                            )
         with col2:
             acesso_central_luto = st.checkbox("Dar acesso à Central de Luto", key="contato_acesso_luto")
             prioridade = st.checkbox("Marcar como contato prioritário", key="contato_prioridade")
