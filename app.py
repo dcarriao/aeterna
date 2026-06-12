@@ -21,6 +21,7 @@ from components.dashboard_ui import (
     render_painel_inicial
 )
 from components.mobile_ui import aplicar_css_mobile
+from datetime import date
 
 # ============================================================================
 # CONFIGURAÇÃO DA PÁGINA
@@ -556,7 +557,14 @@ def render_contatos():
                                       ["", "Filho(a)", "Cônjuge", "Irmão(ã)", "Amigo(a)", "Advogado(a)", "Outro"],
                                       key="contato_parentesco")
 
-            data_nascimento = st.date_input("Data de nascimento", key="contato_data_nascimento", value=None)
+            data_nascimento = st.date_input(
+                "Data de nascimento",
+                value=date(1990, 1, 1),
+                min_value=date(1900, 1, 1),
+                max_value=date.today(),
+                format="DD/MM/YYYY",
+                key="contato_data_nascimento"
+            )
             is_prioridade = st.checkbox("Marcar como contato prioritário", key="contato_prioridade")
 
             if is_prioridade and prioridades_atual >= max_prioridades:
