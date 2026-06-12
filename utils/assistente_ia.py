@@ -342,7 +342,10 @@ class AssistenteLuto:
         return "\n\n".join(partes)
 
     def _tem_openai_disponivel(self) -> bool:
-        return bool(self._get_secret("OPENAI_API_KEY"))
+        try:
+            return bool(os.getenv("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY"))
+        except Exception:
+            return bool(os.getenv("OPENAI_API_KEY"))
 
     def _prompt_sistema(self) -> str:
         return """
@@ -385,7 +388,10 @@ Formato:
             from openai import OpenAI
 
             client = OpenAI(api_key=api_key)
-            modelo = self._get_secret("OPENAI_MODEL", "gpt-4o-mini")
+            modelo = (
+                    os.getenv("OPENAI_MODEL")
+                    or st.secrets.get("OPENAI_MODEL", "gpt-4o-mini")
+            )
 
             entrada = f"""
     CONTEXTO DISPONÍVEL SOBRE O LEGADO:
