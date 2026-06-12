@@ -6,6 +6,7 @@ from components.legal_texts import (
     POLITICA_PRIVACIDADE,
     CONSENTIMENTO_LGPD,
 )
+from datetime import date
 
 
 def _salvar_consentimento_usuario(email):
