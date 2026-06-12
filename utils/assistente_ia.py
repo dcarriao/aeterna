@@ -21,6 +21,16 @@ class AssistenteLuto:
         base_dir = Path(__file__).resolve().parent.parent
         return str(base_dir / caminho)
 
+    def _get_secret(self, nome: str, default=None):
+        valor = os.getenv(nome)
+        if valor:
+            return valor
+
+        try:
+            return st.secrets.get(nome, default)
+        except Exception:
+            return default
+
     def _conectar(self):
         return sqlite3.connect(self.arquivo_db)
 
@@ -156,9 +166,7 @@ class AssistenteLuto:
                 "melhor_lembranca",
                 "dia_mais_feliz",
                 "dia_mais_triste",
-                "valores",
-                "frase_marcante",
-                "personalidade",
+                "personalidade_extra",
             ],
             where_usuario=True,
             limit=1,
@@ -174,9 +182,7 @@ class AssistenteLuto:
             "lembranca": row.get("melhor_lembranca", "") or "",
             "dia_feliz": row.get("dia_mais_feliz", "") or "",
             "dia_triste": row.get("dia_mais_triste", "") or "",
-            "valores": row.get("valores", "") or "",
-            "frase_marcante": row.get("frase_marcante", "") or "",
-            "personalidade": row.get("personalidade", "") or "",
+            "personalidade": row.get("personalidade_extra", "") or "",
         }
 
     def _buscar_nome_usuario(self) -> str:
@@ -232,7 +238,7 @@ class AssistenteLuto:
 
         videos = self._safe_select(
             "videos",
-            ["titulo", "descricao", "transcricao", "data", "created_at"],
+            ["titulo", "destinatario", "categoria", "notas", "data_criacao"],
             where_usuario=True,
             limit=8,
             order_by="id",
@@ -241,11 +247,16 @@ class AssistenteLuto:
             linhas = []
             for v in videos:
                 titulo = v.get("titulo") or "Vídeo"
-                desc = v.get("descricao") or ""
-                transcricao = v.get("transcricao") or ""
-                texto = f"- {titulo}: {desc}"
-                if transcricao:
-                    texto += f" | Transcrição: {transcricao[:700]}"
+                categoria = v.get("categoria") or ""
+                destinatario = v.get("destinatario") or ""
+                notas = v.get("notas") or ""
+                texto = f"- {titulo}"
+                if categoria:
+                    texto += f" | Categoria: {categoria}"
+                if destinatario:
+                    texto += f" | Destinatário: {destinatario}"
+                if notas:
+                    texto += f" | Notas: {notas[:700]}"
                 linhas.append(texto)
             blocos.append("VÍDEOS E MENSAGENS REGISTRADAS:\n" + "\n".join(linhas))
 
@@ -331,10 +342,7 @@ class AssistenteLuto:
         return "\n\n".join(partes)
 
     def _tem_openai_disponivel(self) -> bool:
-        return bool(
-            os.getenv("OPENAI_API_KEY")
-            or st.secrets.get("OPENAI_API_KEY")
-        )
+        return bool(self._get_secret("OPENAI_API_KEY"))
 
     def _prompt_sistema(self) -> str:
         return """
@@ -369,27 +377,23 @@ Formato:
 """.strip()
 
     def _responder_com_openai(self, mensagem: str, contexto: str) -> Optional[str]:
-        if not self._tem_openai_disponivel():
+        api_key = self._get_secret("OPENAI_API_KEY")
+        if not api_key:
             return None
 
         try:
             from openai import OpenAI
 
-            api_key = (
-                    os.getenv("OPENAI_API_KEY")
-                    or st.secrets.get("OPENAI_API_KEY")
-            )
-
             client = OpenAI(api_key=api_key)
-            modelo = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+            modelo = self._get_secret("OPENAI_MODEL", "gpt-4o-mini")
 
             entrada = f"""
-CONTEXTO DISPONÍVEL SOBRE O LEGADO:
-{contexto}
+    CONTEXTO DISPONÍVEL SOBRE O LEGADO:
+    {contexto}
 
-MENSAGEM DA PESSOA USUÁRIA:
-{mensagem}
-""".strip()
+    MENSAGEM DA PESSOA USUÁRIA:
+    {mensagem}
+    """.strip()
 
             response = client.responses.create(
                 model=modelo,
@@ -403,7 +407,8 @@ MENSAGEM DA PESSOA USUÁRIA:
 
             return None
 
-        except Exception:
+        except Exception as exc:
+            st.warning(f"OpenAI não respondeu, usando fallback local. Detalhe: {exc}")
             return None
 
     def _classificar_intencao(self, mensagem: str) -> Dict[str, bool]:
