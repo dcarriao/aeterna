@@ -199,7 +199,6 @@ def _render_mensagens():
 
 
 def render_chat_luto():
-    aplicar_css_chat_luto()
     _inicializar_chat()
 
     nome_referencia = _obter_nome_referencia()
