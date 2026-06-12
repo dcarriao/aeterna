@@ -413,9 +413,12 @@ Formato:
 
             return None
 
+
         except Exception as exc:
-            st.session_state["ultimo_erro_openai"] = str(exc)
-            return None
+            return (
+                "DEBUG_OPENAI: não consegui chamar a OpenAI. "
+                "Erro técnico: {exc}"
+            )
 
     def _classificar_intencao(self, mensagem: str) -> Dict[str, bool]:
         texto = mensagem.lower()
