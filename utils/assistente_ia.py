@@ -413,12 +413,8 @@ Formato:
 
             return None
 
-
         except Exception as exc:
-            return (
-                "DEBUG_OPENAI: não consegui chamar a OpenAI. "
-                "Erro técnico: {exc}"
-            )
+            return f"DEBUG OPENAI ERROR: {type(exc).__name__}: {exc}"
 
     def _classificar_intencao(self, mensagem: str) -> Dict[str, bool]:
         texto = mensagem.lower()
@@ -527,16 +523,12 @@ Formato:
     def conversar(self, mensagem: str, contexto_adicional: str = "") -> str:
         contexto = self._montar_contexto(contexto_adicional)
 
-        api_key = None
-        try:
-            api_key = os.getenv("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY")
-        except Exception as exc:
-            return f"DEBUG: não consegui ler st.secrets. Erro: {exc}"
+        resposta = self._responder_com_openai(mensagem, contexto)
 
-        if not api_key:
-            return "DEBUG: OPENAI_API_KEY não encontrada."
+        if resposta:
+            return resposta
 
-        return "DEBUG: OPENAI_API_KEY encontrada. A próxima etapa é testar a chamada OpenAI."
+        return "DEBUG: _responder_com_openai retornou None"
 
     def gerar_mensagem_diaria(self) -> str:
         nome = self._buscar_nome_usuario()
