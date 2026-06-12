@@ -16,6 +16,26 @@ def _salvar_consentimento_usuario(email):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS consentimentos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            usuario_id INTEGER NOT NULL,
+            aceite_termos INTEGER DEFAULT 0,
+            aceite_privacidade INTEGER DEFAULT 0,
+            aceite_lgpd INTEGER DEFAULT 0,
+            versao_termos TEXT DEFAULT '1.0',
+            versao_privacidade TEXT DEFAULT '1.0',
+            data_aceite TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            ip TEXT,
+            user_agent TEXT
+        )
+    """)
+
+    cursor.execute("""
+        CREATE INDEX IF NOT EXISTS idx_consentimentos_usuario
+        ON consentimentos(usuario_id)
+    """)
+
     cursor.execute("SELECT id FROM usuarios WHERE email = ?", (email,))
     row = cursor.fetchone()
 
