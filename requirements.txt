@@ -3,3 +3,4 @@ cryptography
 python-dotenv
 Pillow
 openai>=1.93.0
+psycopg2-binary
