@@ -1,62 +1,10 @@
 import streamlit as st
-import sqlite3
-from pathlib import Path
 from components.legal_texts import (
     TERMOS_USO,
     POLITICA_PRIVACIDADE,
     CONSENTIMENTO_LGPD,
 )
 from datetime import date
-
-
-def _salvar_consentimento_usuario(email):
-    base_dir = Path(__file__).resolve().parent.parent
-    db_path = base_dir / "dados" / "cofre.db"
-
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS consentimentos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            usuario_id INTEGER NOT NULL,
-            aceite_termos INTEGER DEFAULT 0,
-            aceite_privacidade INTEGER DEFAULT 0,
-            aceite_lgpd INTEGER DEFAULT 0,
-            versao_termos TEXT DEFAULT '1.0',
-            versao_privacidade TEXT DEFAULT '1.0',
-            data_aceite TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            ip TEXT,
-            user_agent TEXT
-        )
-    """)
-
-    cursor.execute("""
-        CREATE INDEX IF NOT EXISTS idx_consentimentos_usuario
-        ON consentimentos(usuario_id)
-    """)
-
-    cursor.execute("SELECT id FROM usuarios WHERE email = ?", (email,))
-    row = cursor.fetchone()
-
-    if row:
-        usuario_id = row[0]
-
-        cursor.execute("""
-            INSERT INTO consentimentos (
-                usuario_id,
-                aceite_termos,
-                aceite_privacidade,
-                aceite_lgpd,
-                versao_termos,
-                versao_privacidade
-            )
-            VALUES (?, 1, 1, 1, '1.0', '1.0')
-        """, (usuario_id,))
-
-        conn.commit()
-
-    conn.close()
 
 
 def _css_login_compacto():
@@ -398,7 +346,6 @@ def _render_cadastro(fazer_cadastro):
             else:
                 resultado = fazer_cadastro(nome, sobrenome, email, cpf, data_nascimento.strftime("%Y-%m-%d"), senha, telefone, whatsapp)
                 if resultado is True:
-                    _salvar_consentimento_usuario(email)
                     st.success("Conta criada! Faça login.")
                     _set_mode("login")
                     st.rerun()

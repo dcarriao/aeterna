@@ -259,15 +259,20 @@ if 'historico_assistente' not in st.session_state:
 # FUNÇÕES DE AUTENTICAÇÃO
 # ============================================================================
 def fazer_login(email, senha):
-    usuario = gerente_usuarios.autenticar(email, senha)
+    usuario = db.autenticar_usuario(email, senha)
+
+    print("LOGIN USUARIO:", usuario)
+
     if usuario:
-        st.session_state.usuario_atual = usuario
+        nome_completo = f"{usuario.get('nome', '')} {usuario.get('sobrenome', '')}".strip()
+
+        usuario["nome_completo"] = nome_completo or usuario.get("nome", "Usuário")
+
         st.session_state.autenticado = True
-        st.session_state.modo_acesso = 'falecido'
-        st.session_state.falecido_id = usuario['id']
-        st.session_state.crypto = GerenciadorCriptografia(senha)
-        gerente_usuarios.atualizar_ultimo_acesso(usuario['id'])
+        st.session_state.usuario_atual = usuario
+
         return True
+
     return False
 
 
@@ -300,21 +305,17 @@ def fazer_logout():
     st.rerun()
 
 
-def fazer_cadastro(nome, sobrenome, email, cpf, data_nascimento, senha,
-                   telefone="", whatsapp="", foto=None, redes=None):
-    resultado = gerente_usuarios.criar_usuario(
-        nome=nome,
-        sobrenome=sobrenome,
-        email=email,
-        cpf=cpf,
-        data_nascimento=data_nascimento,
-        senha=senha,
-        telefone=telefone,
-        whatsapp=whatsapp,
-        foto=foto or "",
-        redes=redes or "{}"
+def fazer_cadastro(nome, sobrenome, email, cpf, data_nascimento, senha, telefone="", whatsapp=""):
+    return db.cadastrar_usuario(
+        nome,
+        sobrenome,
+        email,
+        cpf,
+        data_nascimento,
+        senha,
+        telefone,
+        whatsapp
     )
-    return resultado
 
 
 # ============================================================================

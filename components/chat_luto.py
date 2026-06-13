@@ -11,7 +11,6 @@ def _safe_text(value: str) -> str:
 def render_chat_luto():
     _inicializar_chat()
     db = BancoDados()
-    db.migrar_memoria()
 
     nome_referencia = _obter_nome_referencia()
 
@@ -97,31 +96,34 @@ def render_chat_luto():
     if not historico:
         historico = [{
             "tipo": "bot",
-            "texto": f"Olá. Este é um espaço de criação de Histórias, valores e ensinamentos para o futuro de {nome_referencia}. Você pode falar sobre saudade, lembranças, conselhos ou momentos importantes."
+            "texto": "Olá. Este é um espaço de criação de Histórias, valores e ensinamentos para o futuro de {nome_referencia}. Você pode falar sobre saudade, lembranças, conselhos ou momentos importantes."
         }]
 
-    for msg in historico:
+    for i, msg in enumerate(historico):
         tipo = msg.get("tipo", "bot")
-        texto = html.escape(msg.get("texto", "")).replace("\n", "<br>")
+        texto_original = msg.get("texto", "")
+        texto_html = html.escape(texto_original).replace("\n", "<br>")
 
         if tipo == "user":
             st.markdown(
-                f'<div class="ae-simple-bubble-user">{texto}</div>',
+                '<div class="ae-simple-bubble-user">{}</div>'.format(texto_html),
                 unsafe_allow_html=True
             )
-        else:
-            st.markdown(
-                f'<div class="ae-simple-bubble-bot">{texto}</div>',
-                unsafe_allow_html=True
-            )
-            if len(texto) > 80:
+
+            if len(texto_original.strip()) > 20:
                 if st.button(
                         "💾 Salvar como memória",
-                        key="salvar_{hash(texto)}"
+                        key="salvar_memoria_user_{}_{}".format(i, abs(hash(texto_original)))
                 ):
                     usuario = st.session_state.get("usuario_atual")
-                    db.salvar_memoria(usuario["id"], texto)
+                    db.salvar_memoria(usuario["id"], texto_original)
                     st.success("Memória salva no legado.")
+
+        else:
+            st.markdown(
+                '<div class="ae-simple-bubble-bot">{}</div>'.format(texto_html),
+                unsafe_allow_html=True
+            )
 
     with st.form("form_assistente_luto", clear_on_submit=True):
         mensagem = st.text_area(
@@ -192,8 +194,13 @@ def _inicializar_chat():
     if "historico_assistente" not in st.session_state:
         st.session_state.historico_assistente = []
 
+    usuario = st.session_state.get("usuario_atual")
+
     if "assistente_obj" not in st.session_state:
-        st.session_state.assistente_obj = AssistenteLuto(st.session_state.falecido_id)
+        st.session_state.assistente_obj = AssistenteLuto(
+            usuario["id"],
+            modo="legado"
+        )
 
     if not st.session_state.historico_assistente:
         nome = _obter_nome_referencia()

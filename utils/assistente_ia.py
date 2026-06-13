@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 import sqlite3
+import psycopg2
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -10,9 +11,13 @@ import streamlit as st
 
 
 class AssistenteLuto:
-    def __init__(self, usuario_id: int, arquivo_db: str = "dados/cofre.db"):
+    def __init__(self, usuario_id: int, modo: str = "legado", arquivo_db: str = "dados/cofre.db"):
         self.usuario_id = usuario_id
+        self.modo = modo
         self.arquivo_db = self._resolver_caminho_db(arquivo_db)
+
+        print("ASSISTENTE CRIADO COM usuario_id:", self.usuario_id)
+        print("DATABASE_URL EXISTE:", bool(os.getenv("DATABASE_URL") or self._get_secret("DATABASE_URL")))
 
     def _resolver_caminho_db(self, arquivo_db: str) -> str:
         caminho = Path(arquivo_db)
@@ -32,6 +37,14 @@ class AssistenteLuto:
             return default
 
     def _conectar(self):
+        database_url = (
+                os.getenv("DATABASE_URL")
+                or self._get_secret("DATABASE_URL")
+        )
+
+        if database_url:
+            return psycopg2.connect(database_url)
+
         return sqlite3.connect(self.arquivo_db)
 
     def _tabela_existe(self, cursor, tabela: str) -> bool:
@@ -185,39 +198,60 @@ class AssistenteLuto:
             "personalidade": row.get("personalidade_extra", "") or "",
         }
 
+    def _buscar_memorias_supabase(self, limite=30) -> str:
+        conn = self._conectar()
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute("""
+                SELECT titulo, conteudo
+                FROM memorias
+                WHERE usuario_id = %s
+                ORDER BY data_criacao DESC
+                LIMIT %s
+            """, (self.usuario_id, limite))
+
+            rows = cursor.fetchall()
+
+            if not rows:
+                return ""
+
+            return "\n".join(
+                "- {}: {}".format(titulo or "Memória", conteudo)
+                for titulo, conteudo in rows
+                if conteudo
+            )
+
+        except Exception as e:
+            print("Erro ao buscar memorias:", e)
+            return ""
+
+        finally:
+            cursor.close()
+            conn.close()
+
     def _buscar_nome_usuario(self) -> str:
         conn = self._conectar()
         cursor = conn.cursor()
 
         try:
-            if not self._tabela_existe(cursor, "usuarios"):
-                return "esta pessoa"
+            cursor.execute(
+                "SELECT nome, sobrenome FROM usuarios WHERE id = %s",
+                (self.usuario_id,)
+            )
+            row = cursor.fetchone()
 
-            colunas = self._colunas_tabela(cursor, "usuarios")
-
-            if "nome" in colunas and "sobrenome" in colunas:
-                cursor.execute(
-                    "SELECT nome, sobrenome FROM usuarios WHERE id = ?",
-                    (self.usuario_id,),
-                )
-                resultado = cursor.fetchone()
-                if resultado:
-                    return f"{resultado[0] or ''} {resultado[1] or ''}".strip() or "esta pessoa"
-
-            if "nome_completo" in colunas:
-                cursor.execute(
-                    "SELECT nome_completo FROM usuarios WHERE id = ?",
-                    (self.usuario_id,),
-                )
-                resultado = cursor.fetchone()
-                if resultado and resultado[0]:
-                    return resultado[0]
+            if row:
+                return "{} {}".format(row[0] or "", row[1] or "").strip() or "esta pessoa"
 
             return "esta pessoa"
 
-        except Exception:
+        except Exception as e:
+            print("Erro ao buscar nome usuario:", e)
             return "esta pessoa"
+
         finally:
+            cursor.close()
             conn.close()
 
     def _buscar_memorias_txt(self, limite_caracteres: int = 3500) -> str:
@@ -310,11 +344,50 @@ class AssistenteLuto:
 
         return "\n\n".join(blocos)
 
+    def _buscar_memorias_supabase(self, limite: int = 30) -> str:
+        conn = self._conectar()
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute("""
+                SELECT titulo, conteudo, categoria, origem, data_criacao
+                FROM memorias
+                WHERE usuario_id = %s
+                ORDER BY data_criacao DESC
+                LIMIT %s
+            """, (self.usuario_id, limite))
+
+            rows = cursor.fetchall()
+
+            if not rows:
+                return ""
+
+            linhas = []
+            for titulo, conteudo, categoria, origem, data_criacao in rows:
+                if conteudo:
+                    linhas.append(
+                        "- {}: {}".format(
+                            titulo or "Memória",
+                            conteudo
+                        )
+                    )
+
+            return "\n".join(linhas)
+
+        except Exception as e:
+            print("Erro ao buscar memórias no Supabase:", e)
+            return ""
+
+        finally:
+            cursor.close()
+            conn.close()
+
     def _montar_contexto(self, contexto_adicional: str = "") -> str:
         nome = self._buscar_nome_usuario()
         personalidade = self._buscar_personalidade()
         preferencias = self._buscar_preferencias()
         memorias_txt = self._buscar_memorias_txt()
+        memorias_supabase = self._buscar_memorias_supabase()
         contexto_tabelas = self._buscar_contexto_tabelas()
 
         partes = [f"NOME DE REFERÊNCIA: {nome}"]
@@ -329,6 +402,9 @@ class AssistenteLuto:
                     pref_linhas.append(f"- {chave}: {valor}")
             if pref_linhas:
                 partes.append("PREFERÊNCIAS E MEMÓRIAS PRINCIPAIS:\n" + "\n".join(pref_linhas))
+
+        if memorias_supabase:
+            partes.append("MEMÓRIAS REGISTRADAS NO BANCO:\n" + memorias_supabase)
 
         if memorias_txt:
             partes.append("MEMÓRIAS REGISTRADAS EM ARQUIVO:\n" + memorias_txt)
@@ -346,6 +422,39 @@ class AssistenteLuto:
             return bool(os.getenv("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY"))
         except Exception:
             return bool(os.getenv("OPENAI_API_KEY"))
+
+    def _prompt_sistema_legado(self):
+        return """
+    Você é o Assistente de Legado da aEterna.
+    Você conversa diretamente com a pessoa usuária para ajudá-la a registrar sua história, memórias, valores, preferências e mensagens futuras.
+
+    Seu papel:
+    - fazer perguntas acolhedoras;
+    - ajudar a transformar relatos em memórias bem escritas;
+    - organizar fatos pessoais sem inventar nada;
+    - sugerir temas de registro;
+    - responder como um assistente cuidadoso, não como memorial póstumo.
+
+    Nunca invente informações.
+    Use somente o que a pessoa contou ou o contexto cadastrado.
+    """.strip()
+
+    def _prompt_sistema_luto(self):
+        return """
+    Você é o Assistente de Memória da aEterna.
+    Você ajuda familiares e pessoas autorizadas a acessar o legado registrado de alguém.
+
+    Seu papel:
+    - acolher com respeito e serenidade;
+    - responder usando apenas memórias, mensagens, preferências e fatos cadastrados;
+    - nunca fingir ser a pessoa falecida;
+    - nunca inventar fatos;
+    - se a informação não existir, diga claramente:
+    "Não encontrei nenhuma informação registrada sobre esse assunto entre as memórias disponíveis."
+
+    Tom:
+    humano, calmo, respeitoso, em português do Brasil.
+    """.strip()
 
     def _prompt_sistema(self) -> str:
         return """
@@ -447,7 +556,7 @@ Formato:
 
             response = client.responses.create(
                 model=modelo,
-                instructions=self._prompt_sistema(),
+                instructions=self._prompt_sistema_legado() if self.modo == "legado" else self._prompt_sistema_luto(),
                 input=entrada,
             )
 
@@ -557,6 +666,11 @@ Formato:
 
     def conversar(self, mensagem: str, contexto_adicional: str = "") -> str:
         contexto = self._montar_contexto(contexto_adicional)
+
+        print("\n" + "=" * 80)
+        print("CONTEXTO ENVIADO PARA IA")
+        print(contexto)
+        print("=" * 80 + "\n")
 
         resposta = self._responder_com_openai(mensagem, contexto)
 
