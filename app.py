@@ -261,8 +261,6 @@ if 'historico_assistente' not in st.session_state:
 def fazer_login(email, senha):
     usuario = db.autenticar_usuario(email, senha)
 
-    print("LOGIN USUARIO:", usuario)
-
     if usuario:
         nome_completo = f"{usuario.get('nome', '')} {usuario.get('sobrenome', '')}".strip()
 
@@ -277,6 +275,7 @@ def fazer_login(email, senha):
 
 
 def fazer_login_visitante(visitante_nome, chave_acesso, falecido_email):
+
     contato = db.obter_contato_por_chave(chave_acesso, falecido_email)
     if contato and contato.get('acesso_central_luto', 0):
         st.session_state.autenticado = True
@@ -284,11 +283,13 @@ def fazer_login_visitante(visitante_nome, chave_acesso, falecido_email):
         st.session_state.falecido_id = contato['usuario_id']
         st.session_state.usuario_atual = {
             'id': contato['id'],
+            'usuario_id': contato['usuario_id'],  # <-- adicionar
             'nome': visitante_nome,
             'tipo': 'visitante',
             'nome_falecido': contato['falecido_nome'],
             'email': contato['email'],
-            'whatsapp': contato['whatsapp']
+            'whatsapp': contato['whatsapp'],
+            'parentesco': contato.get('parentesco', '')
         }
         st.session_state.historico_assistente = []
         return True
@@ -468,27 +469,42 @@ def render_videos():
             st.caption("📹 Formatos aceitos: MP4, MOV, AVI, MKV")
 
             if st.button("💾 Salvar", key="salvar_video", type="primary", use_container_width=True):
+
                 if titulo and arquivo_video:
-                    caminho = gerente_videos.salvar_video(
-                        arquivo_video,
-                        st.session_state.usuario_atual['id'],
-                        titulo,
-                        destinatario,
-                        categoria
-                    )
 
-                    # Salvar vídeo com acesso para os contatos selecionados
-                    video_id = db.adicionar_video_com_acesso(
-                        usuario_id=st.session_state.usuario_atual['id'],
-                        titulo=titulo,
-                        destinatario=destinatario,
-                        caminho_arquivo=caminho,
-                        contatos_ids=contatos_selecionados,
-                        categoria=categoria
-                    )
+                    try:
+                        caminho = gerente_videos.salvar_video(
+                            arquivo_video,
+                            st.session_state.usuario_atual['id'],
+                            titulo,
+                            destinatario,
+                            categoria
+                        )
 
-                    st.success(f"✅ {titulo} salvo! {len(contatos_selecionados)} contato(s) terão acesso.")
-                    st.rerun()
+                        print("VIDEO SALVO EM:", caminho)
+
+                        video_id = db.adicionar_video_com_acesso(
+                            usuario_id=st.session_state.usuario_atual['id'],
+                            titulo=titulo,
+                            destinatario=destinatario,
+                            caminho_arquivo=caminho,
+                            contatos_ids=contatos_selecionados,
+                            categoria=categoria
+                        )
+
+                        print("VIDEO_ID:", video_id)
+
+                        st.success(
+                            f"✅ {titulo} salvo! "
+                            f"{len(contatos_selecionados)} contato(s) terão acesso."
+                        )
+
+                        st.rerun()
+
+                    except Exception as e:
+                        print("ERRO AO SALVAR VIDEO:", e)
+                        st.error(f"Erro ao salvar vídeo: {e}")
+
                 else:
                     st.error("❌ Preencha o título e selecione um vídeo")
 
@@ -513,6 +529,37 @@ def render_videos():
                         db.deletar_video(video['id'], st.session_state.usuario_atual['id'])
                         st.rerun()
 
+def render_videos_visitante():
+    usuario = st.session_state.usuario_atual
+    contato_id = usuario["id"]
+
+    nome_falecido = st.session_state.usuario_atual.get(
+        "nome_falecido",
+        "essa pessoa"
+    )
+
+    st.markdown(
+        f"<h3 style='color: #2E8B57;'>🕊️ Mensagens de {nome_falecido} para você</h3>",
+        unsafe_allow_html=True
+    )
+
+    videos = db.listar_videos_por_contato(contato_id)
+
+    if not videos:
+        st.info("📭 Nenhum vídeo foi liberado para você.")
+        return
+
+    for video in videos:
+        with st.expander(f"🎬 {video['titulo']}"):
+            if video.get("destinatario"):
+                st.markdown(f"**Para:** {video['destinatario']}")
+
+            st.markdown(f"**Categoria:** {video.get('categoria', '')}")
+
+            if video.get("caminho") and os.path.exists(video["caminho"]):
+                st.video(video["caminho"])
+            else:
+                st.warning("Arquivo de vídeo indisponível neste ambiente.")
 
 # ============================================================================
 # CONTATOS (COMPLETO)
@@ -529,72 +576,99 @@ def render_contatos():
     st.info(
         f"📊 Você tem {contatos_atual} de {max_contatos} contatos | Prioritários: {prioridades_atual} de {max_prioridades}")
 
+    if st.session_state.get("contato_salvo_msg"):
+        st.success(st.session_state.contato_salvo_msg)
+        st.code(st.session_state.contato_chave_msg)
+
+        if st.button("Ocultar chave"):
+            del st.session_state.contato_salvo_msg
+            del st.session_state.contato_chave_msg
+            st.rerun()
+
     col1, col2 = st.columns([1, 2])
 
     with col1:
         with st.expander("➕ Adicionar contato", expanded=False):
-            st.markdown("**📝 Nome completo ***")
-            col_n1, col_n2 = st.columns(2)
-            with col_n1:
-                nome = st.text_input("nome", placeholder="Nome", key="contato_nome", label_visibility="collapsed")
-            with col_n2:
-                sobrenome = st.text_input("sobrenome", placeholder="Sobrenome", key="contato_sobrenome",
-                                          label_visibility="collapsed")
 
-            st.markdown("**📧 Forma de contato ***")
-            col_c1, col_c2 = st.columns(2)
-            with col_c1:
-                email = st.text_input("email", placeholder="E-mail", key="contato_email", label_visibility="collapsed")
-            with col_c2:
-                whatsapp = st.text_input("whatsapp", placeholder="WhatsApp", key="contato_whatsapp",
-                                         label_visibility="collapsed")
+            with st.form("form_adicionar_contato", clear_on_submit=True):
+                st.markdown("**📝 Nome completo ***")
 
-            st.caption("⚠️ Pelo menos um contato (e-mail ou WhatsApp) é obrigatório")
+                col_n1, col_n2 = st.columns(2)
+                with col_n1:
+                    nome = st.text_input("nome", placeholder="Nome", label_visibility="collapsed")
+                with col_n2:
+                    sobrenome = st.text_input("sobrenome", placeholder="Sobrenome", label_visibility="collapsed")
 
-            st.markdown("---")
-            st.markdown("#### ✨ Informações adicionais (opcional)")
+                st.markdown("**📧 Forma de contato ***")
 
-            parentesco = st.selectbox("Grau de parentesco",
-                                      ["", "Filho(a)", "Cônjuge", "Irmão(ã)", "Amigo(a)", "Advogado(a)", "Outro"],
-                                      key="contato_parentesco")
+                col_c1, col_c2 = st.columns(2)
+                with col_c1:
+                    email = st.text_input("email", placeholder="E-mail", label_visibility="collapsed")
+                with col_c2:
+                    whatsapp = st.text_input("whatsapp", placeholder="WhatsApp", label_visibility="collapsed")
 
-            data_nascimento = st.date_input(
-                "Data de nascimento",
-                value=date(1990, 1, 1),
-                min_value=date(1900, 1, 1),
-                max_value=date.today(),
-                format="DD/MM/YYYY",
-                key="contato_data_nascimento"
-            )
-            is_prioridade = st.checkbox("Marcar como contato prioritário", key="contato_prioridade")
+                st.caption("⚠️ Pelo menos um contato (e-mail ou WhatsApp) é obrigatório")
 
-            if is_prioridade and prioridades_atual >= max_prioridades:
-                st.warning(f"⚠️ Você já tem {prioridades_atual} contatos prioritários. Limite: {max_prioridades}.")
-                is_prioridade = False
+                st.markdown("---")
+                st.markdown("#### ✨ Informações adicionais (opcional)")
 
-            if st.button("💾 Salvar", type="primary", use_container_width=True):
-                if not nome or not sobrenome:
-                    st.error("❌ Nome e sobrenome são obrigatórios")
-                elif not email and not whatsapp:
-                    st.error("❌ Informe pelo menos um contato (e-mail ou WhatsApp)")
-                else:
-                    chave_acesso = secrets.token_hex(8)
-                    db.adicionar_contato(
-                        usuario_id=st.session_state.usuario_atual['id'],
-                        nome=nome,
-                        sobrenome=sobrenome,
-                        email=email,
-                        telefone="",
-                        whatsapp=whatsapp or "",
-                        parentesco=parentesco,
-                        data_nascimento=data_nascimento.strftime("%Y-%m-%d") if data_nascimento else "",
-                        is_prioridade=1 if is_prioridade else 0,
-                        prioridade_order=prioridades_atual + 1 if is_prioridade else 0,
-                        chave_acesso=chave_acesso
-                    )
-                    st.success(f"✅ {nome} {sobrenome} adicionado!")
-                    st.info(f"🔑 Chave: {chave_acesso}")
-                    st.rerun()
+                parentesco = st.selectbox(
+                    "Grau de parentesco",
+                    ["", "Filho(a)", "Cônjuge", "Irmão(ã)", "Amigo(a)", "Advogado(a)", "Outro"]
+                )
+
+                data_nascimento = st.date_input(
+                    "Data de nascimento",
+                    value=date(1990, 1, 1),
+                    min_value=date(1900, 1, 1),
+                    max_value=date.today(),
+                    format="DD/MM/YYYY"
+                )
+
+                is_prioridade = st.checkbox("Marcar como contato prioritário")
+
+                acesso_central_luto = st.checkbox(
+                    "Permitir acesso ao Assistente Memorial",
+                    value=False
+                )
+
+                salvar = st.form_submit_button(
+                    "💾 Salvar",
+                    type="primary",
+                    use_container_width=True
+                )
+
+                if salvar:
+                    if not nome or not sobrenome:
+                        st.error("❌ Nome e sobrenome são obrigatórios")
+                    elif not email and not whatsapp:
+                        st.error("❌ Informe pelo menos um contato (e-mail ou WhatsApp)")
+                    elif is_prioridade and prioridades_atual >= max_prioridades:
+                        st.warning(
+                            f"⚠️ Você já tem {prioridades_atual} contatos prioritários. "
+                            f"Limite: {max_prioridades}."
+                        )
+                    else:
+                        chave_acesso = secrets.token_hex(8)
+
+                        db.adicionar_contato(
+                            usuario_id=st.session_state.usuario_atual["id"],
+                            nome=nome,
+                            sobrenome=sobrenome,
+                            email=email,
+                            telefone="",
+                            whatsapp=whatsapp or "",
+                            parentesco=parentesco,
+                            data_nascimento=data_nascimento.strftime("%Y-%m-%d") if data_nascimento else "",
+                            is_prioridade=1 if is_prioridade else 0,
+                            prioridade_order=prioridades_atual + 1 if is_prioridade else 0,
+                            acesso_central_luto=1 if acesso_central_luto else 0,
+                            chave_acesso=chave_acesso,
+                        )
+
+                        st.session_state.contato_salvo_msg = f"✅ {nome} {sobrenome} adicionado!"
+                        st.session_state.contato_chave_msg = f"🔑 Chave de acesso: {chave_acesso}"
+                        st.rerun()
 
     with col2:
         contatos = db.listar_contatos_usuario(st.session_state.usuario_atual['id'])
@@ -611,7 +685,9 @@ def render_contatos():
                     if contato.get('data_nascimento'):
                         st.markdown(f"**Data nascimento:** {contato['data_nascimento']}")
                     st.markdown(f"**Prioritário:** {'✅ Sim' if contato.get('is_prioridade') else '❌ Não'}")
-
+                    if contato.get("chave_acesso"):
+                        st.markdown("**Chave de acesso:**")
+                        st.code(contato["chave_acesso"])
                     if st.button(f"🗑️ Remover", key=f"del_contato_{contato['id']}"):
                         db.deletar_contato(contato['id'], st.session_state.usuario_atual['id'])
                         st.rerun()
@@ -971,6 +1047,78 @@ def main():
     else:
         aplicar_css_mobile()
         aplicar_css_dashboard()
+
+        if st.session_state.usuario_atual.get("tipo") == "visitante":
+            nome_exibido = st.session_state.usuario_atual.get("nome", "Visitante")
+
+            render_sidebar_premium(
+                nome_exibido=nome_exibido,
+                qtd_videos=0,
+                qtd_contatos=0,
+                qtd_cofre=0,
+                qtd_memorias=0,
+                is_admin=False,
+                fazer_logout=fazer_logout
+            )
+
+            videos_visitante = db.listar_videos_por_contato(
+                st.session_state.usuario_atual["id"]
+            )
+
+            qtd_videos = len(
+                db.listar_videos_por_contato(
+                    st.session_state.usuario_atual["id"]
+                )
+            )
+
+            qtd_memorias = len(
+                db.listar_memorias_usuario(
+                    st.session_state.falecido_id
+                )
+            )
+
+            qtd_contatos = len(
+                db.listar_contatos_usuario(
+                    st.session_state.falecido_id
+                )
+            )
+
+            #qtd_documentos = len(
+            #    db.listar_cofre_usuario(
+            #        st.session_state.falecido_id
+            #    )
+            #)
+            qtd_documentos = 0
+
+            videos_visitante = db.listar_videos_por_contato(
+                st.session_state.usuario_atual["id"]
+            )
+
+            abas = ["🕊️ Assistente Memorial"]
+
+            if videos_visitante:
+                abas.append(f"🎥 Mensagens ({len(videos_visitante)})")
+
+            tabs = st.tabs(abas)
+
+            with tabs[0]:
+                render_assistente()
+
+            indice = 1
+
+            if videos_visitante:
+                with tabs[indice]:
+                    render_videos_visitante()
+                indice += 1
+
+            st.markdown("""
+            <div class="footer-aeterna">
+                <p>✨ aEterna - Assistente Memorial ✨</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+            return
+
         nome_exibido = st.session_state.usuario_atual.get(
             "nome_completo",
             "Usuário"
@@ -980,17 +1128,20 @@ def main():
                 st.session_state.usuario_atual.get("tipo") == "admin"
         )
 
-        qtd_videos = len(
-            db.listar_videos_usuario(
-                st.session_state.usuario_atual["id"]
-            )
-        )
+        #qtd_videos = len(
+        #    db.listar_videos_usuario(
+        #        st.session_state.usuario_atual["id"]
+        #    )
+        #)
 
-        qtd_contatos = len(
-            db.listar_contatos_usuario(
-                st.session_state.usuario_atual["id"]
-            )
-        )
+        #qtd_contatos = len(
+        #    db.listar_contatos_usuario(
+        #        st.session_state.usuario_atual["id"]
+        #    )
+        #)
+
+        qtd_videos = 0
+        qtd_contatos = 0
 
         # Ajustaremos depois para dados reais
         qtd_cofre = 0

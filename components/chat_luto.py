@@ -1,5 +1,6 @@
 import html
 import streamlit as st
+
 from utils.assistente_ia import AssistenteLuto
 from utils.banco import BancoDados
 
@@ -13,6 +14,8 @@ def render_chat_luto():
     db = BancoDados()
 
     nome_referencia = _obter_nome_referencia()
+    usuario = st.session_state.get("usuario_atual") or {}
+    modo = "memorial" if usuario.get("tipo") == "visitante" else "legado"
 
     st.markdown("""
     <style>
@@ -56,40 +59,109 @@ def render_chat_luto():
 
     st.markdown('<div class="ae-assistente-page">', unsafe_allow_html=True)
 
-    st.markdown("## Assistente de Legado")
+    if modo == "memorial":
+        nome_falecido = usuario.get("nome_falecido", "essa pessoa especial")
+        nome_visitante = usuario.get("nome", "você")
+        parentesco = usuario.get("parentesco", "")
+
+        st.markdown(f"""
+                    <div style="
+                        background: linear-gradient(135deg, #2b1747 0%, #6f4e37 100%);
+                        color: white;
+                        padding: 32px;
+                        border-radius: 24px;
+                        margin-bottom: 24px;
+                        box-shadow: 0 20px 60px rgba(43, 23, 71, 0.25);
+                    ">
+                        <h1 style="color: #f2c572; margin-bottom: 12px;">🕊️ Memorial de {nome_falecido}</h1>
+                        <p style="font-size: 1.1rem; line-height: 1.6;">
+                            {nome_visitante}, este é um espaço para conversar com o legado de {nome_falecido}.
+                        </p>
+                        <p style="font-size: 1rem; opacity: 0.92;">
+                            O Assistente Memorial usa memórias, valores, histórias e mensagens registradas para acolher,
+                            responder perguntas, ajudar em momentos de saudade e preservar a presença simbólica de quem foi importante.
+                        </p>
+                        <p style="font-size: 0.88rem; opacity: 0.78;">
+                            Ele não substitui a pessoa, não inventa lembranças e não responde fora do que foi preservado.
+                        </p>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+        st.markdown("""
+                    ### 💬 💬 Se não souber por onde começar...
+
+                    • Estou com saudade.
+                    • Quero lembrar momentos especiais.
+                    • Preciso conversar um pouco.
+                    • O que essa pessoa valorizava na vida?
+                    • Existem mensagens ou conselhos registrados?
+                    • Como ela enxergava a família e os relacionamentos?
+                    • O que posso aprender com sua história?
+                    • Quero compartilhar algo que aconteceu comigo hoje.
+                    """)
+        st.markdown("""
+                    ---
+                    ### ✨ Também quer criar seu próprio legado?
+
+                    A aEterna permite que você preserve histórias, mensagens e orientações para pessoas que ama.
+                    """)
+
+        if st.button("✨ Criar meu próprio legado"):
+            for key in [
+                "autenticado",
+                "usuario_atual",
+                "modo_acesso",
+                "falecido_id",
+                "historico_assistente",
+                "assistente_obj",
+                "assistente_modo",
+                "assistente_usuario_id",
+            ]:
+                if key in st.session_state:
+                    del st.session_state[key]
+
+            st.session_state.autenticado = False
+            st.session_state.login_mode = "cadastro"
+            st.rerun()
+    else:
+        st.markdown("## Assistente de Legado")
+        st.markdown("""
+            Este espaço existe para ajudar a construir e preservar o seu legado digital.
+        
+            Você pode conversar livremente sobre qualquer assunto que desejar.
+        
+            Também posso sugerir temas importantes para registrar histórias, valores, aprendizados, conselhos e lembranças que poderão ajudar sua família e pessoas queridas no futuro.
+            """)
+        st.markdown(
+            """
+
+            ### 💡 Sugestões de conversa
+    
+            • Minha infância
+    
+            • Minha família
+    
+            • Como conheci meu amor
+    
+            • Meus filhos
+    
+            • Minha carreira
+    
+            • Meus maiores aprendizados
+    
+            • Sonhos realizados
+    
+            • Momentos difíceis que superei
+    
+            • Conselhos para o futuro
+    
+            • Histórias engraçadas
+            """
+            )
+
     if st.session_state.get("ultimo_erro_openai"):
         st.error(f"Erro OpenAI: {st.session_state['ultimo_erro_openai']}")
-    st.markdown(
-        """
-    Este espaço existe para ajudar a construir e preservar o seu legado digital.
 
-    Você pode conversar livremente sobre qualquer assunto que desejar.
-
-    Também posso sugerir temas importantes para registrar histórias, valores, aprendizados, conselhos e lembranças que poderão ajudar sua família e pessoas queridas no futuro.
-
-    ### 💡 Sugestões de conversa
-
-    • Minha infância
-
-    • Minha família
-
-    • Como conheci meu amor
-
-    • Meus filhos
-
-    • Minha carreira
-
-    • Meus maiores aprendizados
-
-    • Sonhos realizados
-
-    • Momentos difíceis que superei
-
-    • Conselhos para o futuro
-
-    • Histórias engraçadas
-    """
-    )
 
     historico = st.session_state.get("historico_assistente", [])
 
@@ -110,7 +182,7 @@ def render_chat_luto():
                 unsafe_allow_html=True
             )
 
-            if len(texto_original.strip()) > 20:
+            if modo == "legado" and len(texto_original.strip()) > 20:
                 if st.button(
                         "💾 Salvar como memória",
                         key="salvar_memoria_user_{}_{}".format(i, abs(hash(texto_original)))
@@ -161,7 +233,24 @@ def render_chat_luto():
         })
 
         try:
-            resposta = st.session_state.assistente_obj.conversar(mensagem.strip())
+            usuario = st.session_state.get("usuario_atual") or {}
+
+            contexto_adicional = ""
+
+            if usuario.get("tipo") == "visitante":
+                contexto_adicional = (
+                    "A pessoa que está acessando o memorial se chama {}. "
+                    "Ela está registrada como {} de {}."
+                ).format(
+                    usuario.get("nome", "Visitante"),
+                    usuario.get("parentesco", "relação não informada"),
+                    usuario.get("nome_falecido", "a pessoa memorializada")
+                )
+
+            resposta = st.session_state.assistente_obj.conversar(
+                mensagem.strip(),
+                contexto_adicional=contexto_adicional
+            )
         except Exception as exc:
             resposta = (
                 "Desculpe, tive uma dificuldade para responder agora. "
@@ -194,21 +283,41 @@ def _inicializar_chat():
     if "historico_assistente" not in st.session_state:
         st.session_state.historico_assistente = []
 
-    usuario = st.session_state.get("usuario_atual")
+    usuario = st.session_state.get("usuario_atual") or {}
 
-    if "assistente_obj" not in st.session_state:
+    modo = "memorial" if usuario.get("tipo") == "visitante" else "legado"
+
+    if modo == "memorial":
+        usuario_id_referencia = usuario.get("usuario_id") or usuario.get("falecido_id")
+    else:
+        usuario_id_referencia = usuario.get("id")
+
+    if (
+        "assistente_obj" not in st.session_state
+        or st.session_state.get("assistente_modo") != modo
+        or st.session_state.get("assistente_usuario_id") != usuario_id_referencia
+    ):
         st.session_state.assistente_obj = AssistenteLuto(
-            usuario["id"],
-            modo="legado"
+            usuario_id_referencia,
+            modo=modo
         )
+        st.session_state.assistente_modo = modo
+        st.session_state.assistente_usuario_id = usuario_id_referencia
 
     if not st.session_state.historico_assistente:
-        nome = _obter_nome_referencia()
-        st.session_state.historico_assistente.append({
-            "tipo": "bot",
-            "texto": (
-                "Olá. Este é o seu Assistente de Legado.\n\n"
-                "Estou aqui para ajudar a preservar histórias, valores, aprendizados e lembranças importantes da sua vida.\n\n"
-                "Você pode conversar livremente sobre qualquer assunto ou utilizar as sugestões de temas para construir um legado mais rico para sua família e pessoas queridas."
-            )
-        })
+        if modo == "memorial":
+            st.session_state.historico_assistente.append({
+                "tipo": "bot",
+                "texto": (
+                    "Olá. Este é o seu Assistente Memorial.\n\n"
+                    "Estou aqui para ajudar você a se conectar com seu ente querido."
+                )
+            })
+        else:
+            st.session_state.historico_assistente.append({
+                "tipo": "bot",
+                "texto": (
+                    "Olá. Este é o seu Assistente de Legado.\n\n"
+                    "Estou aqui para ajudar a preservar histórias, valores, aprendizados e lembranças importantes da sua vida."
+                )
+            })

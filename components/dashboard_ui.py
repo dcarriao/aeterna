@@ -281,6 +281,27 @@ def render_sidebar_premium(
         if fazer_logout and st.button("🚪 Encerrar sessão", use_container_width=True):
             fazer_logout()
 
+        usuario = st.session_state.get("usuario_atual") or {}
+
+        if usuario.get("tipo") == "visitante":
+            nome_falecido = usuario.get("nome_falecido", "essa pessoa")
+
+            st.markdown(f"### Memorial de {nome_falecido}")
+
+            st.markdown("💬 Assistente Memorial")
+
+            if qtd_videos > 0:
+                st.markdown(f"🎥 Vídeos disponíveis: **{qtd_videos}**")
+
+            if qtd_memorias > 0:
+                st.markdown(f"💬 Memórias disponíveis: **{qtd_memorias}**")
+
+            if qtd_cofre > 0:
+                st.markdown(f"🔒 Itens liberados: **{qtd_cofre}**")
+
+            st.markdown("---")
+            return
+
         st.markdown('<div class="ae-sidebar-section">Seu legado</div>', unsafe_allow_html=True)
 
         stats_html = (

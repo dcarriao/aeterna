@@ -18,6 +18,18 @@ chave (TEXT)
 valor (TEXT)
 data_atualizacao (TIMESTAMP)
 
+=== consentimentos ===
+id (INTEGER)
+usuario_id (INTEGER)
+aceite_termos (INTEGER)
+aceite_privacidade (INTEGER)
+aceite_lgpd (INTEGER)
+versao_termos (TEXT)
+versao_privacidade (TEXT)
+data_aceite (TIMESTAMP)
+ip (TEXT)
+user_agent (TEXT)
+
 === contatos ===
 id (INTEGER)
 usuario_id (INTEGER)
@@ -45,6 +57,15 @@ descricao (TEXT)
 caminho_arquivo (TEXT)
 nome_original (TEXT)
 tamanho (INTEGER)
+data_criacao (TIMESTAMP)
+
+=== memorias ===
+id (INTEGER)
+usuario_id (INTEGER)
+categoria (TEXT)
+titulo (TEXT)
+conteudo (TEXT)
+origem (TEXT)
 data_criacao (TIMESTAMP)
 
 === personalidade ===

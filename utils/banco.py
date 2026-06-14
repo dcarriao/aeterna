@@ -17,7 +17,6 @@ class BancoDados:
                     os.getenv("DATABASE_URL")
                     or st.secrets.get("DATABASE_URL")
             )
-            print("USANDO POSTGRES:", self.usa_postgres)
         except Exception:
             self.database_url = os.getenv("DATABASE_URL")
 
@@ -439,26 +438,83 @@ class BancoDados:
         conn.close()
         return video_id
 
-    def adicionar_video_com_acesso(self, usuario_id: int, titulo: str, destinatario: str,
-                                   caminho_arquivo: str, contatos_ids: List[int], categoria: str = "geral"):
+    def adicionar_video_com_acesso(
+            self,
+            usuario_id: int,
+            titulo: str,
+            destinatario: str,
+            caminho_arquivo: str,
+            contatos_ids: List[int],
+            categoria: str = "geral"
+    ):
         conn = self.conectar()
         cursor = conn.cursor()
 
-        self.executar(cursor,'''
-            INSERT INTO videos (usuario_id, titulo, destinatario, caminho_arquivo, categoria)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (usuario_id, titulo, destinatario, caminho_arquivo, categoria))
-        video_id = cursor.lastrowid
+        try:
+            if self.usa_postgres:
+                self.executar(cursor, '''
+                    INSERT INTO videos (
+                        usuario_id,
+                        titulo,
+                        destinatario,
+                        caminho_arquivo,
+                        categoria
+                    )
+                    VALUES (%s, %s, %s, %s, %s)
+                    RETURNING id
+                ''', (
+                    usuario_id,
+                    titulo,
+                    destinatario,
+                    caminho_arquivo,
+                    categoria
+                ))
 
-        for contato_id in contatos_ids:
-            try:
-                self.executar(cursor,'INSERT INTO videos_acesso (video_id, contato_id) VALUES (?, ?)', (video_id, contato_id))
-            except:
-                pass
+                video_id = cursor.fetchone()[0]
 
-        conn.commit()
-        conn.close()
-        return video_id
+            else:
+                self.executar(cursor, '''
+                    INSERT INTO videos (
+                        usuario_id,
+                        titulo,
+                        destinatario,
+                        caminho_arquivo,
+                        categoria
+                    )
+                    VALUES (?, ?, ?, ?, ?)
+                ''', (
+                    usuario_id,
+                    titulo,
+                    destinatario,
+                    caminho_arquivo,
+                    categoria
+                ))
+
+                video_id = cursor.lastrowid
+
+            for contato_id in contatos_ids:
+                self.executar(cursor, '''
+                    INSERT INTO videos_acesso (
+                        video_id,
+                        contato_id
+                    )
+                    VALUES (%s, %s)
+                ''', (
+                    video_id,
+                    contato_id
+                ))
+
+            conn.commit()
+            return video_id
+
+        except Exception as e:
+            conn.rollback()
+            print("Erro ao adicionar vídeo com acesso:", e)
+            raise e
+
+        finally:
+            cursor.close()
+            conn.close()
 
     def deletar_video(self, id_video: int, usuario_id: int) -> bool:
         conn = self.conectar()
@@ -492,6 +548,36 @@ class BancoDados:
         conn.close()
         return [{"id": r[0], "nome_completo": f"{r[1]} {r[2]}".strip()} for r in rows]
 
+    def listar_videos_por_contato(self, contato_id: int) -> List[Dict]:
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        self.executar(cursor, """
+            SELECT 
+                v.id,
+                v.titulo,
+                v.destinatario,
+                v.caminho_arquivo,
+                v.categoria,
+                v.data_criacao
+            FROM videos v
+            JOIN videos_acesso va ON va.video_id = v.id
+            WHERE va.contato_id = %s
+            ORDER BY v.data_criacao DESC
+        """, (contato_id,))
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        return [{
+            "id": r[0],
+            "titulo": r[1],
+            "destinatario": r[2],
+            "caminho": r[3],
+            "categoria": r[4],
+            "data": r[5],
+        } for r in rows]
+
     # ========================================================================
     # CONTATOS
     # ========================================================================
@@ -499,7 +585,7 @@ class BancoDados:
                           telefone: str = "", whatsapp: str = "", parentesco: str = "",
                           data_nascimento: str = "", datas_especiais: str = "",
                           is_prioridade: int = 0, prioridade_order: int = 0,
-                          acesso_central_luto: int = 0, chave_acesso: str = ""):
+                          acesso_central_luto: int = 0, chave_acesso: str = "",):
         conn = self.conectar()
         cursor = conn.cursor()
         self.executar(cursor,'''
@@ -535,7 +621,31 @@ class BancoDados:
             "datas_especiais": r[8] or "",
             "is_prioridade": r[9] or 0,
             "prioridade_order": r[10] or 0,
-            "acesso_central_luto": r[11] or 0
+            "acesso_central_luto": r[11] or 0,
+            "chave_acesso": r[12] or ""
+        } for r in rows]
+
+    def listar_memorias_usuario(self, usuario_id: int):
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        self.executar(cursor, """
+            SELECT id, categoria, titulo, conteudo, origem, data_criacao
+            FROM memorias
+            WHERE usuario_id = ?
+            ORDER BY data_criacao DESC
+        """, (usuario_id,))
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        return [{
+            "id": r[0],
+            "categoria": r[1],
+            "titulo": r[2],
+            "conteudo": r[3],
+            "origem": r[4],
+            "data_criacao": r[5],
         } for r in rows]
 
     def salvar_memoria(self, usuario_id: int,  conteudo: str):
@@ -574,14 +684,31 @@ class BancoDados:
         cursor = conn.cursor()
         if email_falecido:
             self.executar(cursor, '''
-                SELECT c.id, c.nome, c.sobrenome, c.email, c.telefone, c.whatsapp, c.acesso_central_luto, u.id as usuario_id, u.nome as falecido_nome
+                SELECT c.id, c.nome, 
+                c.sobrenome, 
+                c.email, 
+                c.telefone, 
+                c.whatsapp, 
+                c.acesso_central_luto, 
+                u.id as usuario_id, 
+                u.nome as falecido_nome, 
+                c.parentesco
                 FROM contatos c
                 JOIN usuarios u ON c.usuario_id = u.id
                 WHERE c.chave_acesso = ? AND u.email = ?
             ''', (chave_acesso, email_falecido))
         else:
             self.executar(cursor, '''
-                SELECT c.id, c.nome, c.sobrenome, c.email, c.telefone, c.whatsapp, c.acesso_central_luto, u.id as usuario_id, u.nome as falecido_nome
+                SELECT c.id, 
+                c.nome, 
+                c.sobrenome, 
+                c.email, 
+                c.telefone, 
+                c.whatsapp, 
+                c.acesso_central_luto, 
+                u.id as usuario_id, 
+                u.nome as falecido_nome,
+                c.parentesco
                 FROM contatos c
                 JOIN usuarios u ON c.usuario_id = u.id
                 WHERE c.chave_acesso = ?
@@ -594,7 +721,8 @@ class BancoDados:
                 "telefone": row[4] or "", "whatsapp": row[5] or "",
                 "acesso_central_luto": row[6] or 0,
                 "usuario_id": row[7],
-                "falecido_nome": row[8]
+                "falecido_nome": row[8],
+                "parentesco": row[9] or ""
             }
         return None
 
