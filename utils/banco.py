@@ -579,6 +579,187 @@ class BancoDados:
         } for r in rows]
 
     # ========================================================================
+    # FOTOS
+    # ========================================================================
+
+    def adicionar_foto_com_acesso(
+            self,
+            usuario_id: int,
+            titulo: str,
+            descricao: str,
+            categoria: str,
+            caminho_arquivo: str,
+            contatos_ids: List[int],
+    ):
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            self.executar(cursor, """
+                INSERT INTO fotos (
+                    usuario_id,
+                    titulo,
+                    descricao,
+                    categoria,
+                    caminho_arquivo
+                )
+                VALUES (%s, %s, %s, %s, %s)
+                RETURNING id
+            """, (
+                usuario_id,
+                titulo,
+                descricao,
+                categoria,
+                caminho_arquivo,
+            ))
+
+            foto_id = cursor.fetchone()[0]
+
+            for contato_id in contatos_ids:
+                self.executar(cursor, """
+                    INSERT INTO fotos_contatos (
+                        foto_id,
+                        contato_id
+                    )
+                    VALUES (%s, %s)
+                """, (
+                    foto_id,
+                    contato_id,
+                ))
+
+            conn.commit()
+            return foto_id
+
+        except Exception as e:
+            conn.rollback()
+            print("Erro ao adicionar foto com acesso:", e)
+            raise e
+
+        finally:
+            cursor.close()
+            conn.close()
+
+    def listar_fotos_usuario(self, usuario_id: int) -> List[Dict]:
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        self.executar(cursor, """
+            SELECT id, titulo, descricao, categoria, caminho_arquivo, data_criacao
+            FROM fotos
+            WHERE usuario_id = %s
+            ORDER BY data_criacao DESC
+        """, (usuario_id,))
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        return [{
+            "id": r[0],
+            "titulo": r[1],
+            "descricao": r[2] or "",
+            "categoria": r[3] or "",
+            "caminho": r[4],
+            "data_criacao": r[5],
+        } for r in rows]
+
+    def listar_fotos_por_contato(self, contato_id: int) -> List[Dict]:
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        self.executar(cursor, """
+            SELECT
+                f.id,
+                f.titulo,
+                f.descricao,
+                f.categoria,
+                f.caminho_arquivo,
+                f.data_criacao
+            FROM fotos f
+            JOIN fotos_contatos fc ON fc.foto_id = f.id
+            WHERE fc.contato_id = %s
+            ORDER BY f.data_criacao DESC
+        """, (contato_id,))
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        return [{
+            "id": r[0],
+            "titulo": r[1],
+            "descricao": r[2] or "",
+            "categoria": r[3] or "",
+            "caminho": r[4],
+            "data_criacao": r[5],
+        } for r in rows]
+
+    def listar_contatos_por_foto(self, foto_id: int) -> List[Dict]:
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        self.executar(cursor, """
+            SELECT c.id, c.nome, c.sobrenome
+            FROM contatos c
+            JOIN fotos_contatos fc ON c.id = fc.contato_id
+            WHERE fc.foto_id = %s
+        """, (foto_id,))
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        return [{
+            "id": r[0],
+            "nome_completo": "{} {}".format(r[1], r[2] or "").strip()
+        } for r in rows]
+
+    def deletar_foto(self, foto_id: int, usuario_id: int) -> bool:
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            self.executar(cursor, """
+                SELECT caminho_arquivo
+                FROM fotos
+                WHERE id = %s AND usuario_id = %s
+            """, (foto_id, usuario_id))
+
+            row = cursor.fetchone()
+
+            if not row:
+                return False
+
+            caminho = row[0]
+
+            self.executar(cursor, """
+                DELETE FROM fotos_contatos
+                WHERE foto_id = %s
+            """, (foto_id,))
+
+            self.executar(cursor, """
+                DELETE FROM fotos
+                WHERE id = %s AND usuario_id = %s
+            """, (foto_id, usuario_id))
+
+            conn.commit()
+
+            if caminho and os.path.exists(caminho):
+                try:
+                    os.remove(caminho)
+                except Exception:
+                    pass
+
+            return True
+
+        except Exception as e:
+            conn.rollback()
+            print("Erro ao deletar foto:", e)
+            raise e
+
+        finally:
+            cursor.close()
+            conn.close()
+
+
+    # ========================================================================
     # CONTATOS
     # ========================================================================
     def adicionar_contato(self, usuario_id: int, nome: str, sobrenome: str, email: str,
@@ -736,46 +917,198 @@ class BancoDados:
     # ========================================================================
     # AGENDAMENTOS (LEMBRANÇAS PROGRAMADAS)
     # ========================================================================
-    def criar_agendamento(self, usuario_id: int, contato_id: int, tipo: str, data_envio: str,
-                          data_termino: str = "", conteudo: str = "", video_id: int = None,
-                          gerar_por_ia: int = 0) -> int:
+    def criar_agendamento(
+            self,
+            usuario_id: int,
+            contato_id: int,
+            tipo: str,
+            data_envio: str,
+            data_termino: str = "",
+            conteudo: str = "",
+            video_id: int = None,
+            gerar_por_ia: int = 0
+    ) -> int:
         conn = self.conectar()
         cursor = conn.cursor()
-        self.executar(cursor, '''
-            INSERT INTO agendamentos (usuario_id, contato_id, tipo, data_envio, data_termino, 
-                                      conteudo, video_id, gerar_por_ia, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'agendado')
-        ''', (usuario_id, contato_id, tipo, data_envio, data_termino, conteudo, video_id, gerar_por_ia))
-        conn.commit()
-        agendamento_id = cursor.lastrowid
-        conn.close()
-        return agendamento_id
+
+        try:
+            if not data_termino:
+                data_termino = None
+            self.executar(cursor, """
+                INSERT INTO agendamentos (
+                    usuario_id,
+                    contato_id,
+                    tipo,
+                    data_envio,
+                    data_termino,
+                    conteudo,
+                    video_id,
+                    gerar_por_ia,
+                    status
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'agendado')
+                RETURNING id
+            """, (
+                usuario_id,
+                contato_id,
+                tipo,
+                data_envio,
+                data_termino,
+                conteudo,
+                video_id,
+                gerar_por_ia
+            ))
+
+            agendamento_id = cursor.fetchone()[0]
+            conn.commit()
+            return agendamento_id
+
+        except Exception as e:
+            conn.rollback()
+            print("Erro ao criar agendamento:", e)
+            raise e
+
+        finally:
+            cursor.close()
+            conn.close()
 
     def listar_agendamentos_usuario(self, usuario_id: int) -> List[Dict]:
         conn = self.conectar()
         cursor = conn.cursor()
-        self.executar(cursor, '''
-            SELECT a.id, a.tipo, a.data_envio, a.data_termino, a.conteudo, a.status,
-                   c.nome, c.sobrenome, c.email
+
+        self.executar(cursor, """
+            SELECT 
+                a.id,
+                a.tipo,
+                a.data_envio,
+                a.data_termino,
+                a.conteudo,
+                a.status,
+                c.nome,
+                c.sobrenome,
+                c.email,
+                a.video_id
             FROM agendamentos a
             JOIN contatos c ON a.contato_id = c.id
-            WHERE a.usuario_id = ?
+            WHERE a.usuario_id = %s
             ORDER BY a.data_envio
-        ''', (usuario_id,))
+        """, (usuario_id,))
+
         rows = cursor.fetchall()
         conn.close()
+
         return [{
-            "id": r[0], "tipo": r[1], "data_envio": r[2], "data_termino": r[3],
-            "conteudo": r[4] or "", "status": r[5],
-            "contato_nome": f"{r[6]} {r[7]}".strip(), "contato_email": r[8]
+            "id": r[0],
+            "tipo": r[1],
+            "data_envio": r[2],
+            "data_termino": r[3],
+            "conteudo": r[4] or "",
+            "status": r[5],
+            "contato_nome": "{} {}".format(r[6], r[7] or "").strip(),
+            "contato_email": r[8],
+            "video_id": r[9],
         } for r in rows]
 
     def deletar_agendamento(self, id_agendamento: int, usuario_id: int):
         conn = self.conectar()
         cursor = conn.cursor()
-        self.executar(cursor, "DELETE FROM agendamentos WHERE id = ? AND usuario_id = ?", (id_agendamento, usuario_id))
-        conn.commit()
-        conn.close()
+
+        try:
+            self.executar(cursor, """
+                DELETE FROM agendamentos
+                WHERE id = %s AND usuario_id = %s
+            """, (id_agendamento, usuario_id))
+
+            conn.commit()
+
+        finally:
+            cursor.close()
+            conn.close()
+
+    def listar_agendamentos_pendentes(self) -> List[Dict]:
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            self.executar(cursor, """
+                SELECT
+                    a.id,
+                    a.usuario_id,
+                    a.contato_id,
+                    a.tipo,
+                    a.data_envio,
+                    a.data_termino,
+                    a.conteudo,
+                    a.video_id,
+                    a.gerar_por_ia,
+                    a.status,
+                    c.nome,
+                    c.sobrenome,
+                    c.email
+                FROM agendamentos a
+                JOIN contatos c ON c.id = a.contato_id
+                WHERE a.status = %s
+                  AND a.data_envio <= CURRENT_DATE
+                ORDER BY a.data_envio ASC
+            """, ("agendado",))
+
+            rows = cursor.fetchall()
+
+            return [{
+                "id": r[0],
+                "usuario_id": r[1],
+                "contato_id": r[2],
+                "tipo": r[3],
+                "data_envio": r[4],
+                "data_termino": r[5],
+                "conteudo": r[6] or "",
+                "video_id": r[7],
+                "gerar_por_ia": r[8],
+                "status": r[9],
+                "contato_nome": "{} {}".format(r[10], r[11] or "").strip(),
+                "contato_email": r[12],
+            } for r in rows]
+
+        finally:
+            cursor.close()
+            conn.close()
+
+    def marcar_agendamento_enviado(self, id_agendamento: int):
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            self.executar(cursor, """
+                UPDATE agendamentos
+                SET status = %s,
+                    data_envio_real = CURRENT_TIMESTAMP
+                WHERE id = %s
+            """, ("enviado", id_agendamento))
+
+            conn.commit()
+
+        finally:
+            cursor.close()
+            conn.close()
+
+    def marcar_agendamento_erro(self, id_agendamento: int, erro: str):
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            self.executar(cursor, """
+                UPDATE agendamentos
+                SET status = %s
+                WHERE id = %s
+            """, ("erro", id_agendamento))
+
+            conn.commit()
+
+            print("Erro no agendamento {}: {}".format(id_agendamento, erro))
+
+        finally:
+            cursor.close()
+            conn.close()
 
     # ========================================================================
     # PREFERÊNCIAS (GOSTOS)

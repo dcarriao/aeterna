@@ -10,7 +10,6 @@ from utils.criptografia import GerenciadorCriptografia
 from utils.usuarios import GerenciadorUsuarios
 from utils.upload_video import GerenciadorVideos
 from utils.assistente_ia import AssistenteLuto
-from utils.email_service import EmailService, processar_agendamentos
 from styles.theme import aplicar_tema
 from components.landing import render_landing
 from components.chat_luto import render_chat_luto
@@ -341,7 +340,7 @@ def render_login():
         with st.form("login_form"):
             email = st.text_input("E-mail", key="login_email")
             senha = st.text_input("Senha", type="password", key="login_senha")
-            submitted = st.form_submit_button("🌿 ENTRAR", use_container_width=True, type="primary")
+            submitted = st.form_submit_button("🌿 ENTRAR", width="stretch", type="primary")
             if submitted:
                 if email and senha:
                     if fazer_login(email, senha):
@@ -356,7 +355,7 @@ def render_login():
             nome_visitante = st.text_input("Seu nome", key="visitante_nome")
             email_falecido = st.text_input("E-mail da pessoa falecida", key="visitante_email")
             chave = st.text_input("Chave de acesso", type="password", key="visitante_chave")
-            submitted = st.form_submit_button("🕊️ ACESSAR LEGADO", use_container_width=True, type="primary")
+            submitted = st.form_submit_button("🕊️ ACESSAR LEGADO", width="stretch", type="primary")
             if submitted:
                 if nome_visitante and email_falecido and chave:
                     if fazer_login_visitante(nome_visitante, chave, email_falecido):
@@ -383,7 +382,7 @@ def render_login():
             senha = st.text_input("Senha *", type="password", key="cadastro_senha")
             confirmar_senha = st.text_input("Confirmar senha *", type="password", key="cadastro_confirmar")
 
-            submitted = st.form_submit_button("📝 CRIAR CONTA", use_container_width=True, type="primary")
+            submitted = st.form_submit_button("📝 CRIAR CONTA", width="stretch", type="primary")
 
             if submitted:
                 if not nome or not sobrenome or not email or not cpf or not data_nascimento or not senha:
@@ -468,7 +467,7 @@ def render_videos():
             arquivo_video = st.file_uploader("Arquivo de vídeo", type=["mp4", "mov", "avi", "mkv"], key="video_file")
             st.caption("📹 Formatos aceitos: MP4, MOV, AVI, MKV")
 
-            if st.button("💾 Salvar", key="salvar_video", type="primary", use_container_width=True):
+            if st.button("💾 Salvar", key="salvar_video", type="primary", width="stretch"):
 
                 if titulo and arquivo_video:
 
@@ -561,6 +560,180 @@ def render_videos_visitante():
             else:
                 st.warning("Arquivo de vídeo indisponível neste ambiente.")
 
+
+# ============================================================================
+# FOTOS
+# ============================================================================
+
+def render_fotos():
+    st.markdown("<h3 style='color: #2E8B57;'>📷 Fotos e Lembranças</h3>", unsafe_allow_html=True)
+
+    col1, col2 = st.columns([1, 2])
+
+    with col1:
+        with st.expander("📷 Adicionar foto", expanded=False):
+            with st.form("form_adicionar_foto", clear_on_submit=True):
+                titulo = st.text_input("Título *")
+
+                categoria = st.selectbox(
+                    "Categoria",
+                    [
+                        "Família",
+                        "Filhos",
+                        "Casamento",
+                        "Viagens",
+                        "Infância",
+                        "Amigos",
+                        "Momentos especiais",
+                    ],
+                )
+
+                descricao = st.text_area(
+                    "Descrição",
+                    placeholder="Conte brevemente o que essa foto representa...",
+                    height=100,
+                )
+
+                st.markdown("**👥 Quem pode ver esta foto?**")
+
+                contatos = db.listar_contatos_usuario(
+                    st.session_state.usuario_atual["id"]
+                )
+
+                if not contatos:
+                    st.warning("Cadastre contatos primeiro para definir quem pode ver a foto.")
+                    contatos_selecionados = []
+                else:
+                    opcoes_contato = {
+                        c["nome_completo"]: c["id"]
+                        for c in contatos
+                    }
+
+                    contatos_selecionados_nomes = st.multiselect(
+                        "Selecione os contatos que terão acesso à foto",
+                        list(opcoes_contato.keys()),
+                    )
+
+                    contatos_selecionados = [
+                        opcoes_contato[nome]
+                        for nome in contatos_selecionados_nomes
+                    ]
+
+                arquivo_foto = st.file_uploader(
+                    "Arquivo de foto",
+                    type=["png", "jpg", "jpeg", "webp"],
+                )
+
+                salvar = st.form_submit_button(
+                    "💾 Salvar foto",
+                    type="primary",
+                    width="stretch",
+                )
+
+                if salvar:
+                    if not titulo or not arquivo_foto:
+                        st.error("Informe um título e selecione uma foto.")
+                    else:
+                        try:
+                            pasta = f"fotos/usuario_{st.session_state.usuario_atual['id']}"
+                            os.makedirs(pasta, exist_ok=True)
+
+                            extensao = arquivo_foto.name.split(".")[-1].lower()
+                            nome_arquivo = "{}_{}.{}".format(
+                                datetime.now().strftime("%Y%m%d_%H%M%S"),
+                                secrets.token_hex(4),
+                                extensao,
+                            )
+
+                            caminho = os.path.join(pasta, nome_arquivo)
+
+                            with open(caminho, "wb") as f:
+                                f.write(arquivo_foto.getbuffer())
+
+                            db.adicionar_foto_com_acesso(
+                                usuario_id=st.session_state.usuario_atual["id"],
+                                titulo=titulo,
+                                descricao=descricao,
+                                categoria=categoria,
+                                caminho_arquivo=caminho,
+                                contatos_ids=contatos_selecionados,
+                            )
+
+                            st.success("Foto salva com sucesso.")
+                            st.rerun()
+
+                        except Exception as e:
+                            st.error(f"Erro ao salvar foto: {e}")
+                            print("ERRO AO SALVAR FOTO:", e)
+
+    with col2:
+        fotos = db.listar_fotos_usuario(
+            st.session_state.usuario_atual["id"]
+        )
+
+        if not fotos:
+            st.info("📭 Nenhuma foto cadastrada.")
+        else:
+            for foto in fotos:
+                contatos_acesso = db.listar_contatos_por_foto(foto["id"])
+                nomes_acesso = [
+                    c["nome_completo"]
+                    for c in contatos_acesso
+                ]
+
+                with st.expander(f"📷 {foto['titulo']} - {foto.get('categoria', '')}"):
+                    if foto.get("descricao"):
+                        st.markdown(foto["descricao"])
+
+                    st.markdown(
+                        "**Acesso para:** {}".format(
+                            ", ".join(nomes_acesso)
+                            if nomes_acesso
+                            else "Nenhum contato específico"
+                        )
+                    )
+
+                    if foto.get("caminho") and os.path.exists(foto["caminho"]):
+                        st.image(foto["caminho"], width="stretch")
+                    else:
+                        st.warning("Arquivo de foto indisponível neste ambiente.")
+
+                    if st.button(
+                        "🗑️ Remover",
+                        key=f"del_foto_{foto['id']}",
+                    ):
+                        db.deletar_foto(
+                            foto["id"],
+                            st.session_state.usuario_atual["id"],
+                        )
+                        st.rerun()
+
+def render_fotos_visitante():
+    usuario = st.session_state.usuario_atual
+    contato_id = usuario["id"]
+    nome_falecido = usuario.get("nome_falecido", "essa pessoa")
+
+    st.markdown(
+        f"<h3 style='color: #2E8B57;'>📷 Fotos de {nome_falecido}</h3>",
+        unsafe_allow_html=True
+    )
+
+    fotos = db.listar_fotos_por_contato(contato_id)
+
+    if not fotos:
+        st.info("📭 Nenhuma foto foi liberada para você.")
+        return
+
+    for foto in fotos:
+        with st.expander(f"📷 {foto['titulo']} - {foto.get('categoria', '')}"):
+            if foto.get("descricao"):
+                st.markdown(foto["descricao"])
+
+            if foto.get("caminho") and os.path.exists(foto["caminho"]):
+                st.image(foto["caminho"], width="stretch")
+            else:
+                st.warning("Arquivo de foto indisponível neste ambiente.")
+
 # ============================================================================
 # CONTATOS (COMPLETO)
 # ============================================================================
@@ -635,7 +808,7 @@ def render_contatos():
                 salvar = st.form_submit_button(
                     "💾 Salvar",
                     type="primary",
-                    use_container_width=True
+                    width="stretch"
                 )
 
                 if salvar:
@@ -754,15 +927,17 @@ def render_preferencias():
 # LEMBRANÇAS PROGRAMADAS (AGENDAMENTOS)
 # ============================================================================
 def render_agendamentos():
-    st.markdown("<h3 style='color: #2E8B57;'>📅 Lembranças Programadas</h3>", unsafe_allow_html=True)
-    st.caption("Programe mensagens para serem enviadas em datas especiais.")
+    st.markdown(
+        "<h3 style='color: #2E8B57;'>💌 Mensagens para o Futuro</h3>",
+        unsafe_allow_html=True
+    )
 
-    # Processar agendamentos automaticamente
-    enviados = processar_agendamentos()
-    if enviados > 0:
-        st.success(f"✨ {enviados} lembrança(s) programada(s) foram enviadas hoje!")
+    st.info(
+        "Deixe mensagens e vídeos para serem entregues em momentos importantes "
+        "da vida das pessoas que você ama."
+    )
 
-    plano = db.obter_plano_usuario(st.session_state.usuario_atual['id'])
+   plano = db.obter_plano_usuario(st.session_state.usuario_atual['id'])
 
     if not plano.get("tem_agendamento", False):
         st.info("💡 Esta funcionalidade estará disponível em breve nos planos pagos!")
@@ -771,87 +946,163 @@ def render_agendamentos():
     col1, col2 = st.columns([1, 2])
 
     with col1:
-        with st.expander("➕ Criar nova lembrança", expanded=False):
-            contatos = db.listar_contatos_usuario(st.session_state.usuario_atual['id'])
+        with st.expander("➕ Criar nova mensagem para o futuro", expanded=False):
+            contatos = db.listar_contatos_usuario(st.session_state.usuario_atual["id"])
+
             if not contatos:
                 st.warning("⚠️ Cadastre um contato primeiro")
             else:
-                opcoes_contato = {c['nome_completo']: c for c in contatos}
-                contato_selecionado_nome = st.selectbox("Para quem?", list(opcoes_contato.keys()),
-                                                        key="agendamento_contato")
-                contato_selecionado = opcoes_contato[contato_selecionado_nome]
-                contato_id = contato_selecionado['id']
+                with st.form("form_mensagem_futuro", clear_on_submit=True):
+                    opcoes_contato = {c["nome_completo"]: c for c in contatos}
 
-                # Verificar se o contato tem e-mail
-                if not contato_selecionado.get('email'):
-                    st.warning("⚠️ Este contato não tem e-mail cadastrado. Adicione um e-mail para receber mensagens.")
+                    contato_selecionado_nome = st.selectbox(
+                        "Para quem?",
+                        list(opcoes_contato.keys())
+                    )
 
-                tipo = st.selectbox("Tipo de mensagem", ["texto", "vídeo"], key="agendamento_tipo")
+                    contato_selecionado = opcoes_contato[contato_selecionado_nome]
+                    contato_id = contato_selecionado["id"]
 
-                col_d1, col_d2 = st.columns(2)
-                with col_d1:
-                    data_envio = st.date_input("Data de envio", min_value=datetime.now().date(), key="agendamento_data")
-                with col_d2:
-                    data_termino = st.date_input("Data de término (opcional)", key="agendamento_termino", value=None)
-
-                # Forma de envio
-                forma_envio = st.selectbox("Como enviar?", ["E-mail", "WhatsApp (em breve)"], key="forma_envio")
-
-                conteudo = ""
-                video_id = None
-
-                if tipo == "texto":
-                    opcao_texto = st.radio("Como criar?", ["Escrever manualmente", "Gerar com IA (em breve)"],
-                                           key="agendamento_opcao")
-                    if opcao_texto == "Escrever manualmente":
-                        conteudo = st.text_area("Digite sua mensagem:", height=150, key="agendamento_texto")
-                    else:
-                        st.info("🤖 Geração por IA disponível em breve!")
-                        conteudo = st.text_area("Digite sua mensagem:", height=150, key="agendamento_texto_ia")
-                else:
-                    videos = db.listar_videos_usuario(st.session_state.usuario_atual['id'])
-                    if videos:
-                        opcoes_video = {v['titulo']: v['id'] for v in videos}
-                        video_selecionado = st.selectbox("Selecione um vídeo", list(opcoes_video.keys()),
-                                                         key="agendamento_video")
-                        video_id = opcoes_video[video_selecionado]
-                    else:
-                        st.warning("⚠️ Você não tem vídeos cadastrados.")
-                        return
-
-                # Data especial (opcional)
-                data_especial = st.text_input("Data especial (opcional)", key="agendamento_data_especial",
-                                              placeholder="Ex: Aniversário, Natal, Dia dos Pais...")
-
-                if st.button("💾 Agendar", type="primary", use_container_width=True):
-                    if tipo == "texto" and not conteudo:
-                        st.error("❌ Digite uma mensagem")
-                    elif not contato_selecionado.get('email') and forma_envio == "E-mail":
-                        st.error("❌ Este contato não tem e-mail cadastrado")
-                    else:
-                        # Adicionar data especial ao conteúdo
-                        mensagem_final = conteudo
-                        if data_especial:
-                            mensagem_final = f"✨ {data_especial} ✨\n\n{conteudo}"
-
-                        db.criar_agendamento(
-                            usuario_id=st.session_state.usuario_atual['id'],
-                            contato_id=contato_id,
-                            tipo=tipo,
-                            data_envio=data_envio.strftime("%Y-%m-%d"),
-                            data_termino=data_termino.strftime("%Y-%m-%d") if data_termino else "",
-                            conteudo=mensagem_final,
-                            video_id=video_id,
-                            gerar_por_ia=1 if tipo == "texto" and opcao_texto == "Gerar com IA (em breve)" else 0
+                    if not contato_selecionado.get("email"):
+                        st.warning(
+                            "⚠️ Este contato não tem e-mail cadastrado. "
+                            "Adicione um e-mail para receber mensagens."
                         )
-                        st.success(f"✅ Lembrança agendada para {data_envio.strftime('%d/%m/%Y')}!")
-                        st.info(f"📧 Será enviada por e-mail para {contato_selecionado['email']}")
-                        st.rerun()
+
+                    tipo = st.selectbox(
+                        "Tipo de mensagem",
+                        ["texto", "vídeo"]
+                    )
+
+                    col_d1, col_d2 = st.columns(2)
+
+                    with col_d1:
+                        data_envio = st.date_input(
+                            "Data de envio",
+                            min_value=datetime.now().date()
+                        )
+
+                    with col_d2:
+                        data_termino = st.date_input(
+                            "Data de término (opcional)",
+                            value=None
+                        )
+
+                    forma_envio = st.selectbox(
+                        "Como enviar?",
+                        ["E-mail", "WhatsApp (em breve)"]
+                    )
+
+                    conteudo = ""
+                    video_id = None
+                    gerar_por_ia = 0
+
+                    if tipo == "texto":
+                        opcao_texto = st.radio(
+                            "Como criar?",
+                            ["Escrever manualmente", "Gerar com IA (em breve)"]
+                        )
+
+                        if opcao_texto == "Escrever manualmente":
+                            conteudo = st.text_area(
+                                "Digite sua mensagem:",
+                                height=150
+                            )
+                        else:
+                            st.info("🤖 Geração por IA disponível em breve!")
+                            conteudo = st.text_area(
+                                "Digite sua mensagem:",
+                                height=150
+                            )
+                            gerar_por_ia = 1
+
+                    else:
+                        videos = db.listar_videos_usuario(
+                            st.session_state.usuario_atual["id"]
+                        )
+
+                        if videos:
+                            opcoes_video = {
+                                v["titulo"]: v["id"]
+                                for v in videos
+                            }
+
+                            video_selecionado = st.selectbox(
+                                "Selecione um vídeo",
+                                list(opcoes_video.keys())
+                            )
+
+                            video_id = opcoes_video[video_selecionado]
+                        else:
+                            st.warning("⚠️ Você não tem vídeos cadastrados.")
+
+                    ocasiao = st.selectbox(
+                        "Ocasião",
+                        [
+                            "Aniversário",
+                            "Natal",
+                            "Ano Novo",
+                            "Dia dos Pais",
+                            "Dia das Mães",
+                            "Aniversário de Casamento",
+                            "Formatura",
+                            "Nascimento de Filho(a)",
+                            "Mensagem Personalizada"
+                        ]
+                    )
+
+                    if ocasiao == "Mensagem Personalizada":
+                        data_especial = st.text_input(
+                            "Descreva a ocasião"
+                        )
+                    else:
+                        data_especial = ocasiao
+
+                    salvar_agendamento = st.form_submit_button(
+                        "💾 Agendar mensagem",
+                        type="primary",
+                        width="stretch"
+                    )
+
+                    if salvar_agendamento:
+                        if tipo == "texto" and not conteudo:
+                            st.error("❌ Digite uma mensagem")
+                        elif tipo == "vídeo" and not video_id:
+                            st.error("❌ Selecione um vídeo")
+                        elif forma_envio == "E-mail" and not contato_selecionado.get("email"):
+                            st.error("❌ Este contato não tem e-mail cadastrado")
+                        else:
+                            mensagem_final = conteudo
+
+                            if data_especial and tipo == "texto":
+                                mensagem_final = f"✨ {data_especial} ✨\n\n{conteudo}"
+
+                            db.criar_agendamento(
+                                usuario_id=st.session_state.usuario_atual["id"],
+                                contato_id=contato_id,
+                                tipo=tipo,
+                                data_envio=data_envio.strftime("%Y-%m-%d"),
+                                data_termino=data_termino.strftime("%Y-%m-%d") if data_termino else "",
+                                conteudo=mensagem_final,
+                                video_id=video_id,
+                                gerar_por_ia=gerar_por_ia
+                            )
+
+                            st.success(
+                                f"✅ Mensagem agendada para {data_envio.strftime('%d/%m/%Y')}!"
+                            )
+
+                            if forma_envio == "E-mail":
+                                st.info(
+                                    f"📧 Será enviada por e-mail para {contato_selecionado['email']}"
+                                )
+
+                            st.rerun()
 
     with col2:
         agendamentos = db.listar_agendamentos_usuario(st.session_state.usuario_atual['id'])
         if not agendamentos:
-            st.info("📭 Nenhuma lembrança programada")
+            st.info("📭 Nenhuma mensagem para o futuro programada.")
         else:
             for agend in agendamentos:
                 with st.expander(f"📌 {agend['tipo'].upper()} para {agend['contato_nome']} - {agend['data_envio']}"):
@@ -890,7 +1141,7 @@ def render_cofre():
                 url = st.text_input("URL", key="url_input")
                 notas = st.text_area("Notas", key="notas_input", height=80)
 
-                if st.button("💾 Salvar", key="salvar_senha", type="primary", use_container_width=True):
+                if st.button("💾 Salvar", key="salvar_senha", type="primary", width="stretch"):
                     if servico and usuario_senha and senha_original:
                         senha_cripto = st.session_state.crypto.criptografar(senha_original)
                         db.adicionar_senha(
@@ -943,7 +1194,7 @@ def render_cofre():
 
                 titulo_final = titulo_doc if titulo_doc else f"{tipo_doc}"
 
-                if st.button("💾 Salvar", key="salvar_doc", type="primary", use_container_width=True):
+                if st.button("💾 Salvar", key="salvar_doc", type="primary", width="stretch"):
                     if arquivo:
                         docs_folder = f"documentos/usuario_{st.session_state.usuario_atual['id']}"
                         os.makedirs(docs_folder, exist_ok=True)
@@ -1068,6 +1319,10 @@ def main():
                 st.session_state.usuario_atual["id"]
             )
 
+            fotos_visitante = db.listar_fotos_por_contato(
+                st.session_state.usuario_atual["id"]
+            )
+
             qtd_videos = len(
                 db.listar_videos_por_contato(
                     st.session_state.usuario_atual["id"]
@@ -1102,6 +1357,9 @@ def main():
             if videos_visitante:
                 abas.append(f"🎥 Mensagens ({len(videos_visitante)})")
 
+            if fotos_visitante:
+                abas.append(f"📷 Fotos ({len(fotos_visitante)})")
+
             tabs = st.tabs(abas)
 
             with tabs[0]:
@@ -1112,6 +1370,11 @@ def main():
             if videos_visitante:
                 with tabs[indice]:
                     render_videos_visitante()
+                indice += 1
+
+            if fotos_visitante:
+                with tabs[indice]:
+                    render_fotos_visitante()
                 indice += 1
 
             st.markdown("""
@@ -1194,13 +1457,14 @@ def main():
             with tab7:
                 render_admin_panel()
         else:
-            tab0, tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+            tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
                 "🏠 Painel",
                 "💬 Assistente",
                 "🎥 Vídeos",
+                "📷 Fotos",
                 "👥 Família",
                 "👤 Minha Essência",
-                "📝 Lembranças",
+                "💌 Mensagens para o Futuro",
                 "🔒 Cofre"
             ])
             with tab0:
@@ -1216,12 +1480,14 @@ def main():
             with tab2:
                 render_videos()
             with tab3:
-                render_contatos()
+                render_fotos()
             with tab4:
-                render_preferencias()
+                render_contatos()
             with tab5:
-                render_agendamentos()
+                render_preferencias()
             with tab6:
+                render_agendamentos()
+            with tab7:
                 render_cofre()
 
         st.markdown("""
