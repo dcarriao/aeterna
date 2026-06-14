@@ -168,32 +168,44 @@ class AssistenteLuto:
         return "\n".join(linhas)
 
     def _buscar_preferencias(self) -> dict:
-        registros = self._safe_select(
-            "preferencias_usuario",
-            [
-                "gostos_musica",
-                "gostos_comida",
-                "melhor_lembranca",
-                "dia_mais_feliz",
-                "dia_mais_triste",
-                "personalidade_extra",
-            ],
-            where_usuario=True,
-            limit=1,
-        )
+        conn = self._conectar()
+        cursor = conn.cursor()
 
-        if not registros:
+        try:
+            cursor.execute("""
+                SELECT
+                    gostos_musica,
+                    gostos_comida,
+                    melhor_lembranca,
+                    dia_mais_feliz,
+                    dia_mais_triste,
+                    personalidade_extra
+                FROM preferencias_usuario
+                WHERE usuario_id = %s
+                LIMIT 1
+            """, (self.usuario_id,))
+
+            row = cursor.fetchone()
+
+            if not row:
+                return {}
+
+            return {
+                "musica": row[0] or "",
+                "comida": row[1] or "",
+                "lembranca": row[2] or "",
+                "dia_feliz": row[3] or "",
+                "dia_triste": row[4] or "",
+                "personalidade": row[5] or "",
+            }
+
+        except Exception as e:
+            print("Erro ao buscar preferências:", e)
             return {}
 
-        row = registros[0]
-        return {
-            "musica": row.get("gostos_musica", "") or "",
-            "comida": row.get("gostos_comida", "") or "",
-            "lembranca": row.get("melhor_lembranca", "") or "",
-            "dia_feliz": row.get("dia_mais_feliz", "") or "",
-            "dia_triste": row.get("dia_mais_triste", "") or "",
-            "personalidade": row.get("personalidade_extra", "") or "",
-        }
+        finally:
+            cursor.close()
+            conn.close()
 
     def _buscar_memorias_supabase(self, limite=30) -> str:
         conn = self._conectar()
@@ -438,19 +450,27 @@ class AssistenteLuto:
 
     def _prompt_sistema_luto(self):
         return """
-    Você é o Assistente de Memória da aEterna.
-    Você ajuda familiares e pessoas autorizadas a acessar o legado registrado de alguém.
+    Você é o Assistente Memorial da aEterna.
+
+    Você ajuda familiares e pessoas autorizadas a conversar com o legado registrado de alguém.
 
     Seu papel:
     - acolher com respeito e serenidade;
-    - responder usando apenas memórias, mensagens, preferências e fatos cadastrados;
+    - responder usando apenas memórias, preferências, valores, mensagens e fatos cadastrados;
+    - ajudar a pessoa visitante a se sentir acompanhada em momentos de saudade;
+    - dar respostas humanas, afetuosas e naturais, sempre baseadas no contexto disponível;
     - nunca fingir ser a pessoa falecida;
-    - nunca inventar fatos;
-    - se a informação não existir, diga claramente:
-    "Não encontrei nenhuma informação registrada sobre esse assunto entre as memórias disponíveis."
+    - nunca dizer que é a pessoa falecida;
+    - nunca inventar fatos.
+
+    Regras importantes:
+    - Se a pergunta for ampla, use informações relacionadas do contexto.
+    - Se perguntarem "o que ele gostava de fazer", considere gostos, músicas, comidas, lembranças, viagens, família, carreira e valores registrados.
+    - Se houver informação parcial, responda com o que existe e diga que não há mais detalhes registrados.
+    - Só diga "Não encontrei nenhuma informação..." quando realmente não houver nada relacionado no contexto.
 
     Tom:
-    humano, calmo, respeitoso, em português do Brasil.
+    humano, calmo, respeitoso, acolhedor, em português do Brasil.
     """.strip()
 
     def _prompt_sistema(self):

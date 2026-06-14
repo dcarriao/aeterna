@@ -697,8 +697,11 @@ def render_contatos():
 # PREFERÊNCIAS (GOSTOS)
 # ============================================================================
 def render_preferencias():
-    st.markdown("<h3 style='color: #2E8B57;'>🧠 Sobre você</h3>", unsafe_allow_html=True)
-    st.info("💡 Essas informações ajudam o Assistente de Luto a conversar como você.")
+    st.markdown("<h3 style='color: #2E8B57;'>👤 Minha Essência</h3>", unsafe_allow_html=True)
+    st.info(
+        "Essas informações ajudam o Assistente de Legado e o Assistente Memorial "
+        "a compreender melhor sua história, seus valores, gostos e lembranças importantes."
+    )
 
     preferencias = db.obter_preferencias(st.session_state.usuario_atual['id'])
 
@@ -728,7 +731,7 @@ def render_preferencias():
                                        value=preferencias.get('dia_mais_triste', ''),
                                        height=80, key="pref_triste")
 
-        st.markdown("**💬 Personalidade extra**")
+        st.markdown("**🌟 Como você gostaria de ser lembrado?**")
         personalidade_extra = st.text_area("Algo mais que você quer que o assistente saiba sobre você?",
                                            value=preferencias.get('personalidade_extra', ''),
                                            height=100, key="pref_extra")
@@ -1163,7 +1166,7 @@ def main():
                 "💬 Assistente",
                 "🎥 Vídeos",
                 "👥 Família",
-                "👤 Perfil",
+                "👤 Minha Essência",
                 "📝 Lembranças",
                 "🔒 Cofre",
                 "👑 Admin"
@@ -1196,7 +1199,7 @@ def main():
                 "💬 Assistente",
                 "🎥 Vídeos",
                 "👥 Família",
-                "👤 Perfil",
+                "👤 Minha Essência",
                 "📝 Lembranças",
                 "🔒 Cofre"
             ])
