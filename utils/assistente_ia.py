@@ -16,6 +16,74 @@ class AssistenteLuto:
         self.modo = modo
         self.arquivo_db = self._resolver_caminho_db(arquivo_db)
 
+    def sugerir_metadados_memoria(self, texto: str) -> dict:
+        api_key = self._get_secret("OPENAI_API_KEY")
+
+        if not api_key:
+            return {
+                "titulo": "Memória registrada via assistente",
+                "categoria": "livre",
+                "local": "",
+                "data_evento": "",
+                "pessoas_relacionadas": ""
+            }
+
+        try:
+            from openai import OpenAI
+            import json
+
+            client = OpenAI(api_key=api_key)
+
+            prompt = f"""
+    Analise a memória abaixo e sugira metadados para organizá-la.
+
+    Retorne APENAS um JSON válido, sem markdown, neste formato:
+
+    {{
+      "titulo": "",
+      "categoria": "",
+      "local": "",
+      "data_evento": "",
+      "pessoas_relacionadas": ""
+    }}
+
+    Regras:
+    - Se não souber algum campo, retorne string vazia.
+    - data_evento deve ficar vazia se não houver data clara.
+    - categoria pode ser: família, infância, viagens, carreira, estudos, amizade, amor, perda, conquista, valores, livre.
+    - pessoas_relacionadas deve ser uma string com nomes separados por vírgula.
+    - Não invente informações.
+
+    Memória:
+    {texto}
+    """.strip()
+
+            response = client.responses.create(
+                model=os.getenv("OPENAI_MODEL") or st.secrets.get("OPENAI_MODEL", "gpt-4o-mini"),
+                input=prompt
+            )
+
+            raw = response.output_text.strip()
+            dados = json.loads(raw)
+
+            return {
+                "titulo": dados.get("titulo") or "Memória registrada via assistente",
+                "categoria": dados.get("categoria") or "livre",
+                "local": dados.get("local") or "",
+                "data_evento": dados.get("data_evento") or "",
+                "pessoas_relacionadas": dados.get("pessoas_relacionadas") or ""
+            }
+
+        except Exception as e:
+            print("Erro ao sugerir metadados da memória:", e)
+            return {
+                "titulo": "Memória registrada via assistente",
+                "categoria": "livre",
+                "local": "",
+                "data_evento": "",
+                "pessoas_relacionadas": ""
+            }
+
     def _resolver_caminho_db(self, arquivo_db: str) -> str:
         caminho = Path(arquivo_db)
         if caminho.is_absolute():

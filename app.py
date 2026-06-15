@@ -497,6 +497,30 @@ def render_videos():
                         placeholder="Ex: Para minha família"
                     )
 
+                memorias = db.listar_memorias_usuario(
+                    st.session_state.usuario_atual["id"]
+                )
+
+                memoria_id = None
+
+                if memorias:
+                    opcoes_memoria = {
+                        "Não associar a nenhuma memória": None
+                    }
+
+                    for m in memorias:
+                        titulo_memoria = m.get("titulo") or "Memória sem título"
+                        opcoes_memoria[titulo_memoria] = m["id"]
+
+                    memoria_escolhida = st.selectbox(
+                        "Associar este vídeo a uma memória? (opcional)",
+                        list(opcoes_memoria.keys())
+                    )
+
+                    memoria_id = opcoes_memoria[memoria_escolhida]
+                else:
+                    st.info("Você ainda não tem memórias salvas para associar este vídeo.")
+
                 arquivo_video = st.file_uploader(
                     "Arquivo de vídeo",
                     type=["mp4", "mov", "avi", "mkv"]
@@ -531,6 +555,12 @@ def render_videos():
                                 contatos_ids=contatos_selecionados,
                                 categoria=categoria
                             )
+
+                            if memoria_id:
+                                db.associar_video_memoria(
+                                    memoria_id=memoria_id,
+                                    video_id=video_id
+                                )
 
                             st.success(
                                 f"✅ {titulo} salvo! "

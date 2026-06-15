@@ -1,9 +1,11 @@
 import html
 import streamlit as st
 import os
+from datetime import datetime
 
 from utils.assistente_ia import AssistenteLuto
 from utils.banco import BancoDados
+from utils.upload_video import GerenciadorVideos
 
 
 def _extrair_palavras_relevantes(texto: str):
@@ -200,13 +202,141 @@ def render_chat_luto():
             )
 
             if modo == "legado" and len(texto_original.strip()) > 20:
+                chave_base = "memoria_{}_{}".format(i, abs(hash(texto_original)))
+
                 if st.button(
                         "💾 Salvar como memória",
-                        key="salvar_memoria_user_{}_{}".format(i, abs(hash(texto_original)))
+                        key="salvar_" + chave_base
                 ):
-                    usuario = st.session_state.get("usuario_atual")
-                    db.salvar_memoria(usuario["id"], texto_original)
-                    st.success("Memória salva no legado.")
+                    sugestoes = st.session_state.assistente_obj.sugerir_metadados_memoria(
+                        texto_original
+                    )
+                    st.session_state["sugestoes_" + chave_base] = sugestoes
+                    st.session_state["texto_memoria_" + chave_base] = texto_original
+
+                if "sugestoes_" + chave_base in st.session_state:
+                    sugestoes = st.session_state["sugestoes_" + chave_base]
+
+                    with st.form("form_" + chave_base):
+                        st.markdown("#### 💡 Sugestões para organizar esta memória")
+
+                        titulo = st.text_input(
+                            "Título",
+                            value=sugestoes.get("titulo", "")
+                        )
+
+                        categoria = st.text_input(
+                            "Categoria",
+                            value=sugestoes.get("categoria", "")
+                        )
+
+                        local = st.text_input(
+                            "Local",
+                            value=sugestoes.get("local", "")
+                        )
+
+                        data_evento = st.text_input(
+                            "Data aproximada",
+                            value=sugestoes.get("data_evento", ""),
+                            placeholder="Ex: 2024-03-15, 2024, infância..."
+                        )
+
+                        pessoas_relacionadas = st.text_input(
+                            "Pessoas relacionadas",
+                            value=sugestoes.get("pessoas_relacionadas", "")
+                        )
+
+                        foto_memoria = st.file_uploader(
+                            "📷 Adicionar foto a esta memória (opcional)",
+                            type=["png", "jpg", "jpeg", "webp"],
+                            key="foto_" + chave_base
+                        )
+
+                        video_memoria = st.file_uploader(
+                            "🎥 Adicionar vídeo a esta memória (opcional)",
+                            type=["mp4", "mov", "avi", "mkv"],
+                            key="video_" + chave_base
+                        )
+
+                        salvar_final = st.form_submit_button(
+                            "✅ Salvar memória",
+                            type="primary",
+                            width="stretch"
+                        )
+
+                        if salvar_final:
+                            usuario = st.session_state.get("usuario_atual")
+
+                            memoria_id = db.salvar_memoria(
+                                usuario_id=usuario["id"],
+                                conteudo=st.session_state["texto_memoria_" + chave_base],
+                                titulo=titulo or "Memória registrada via assistente",
+                                categoria=categoria or "livre",
+                                origem="assistente",
+                                local=local or None,
+                                data_evento=data_evento or None,
+                                pessoas_relacionadas=pessoas_relacionadas or None
+                            )
+
+                            if foto_memoria:
+                                pasta = "fotos/usuario_{}".format(usuario["id"])
+                                os.makedirs(pasta, exist_ok=True)
+
+                                extensao = foto_memoria.name.split(".")[-1].lower()
+                                nome_arquivo = "{}_{}.{}".format(
+                                    datetime.now().strftime("%Y%m%d_%H%M%S"),
+                                    abs(hash(foto_memoria.name)),
+                                    extensao
+                                )
+
+                                caminho_foto = os.path.join(pasta, nome_arquivo)
+
+                                with open(caminho_foto, "wb") as f:
+                                    f.write(foto_memoria.getbuffer())
+
+                                foto_id = db.adicionar_foto_com_acesso(
+                                    usuario_id=usuario["id"],
+                                    titulo=titulo or "Foto da memória",
+                                    descricao=st.session_state["texto_memoria_" + chave_base][:300],
+                                    categoria=categoria or "livre",
+                                    caminho_arquivo=caminho_foto,
+                                    contatos_ids=[]
+                                )
+
+                                db.associar_foto_memoria(
+                                    memoria_id=memoria_id,
+                                    foto_id=foto_id
+                                )
+                            if video_memoria:
+                                gerente_videos = GerenciadorVideos()
+                                caminho_video = gerente_videos.salvar_video(
+                                    video_memoria,
+                                    usuario["id"],
+                                    titulo or "Vídeo da memória",
+                                    pessoas_relacionadas or "",
+                                    categoria or "livre"
+                                )
+
+                                video_id = db.adicionar_video_com_acesso(
+                                    usuario_id=usuario["id"],
+                                    titulo=titulo or "Vídeo da memória",
+                                    destinatario=pessoas_relacionadas or "",
+                                    caminho_arquivo=caminho_video,
+                                    contatos_ids=[],
+                                    categoria=categoria or "livre"
+                                )
+
+                                db.associar_video_memoria(
+                                    memoria_id=memoria_id,
+                                    video_id=video_id
+                                )
+
+                            del st.session_state["sugestoes_" + chave_base]
+                            del st.session_state["texto_memoria_" + chave_base]
+
+                            st.success("Memória salva no legado.")
+                            st.rerun()
+
 
         else:
             st.markdown(

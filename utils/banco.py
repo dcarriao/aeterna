@@ -804,6 +804,48 @@ class BancoDados:
         finally:
             cursor.close()
             conn.close()
+    # ========================================================================
+    # MEMORIAS E videos
+    # ========================================================================
+
+    def associar_video_memoria(self, memoria_id: int, video_id: int):
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            self.executar(cursor, """
+                INSERT INTO memoria_videos (memoria_id, video_id)
+                VALUES (%s, %s)
+            """, (memoria_id, video_id))
+
+            conn.commit()
+
+        finally:
+            cursor.close()
+            conn.close()
+
+    def listar_videos_memoria(self, memoria_id: int):
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        self.executar(cursor, """
+            SELECT v.id, v.titulo, v.destinatario, v.categoria, v.caminho_arquivo
+            FROM videos v
+            JOIN memoria_videos mv ON mv.video_id = v.id
+            WHERE mv.memoria_id = %s
+            ORDER BY v.data_criacao DESC
+        """, (memoria_id,))
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        return [{
+            "id": r[0],
+            "titulo": r[1],
+            "destinatario": r[2] or "",
+            "categoria": r[3] or "",
+            "caminho": r[4],
+        } for r in rows]
 
     # ========================================================================
     # MEMORIAS E FOTOS
@@ -940,28 +982,52 @@ class BancoDados:
             "data_criacao": r[5],
         } for r in rows]
 
-    def salvar_memoria(self, usuario_id: int,  conteudo: str):
+    def salvar_memoria(
+            self,
+            usuario_id: int,
+            conteudo: str,
+            titulo: str = "Memória registrada via assistente",
+            categoria: str = "livre",
+            origem: str = "assistente",
+            local: str = None,
+            data_evento: str = None,
+            pessoas_relacionadas: str = None
+    ):
         conn = self.conectar()
         cursor = conn.cursor()
 
-        self.executar(cursor,"""
-            INSERT INTO memorias (
+        try:
+            self.executar(cursor, """
+                INSERT INTO memorias (
+                    usuario_id,
+                    categoria,
+                    titulo,
+                    conteudo,
+                    origem,
+                    local,
+                    data_evento,
+                    pessoas_relacionadas
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s) 
+                RETURNING id
+            """, (
                 usuario_id,
                 categoria,
                 titulo,
                 conteudo,
-                origem
-            )
-            VALUES (?, ?, ?, ?, ?)
-        """, (
-            usuario_id,
-            "livre",
-            "Memória registrada via assistente",
-            conteudo,
-            "assistente"
-        ))
-        conn.commit()
-        conn.close()
+                origem,
+                local,
+                data_evento,
+                pessoas_relacionadas
+            ))
+
+            memoria_id = cursor.fetchone()[0]
+            conn.commit()
+            return memoria_id
+
+        finally:
+            cursor.close()
+            conn.close()
 
     def contar_contatos_usuario(self, usuario_id: int) -> int:
         conn = self.conectar()
