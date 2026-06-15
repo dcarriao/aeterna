@@ -2,16 +2,11 @@ import streamlit as st
 from PIL import Image
 import os
 from datetime import datetime
-import json
-import sqlite3
 import secrets
 from utils.banco import BancoDados
-from utils.criptografia import GerenciadorCriptografia
 from utils.usuarios import GerenciadorUsuarios
 from utils.upload_video import GerenciadorVideos
-from utils.assistente_ia import AssistenteLuto
 from styles.theme import aplicar_tema
-from components.landing import render_landing
 from components.chat_luto import render_chat_luto
 from components.login_compacto import render_login_compacto
 from components.dashboard_ui import (
@@ -21,6 +16,7 @@ from components.dashboard_ui import (
 )
 from components.mobile_ui import aplicar_css_mobile
 from datetime import date
+from utils.logger import logger
 
 # ============================================================================
 # CONFIGURAÇÃO DA PÁGINA
@@ -345,6 +341,7 @@ def render_login():
                 if email and senha:
                     if fazer_login(email, senha):
                         st.success("✅ Login realizado!")
+                        logger.info(f"LOGIN_USUARIO: {email}")
                         st.rerun()
                     else:
                         st.error("❌ E-mail ou senha incorretos")
@@ -360,6 +357,9 @@ def render_login():
                 if nome_visitante and email_falecido and chave:
                     if fazer_login_visitante(nome_visitante, chave, email_falecido):
                         st.success(f"✅ Bem-vindo(a), {nome_visitante}!")
+                        logger.info(
+                            f"LOGIN_VISITANTE: {nome_visitante} acessou memorial de {email_falecido}"
+                        )
                         st.rerun()
                     else:
                         st.error("❌ Credenciais inválidas")
@@ -433,76 +433,101 @@ def render_videos():
 
     with col1:
         with st.expander("🎥 Adicionar vídeo", expanded=False):
-            titulo = st.text_input("Título *", key="titulo_video")
 
-            categoria = st.selectbox("Categoria",
-                                     ["Mensagem após falecimento", "Para pessoa específica", "Para data especial"],
-                                     key="categoria_video")
+            contatos = db.listar_contatos_usuario(st.session_state.usuario_atual["id"])
 
-            # Seleção de contatos que terão acesso
-            st.markdown("**👥 Quem pode ver este vídeo?**")
+            with st.form("form_adicionar_video", clear_on_submit=True):
+                titulo = st.text_input("Título *")
 
-            contatos = db.listar_contatos_usuario(st.session_state.usuario_atual['id'])
-            if not contatos:
-                st.warning("⚠️ Cadastre contatos primeiro para definir quem pode ver o vídeo")
-                contatos_selecionados = []
-            else:
-                opcoes_contato = {c['nome_completo']: c['id'] for c in contatos}
-                contatos_selecionados_nomes = st.multiselect(
-                    "Selecione os contatos que terão acesso ao vídeo",
-                    list(opcoes_contato.keys()),
-                    key="video_contatos_acesso"
+                categoria = st.selectbox(
+                    "Categoria",
+                    [
+                        "Mensagem após falecimento",
+                        "Para pessoa específica",
+                        "Para data especial"
+                    ]
                 )
-                contatos_selecionados = [opcoes_contato[nome] for nome in contatos_selecionados_nomes]
 
-            # Destinatário específico (para categoria "Para pessoa específica")
-            if categoria == "Para pessoa específica" and contatos:
-                destinatario_nome = st.selectbox("Para quem é este vídeo?", list(opcoes_contato.keys()),
-                                                 key="video_destinatario_especifico")
-                destinatario = destinatario_nome
-            else:
-                destinatario = st.text_input("Para quem é este vídeo? (opcional)", key="destinatario_video",
-                                             placeholder="Ex: Para minha família")
+                st.markdown("**👥 Quem pode ver este vídeo?**")
 
-            arquivo_video = st.file_uploader("Arquivo de vídeo", type=["mp4", "mov", "avi", "mkv"], key="video_file")
-            st.caption("📹 Formatos aceitos: MP4, MOV, AVI, MKV")
+                contatos_selecionados = []
+                opcoes_contato = {}
 
-            if st.button("💾 Salvar", key="salvar_video", type="primary", width="stretch"):
+                if not contatos:
+                    st.warning("⚠️ Cadastre contatos primeiro para definir quem pode ver o vídeo")
+                else:
+                    opcoes_contato = {
+                        c["nome_completo"]: c["id"]
+                        for c in contatos
+                    }
 
-                if titulo and arquivo_video:
+                    contatos_selecionados_nomes = st.multiselect(
+                        "Selecione os contatos que terão acesso ao vídeo",
+                        list(opcoes_contato.keys())
+                    )
 
-                    try:
-                        caminho = gerente_videos.salvar_video(
-                            arquivo_video,
-                            st.session_state.usuario_atual['id'],
-                            titulo,
-                            destinatario,
-                            categoria
-                        )
+                    contatos_selecionados = [
+                        opcoes_contato[nome]
+                        for nome in contatos_selecionados_nomes
+                    ]
 
-                        print("VIDEO SALVO EM:", caminho)
+                if categoria == "Para pessoa específica" and contatos:
+                    destinatario_nome = st.selectbox(
+                        "Para quem é este vídeo?",
+                        list(opcoes_contato.keys())
+                    )
+                    destinatario = destinatario_nome
+                else:
+                    destinatario = st.text_input(
+                        "Para quem é este vídeo? (opcional)",
+                        placeholder="Ex: Para minha família"
+                    )
 
-                        video_id = db.adicionar_video_com_acesso(
-                            usuario_id=st.session_state.usuario_atual['id'],
-                            titulo=titulo,
-                            destinatario=destinatario,
-                            caminho_arquivo=caminho,
-                            contatos_ids=contatos_selecionados,
-                            categoria=categoria
-                        )
+                arquivo_video = st.file_uploader(
+                    "Arquivo de vídeo",
+                    type=["mp4", "mov", "avi", "mkv"]
+                )
 
-                        print("VIDEO_ID:", video_id)
+                st.caption("📹 Formatos aceitos: MP4, MOV, AVI, MKV")
 
-                        st.success(
-                            f"✅ {titulo} salvo! "
-                            f"{len(contatos_selecionados)} contato(s) terão acesso."
-                        )
+                salvar_video = st.form_submit_button(
+                    "💾 Salvar",
+                    type="primary",
+                    width="stretch"
+                )
 
-                        st.rerun()
+                if salvar_video:
+                    if not titulo or not arquivo_video:
+                        st.error("❌ Preencha o título e selecione um vídeo")
+                    else:
+                        try:
+                            caminho = gerente_videos.salvar_video(
+                                arquivo_video,
+                                st.session_state.usuario_atual["id"],
+                                titulo,
+                                destinatario,
+                                categoria
+                            )
 
-                    except Exception as e:
-                        print("ERRO AO SALVAR VIDEO:", e)
-                        st.error(f"Erro ao salvar vídeo: {e}")
+                            video_id = db.adicionar_video_com_acesso(
+                                usuario_id=st.session_state.usuario_atual["id"],
+                                titulo=titulo,
+                                destinatario=destinatario,
+                                caminho_arquivo=caminho,
+                                contatos_ids=contatos_selecionados,
+                                categoria=categoria
+                            )
+
+                            st.success(
+                                f"✅ {titulo} salvo! "
+                                f"{len(contatos_selecionados)} contato(s) terão acesso."
+                            )
+
+                            st.rerun()
+
+                        except Exception as e:
+                            print("ERRO AO SALVAR VIDEO:", e)
+                            st.error(f"Erro ao salvar vídeo: {e}")
 
                 else:
                     st.error("❌ Preencha o título e selecione um vídeo")
@@ -937,7 +962,7 @@ def render_agendamentos():
         "da vida das pessoas que você ama."
     )
 
-   plano = db.obter_plano_usuario(st.session_state.usuario_atual['id'])
+    plano = db.obter_plano_usuario(st.session_state.usuario_atual['id'])
 
     if not plano.get("tem_agendamento", False):
         st.info("💡 Esta funcionalidade estará disponível em breve nos planos pagos!")

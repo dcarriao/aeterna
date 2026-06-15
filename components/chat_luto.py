@@ -1,9 +1,26 @@
 import html
 import streamlit as st
+import os
 
 from utils.assistente_ia import AssistenteLuto
 from utils.banco import BancoDados
 
+
+def _extrair_palavras_relevantes(texto: str):
+    ignorar = {
+        "como", "foi", "essa", "esse", "isso", "sobre", "para", "pela",
+        "pelo", "dele", "dela", "nossa", "nosso", "minha", "meu",
+        "quero", "saber", "falar", "conte", "mais", "uma", "uns", "das",
+        "dos", "que", "com", "por"
+    }
+
+    palavras = []
+
+    for palavra in texto.lower().replace("?", "").replace(",", "").split():
+        if len(palavra) >= 4 and palavra not in ignorar:
+            palavras.append(palavra)
+
+    return palavras
 
 def _safe_text(value: str) -> str:
     return html.escape(str(value or "")).replace("\n", "<br>")
@@ -196,6 +213,27 @@ def render_chat_luto():
                 '<div class="ae-simple-bubble-bot">{}</div>'.format(texto_html),
                 unsafe_allow_html=True
             )
+            fotos = msg.get("fotos", [])
+
+            if fotos:
+                st.caption("📷 Fotos relacionadas")
+
+                mostradas = set()
+
+                for foto in fotos:
+                    if foto["id"] in mostradas:
+                        continue
+
+                    mostradas.add(foto["id"])
+
+                    caminho = foto.get("caminho")
+
+                    if caminho and os.path.exists(caminho):
+                        st.image(
+                            caminho,
+                            caption=foto.get("titulo", "Foto relacionada"),
+                            width="stretch"
+                        )
 
     with st.form("form_assistente_luto", clear_on_submit=True):
         mensagem = st.text_area(
@@ -233,6 +271,7 @@ def render_chat_luto():
         })
 
         try:
+
             usuario = st.session_state.get("usuario_atual") or {}
 
             contexto_adicional = ""
@@ -258,9 +297,22 @@ def render_chat_luto():
             )
             st.error(f"Erro no assistente: {exc}")
 
+        fotos_relacionadas = []
+
+        usuario = st.session_state.get("usuario_atual") or {}
+
+        for palavra in _extrair_palavras_relevantes(mensagem.strip()):
+            fotos_relacionadas.extend(
+                db.buscar_fotos_por_texto(
+                    usuario,
+                    palavra
+                )
+            )
+
         st.session_state.historico_assistente.append({
             "tipo": "bot",
             "texto": resposta,
+            "fotos": fotos_relacionadas
         })
 
         st.rerun()

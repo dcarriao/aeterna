@@ -711,6 +711,53 @@ class BancoDados:
             "nome_completo": "{} {}".format(r[1], r[2] or "").strip()
         } for r in rows]
 
+    def buscar_fotos_por_texto(
+            self,
+            usuario_id: int,
+            texto: str
+    ):
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            termo = f"%{texto.lower()}%"
+
+            self.executar(cursor, """
+                SELECT
+                    id,
+                    titulo,
+                    descricao,
+                    categoria,
+                    caminho_arquivo
+                FROM fotos
+                WHERE usuario_id = %s
+                AND (
+                    LOWER(titulo) LIKE %s
+                    OR LOWER(COALESCE(descricao,'')) LIKE %s
+                    OR LOWER(COALESCE(categoria,'')) LIKE %s
+                )
+                LIMIT 5
+            """, (
+                usuario_id,
+                termo,
+                termo,
+                termo
+            ))
+
+            rows = cursor.fetchall()
+
+            return [{
+                "id": r[0],
+                "titulo": r[1],
+                "descricao": r[2] or "",
+                "categoria": r[3] or "",
+                "caminho": r[4]
+            } for r in rows]
+
+        finally:
+            cursor.close()
+            conn.close()
+
     def deletar_foto(self, foto_id: int, usuario_id: int) -> bool:
         conn = self.conectar()
         cursor = conn.cursor()
