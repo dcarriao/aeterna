@@ -408,8 +408,94 @@ def render_login():
 
 
 # ============================================================================
+# MINHA HISTORIA
+# ============================================================================
+
+def render_minha_historia():
+    st.markdown("<h3 style='color: #2E8B57;'>📖 Minha História</h3>", unsafe_allow_html=True)
+    st.info("Aqui suas memórias começam a formar uma linha viva da sua história.")
+
+    memorias = db.listar_memorias_usuario(st.session_state.usuario_atual["id"])
+
+    usuario_id = st.session_state.usuario_atual["id"]
+
+    fotos_por_memoria = db.listar_fotos_por_memorias_usuario(usuario_id)
+    videos_por_memoria = db.listar_videos_por_memorias_usuario(usuario_id)
+
+    if not memorias:
+        st.info("📭 Você ainda não tem memórias registradas.")
+        return
+
+    grupos = {}
+
+    for memoria in memorias:
+        categoria = memoria.get("categoria") or "livre"
+        grupos.setdefault(categoria, []).append(memoria)
+
+    icones = {
+        "família": "❤️",
+        "familia": "❤️",
+        "viagens": "✈️",
+        "carreira": "💼",
+        "estudos": "🎓",
+        "infância": "👶",
+        "infancia": "👶",
+        "conquista": "🏆",
+        "conquistas": "🏆",
+        "amor": "💕",
+        "perda": "🕊️",
+        "valores": "🌟",
+        "Outras Histórias": "📚"
+    }
+
+    for categoria, itens in grupos.items():
+        nome_categoria = {
+            "livre": "Outras Histórias"
+        }.get(categoria.lower(), categoria.title())
+        icone = icones.get(categoria.lower(), "📌")
+
+        st.markdown(f"### {icone} {nome_categoria}")
+
+        for memoria in itens:
+            with st.expander(memoria.get("titulo", "Memória")):
+                if memoria.get("data_evento"):
+                    st.markdown(f"**Data:** {memoria['data_evento']}")
+
+                if memoria.get("local"):
+                    st.markdown(f"**Local:** {memoria['local']}")
+
+                if memoria.get("pessoas_relacionadas"):
+                    st.markdown(f"**Pessoas:** {memoria['pessoas_relacionadas']}")
+
+                st.markdown(memoria.get("conteudo", ""))
+
+                try:
+                    fotos = fotos_por_memoria.get(memoria["id"], [])
+                except Exception as e:
+                    print("Erro ao listar fotos da memória:", e)
+                    fotos = []
+                if fotos:
+                    st.markdown("**📷 Fotos desta memória**")
+                    for foto in fotos:
+                        if foto.get("caminho") and os.path.exists(foto["caminho"]):
+                            st.image(foto["caminho"], caption=foto.get("titulo", ""), width="stretch")
+
+                try:
+                    videos = videos_por_memoria.get(memoria["id"], [])
+                except Exception as e:
+                    print("Erro ao listar vídeos da memória:", e)
+                    videos = []
+                if videos:
+                    st.markdown("**🎥 Vídeos desta memória**")
+                    for video in videos:
+                        if video.get("caminho") and os.path.exists(video["caminho"]):
+                            st.video(video["caminho"])
+
+
+# ============================================================================
 # ASSISTENTE DE LUTO (CHAT DENTRO DA CAIXA)
 # ============================================================================
+
 def render_assistente():
     render_chat_luto()
 
@@ -978,6 +1064,59 @@ def render_preferencias():
         "a compreender melhor sua história, seus valores, gostos e lembranças importantes."
     )
 
+    usuario_id = st.session_state.usuario_atual["id"]
+
+    st.markdown("### 📷 Sua foto")
+
+    foto_atual = db.obter_foto_usuario(usuario_id)
+
+    if foto_atual and os.path.exists(foto_atual):
+        st.image(
+            foto_atual,
+            caption="Sua foto atual",
+            width=180
+        )
+
+    with st.form("form_foto_perfil_usuario", clear_on_submit=True):
+        foto_usuario = st.file_uploader(
+            "Adicione uma foto sua ao seu legado",
+            type=["png", "jpg", "jpeg", "webp"]
+        )
+
+        salvar_foto = st.form_submit_button(
+            "💾 Salvar foto",
+            type="primary",
+            width="stretch"
+        )
+
+        if salvar_foto:
+            if not foto_usuario:
+                st.error("Selecione uma foto.")
+            else:
+                try:
+                    pasta = "fotos_perfil/usuarios"
+                    os.makedirs(pasta, exist_ok=True)
+
+                    extensao = foto_usuario.name.split(".")[-1].lower()
+                    nome_arquivo = "usuario_{}_{}.{}".format(
+                        usuario_id,
+                        datetime.now().strftime("%Y%m%d_%H%M%S"),
+                        extensao
+                    )
+
+                    caminho = os.path.join(pasta, nome_arquivo)
+
+                    with open(caminho, "wb") as f:
+                        f.write(foto_usuario.getbuffer())
+
+                    db.atualizar_foto_usuario(usuario_id, caminho)
+
+                    st.success("Foto de perfil atualizada.")
+                    st.rerun()
+
+                except Exception as e:
+                    st.error(f"Erro ao salvar foto de perfil: {e}")
+
     preferencias = db.obter_preferencias(st.session_state.usuario_atual['id'])
 
     with st.form("preferencias_form"):
@@ -1038,6 +1177,116 @@ def render_agendamentos():
         "Deixe mensagens e vídeos para serem entregues em momentos importantes "
         "da vida das pessoas que você ama."
     )
+
+    st.markdown("### 📅 Datas importantes")
+
+    with st.expander("➕ Cadastrar uma data importante", expanded=False):
+        with st.form("form_data_importante", clear_on_submit=True):
+            titulo_data = st.text_input(
+                "Título da data",
+                placeholder="Ex: Aniversário da filha, Aniversário de casamento, Férias..."
+            )
+
+            tipo_data = st.selectbox(
+                "Tipo",
+                [
+                    "Aniversário",
+                    "Casamento",
+                    "Nascimento",
+                    "Conquista",
+                    "Viagem",
+                    "Data familiar",
+                    "Outra"
+                ]
+            )
+
+            contatos = db.listar_contatos_usuario(
+                st.session_state.usuario_atual["id"]
+            )
+
+            contato_id = None
+
+            if contatos:
+                opcoes_contato = {"Nenhum contato específico": None}
+
+                for c in contatos:
+                    opcoes_contato[c["nome_completo"]] = c["id"]
+
+                contato_nome = st.selectbox(
+                    "Relacionar a algum contato? (opcional)",
+                    list(opcoes_contato.keys())
+                )
+
+                contato_id = opcoes_contato[contato_nome]
+
+            data_evento = st.date_input(
+                "Data",
+                value=datetime.now().date()
+            )
+
+            recorrente = st.checkbox(
+                "Repetir todos os anos",
+                value=True
+            )
+
+            observacoes = st.text_area(
+                "Observações",
+                placeholder="Ex: nesta data quero lembrar de registrar algo especial..."
+            )
+
+            salvar_data = st.form_submit_button(
+                "💾 Salvar data importante",
+                type="primary",
+                width="stretch"
+            )
+
+            if salvar_data:
+                if not titulo_data:
+                    st.error("Informe um título para a data.")
+                else:
+                    db.criar_data_importante(
+                        usuario_id=st.session_state.usuario_atual["id"],
+                        titulo=titulo_data,
+                        data_evento=data_evento.strftime("%Y-%m-%d"),
+                        tipo=tipo_data,
+                        contato_id=contato_id,
+                        recorrente=recorrente,
+                        observacoes=observacoes
+                    )
+
+                    st.success("Data importante cadastrada.")
+                    st.rerun()
+    datas_importantes = db.listar_datas_importantes_usuario(
+        st.session_state.usuario_atual["id"]
+    )
+
+    if datas_importantes:
+        for data in datas_importantes:
+            with st.expander(f"📌 {data['titulo']} - {data['data_evento']}"):
+                if data.get("tipo"):
+                    st.markdown(f"**Tipo:** {data['tipo']}")
+
+                if data.get("contato_nome"):
+                    st.markdown(f"**Contato relacionado:** {data['contato_nome']}")
+
+                st.markdown(
+                    f"**Recorrente:** {'Sim' if data.get('recorrente') else 'Não'}"
+                )
+
+                if data.get("observacoes"):
+                    st.markdown(data["observacoes"])
+
+                if st.button(
+                        "🗑️ Remover data",
+                        key=f"del_data_importante_{data['id']}"
+                ):
+                    db.deletar_data_importante(
+                        data["id"],
+                        st.session_state.usuario_atual["id"]
+                    )
+                    st.rerun()
+    else:
+        st.info("Você ainda não cadastrou datas importantes.")
 
     plano = db.obter_plano_usuario(st.session_state.usuario_atual['id'])
 
@@ -1559,9 +1808,10 @@ def main():
             with tab7:
                 render_admin_panel()
         else:
-            tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
+            tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
                 "🏠 Painel",
                 "💬 Assistente",
+                "📖 Minha História",
                 "🎥 Vídeos",
                 "📷 Fotos",
                 "👥 Família",
@@ -1580,16 +1830,18 @@ def main():
             with tab1:
                 render_assistente()
             with tab2:
-                render_videos()
+                render_minha_historia()
             with tab3:
-                render_fotos()
+                render_videos()
             with tab4:
-                render_contatos()
+                render_fotos()
             with tab5:
-                render_preferencias()
+                render_contatos()
             with tab6:
-                render_agendamentos()
+                render_preferencias()
             with tab7:
+                render_agendamentos()
+            with tab8:
                 render_cofre()
 
         st.markdown("""

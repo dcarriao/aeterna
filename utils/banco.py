@@ -982,6 +982,41 @@ class BancoDados:
             "data_criacao": r[5],
         } for r in rows]
 
+    def atualizar_foto_usuario(self, usuario_id: int, caminho_foto: str):
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            self.executar(cursor, """
+                UPDATE usuarios
+                SET foto_perfil = %s
+                WHERE id = %s
+            """, (caminho_foto, usuario_id))
+
+            conn.commit()
+
+        finally:
+            cursor.close()
+            conn.close()
+
+    def atualizar_foto_contato(self, contato_id: int, usuario_id: int, caminho_foto: str):
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            self.executar(cursor, """
+                UPDATE contatos
+                SET foto_perfil = %s
+                WHERE id = %s
+                  AND usuario_id = %s
+            """, (caminho_foto, contato_id, usuario_id))
+
+            conn.commit()
+
+        finally:
+            cursor.close()
+            conn.close()
+
     def salvar_memoria(
             self,
             usuario_id: int,
@@ -1036,6 +1071,199 @@ class BancoDados:
         count = cursor.fetchone()[0]
         conn.close()
         return count
+
+    def listar_fotos_por_memorias_usuario(self, usuario_id: int):
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            self.executar(cursor, """
+                SELECT
+                    mf.memoria_id,
+                    f.id,
+                    f.titulo,
+                    f.descricao,
+                    f.categoria,
+                    f.caminho_arquivo
+                FROM memoria_fotos mf
+                JOIN fotos f ON f.id = mf.foto_id
+                WHERE f.usuario_id = %s
+                ORDER BY f.data_criacao DESC
+            """, (usuario_id,))
+
+            rows = cursor.fetchall()
+
+            fotos_por_memoria = {}
+
+            for r in rows:
+                memoria_id = r[0]
+                fotos_por_memoria.setdefault(memoria_id, []).append({
+                    "id": r[1],
+                    "titulo": r[2],
+                    "descricao": r[3] or "",
+                    "categoria": r[4] or "",
+                    "caminho": r[5],
+                })
+
+            return fotos_por_memoria
+
+        finally:
+            cursor.close()
+            conn.close()
+
+    def obter_foto_usuario(self, usuario_id: int):
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            self.executar(cursor, """
+                SELECT foto_perfil
+                FROM usuarios
+                WHERE id = %s
+            """, (usuario_id,))
+
+            row = cursor.fetchone()
+            return row[0] if row and row[0] else None
+
+        finally:
+            cursor.close()
+            conn.close()
+
+    def criar_data_importante(
+            self,
+            usuario_id: int,
+            titulo: str,
+            data_evento: str,
+            tipo: str = "",
+            contato_id: int = None,
+            recorrente: bool = True,
+            observacoes: str = ""
+    ):
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            self.executar(cursor, """
+                INSERT INTO datas_importantes (
+                    usuario_id,
+                    contato_id,
+                    titulo,
+                    data_evento,
+                    tipo,
+                    recorrente,
+                    observacoes
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
+            """, (
+                usuario_id,
+                contato_id,
+                titulo,
+                data_evento,
+                tipo,
+                recorrente,
+                observacoes
+            ))
+
+            data_id = cursor.fetchone()[0]
+            conn.commit()
+            return data_id
+
+        finally:
+            cursor.close()
+            conn.close()
+
+    def listar_datas_importantes_usuario(self, usuario_id: int):
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            self.executar(cursor, """
+                SELECT
+                    d.id,
+                    d.titulo,
+                    d.data_evento,
+                    d.tipo,
+                    d.recorrente,
+                    d.observacoes,
+                    c.nome,
+                    c.sobrenome
+                FROM datas_importantes d
+                LEFT JOIN contatos c ON c.id = d.contato_id
+                WHERE d.usuario_id = %s
+                ORDER BY d.data_evento
+            """, (usuario_id,))
+
+            rows = cursor.fetchall()
+
+            return [{
+                "id": r[0],
+                "titulo": r[1],
+                "data_evento": r[2],
+                "tipo": r[3] or "",
+                "recorrente": r[4],
+                "observacoes": r[5] or "",
+                "contato_nome": "{} {}".format(r[6] or "", r[7] or "").strip(),
+            } for r in rows]
+
+        finally:
+            cursor.close()
+            conn.close()
+
+    def deletar_data_importante(self, data_id: int, usuario_id: int):
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            self.executar(cursor, """
+                DELETE FROM datas_importantes
+                WHERE id = %s AND usuario_id = %s
+            """, (data_id, usuario_id))
+
+            conn.commit()
+
+        finally:
+            cursor.close()
+            conn.close()
+
+    def listar_videos_por_memorias_usuario(self, usuario_id: int):
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            self.executar(cursor, """
+                SELECT
+                    mv.memoria_id,
+                    v.id,
+                    v.titulo,
+                    v.destinatario,
+                    v.categoria,
+                    v.caminho_arquivo
+                FROM memoria_videos mv
+                JOIN videos v ON v.id = mv.video_id
+                WHERE v.usuario_id = %s
+                ORDER BY v.data_criacao DESC
+            """, (usuario_id,))
+
+            rows = cursor.fetchall()
+
+            videos_por_memoria = {}
+
+            for r in rows:
+                memoria_id = r[0]
+                videos_por_memoria.setdefault(memoria_id, []).append({
+                    "id": r[1],
+                    "titulo": r[2],
+                    "destinatario": r[3] or "",
+                    "categoria": r[4] or "",
+                    "caminho": r[5],
+                })
+
+            return videos_por_memoria
+
+        finally:
+            cursor.close()
+            conn.close()
 
     def obter_contato_por_chave(self, chave_acesso: str, email_falecido: str = None) -> Optional[Dict]:
         conn = self.conectar()
