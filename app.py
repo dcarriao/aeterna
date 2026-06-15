@@ -413,6 +413,7 @@ def render_login():
 def render_assistente():
     render_chat_luto()
 
+
 # ============================================================================
 # VÍDEOS
 # ============================================================================
@@ -434,7 +435,20 @@ def render_videos():
     with col1:
         with st.expander("🎥 Adicionar vídeo", expanded=False):
 
-            contatos = db.listar_contatos_usuario(st.session_state.usuario_atual["id"])
+            try:
+                videos = db.listar_videos_usuario(st.session_state.usuario_atual['id'])
+            except Exception as e:
+                st.error("Não foi possível carregar os vídeos agora. Tente novamente em alguns instantes.")
+                print("Erro ao listar vídeos:", e)
+                return
+
+            try:
+                contatos = db.listar_contatos_usuario(
+                    st.session_state.usuario_atual["id"]
+                )
+            except Exception as e:
+                print("Erro ao listar contatos para vídeo:", e)
+                contatos = []
 
             with st.form("form_adicionar_video", clear_on_submit=True):
                 titulo = st.text_input("Título *")
@@ -539,8 +553,13 @@ def render_videos():
         else:
             for video in videos:
                 # Buscar contatos que têm acesso a este vídeo
-                contatos_acesso = db.listar_contatos_por_video(video['id'])
-                nomes_acesso = [c['nome_completo'] for c in contatos_acesso]
+                try:
+                    contatos_acesso = db.listar_contatos_por_video(video['id'])
+                    nomes_acesso = [c['nome_completo'] for c in contatos_acesso]
+                except Exception as e:
+                    print("Erro ao listar contatos do vídeo:", e)
+                    contatos_acesso = []
+                    nomes_acesso = []
 
                 with st.expander(f"🎬 {video['titulo']} - {video.get('categoria', 'geral')}"):
                     if video.get('destinatario'):
@@ -643,7 +662,29 @@ def render_fotos():
                         opcoes_contato[nome]
                         for nome in contatos_selecionados_nomes
                     ]
+                memorias = db.listar_memorias_usuario(
+                    st.session_state.usuario_atual["id"]
+                )
 
+                memoria_id = None
+
+                if memorias:
+                    opcoes_memoria = {
+                        "Não associar a nenhuma memória": None
+                    }
+
+                    for m in memorias:
+                        titulo = m.get("titulo") or "Memória sem título"
+                        opcoes_memoria[titulo] = m["id"]
+
+                    memoria_escolhida = st.selectbox(
+                        "Associar esta foto a uma memória? (opcional)",
+                        list(opcoes_memoria.keys())
+                    )
+
+                    memoria_id = opcoes_memoria[memoria_escolhida]
+                else:
+                    st.info("Você ainda não tem memórias salvas para associar esta foto.")
                 arquivo_foto = st.file_uploader(
                     "Arquivo de foto",
                     type=["png", "jpg", "jpeg", "webp"],
@@ -675,7 +716,7 @@ def render_fotos():
                             with open(caminho, "wb") as f:
                                 f.write(arquivo_foto.getbuffer())
 
-                            db.adicionar_foto_com_acesso(
+                            foto_id = db.adicionar_foto_com_acesso(
                                 usuario_id=st.session_state.usuario_atual["id"],
                                 titulo=titulo,
                                 descricao=descricao,
@@ -683,6 +724,12 @@ def render_fotos():
                                 caminho_arquivo=caminho,
                                 contatos_ids=contatos_selecionados,
                             )
+
+                            if memoria_id:
+                                db.associar_foto_memoria(
+                                    memoria_id=memoria_id,
+                                    foto_id=foto_id
+                                )
 
                             st.success("Foto salva com sucesso.")
                             st.rerun()

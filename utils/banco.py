@@ -805,6 +805,70 @@ class BancoDados:
             cursor.close()
             conn.close()
 
+    # ========================================================================
+    # MEMORIAS E FOTOS
+    # ========================================================================
+
+    def listar_memorias_usuario(self, usuario_id: int):
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        self.executar(cursor, """
+            SELECT id, titulo, conteudo, categoria, data_criacao
+            FROM memorias
+            WHERE usuario_id = %s
+            ORDER BY data_criacao DESC
+        """, (usuario_id,))
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        return [{
+            "id": r[0],
+            "titulo": r[1] or "Memória sem título",
+            "conteudo": r[2] or "",
+            "categoria": r[3] or "",
+            "data_criacao": r[4],
+        } for r in rows]
+
+    def associar_foto_memoria(self, memoria_id: int, foto_id: int):
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            self.executar(cursor, """
+                INSERT INTO memoria_fotos (memoria_id, foto_id)
+                VALUES (%s, %s)
+            """, (memoria_id, foto_id))
+
+            conn.commit()
+
+        finally:
+            cursor.close()
+            conn.close()
+
+    def listar_fotos_memoria(self, memoria_id: int):
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        self.executar(cursor, """
+            SELECT f.id, f.titulo, f.descricao, f.categoria, f.caminho_arquivo
+            FROM fotos f
+            JOIN memoria_fotos mf ON mf.foto_id = f.id
+            WHERE mf.memoria_id = %s
+            ORDER BY f.data_criacao DESC
+        """, (memoria_id,))
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        return [{
+            "id": r[0],
+            "titulo": r[1],
+            "descricao": r[2] or "",
+            "categoria": r[3] or "",
+            "caminho": r[4],
+        } for r in rows]
 
     # ========================================================================
     # CONTATOS

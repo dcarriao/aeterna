@@ -301,13 +301,21 @@ def render_chat_luto():
 
         usuario = st.session_state.get("usuario_atual") or {}
 
-        for palavra in _extrair_palavras_relevantes(mensagem.strip()):
-            fotos_relacionadas.extend(
-                db.buscar_fotos_por_texto(
-                    usuario,
+        if usuario.get("tipo") == "visitante":
+            falecido_id = st.session_state.get("falecido_id")
+
+            palavras = _extrair_palavras_relevantes(mensagem.strip())
+
+            for palavra in palavras:
+                if not isinstance(palavra, str):
+                    continue
+
+                resultado = db.buscar_fotos_por_texto(
+                    falecido_id,
                     palavra
                 )
-            )
+
+                fotos_relacionadas.extend(resultado)
 
         st.session_state.historico_assistente.append({
             "tipo": "bot",
