@@ -1226,6 +1226,35 @@ class BancoDados:
             cursor.close()
             conn.close()
 
+    def registrar_interesse_plano(
+            self,
+            usuario_id: int,
+            plano: str,
+            valor: float
+    ):
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            self.executar(cursor, """
+                INSERT INTO interesses_planos (
+                    usuario_id,
+                    plano,
+                    valor
+                )
+                VALUES (%s, %s, %s)
+            """, (
+                usuario_id,
+                plano,
+                valor
+            ))
+
+            conn.commit()
+
+        finally:
+            cursor.close()
+            conn.close()
+
     def listar_videos_por_memorias_usuario(self, usuario_id: int):
         conn = self.conectar()
         cursor = conn.cursor()

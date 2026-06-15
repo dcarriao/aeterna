@@ -329,10 +329,10 @@ def render_login():
             st.image(logo_sem_fundo, width=180)
     st.markdown('</div>', unsafe_allow_html=True)
 
-    tab1, tab2, tab3 = st.tabs(["🔐 Acessar meu Legado", "👋 Acessar Legado de Alguém", "📝 Criar Conta"])
+    tab1, tab2, tab3 = st.tabs(["📖 Entrar na minha história", "👋👨‍👩‍👧 Conhecer a história de alguém", "📝 Criar Conta"])
 
     with tab1:
-        st.markdown("### Acesse seu cofre digital")
+        st.markdown("### Continue construindo sua história")
         with st.form("login_form"):
             email = st.text_input("E-mail", key="login_email")
             senha = st.text_input("Senha", type="password", key="login_senha")
@@ -504,7 +504,7 @@ def render_assistente():
 # VÍDEOS
 # ============================================================================
 def render_videos():
-    st.markdown("<h3 style='color: #2E8B57;'>📹 Mensagens em Vídeo</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #2E8B57;'>📹 Vídeos da Minha História</h3>", unsafe_allow_html=True)
 
     plano = db.obter_plano_usuario(st.session_state.usuario_atual['id'])
     videos_atual = len(db.listar_videos_usuario(st.session_state.usuario_atual['id']))
@@ -726,7 +726,7 @@ def render_videos_visitante():
 # ============================================================================
 
 def render_fotos():
-    st.markdown("<h3 style='color: #2E8B57;'>📷 Fotos e Lembranças</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #2E8B57;'>📷 Álbum de Memórias/h3>", unsafe_allow_html=True)
 
     col1, col2 = st.columns([1, 2])
 
@@ -926,7 +926,7 @@ def render_fotos_visitante():
 # CONTATOS (COMPLETO)
 # ============================================================================
 def render_contatos():
-    st.markdown("<h3 style='color: #2E8B57;'>👥 Contatos de Confiança</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #2E8B57;'>👨‍👩‍👧‍👦 Pessoas Importantes</h3>", unsafe_allow_html=True)
 
     plano = db.obter_plano_usuario(st.session_state.usuario_atual['id'])
     contatos_atual = db.contar_contatos_usuario(st.session_state.usuario_atual['id'])
@@ -1165,6 +1165,126 @@ def render_preferencias():
 
 
 # ============================================================================
+# PLANOS
+# ============================================================================
+def render_planos():
+
+    st.markdown(
+        "<h3 style='color:#2E8B57;'>💎 Planos aEterna</h3>",
+        unsafe_allow_html=True
+    )
+
+    st.markdown("""
+    ### Preserve sua história para as próximas gerações
+
+    Escolha quanto da sua história deseja preservar.
+    """)
+
+    planos = [
+        {
+            "nome": "🌱 Essencial",
+            "preco": 0,
+            "descricao": "Comece seu legado",
+            "beneficios": [
+                "20 histórias",
+                "5 fotos",
+                "2 vídeos",
+                "1 mensagem para o futuro",
+                "1 pessoa convidada",
+                "Preservação por 2 anos"
+            ]
+        },
+        {
+            "nome": "👨‍👩‍👧 Família",
+            "preco": 139,
+            "descricao": "Preserve as memórias da sua família",
+            "beneficios": [
+                "60 histórias",
+                "20 fotos",
+                "10 vídeos",
+                "5 pessoas convidadas",
+                "5 mensagens para o futuro",
+                "Preservação por 5 anos"
+            ]
+        },
+        {
+            "nome": "❤️ Legado",
+            "preco": 189,
+            "descricao": "Construa um legado familiar",
+            "beneficios": [
+                "80 histórias",
+                "30 fotos",
+                "15 vídeos",
+                "10 pessoas convidadas",
+                "10 mensagens para o futuro",
+                "Preservação por 8 anos"
+            ]
+        },
+        {
+            "nome": "👑 Gerações",
+            "preco": 299,
+            "descricao": "Para famílias que querem preservar tudo",
+            "beneficios": [
+                "100 histórias",
+                "50 fotos",
+                "25 vídeos",
+                "30 pessoas convidadas",
+                "30 mensagens para o futuro",
+                "Preservação por 15 anos"
+            ]
+        },
+        {
+            "nome": "✨ Permanente",
+            "preco": 1499,
+            "descricao": "Sem limite de tempo",
+            "beneficios": [
+                "Tudo ilimitado",
+                "Preservação contínua",
+                "Atualizações futuras incluídas"
+            ]
+        }
+    ]
+
+    cols = st.columns(len(planos))
+
+    for i, plano in enumerate(planos):
+
+        with cols[i]:
+
+            st.markdown(f"### {plano['nome']}")
+
+            st.caption(plano["descricao"])
+
+            if plano["preco"] == 0:
+                st.markdown("## Gratuito")
+            else:
+                st.markdown(
+                    f"## R$ {plano['preco']:.2f}"
+                )
+
+            for item in plano["beneficios"]:
+                st.markdown(f"✓ {item}")
+
+            if plano["preco"] > 0:
+
+                if st.button(
+                    f"Quero {plano['nome']}",
+                    key=f"plano_{i}",
+                    width="stretch"
+                ):
+
+                    db.registrar_interesse_plano(
+                        st.session_state.usuario_atual["id"],
+                        plano["nome"],
+                        plano["preco"]
+                    )
+
+                    st.success(
+                        "Interesse registrado. Em breve você poderá concluir a contratação."
+                    )
+
+
+# ============================================================================
 # LEMBRANÇAS PROGRAMADAS (AGENDAMENTOS)
 # ============================================================================
 def render_agendamentos():
@@ -1178,7 +1298,7 @@ def render_agendamentos():
         "da vida das pessoas que você ama."
     )
 
-    st.markdown("### 📅 Datas importantes")
+    st.markdown("### 🎉 Datas que marcaram minha vida")
 
     with st.expander("➕ Cadastrar uma data importante", expanded=False):
         with st.form("form_data_importante", clear_on_submit=True):
@@ -1601,20 +1721,24 @@ def render_sobre():
     st.markdown("<h3 style='color: #2E8B57;'>✨ Sobre o aEterna</h3>", unsafe_allow_html=True)
     st.markdown("""
     <div class="info-card">
-        <h3>🤖 Assistente de Luto com IA</h3>
-        <p>Uma IA treinada com sua personalidade para conversar com seus entes queridos.</p>
+        <h3>📖 Histórias que atravessam gerações</h3>
+        <p>Registre momentos, aprendizados e experiências importantes.</p>
     </div>
     <div class="info-card">
-        <h3>📅 Lembranças Programadas</h3>
-        <p>Programe mensagens para datas especiais.</p>
+        <h3>📷 Álbum de Memórias</h3>
+        <p>Guarde fotos e vídeos que contam quem você é.</p>
     </div>
     <div class="info-card">
-        <h3>📁 Cofre Digital</h3>
-        <p>Armazene senhas e documentos com criptografia.</p>
+        <h3>💌 Mensagens para o Futuro</h3>
+        <p>Compartilhe palavras importantes em momentos especiais.</p>
     </div>
     <div class="info-card">
-        <h3>🔒 Segurança e LGPD</h3>
-        <p>✅ Criptografia<br>✅ Seus dados, sua chave<br>✅ LGPD Compliant</p>
+        <h3>👨‍👩‍👧‍👦 Pessoas Importantes</h3>
+        <p>Conecte familiares e pessoas queridas à sua história.</p>
+    </div>
+    <div class="info-card">
+        <h3>🔒 Segurança e Privacidade</h3>
+        <p>Sua história protegida e sob seu controle.</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1808,16 +1932,17 @@ def main():
             with tab7:
                 render_admin_panel()
         else:
-            tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
+            tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
                 "🏠 Painel",
-                "💬 Assistente",
+                "✨ Assistente",
                 "📖 Minha História",
                 "🎥 Vídeos",
                 "📷 Fotos",
-                "👥 Família",
-                "👤 Minha Essência",
+                "👨‍👩‍👧‍👦 Pessoas",
+                "🌟 Quem Sou Eu",
                 "💌 Mensagens para o Futuro",
-                "🔒 Cofre"
+                "🔒 Cofre",
+                "💎 Planos"
             ])
             with tab0:
                 render_painel_inicial(
@@ -1843,10 +1968,12 @@ def main():
                 render_agendamentos()
             with tab8:
                 render_cofre()
+            with tab9:
+                render_planos()
 
         st.markdown("""
         <div class="footer-aeterna">
-            <p>✨ aEterna - Assistente de Luto com IA | Cofre Digital ✨</p>
+            <p>✨ aEterna — Memórias vivas para quem você ama ✨</p>
         </div>
         """, unsafe_allow_html=True)
 

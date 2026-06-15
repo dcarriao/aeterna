@@ -219,10 +219,10 @@ def _render_logo():
     st.markdown("""
     <div class="ae-login-header">
         <div class="ae-logo-text"><span class="ae-logo-symbol">∞</span>aEterna</div>
-        <div class="ae-logo-subtitle">Legados Digitais e Segurança Pós-Morte</div>
+        <div class="ae-logo-subtitle">MEMÓRIAS VIVAS PARA QUEM VOCÊ AMA</div>
         <div class="ae-login-title">Bem-vindo à aEterna</div>
         <div class="ae-login-subtitle">
-            Seu legado digital, suas mensagens e suas orientações em um espaço seguro.
+            Guarde histórias, fotos, vídeos e lembranças para conectar gerações..
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -244,27 +244,27 @@ def _render_login_principal(fazer_login):
             else:
                 st.error("E-mail ou senha incorretos.")
 
-        st.markdown('<div class="ae-login-footer">Legados Digitais e Segurança Pós-Morte</div>', unsafe_allow_html=True)
+        st.markdown('<div class="ae-login-footer">Memórias vivas para quem você ama</div>', unsafe_allow_html=True)
 
-    st.markdown('<div class="ae-login-secondary-block"><div class="ae-login-secondary-title">Novo por aqui?</div><div class="ae-login-secondary-text">Crie sua conta para começar seu legado digital.</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="ae-login-secondary-block"><div class="ae-login-secondary-title">Novo por aqui?</div><div class="ae-login-secondary-text">Crie sua conta para começar a preservar sua história.</div></div>', unsafe_allow_html=True)
     if st.button("Criar conta", use_container_width=True):
         _set_mode("cadastro")
         st.rerun()
 
-    st.markdown('<div class="ae-login-secondary-block"><div class="ae-login-secondary-title">Recebeu uma chave?</div><div class="ae-login-secondary-text">Acesse um legado compartilhado com você.</div></div>', unsafe_allow_html=True)
-    if st.button("Acessar legado com chave", use_container_width=True):
+    st.markdown('<div class="ae-login-secondary-block"><div class="ae-login-secondary-title">Recebeu uma chave?</div><div class="ae-login-secondary-text">Conheça histórias compartilhadas com você.</div></div>', unsafe_allow_html=True)
+    if st.button("Acessar história compartilhada", use_container_width=True):
         _set_mode("visitante")
         st.rerun()
 
 
 def _render_visitante(fazer_login_visitante):
     with st.form("visitante_form_compacto"):
-        st.markdown('<div class="ae-login-mode-title">Acessar legado de alguém</div>', unsafe_allow_html=True)
+        st.markdown('<div class="ae-login-mode-title">Conhecer a história de alguém</div>', unsafe_allow_html=True)
         st.info("Use esta opção apenas se você recebeu uma chave de acesso autorizada.")
         nome_visitante = st.text_input("Seu nome", key="visitante_nome_compacto")
-        email_falecido = st.text_input("E-mail da pessoa responsável pelo legado", key="visitante_email_compacto")
+        email_falecido = st.text_input("E-mail da pessoa responsável pela história", key="visitante_email_compacto")
         chave = st.text_input("Chave de acesso", type="password", key="visitante_chave_compacto")
-        submitted = st.form_submit_button("Acessar legado", use_container_width=True, type="primary")
+        submitted = st.form_submit_button("Conhecer História", use_container_width=True, type="primary")
 
         if submitted:
             if not nome_visitante or not email_falecido or not chave:

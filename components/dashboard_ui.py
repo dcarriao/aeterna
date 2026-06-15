@@ -325,30 +325,31 @@ def render_painel_inicial(nome_exibido, qtd_videos, qtd_contatos, qtd_cofre=0, q
     hero_html = (
         f'<div class="ae-dashboard-hero">'
         f'<h1>Bem-vindo, {primeiro_nome}.</h1>'
-        f'<p>Este é o painel do seu legado digital. Aqui você organiza vídeos, mensagens, '
-        f'contatos de confiança, documentos importantes e memórias para quem você ama.</p>'
+        f'<p>Este é o espaço onde sua história ganha forma. '
+        f'Aqui você registra memórias, fotos, vídeos, pessoas importantes e mensagens para o futuro..</p>'
         f'</div>'
     )
     st.markdown(hero_html, unsafe_allow_html=True)
 
     cards_html = (
         '<div class="ae-dashboard-grid">'
-        f'<div class="ae-dashboard-card"><div class="ae-dashboard-card-icon">🎥</div><div class="ae-dashboard-card-label">Vídeos registrados</div><div class="ae-dashboard-card-value">{qtd_videos}</div><div class="ae-dashboard-card-note">Mensagens em vídeo para o futuro.</div></div>'
+        f'<div class="ae-dashboard-card"><div class="ae-dashboard-card-icon">🎥</div><div class="ae-dashboard-card-label">Histórias registradas</div><div class="ae-dashboard-card-value">{qtd_videos}</div><div class="ae-dashboard-card-note">Mensagens em vídeo para o futuro.</div></div>'
         f'<div class="ae-dashboard-card"><div class="ae-dashboard-card-icon">👥</div><div class="ae-dashboard-card-label">Contatos de confiança</div><div class="ae-dashboard-card-value">{qtd_contatos}</div><div class="ae-dashboard-card-note">Pessoas autorizadas a acessar seu legado.</div></div>'
-        f'<div class="ae-dashboard-card"><div class="ae-dashboard-card-icon">🔒</div><div class="ae-dashboard-card-label">Itens no cofre</div><div class="ae-dashboard-card-value">{qtd_cofre}</div><div class="ae-dashboard-card-note">Documentos e informações importantes.</div></div>'
-        f'<div class="ae-dashboard-card"><div class="ae-dashboard-card-icon">💬</div><div class="ae-dashboard-card-label">Memórias registradas</div><div class="ae-dashboard-card-value">{qtd_memorias}</div><div class="ae-dashboard-card-note">Histórias, valores e ensinamentos.</div></div>'
+        f'<div class="ae-dashboard-card"><div class="ae-dashboard-card-icon">🔒</div><div class="ae-dashboard-card-label">Fotos preservadas</div><div class="ae-dashboard-card-value">{qtd_cofre}</div><div class="ae-dashboard-card-note">Documentos e informações importantes.</div></div>'
+        f'<div class="ae-dashboard-card"><div class="ae-dashboard-card-icon">💬</div><div class="ae-dashboard-card-label">Pessoas importantes</div><div class="ae-dashboard-card-value">{qtd_memorias}</div><div class="ae-dashboard-card-note">Histórias, valores e ensinamentos.</div></div>'
         '</div>'
     )
     st.markdown(cards_html, unsafe_allow_html=True)
 
     next_html = (
         '<div class="ae-dashboard-next">'
-        '<h3>Próximos passos recomendados</h3>'
+        '<h3>Comece a construir sua história</h3>'
         '<ul>'
-        '<li>Grave uma primeira mensagem em vídeo para alguém especial.</li>'
-        '<li>Cadastre pelo menos um contato de confiança.</li>'
-        '<li>Adicione informações importantes ao cofre digital.</li>'
-        '<li>Use o Assistente de Memória para registrar histórias e ensinamentos.</li>'
+        '<li>Conte uma primeira história importante da sua vida.</li>'
+        '<li>Adicione fotos que representem momentos especiais.</li>'
+        '<li>Cadastre pessoas importantes para conectar à sua história.</li>'
+        '<li>Registre datas que merecem ser lembradas.</li>'
+        '<li>Use o Assistente para transformar lembranças soltas em histórias organizadas.</li>'
         '</ul>'
         '</div>'
     )
