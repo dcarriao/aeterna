@@ -1,35 +1,244 @@
-<section class="section">
-<div class="container">
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Insights | aEterna</title>
+  <meta name="description" content="Reflexões sobre memória familiar, legado, histórias de vida e o que deixamos para quem amamos.">
 
-<div class="section-title">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
 
-<h2>Últimos Insights</h2>
+  <style>
+    :root {
+      --bg: #080014;
+      --gold: #d4af37;
+      --gold2: #f2c572;
+      --muted: #c9bfd3;
+      --white: #fff;
+      --max: 1120px;
+    }
 
-<div class="ornament">⌁</div>
+    * { box-sizing: border-box; }
 
-</div>
+    body {
+      margin: 0;
+      font-family: "Inter", sans-serif;
+      background:
+        radial-gradient(circle at 18% 0%, rgba(74, 38, 110, .54), transparent 30%),
+        radial-gradient(circle at 82% 12%, rgba(212, 175, 55, .18), transparent 24%),
+        linear-gradient(180deg, var(--bg) 0%, #120324 42%, var(--bg) 100%);
+      color: var(--white);
+      min-height: 100vh;
+    }
 
-<div class="feature-card">
+    a { color: inherit; text-decoration: none; }
 
-<h3>
-Sabemos mais sobre Dom Pedro II do que sobre nosso próprio bisavô
-</h3>
+    .container {
+      width: min(var(--max), calc(100% - 36px));
+      margin: 0 auto;
+    }
 
-<p>
-Temos milhares de fotos da nossa família.
-Mas quase nunca registramos as histórias por trás delas.
-</p>
+    header {
+      padding: 26px 0;
+      border-bottom: 1px solid rgba(212,175,55,.22);
+      background: rgba(8,0,20,.88);
+    }
 
-<br>
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-<a class="btn btn-primary"
-href="/insights/dom-pedro-ii-bisavo.html">
+    .logo img {
+      width: 210px;
+      max-height: 58px;
+      object-fit: contain;
+    }
 
-Ler artigo →
+    .nav a.back {
+      color: var(--gold2);
+      font-weight: 800;
+    }
 
-</a>
+    .hero {
+      text-align: center;
+      padding: 76px 0 44px;
+    }
 
-</div>
+    .kicker {
+      display: inline-block;
+      margin-bottom: 18px;
+      color: var(--gold2);
+      border: 1px solid rgba(212,175,55,.35);
+      border-radius: 12px;
+      padding: 8px 13px;
+      font-size: .78rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      background: rgba(212,175,55,.08);
+    }
 
-</div>
-</section>
+    h1 {
+      font-family: "Cormorant Garamond", serif;
+      font-size: clamp(3rem, 6vw, 5rem);
+      line-height: .95;
+      margin: 0 0 16px;
+      color: var(--gold2);
+    }
+
+    .subtitle {
+      color: var(--muted);
+      max-width: 720px;
+      margin: 0 auto;
+      font-size: 1.1rem;
+      line-height: 1.7;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 28px;
+      padding: 36px 0 90px;
+    }
+
+    .card {
+      display: grid;
+      grid-template-columns: 42% 1fr;
+      overflow: hidden;
+      border-radius: 26px;
+      border: 1px solid rgba(212,175,55,.32);
+      background: linear-gradient(135deg, rgba(76,32,111,.72), rgba(36,12,56,.92));
+      box-shadow: 0 26px 80px rgba(0,0,0,.36);
+    }
+
+    .card img {
+      width: 100%;
+      height: 100%;
+      min-height: 340px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .card-content {
+      padding: 38px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .tag {
+      color: var(--gold2);
+      font-size: .78rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-bottom: 14px;
+    }
+
+    h2 {
+      font-family: "Cormorant Garamond", serif;
+      font-size: clamp(2.1rem, 4vw, 3.2rem);
+      line-height: 1;
+      margin: 0 0 18px;
+    }
+
+    .card p {
+      color: var(--muted);
+      line-height: 1.7;
+      margin: 0 0 26px;
+      font-size: 1rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      justify-content: center;
+      min-height: 54px;
+      padding: 0 24px;
+      border-radius: 13px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #f8dc92, var(--gold) 62%, #c48b36);
+      color: #1b0b22;
+    }
+
+    footer {
+      border-top: 1px solid rgba(212,175,55,.18);
+      padding: 30px 0;
+      color: #9f91ad;
+      text-align: center;
+      font-size: .9rem;
+    }
+
+    @media (max-width: 760px) {
+      .logo img { width: 170px; }
+
+      .card {
+        grid-template-columns: 1fr;
+      }
+
+      .card img {
+        min-height: 260px;
+      }
+
+      .card-content {
+        padding: 26px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="container nav">
+    <a class="logo" href="/">
+      <img src="/assets/logo-navbar.png" alt="aEterna">
+    </a>
+
+    <a class="back" href="/">Voltar ao início</a>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="container">
+      <div class="kicker">Reflexões sobre legado</div>
+
+      <h1>Insights aEterna</h1>
+
+      <p class="subtitle">
+        Textos sobre memória familiar, histórias de vida, legado e aquilo que queremos deixar para quem amamos.
+      </p>
+    </div>
+  </section>
+
+  <section class="container grid">
+    <article class="card">
+      <img src="/assets/bisavo-foto-celular.webp" alt="Fotografia antiga de família ao lado de um celular moderno">
+
+      <div class="card-content">
+        <div class="tag">Memória familiar</div>
+
+        <h2>Sabemos mais sobre Dom Pedro II do que sobre nosso próprio bisavô</h2>
+
+        <p>
+          Temos milhares de fotos da nossa família. Mas quase nunca registramos as histórias por trás delas.
+        </p>
+
+        <a class="btn" href="/insights/dom-pedro-ii-bisavo.html">Ler artigo →</a>
+      </div>
+    </article>
+  </section>
+</main>
+
+<footer>
+  © 2026 aEterna. Histórias que permanecem.
+</footer>
+
+</body>
+</html>
