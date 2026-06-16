@@ -311,14 +311,14 @@ def render_chat_luto():
                                     foto_id=foto_id
                                 )
                             if video_memoria:
-                                gerente_videos = GerenciadorVideos()
-                                caminho_video = gerente_videos.salvar_video(
-                                    video_memoria,
-                                    usuario["id"],
-                                    titulo or "Vídeo da memória",
-                                    pessoas_relacionadas or "",
-                                    categoria or "livre"
+                                upload = storage.upload_streamlit_file(
+                                    bucket="videos",
+                                    arquivo=video_memoria,
+                                    usuario_id=usuario["id"],
+                                    pasta="memorias"
                                 )
+
+                                caminho_video = upload["url"]
 
                                 video_id = db.adicionar_video_com_acesso(
                                     usuario_id=usuario["id"],

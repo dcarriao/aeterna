@@ -627,13 +627,14 @@ def render_videos():
                         st.error("❌ Preencha o título e selecione um vídeo")
                     else:
                         try:
-                            caminho = gerente_videos.salvar_video(
-                                arquivo_video,
-                                st.session_state.usuario_atual["id"],
-                                titulo,
-                                destinatario,
-                                categoria
+                            upload = storage.upload_streamlit_file(
+                                bucket="videos",
+                                arquivo=arquivo_video,
+                                usuario_id=st.session_state.usuario_atual["id"],
+                                pasta="memorias"
                             )
+
+                            caminho = upload["url"]
 
                             video_id = db.adicionar_video_com_acesso(
                                 usuario_id=st.session_state.usuario_atual["id"],
@@ -686,10 +687,10 @@ def render_videos():
                         f"**🔓 Acesso para:** {', '.join(nomes_acesso) if nomes_acesso else 'Todos os contatos'}")
                     caminho_video = video.get("caminho")
 
-                    if caminho_video and os.path.exists(caminho_video):
+                    if caminho_video:
                         st.video(caminho_video)
                     else:
-                        st.warning("🎥 Este vídeo foi cadastrado, mas o arquivo não está disponível neste ambiente.")
+                        st.warning("🎥 Vídeo indisponível.")
 
                     if st.button(f"🗑️ Remover", key=f"del_video_{video['id']}"):
                         db.deletar_video(video['id'], st.session_state.usuario_atual['id'])
@@ -722,10 +723,10 @@ def render_videos_visitante():
 
             st.markdown(f"**Categoria:** {video.get('categoria', '')}")
 
-            if video.get("caminho") and os.path.exists(video["caminho"]):
+            if video.get("caminho"):
                 st.video(video["caminho"])
             else:
-                st.warning("Arquivo de vídeo indisponível neste ambiente.")
+                st.warning("Vídeo indisponível.")
 
 
 # ============================================================================
