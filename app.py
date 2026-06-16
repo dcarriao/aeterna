@@ -17,6 +17,7 @@ from components.dashboard_ui import (
 from components.mobile_ui import aplicar_css_mobile
 from datetime import date
 from utils.logger import logger
+from utils.storage import StorageAeterna
 
 # ============================================================================
 # CONFIGURAÇÃO DA PÁGINA
@@ -233,6 +234,7 @@ def inject_custom_css():
 db = BancoDados()
 gerente_usuarios = GerenciadorUsuarios()
 gerente_videos = GerenciadorVideos()
+storage = StorageAeterna()
 
 gerente_usuarios.criar_usuario_admin_inicial()
 
@@ -731,7 +733,7 @@ def render_videos_visitante():
 # ============================================================================
 
 def render_fotos():
-    st.markdown("<h3 style='color: #2E8B57;'>📷 Álbum de Memórias/h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #2E8B57;'>📷 Álbum de Memórias</h3>", unsafe_allow_html=True)
 
     col1, col2 = st.columns([1, 2])
 
@@ -822,20 +824,14 @@ def render_fotos():
                         st.error("Informe um título e selecione uma foto.")
                     else:
                         try:
-                            pasta = f"fotos/usuario_{st.session_state.usuario_atual['id']}"
-                            os.makedirs(pasta, exist_ok=True)
-
-                            extensao = arquivo_foto.name.split(".")[-1].lower()
-                            nome_arquivo = "{}_{}.{}".format(
-                                datetime.now().strftime("%Y%m%d_%H%M%S"),
-                                secrets.token_hex(4),
-                                extensao,
+                            upload = storage.upload_streamlit_file(
+                                bucket="fotos",
+                                arquivo=arquivo_foto,
+                                usuario_id=st.session_state.usuario_atual["id"],
+                                pasta="memorias"
                             )
 
-                            caminho = os.path.join(pasta, nome_arquivo)
-
-                            with open(caminho, "wb") as f:
-                                f.write(arquivo_foto.getbuffer())
+                            caminho = upload["url"]
 
                             foto_id = db.adicionar_foto_com_acesso(
                                 usuario_id=st.session_state.usuario_atual["id"],
@@ -886,10 +882,10 @@ def render_fotos():
                         )
                     )
 
-                    if foto.get("caminho") and os.path.exists(foto["caminho"]):
+                    if foto.get("caminho"):
                         st.image(foto["caminho"], width="stretch")
                     else:
-                        st.warning("Arquivo de foto indisponível neste ambiente.")
+                        st.warning("Arquivo de foto indisponível.")
 
                     if st.button(
                         "🗑️ Remover",
@@ -1075,7 +1071,7 @@ def render_preferencias():
 
     foto_atual = db.obter_foto_usuario(usuario_id)
 
-    if foto_atual and os.path.exists(foto_atual):
+    if foto_atual:
         st.image(
             foto_atual,
             caption="Sua foto atual",
@@ -1099,20 +1095,14 @@ def render_preferencias():
                 st.error("Selecione uma foto.")
             else:
                 try:
-                    pasta = "fotos_perfil/usuarios"
-                    os.makedirs(pasta, exist_ok=True)
-
-                    extensao = foto_usuario.name.split(".")[-1].lower()
-                    nome_arquivo = "usuario_{}_{}.{}".format(
-                        usuario_id,
-                        datetime.now().strftime("%Y%m%d_%H%M%S"),
-                        extensao
+                    upload = storage.upload_streamlit_file(
+                        bucket="perfis",
+                        arquivo=foto_usuario,
+                        usuario_id=usuario_id,
+                        pasta="usuario"
                     )
 
-                    caminho = os.path.join(pasta, nome_arquivo)
-
-                    with open(caminho, "wb") as f:
-                        f.write(foto_usuario.getbuffer())
+                    caminho = upload["url"]
 
                     db.atualizar_foto_usuario(usuario_id, caminho)
 

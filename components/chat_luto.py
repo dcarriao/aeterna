@@ -6,6 +6,9 @@ from datetime import datetime
 from utils.assistente_ia import AssistenteLuto
 from utils.banco import BancoDados
 from utils.upload_video import GerenciadorVideos
+from utils.storage import StorageAeterna
+
+storage = StorageAeterna()
 
 
 def _extrair_palavras_relevantes(texto: str):
@@ -267,6 +270,12 @@ def render_chat_luto():
                         if salvar_final:
                             usuario = st.session_state.get("usuario_atual")
 
+                            if data_evento:
+                                try:
+                                    datetime.strptime(data_evento, "%Y-%m-%d")
+                                except:
+                                    data_evento = None
+
                             memoria_id = db.salvar_memoria(
                                 usuario_id=usuario["id"],
                                 conteudo=st.session_state["texto_memoria_" + chave_base],
@@ -279,20 +288,14 @@ def render_chat_luto():
                             )
 
                             if foto_memoria:
-                                pasta = "fotos/usuario_{}".format(usuario["id"])
-                                os.makedirs(pasta, exist_ok=True)
-
-                                extensao = foto_memoria.name.split(".")[-1].lower()
-                                nome_arquivo = "{}_{}.{}".format(
-                                    datetime.now().strftime("%Y%m%d_%H%M%S"),
-                                    abs(hash(foto_memoria.name)),
-                                    extensao
+                                upload = storage.upload_streamlit_file(
+                                    bucket="fotos",
+                                    arquivo=foto_memoria,
+                                    usuario_id=usuario["id"],
+                                    pasta="memorias"
                                 )
 
-                                caminho_foto = os.path.join(pasta, nome_arquivo)
-
-                                with open(caminho_foto, "wb") as f:
-                                    f.write(foto_memoria.getbuffer())
+                                caminho_foto = upload["url"]
 
                                 foto_id = db.adicionar_foto_com_acesso(
                                     usuario_id=usuario["id"],
