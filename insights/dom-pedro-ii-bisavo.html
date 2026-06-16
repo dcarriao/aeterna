@@ -1,168 +1,345 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-
-  <title>Sabemos mais sobre Dom Pedro II do que sobre nosso próprio bisavô | aEterna</title>
-
-  <meta name="description" content="Sabemos mais sobre figuras históricas do que sobre as pessoas que construíram nossa própria família. Uma reflexão sobre memória, histórias e legado familiar.">
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <title>Sabemos mais sobre Dom Pedro II do que sobre nosso próprio bisavô | aEterna</title>
+  <meta name="description" content="Sabemos mais sobre figuras históricas do que sobre as pessoas que construíram nossa própria família. Uma reflexão sobre memória, histórias e legado familiar.">
+
+  <link rel="canonical" href="https://www.aeternalegado.com.br/insights/dom-pedro-ii-bisavo.html">
+
   <meta property="og:title" content="Sabemos mais sobre Dom Pedro II do que sobre nosso próprio bisavô">
-  <meta property="og:description" content="Temos milhares de fotos da nossa família, mas quase nenhuma história organizada.">
-  <meta property="og:type" content="article">
-  <meta property="og:url" content="https://www.aeternalegado.com.br/artigos/sabemos-mais-sobre-dom-pedro-ii-do-que-sobre-nosso-bisavo.html">
+  <meta property="og:description" content="Temos milhares de fotos da nossa família, mas quase nunca registramos as histórias por trás delas.">
   <meta property="og:image" content="https://www.aeternalegado.com.br/assets/bisavo-foto-celular.webp">
+  <meta property="og:type" content="article">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
 
   <style>
+    :root {
+      --bg: #080014;
+      --purple: #120324;
+      --gold: #d4af37;
+      --gold2: #f2c572;
+      --muted: #c9bfd3;
+      --white: #ffffff;
+      --max: 860px;
+    }
+
+    * { box-sizing: border-box; }
+
     body {
-      font-family: Arial, sans-serif;
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 32px 20px;
-      line-height: 1.7;
-      color: #222;
-      background: #fffaf3;
-    }
-
-    h1 {
-      font-size: 2.1rem;
-      line-height: 1.2;
-      color: #3a2a1a;
-    }
-
-    .hero {
-      width: 100%;
-      border-radius: 14px;
-      margin: 24px 0;
-    }
-
-    .lead {
-      font-size: 1.2rem;
-      color: #5a4634;
+      margin: 0;
+      font-family: "Inter", sans-serif;
+      background:
+        radial-gradient(circle at 18% 0%, rgba(74, 38, 110, .54), transparent 30%),
+        radial-gradient(circle at 82% 12%, rgba(212, 175, 55, .18), transparent 24%),
+        linear-gradient(180deg, var(--bg) 0%, #120324 42%, var(--bg) 100%);
+      color: var(--white);
+      line-height: 1.75;
     }
 
     a {
-      color: #8a6400;
+      color: var(--gold2);
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(var(--max), calc(100% - 36px));
+      margin: 0 auto;
+    }
+
+    header {
+      padding: 26px 0;
+      border-bottom: 1px solid rgba(212,175,55,.22);
+      background: rgba(8,0,20,.88);
+    }
+
+    .nav {
+      width: min(1180px, calc(100% - 36px));
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo img {
+      width: 210px;
+      max-height: 58px;
+      object-fit: contain;
+    }
+
+    .back {
+      font-weight: 800;
+      color: var(--gold2);
+    }
+
+    .hero {
+      padding: 54px 0 34px;
+      text-align: center;
+    }
+
+    .kicker {
+      display: inline-block;
+      margin-bottom: 18px;
+      color: var(--gold2);
+      border: 1px solid rgba(212,175,55,.35);
+      border-radius: 12px;
+      padding: 8px 13px;
+      font-size: .78rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      background: rgba(212,175,55,.08);
+    }
+
+    h1 {
+      font-family: "Cormorant Garamond", serif;
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      line-height: .95;
+      letter-spacing: -.04em;
+      margin: 0 0 18px;
+      color: var(--white);
+    }
+
+    .lead {
+      color: var(--muted);
+      font-size: 1.15rem;
+      max-width: 760px;
+      margin: 0 auto 18px;
+    }
+
+    .date {
+      color: #9f91ad;
+      font-size: .9rem;
+      font-weight: 700;
+    }
+
+    .hero-img {
+      width: min(1180px, calc(100% - 36px));
+      height: 520px;
+      object-fit: cover;
+      display: block;
+      margin: 34px auto 0;
+      border-radius: 28px;
+      border: 1px solid rgba(212,175,55,.32);
+      box-shadow: 0 26px 80px rgba(0,0,0,.36);
+    }
+
+    article {
+      padding: 48px 0;
+    }
+
+    article p {
+      font-size: 1.08rem;
+      color: rgba(255,255,255,.88);
+      margin: 0 0 24px;
+    }
+
+    article strong {
+      color: var(--gold2);
+    }
+
+    .quote {
+      margin: 38px 0;
+      padding: 28px;
+      border-left: 4px solid var(--gold);
+      background: rgba(255,255,255,.04);
+      border-radius: 16px;
+      color: var(--gold2);
+      font-family: "Cormorant Garamond", serif;
+      font-size: 2rem;
+      line-height: 1.15;
+    }
+
+    .cta {
+      margin: 34px 0 70px;
+      padding: 34px;
+      border-radius: 24px;
+      border: 1px solid rgba(212,175,55,.32);
+      background: linear-gradient(135deg, rgba(76,32,111,.75), rgba(36,12,56,.9));
+      text-align: center;
+    }
+
+    .cta h2 {
+      font-family: "Cormorant Garamond", serif;
+      font-size: 2.7rem;
+      line-height: 1;
+      margin: 0 0 14px;
+      color: var(--gold2);
+    }
+
+    .cta p {
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 54px;
+      padding: 0 24px;
+      border-radius: 13px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #f8dc92, var(--gold) 62%, #c48b36);
+      color: #1b0b22;
     }
 
     footer {
-      margin-top: 48px;
-      border-top: 1px solid #e5d8c8;
-      padding-top: 24px;
-      font-size: 0.95rem;
+      border-top: 1px solid rgba(212,175,55,.18);
+      padding: 30px 0;
+      color: #9f91ad;
+      text-align: center;
+      font-size: .9rem;
+    }
+
+    @media (max-width: 760px) {
+      .logo img { width: 170px; }
+      .hero-img { height: 330px; border-radius: 20px; }
+      article p { font-size: 1rem; }
+      .quote { font-size: 1.55rem; }
+      .cta h2 { font-size: 2.1rem; }
     }
   </style>
 </head>
 
 <body>
 
+<header>
+  <div class="nav">
+    <a class="logo" href="/">
+      <img src="/assets/logo-navbar.png" alt="aEterna">
+    </a>
+    <a class="back" href="/insights/">Insights</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <div class="kicker">Memória familiar</div>
+
+    <h1>Sabemos mais sobre Dom Pedro II do que sobre nosso próprio bisavô</h1>
+
+    <p class="lead">
+      Temos milhares de fotos da nossa família. Mas quase nunca registramos as histórias por trás delas.
+    </p>
+
+    <div class="date">Publicado por aEterna</div>
+  </div>
+
+  <img class="hero-img" src="/assets/bisavo-foto-celular.webp" alt="Fotografia antiga de família ao lado de um celular moderno">
+</section>
+
 <article>
-  <p><a href="/blog.html">← Voltar para o blog</a></p>
+  <div class="container">
 
-  <h1>Sabemos mais sobre Dom Pedro II do que sobre nosso próprio bisavô</h1>
+    <p>Outro dia me dei conta de algo curioso.</p>
 
-  <p class="lead">
-    Temos milhares de fotos da nossa família. Mas quase nunca registramos as histórias por trás delas.
-  </p>
+    <p>Eu sei onde Dom Pedro II nasceu.</p>
 
-  <img class="hero" src="/assets/bisavo-foto-celular.webp" alt="Fotografia antiga de família ao lado de um celular moderno">
+    <p>Sei que ele gostava de ciência, fotografia e astronomia.</p>
 
-  <p>Outro dia me dei conta de algo curioso.</p>
+    <p>Sei que falava vários idiomas.</p>
 
-  <p>Eu sei onde Dom Pedro II nasceu.</p>
+    <p>Sei como viveu seus últimos anos e como morreu.</p>
 
-  <p>Sei que ele gostava de ciência, fotografia e astronomia.</p>
+    <p>Mas existe uma pergunta muito mais difícil de responder:</p>
 
-  <p>Sei que falava vários idiomas.</p>
+    <div class="quote">
+      O que meu bisavô sonhava para a família?
+    </div>
 
-  <p>Sei como viveu seus últimos anos e como morreu.</p>
+    <p>Não sei.</p>
 
-  <p>Mas existe uma pergunta muito mais difícil de responder:</p>
+    <p>Na verdade, percebi que sei muito mais sobre personagens históricos do que sobre pessoas que ajudaram a construir a minha própria história.</p>
 
-  <p><strong>O que meu bisavô sonhava para a família?</strong></p>
+    <p>Não sei qual era o maior medo do meu bisavô.</p>
 
-  <p>Não sei.</p>
+    <p>Não sei como ele conheceu minha bisavó.</p>
 
-  <p>Na verdade, percebi que sei muito mais sobre personagens históricos do que sobre pessoas que ajudaram a construir a minha própria história.</p>
+    <p>Não sei qual foi o dia mais feliz da vida dele.</p>
 
-  <p>Não sei qual era o maior medo do meu bisavô.</p>
+    <p>Não sei quais erros ele mais se arrependeu de cometer.</p>
 
-  <p>Não sei como ele conheceu minha bisavó.</p>
+    <p>Não sei que conselho ele daria aos seus netos e bisnetos.</p>
 
-  <p>Não sei qual foi o dia mais feliz da vida dele.</p>
+    <p>E isso me fez pensar.</p>
 
-  <p>Não sei quais erros ele mais se arrependeu de cometer.</p>
+    <p>Talvez exista uma inversão estranha acontecendo na sociedade moderna.</p>
 
-  <p>Não sei que conselho ele daria aos seus netos e bisnetos.</p>
+    <p>Nunca tivemos tanta capacidade de registrar informações.</p>
 
-  <p>E isso me fez pensar.</p>
+    <p>Temos celulares com câmeras excelentes. Temos redes sociais. Temos armazenamento praticamente ilimitado.</p>
 
-  <p>Talvez exista uma inversão estranha acontecendo na sociedade moderna.</p>
+    <p>Temos milhares de fotos. Centenas de vídeos. Milhares de mensagens.</p>
 
-  <p>Nunca tivemos tanta capacidade de registrar informações.</p>
+    <p>Mas, ao mesmo tempo, continuamos perdendo aquilo que talvez seja mais importante: <strong>as histórias</strong>.</p>
 
-  <p>Temos celulares com câmeras excelentes. Temos redes sociais. Temos armazenamento praticamente ilimitado.</p>
+    <p>Quando alguém da família morre, normalmente ficam as fotografias.</p>
 
-  <p>Temos milhares de fotos. Centenas de vídeos. Milhares de mensagens.</p>
+    <p>Fica a certidão. Ficam alguns documentos. Talvez um vídeo antigo.</p>
 
-  <p>Mas, ao mesmo tempo, continuamos perdendo aquilo que talvez seja mais importante: as histórias.</p>
+    <p>Mas as histórias desaparecem.</p>
 
-  <p>Quando alguém da família morre, normalmente ficam as fotografias.</p>
+    <p>Desaparecem as lições aprendidas.</p>
 
-  <p>Fica a certidão. Ficam alguns documentos. Talvez um vídeo antigo.</p>
+    <p>Desaparecem os medos vencidos.</p>
 
-  <p>Mas as histórias desaparecem.</p>
+    <p>Desaparecem os sonhos realizados e os sonhos abandonados.</p>
 
-  <p>Desaparecem as lições aprendidas.</p>
+    <p>Desaparece a forma como aquela pessoa enxergava o mundo.</p>
 
-  <p>Desaparecem os medos vencidos.</p>
+    <p>E, algumas décadas depois, sobra apenas um nome em uma árvore genealógica.</p>
 
-  <p>Desaparecem os sonhos realizados e os sonhos abandonados.</p>
+    <p>É curioso perceber que muitos de nós sabemos mais sobre reis, presidentes, artistas ou jogadores de futebol do que sobre os próprios avós e bisavós.</p>
 
-  <p>Desaparece a forma como aquela pessoa enxergava o mundo.</p>
+    <p>Sabemos detalhes da vida de celebridades que nunca conheceremos pessoalmente.</p>
 
-  <p>E, algumas décadas depois, sobra apenas um nome em uma árvore genealógica.</p>
+    <p>Mas não sabemos o que nossos avós pensavam sobre amor, trabalho, fé, família ou felicidade.</p>
 
-  <p>É curioso perceber que muitos de nós sabemos mais sobre reis, presidentes, artistas ou jogadores de futebol do que sobre os próprios avós e bisavós.</p>
+    <p>E isso não acontece porque a família não se importa.</p>
 
-  <p>Sabemos detalhes da vida de celebridades que nunca conheceremos pessoalmente.</p>
+    <p><strong>Acontece porque ninguém organizou essas histórias.</strong></p>
 
-  <p>Mas não sabemos o que nossos avós pensavam sobre amor, trabalho, fé, família ou felicidade.</p>
+    <p>Durante séculos, elas foram transmitidas oralmente.</p>
 
-  <p>E isso não acontece porque a família não se importa.</p>
+    <p>Os avós contavam histórias. Os filhos ouviam. Os netos aprendiam.</p>
 
-  <p><strong>Acontece porque ninguém organizou essas histórias.</strong></p>
+    <p>Mas a vida ficou mais corrida. As famílias ficaram mais distantes.</p>
 
-  <p>Durante séculos, elas foram transmitidas oralmente.</p>
+    <p>E, muitas vezes, percebemos tarde demais que nunca fizemos as perguntas certas.</p>
 
-  <p>Os avós contavam histórias. Os filhos ouviam. Os netos aprendiam.</p>
+    <p>Talvez a verdadeira herança não seja apenas financeira.</p>
 
-  <p>Mas a vida ficou mais corrida. As famílias ficaram mais distantes.</p>
+    <p>Talvez ela também seja composta pelas experiências, aprendizados, valores e histórias que cada geração deixa para a próxima.</p>
 
-  <p>E, muitas vezes, percebemos tarde demais que nunca fizemos as perguntas certas.</p>
+    <p>Porque dinheiro pode ser herdado. Uma casa pode ser herdada.</p>
 
-  <p>Talvez a verdadeira herança não seja apenas financeira.</p>
+    <p>Mas a sabedoria de uma vida inteira só pode ser herdada se alguém decidir registrá-la.</p>
 
-  <p>Talvez ela também seja composta pelas experiências, aprendizados, valores e histórias que cada geração deixa para a próxima.</p>
+    <div class="quote">
+      Se seus netos pudessem conhecer você daqui a cinquenta anos, o que você gostaria que eles soubessem?
+    </div>
 
-  <p>Porque dinheiro pode ser herdado. Uma casa pode ser herdada.</p>
+    <p>Talvez a resposta para essa pergunta seja muito mais valiosa do que imaginamos.</p>
 
-  <p>Mas a sabedoria de uma vida inteira só pode ser herdada se alguém decidir registrá-la.</p>
+    <div class="cta">
+      <h2>Preserve suas histórias antes que elas desapareçam.</h2>
+      <p>
+        A aEterna nasceu para ajudar famílias a registrar memórias, aprendizados e valores para as próximas gerações.
+      </p>
+      <a class="btn" href="https://aeterna.streamlit.app/">Começar minha história →</a>
+    </div>
 
-  <p>Por isso, hoje, existe uma pergunta importante:</p>
-
-  <p><strong>Se seus netos pudessem conhecer você daqui a cinquenta anos, o que você gostaria que eles soubessem?</strong></p>
-
-  <p>Talvez a resposta para essa pergunta seja muito mais valiosa do que imaginamos.</p>
+  </div>
 </article>
 
 <footer>
-  <p>
-    A <strong>aEterna</strong> nasceu para ajudar famílias a preservar histórias, aprendizados e valores para as próximas gerações.
-  </p>
-  <p><a href="/">Conheça a aEterna</a></p>
+  © 2026 aEterna. Histórias que permanecem.
 </footer>
 
 </body>
