@@ -1091,12 +1091,22 @@ def render_preferencias():
 
     foto_atual = db.obter_foto_usuario(usuario_id)
 
-    if foto_atual:
+    foto_atual = foto_atual or ""
+
+    if foto_atual.startswith("http"):
         st.image(
             foto_atual,
             caption="Sua foto atual",
             width=180
         )
+    elif foto_atual and os.path.exists(foto_atual):
+        st.image(
+            foto_atual,
+            caption="Sua foto atual",
+            width=180
+        )
+    else:
+        st.info("Sua foto de perfil anterior não está disponível neste ambiente. Envie uma nova foto para atualizar.")
 
     with st.form("form_foto_perfil_usuario", clear_on_submit=True):
         foto_usuario = st.file_uploader(
