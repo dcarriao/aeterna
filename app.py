@@ -687,12 +687,17 @@ def render_videos():
                         st.markdown(f"**👥 Para:** {video['destinatario']}")
                     st.markdown(
                         f"**🔓 Acesso para:** {', '.join(nomes_acesso) if nomes_acesso else 'Todos os contatos'}")
-                    caminho_video = video.get("caminho")
+                    caminho_video = video.get("caminho") or ""
 
-                    if caminho_video:
+                    if caminho_video.startswith("http"):
+                        st.video(caminho_video)
+                    elif caminho_video and os.path.exists(caminho_video):
                         st.video(caminho_video)
                     else:
-                        st.warning("🎥 Vídeo indisponível.")
+                        st.warning(
+                            "🎥 Este vídeo foi cadastrado antes da migração para o Storage "
+                            "e o arquivo não está disponível neste ambiente."
+                        )
 
                     if st.button(f"🗑️ Remover", key=f"del_video_{video['id']}"):
                         db.deletar_video(video['id'], st.session_state.usuario_atual['id'])
