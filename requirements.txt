@@ -5,3 +5,4 @@ Pillow
 openai>=1.93.0
 psycopg2-binary
 supabase
+mercadopago

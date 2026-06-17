@@ -18,6 +18,7 @@ from components.mobile_ui import aplicar_css_mobile
 from datetime import date
 from utils.logger import logger
 from utils.storage import StorageAeterna
+from utils.mercado_pago_service import MercadoPagoService
 
 # ============================================================================
 # CONFIGURAÇÃO DA PÁGINA
@@ -235,6 +236,7 @@ db = BancoDados()
 gerente_usuarios = GerenciadorUsuarios()
 gerente_videos = GerenciadorVideos()
 storage = StorageAeterna()
+mp_service = MercadoPagoService()
 
 gerente_usuarios.criar_usuario_admin_inicial()
 
@@ -1164,120 +1166,102 @@ def render_preferencias():
 # PLANOS
 # ============================================================================
 def render_planos():
-
-    st.markdown(
-        "<h3 style='color:#2E8B57;'>💎 Planos aEterna</h3>",
-        unsafe_allow_html=True
-    )
+    st.markdown("<h3 style='color:#2E8B57;'>💎 Planos aEterna</h3>", unsafe_allow_html=True)
 
     st.markdown("""
     ### Preserve sua história para as próximas gerações
-
-    Escolha quanto da sua história deseja preservar.
+    Escolha o plano que combina melhor com a história que você deseja guardar.
     """)
 
     planos = [
         {
             "nome": "🌱 Essencial",
             "preco": 0,
-            "descricao": "Comece seu legado",
-            "beneficios": [
-                "20 histórias",
-                "5 fotos",
-                "2 vídeos",
-                "1 mensagem para o futuro",
-                "1 pessoa convidada",
-                "Preservação por 2 anos"
-            ]
+            "descricao": "Comece a registrar sua história.",
+            "visivel": True,
+            "beneficios": ["20 histórias", "5 fotos", "2 vídeos", "1 mensagem para o futuro", "1 pessoa convidada", "Preservação por 2 anos"]
         },
         {
             "nome": "👨‍👩‍👧 Família",
-            "preco": 139,
-            "descricao": "Preserve as memórias da sua família",
-            "beneficios": [
-                "60 histórias",
-                "20 fotos",
-                "10 vídeos",
-                "5 pessoas convidadas",
-                "5 mensagens para o futuro",
-                "Preservação por 5 anos"
-            ]
+            "preco": 12,
+            "parcelado": "12x de R$ 14,99",
+            "descricao": "Para preservar as principais memórias da família.",
+            "recomendado": True,
+            "visivel": True,
+            "beneficios": ["60 histórias", "20 fotos", "10 vídeos", "5 pessoas convidadas", "5 mensagens para o futuro", "Preservação por 5 anos"]
         },
         {
             "nome": "❤️ Legado",
             "preco": 189,
-            "descricao": "Construa um legado familiar",
-            "beneficios": [
-                "80 histórias",
-                "30 fotos",
-                "15 vídeos",
-                "10 pessoas convidadas",
-                "10 mensagens para o futuro",
-                "Preservação por 8 anos"
-            ]
+            "descricao": "Para construir uma história familiar mais completa.",
+            "visivel": True,
+            "beneficios": ["80 histórias", "30 fotos", "15 vídeos", "10 pessoas convidadas", "10 mensagens para o futuro", "Preservação por 8 anos"]
         },
         {
             "nome": "👑 Gerações",
             "preco": 299,
-            "descricao": "Para famílias que querem preservar tudo",
-            "beneficios": [
-                "100 histórias",
-                "50 fotos",
-                "25 vídeos",
-                "30 pessoas convidadas",
-                "30 mensagens para o futuro",
-                "Preservação por 15 anos"
-            ]
+            "descricao": "Para famílias que querem preservar mais momentos.",
+            "visivel": True,
+            "beneficios": ["100 histórias", "50 fotos", "25 vídeos", "30 pessoas convidadas", "30 mensagens para o futuro", "Preservação por 15 anos"]
         },
         {
             "nome": "✨ Permanente",
             "preco": 1499,
-            "descricao": "Sem limite de tempo",
-            "beneficios": [
-                "Tudo ilimitado",
-                "Preservação contínua",
-                "Atualizações futuras incluídas"
-            ]
+            "descricao": "Para preservar sua história sem prazo definido.",
+            "visivel": False,
+            "beneficios": ["Tudo ilimitado", "Preservação contínua", "Atualizações futuras incluídas"]
         }
     ]
 
-    cols = st.columns(len(planos))
+    planos_visiveis = [p for p in planos if p.get("visivel", True)]
+    for linha in range(0, len(planos_visiveis), 2):
+        cols = st.columns(2)
 
-    for i, plano in enumerate(planos):
+        for idx, plano in enumerate(planos_visiveis[linha:linha + 2]):
+            i = linha + idx
 
-        with cols[i]:
+            with cols[idx]:
+                with st.container(border=True):
+                    if plano.get("recomendado"):
+                        st.markdown("### ⭐ RECOMENDADO")
+                    st.markdown(f"## {plano['nome']}")
+                    st.caption(plano["descricao"])
 
-            st.markdown(f"### {plano['nome']}")
+                    if plano["preco"] == 0:
+                        st.markdown("### Gratuito")
+                    else:
+                        st.markdown(f"### {plano.get('parcelado', '')}")
 
-            st.caption(plano["descricao"])
+                        st.caption(
+                            f"ou R$ {plano['preco']:.2f} à vista".replace(".", ",")
+                        )
 
-            if plano["preco"] == 0:
-                st.markdown("## Gratuito")
-            else:
-                st.markdown(
-                    f"## R$ {plano['preco']:.2f}"
-                )
+                    for item in plano["beneficios"]:
+                        st.markdown(f"✓ {item}")
 
-            for item in plano["beneficios"]:
-                st.markdown(f"✓ {item}")
+                    if plano["preco"] > 0:
+                        if st.button(f"Quero o plano {plano['nome']}", key=f"plano_{i}", width="stretch"):
+                            db.registrar_interesse_plano(
+                                st.session_state.usuario_atual["id"],
+                                plano["nome"],
+                                plano["preco"]
+                            )
 
-            if plano["preco"] > 0:
+                            link_pagamento = mp_service.criar_checkout_plano(
+                                usuario_id=st.session_state.usuario_atual["id"],
+                                plano_nome=plano["nome"],
+                                valor=plano["preco"]
+                            )
 
-                if st.button(
-                    f"Quero {plano['nome']}",
-                    key=f"plano_{i}",
-                    width="stretch"
-                ):
-
-                    db.registrar_interesse_plano(
-                        st.session_state.usuario_atual["id"],
-                        plano["nome"],
-                        plano["preco"]
-                    )
-
-                    st.success(
-                        "Interesse registrado. Em breve você poderá concluir a contratação."
-                    )
+                            if link_pagamento:
+                                st.success("Checkout criado com sucesso.")
+                                st.link_button(
+                                    "💳 Prosseguir para pagamento",
+                                    link_pagamento,
+                                    width="stretch"
+                                )
+                            else:
+                                st.error("Não foi possível gerar o link de pagamento.")
 
 
 # ============================================================================
