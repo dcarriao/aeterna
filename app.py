@@ -481,9 +481,13 @@ def render_minha_historia():
                 if fotos:
                     st.markdown("**📷 Fotos desta memória**")
                     for foto in fotos:
-                        if foto.get("caminho") and os.path.exists(foto["caminho"]):
+                        caminho_foto = foto.get("caminho") or ""
+                        if caminho_foto.startswith("http"):
                             st.image(foto["caminho"], caption=foto.get("titulo", ""), width="stretch")
-
+                        elif caminho_foto and os.path.exists(caminho_foto):
+                            st.image(foto["caminho"], caption=foto.get("titulo", ""), width="stretch")
+                        else:
+                            st.warning("📷 Foto indisponível neste ambiente.")
                 try:
                     videos = videos_por_memoria.get(memoria["id"], [])
                 except Exception as e:
@@ -890,10 +894,14 @@ def render_fotos():
                         )
                     )
 
-                    if foto.get("caminho"):
-                        st.image(foto["caminho"], width="stretch")
+                    caminho_foto = foto.get("caminho") or ""
+
+                    if caminho_foto.startswith("http"):
+                        st.image(caminho_foto, width="stretch")
+                    elif caminho_foto and os.path.exists(caminho_foto):
+                        st.image(caminho_foto, width="stretch")
                     else:
-                        st.warning("Arquivo de foto indisponível.")
+                        st.warning("📷 Foto indisponível neste ambiente.")
 
                     if st.button(
                         "🗑️ Remover",
@@ -926,10 +934,14 @@ def render_fotos_visitante():
             if foto.get("descricao"):
                 st.markdown(foto["descricao"])
 
-            if foto.get("caminho") and os.path.exists(foto["caminho"]):
-                st.image(foto["caminho"], width="stretch")
+            caminho_foto = foto.get("caminho") or ""
+
+            if caminho_foto.startswith("http"):
+                st.image(caminho_foto, width="stretch")
+            elif caminho_foto and os.path.exists(caminho_foto):
+                st.image(caminho_foto, width="stretch")
             else:
-                st.warning("Arquivo de foto indisponível neste ambiente.")
+                st.warning("📷 Foto indisponível neste ambiente.")
 
 # ============================================================================
 # CONTATOS (COMPLETO)
