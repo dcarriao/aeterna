@@ -1142,6 +1142,182 @@ class BancoDados:
             cursor.close()
             conn.close()
 
+    def obter_ultimo_acesso_historia(
+            self,
+            email_visualizador: str,
+            dono_historia_id: int,
+    ):
+        acesso = self.usuario_pode_acessar_historia(
+            email_visualizador,
+            dono_historia_id,
+        )
+        if not acesso:
+            return None
+
+        email_normalizado = (email_visualizador or "").strip().lower()
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute("""
+                SELECT ultimo_acesso_em
+                FROM historias_acessos
+                WHERE usuario_visualizador_email = %s
+                  AND dono_historia_id = %s
+            """, (email_normalizado, dono_historia_id))
+
+            row = cursor.fetchone()
+            return row[0] if row else None
+        finally:
+            cursor.close()
+            conn.close()
+
+    def registrar_acesso_historia(
+            self,
+            email_visualizador: str,
+            dono_historia_id: int,
+    ) -> bool:
+        email_normalizado = (email_visualizador or "").strip().lower()
+        if not email_normalizado or not dono_historia_id:
+            return False
+
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute("""
+                INSERT INTO historias_acessos (
+                    usuario_visualizador_email,
+                    dono_historia_id,
+                    ultimo_acesso_em
+                )
+                SELECT
+                    %s,
+                    c.usuario_id,
+                    NOW()
+                FROM contatos c
+                WHERE LOWER(TRIM(c.email)) = %s
+                  AND c.usuario_id = %s
+                  AND COALESCE(c.acesso_central_luto, 0) = 1
+                ORDER BY c.id
+                LIMIT 1
+                ON CONFLICT (
+                    usuario_visualizador_email,
+                    dono_historia_id
+                )
+                DO UPDATE SET ultimo_acesso_em = NOW()
+                RETURNING id
+            """, (
+                email_normalizado,
+                email_normalizado,
+                dono_historia_id,
+            ))
+
+            row = cursor.fetchone()
+            conn.commit()
+            return bool(row)
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            cursor.close()
+            conn.close()
+
+    def contar_novidades_historia(
+            self,
+            email_visualizador: str,
+            dono_historia_id: int,
+    ) -> Dict[str, int]:
+        acesso = self.usuario_pode_acessar_historia(
+            email_visualizador,
+            dono_historia_id,
+        )
+        if not acesso:
+            return {
+                "memorias": 0,
+                "fotos": 0,
+                "videos": 0,
+                "total": 0,
+            }
+
+        ultimo_acesso = self.obter_ultimo_acesso_historia(
+            email_visualizador,
+            dono_historia_id,
+        )
+        contato_id = acesso["contato_id"]
+
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            if ultimo_acesso is None:
+                cursor.execute("""
+                    SELECT COUNT(*)
+                    FROM memorias
+                    WHERE usuario_id = %s
+                """, (dono_historia_id,))
+                memorias = cursor.fetchone()[0]
+
+                cursor.execute("""
+                    SELECT COUNT(DISTINCT f.id)
+                    FROM fotos f
+                    JOIN fotos_contatos fc ON fc.foto_id = f.id
+                    WHERE f.usuario_id = %s
+                      AND fc.contato_id = %s
+                """, (dono_historia_id, contato_id))
+                fotos = cursor.fetchone()[0]
+
+                cursor.execute("""
+                    SELECT COUNT(DISTINCT v.id)
+                    FROM videos v
+                    JOIN videos_acesso va ON va.video_id = v.id
+                    WHERE v.usuario_id = %s
+                      AND va.contato_id = %s
+                """, (dono_historia_id, contato_id))
+                videos = cursor.fetchone()[0]
+            else:
+                cursor.execute("""
+                    SELECT COUNT(*)
+                    FROM memorias
+                    WHERE usuario_id = %s
+                      AND data_criacao > %s
+                """, (dono_historia_id, ultimo_acesso))
+                memorias = cursor.fetchone()[0]
+
+                cursor.execute("""
+                    SELECT COUNT(DISTINCT f.id)
+                    FROM fotos f
+                    JOIN fotos_contatos fc ON fc.foto_id = f.id
+                    WHERE f.usuario_id = %s
+                      AND fc.contato_id = %s
+                      AND f.data_criacao > %s
+                """, (dono_historia_id, contato_id, ultimo_acesso))
+                fotos = cursor.fetchone()[0]
+
+                cursor.execute("""
+                    SELECT COUNT(DISTINCT v.id)
+                    FROM videos v
+                    JOIN videos_acesso va ON va.video_id = v.id
+                    WHERE v.usuario_id = %s
+                      AND va.contato_id = %s
+                      AND v.data_criacao > %s
+                """, (dono_historia_id, contato_id, ultimo_acesso))
+                videos = cursor.fetchone()[0]
+
+            memorias = int(memorias or 0)
+            fotos = int(fotos or 0)
+            videos = int(videos or 0)
+
+            return {
+                "memorias": memorias,
+                "fotos": fotos,
+                "videos": videos,
+                "total": memorias + fotos + videos,
+            }
+        finally:
+            cursor.close()
+            conn.close()
+
     def listar_memorias_usuario(self, usuario_id: int):
         conn = self.conectar()
         cursor = conn.cursor()

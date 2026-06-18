@@ -1967,6 +1967,34 @@ def selecionar_historia_compartilhada(historia: dict):
     st.session_state.pop("assistente_usuario_id", None)
 
 
+def formatar_novidades_historia(novidades: dict) -> str:
+    partes = []
+    memorias = int(novidades.get("memorias", 0) or 0)
+    fotos = int(novidades.get("fotos", 0) or 0)
+    videos = int(novidades.get("videos", 0) or 0)
+
+    if memorias:
+        partes.append(
+            f"{memorias} nova história"
+            if memorias == 1
+            else f"{memorias} novas histórias"
+        )
+    if fotos:
+        partes.append(
+            f"{fotos} nova foto"
+            if fotos == 1
+            else f"{fotos} novas fotos"
+        )
+    if videos:
+        partes.append(
+            f"{videos} novo vídeo"
+            if videos == 1
+            else f"{videos} novos vídeos"
+        )
+
+    return " · ".join(partes) if partes else "Tudo visto"
+
+
 def render_navegacao_historias(historias_compartilhadas: list):
     with st.sidebar:
         st.markdown("---")
@@ -1996,19 +2024,28 @@ def render_navegacao_historias(historias_compartilhadas: list):
 
         for historia in historias_compartilhadas:
             nome = historia.get("nome_completo") or historia.get("nome") or "Pessoa"
+            novidades = historia.get("novidades") or {}
+            total_novidades = int(novidades.get("total", 0) or 0)
             selecionada = (
                 st.session_state.modo_visualizacao == "historia_compartilhada"
                 and st.session_state.historia_atual_usuario_id == historia["usuario_id"]
             )
 
             if st.button(
-                f"👤 História de {nome}",
+                (
+                    f"👤 História de {nome} · {total_novidades} "
+                    f"{'novidade' if total_novidades == 1 else 'novidades'}"
+                    if total_novidades
+                    else f"👤 História de {nome}"
+                ),
                 key=f"navegar_historia_{historia['usuario_id']}",
                 use_container_width=True,
                 type="primary" if selecionada else "secondary",
             ):
                 selecionar_historia_compartilhada(historia)
                 st.rerun()
+
+            st.caption(formatar_novidades_historia(novidades))
 
 
 def render_assistente_historia_compartilhada(
@@ -2240,6 +2277,45 @@ def main():
             print("Erro ao listar histórias compartilhadas:", exc)
             historias_compartilhadas = []
 
+        acesso_historia_atual = None
+        if st.session_state.modo_visualizacao == "historia_compartilhada":
+            historia_usuario_id = st.session_state.historia_atual_usuario_id
+            acesso_historia_atual = db.usuario_pode_acessar_historia(
+                usuario_logado.get("email", ""),
+                historia_usuario_id,
+            )
+
+            if not acesso_historia_atual:
+                st.warning(
+                    "Você não possui autorização para acessar esta história. "
+                    "Voltamos para a sua área."
+                )
+                selecionar_minha_historia()
+                st.rerun()
+
+            try:
+                db.registrar_acesso_historia(
+                    usuario_logado.get("email", ""),
+                    historia_usuario_id,
+                )
+            except Exception as exc:
+                print("Erro ao registrar acesso à história:", exc)
+
+        for historia in historias_compartilhadas:
+            try:
+                historia["novidades"] = db.contar_novidades_historia(
+                    usuario_logado.get("email", ""),
+                    historia["usuario_id"],
+                )
+            except Exception as exc:
+                print("Erro ao contar novidades da história:", exc)
+                historia["novidades"] = {
+                    "memorias": 0,
+                    "fotos": 0,
+                    "videos": 0,
+                    "total": 0,
+                }
+
         is_admin = (
                 st.session_state.usuario_atual.get("tipo") == "admin"
         )
@@ -2276,21 +2352,10 @@ def main():
         render_navegacao_historias(historias_compartilhadas)
 
         if st.session_state.modo_visualizacao == "historia_compartilhada":
-            historia_usuario_id = st.session_state.historia_atual_usuario_id
-            acesso = db.usuario_pode_acessar_historia(
-                usuario_logado.get("email", ""),
-                historia_usuario_id,
+            render_visao_historia_compartilhada(
+                acesso_historia_atual,
+                usuario_logado,
             )
-
-            if not acesso:
-                st.warning(
-                    "Você não possui autorização para acessar esta história. "
-                    "Voltamos para a sua área."
-                )
-                selecionar_minha_historia()
-                st.rerun()
-
-            render_visao_historia_compartilhada(acesso, usuario_logado)
             return
 
         if is_admin:
