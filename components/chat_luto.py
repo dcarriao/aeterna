@@ -7,6 +7,7 @@ from utils.assistente_ia import AssistenteLuto
 from utils.banco import BancoDados
 from utils.upload_video import GerenciadorVideos
 from utils.storage import StorageAeterna
+from utils.media import exibir_foto_segura
 
 storage = StorageAeterna()
 
@@ -84,7 +85,6 @@ def render_chat_luto():
     if modo == "memorial":
         nome_falecido = usuario.get("nome_falecido", "essa pessoa especial")
         nome_visitante = usuario.get("nome", "você")
-        parentesco = usuario.get("parentesco", "")
 
         st.markdown(f"""
                     <div style="
@@ -95,40 +95,39 @@ def render_chat_luto():
                         margin-bottom: 24px;
                         box-shadow: 0 20px 60px rgba(43, 23, 71, 0.25);
                     ">
-                        <h1 style="color: #f2c572; margin-bottom: 12px;">🕊️ Memorial de {nome_falecido}</h1>
+                        <h1 style="color: #f2c572; margin-bottom: 12px;">📖 Histórias de {nome_falecido}</h1>
                         <p style="font-size: 1.1rem; line-height: 1.6;">
-                            {nome_visitante}, este é um espaço para conversar com o legado de {nome_falecido}.
+                            {nome_visitante}, este é um espaço que {nome_falecido} compartilhou com você.
                         </p>
                         <p style="font-size: 1rem; opacity: 0.92;">
-                            O Assistente Memorial usa memórias, valores, histórias e mensagens registradas para acolher,
-                            responder perguntas, ajudar em momentos de saudade e preservar a presença simbólica de quem foi importante.
+                            Aqui você pode acessar histórias, fotos, vídeos e mensagens autorizadas,
+                            preservadas para manter vivas as memórias e os momentos importantes.
                         </p>
                         <p style="font-size: 0.88rem; opacity: 0.78;">
-                            Ele não substitui a pessoa, não inventa lembranças e não responde fora do que foi preservado.
+                            O assistente responde apenas com base nas histórias e informações registradas.
+                            Ele não inventa fatos e não substitui uma conversa real com a família.
                         </p>
                     </div>
                     """, unsafe_allow_html=True)
 
         st.markdown("""
-                    ### 💬 💬 Se não souber por onde começar...
+                    ### 💬 Por onde começar?
 
-                    • Estou com saudade.
-                    • Quero lembrar momentos especiais.
-                    • Preciso conversar um pouco.
-                    • O que essa pessoa valorizava na vida?
-                    • Existem mensagens ou conselhos registrados?
-                    • Como ela enxergava a família e os relacionamentos?
-                    • O que posso aprender com sua história?
-                    • Quero compartilhar algo que aconteceu comigo hoje.
-                    """)
+                    • Quais histórias {nome_falecido} compartilhou comigo?
+                    • Quais momentos importantes foram registrados?
+                    • Quais fotos ou vídeos estão disponíveis?
+                    • O que foi contado sobre família, viagens ou aprendizados?
+                    • Existe alguma mensagem compartilhada comigo?
+                    • Quais valores aparecem nessas histórias?
+                    """.format(nome_falecido=nome_falecido))
         st.markdown("""
                     ---
-                    ### ✨ Também quer criar seu próprio legado?
+                    ### ✨ Também quer preservar sua história?
 
-                    A aEterna permite que você preserve histórias, mensagens e orientações para pessoas que ama.
+                    Crie seu espaço na aEterna para registrar histórias, fotos, vídeos e momentos importantes da sua vida.
                     """)
 
-        if st.button("✨ Criar meu próprio legado"):
+        if st.button("✨ Criar minha história"):
             for key in [
                 "autenticado",
                 "usuario_atual",
@@ -190,7 +189,10 @@ def render_chat_luto():
     if not historico:
         historico = [{
             "tipo": "bot",
-            "texto": "Olá. Este é um espaço de criação de Histórias, valores e ensinamentos para o futuro de {nome_referencia}. Você pode falar sobre saudade, lembranças, conselhos ou momentos importantes."
+            "texto": (
+                f"Olá. Este é um espaço para explorar histórias, valores, "
+                f"aprendizados e momentos importantes de {nome_referencia}."
+            )
         }]
 
     for i, msg in enumerate(historico):
@@ -359,14 +361,10 @@ def render_chat_luto():
 
                     mostradas.add(foto["id"])
 
-                    caminho = foto.get("caminho")
-
-                    if caminho and os.path.exists(caminho):
-                        st.image(
-                            caminho,
-                            caption=foto.get("titulo", "Foto relacionada"),
-                            width="stretch"
-                        )
+                    exibir_foto_segura(
+                        foto.get("caminho"),
+                        caption=foto.get("titulo", "Foto relacionada"),
+                    )
 
     with st.form("form_assistente_luto", clear_on_submit=True):
         mensagem = st.text_area(
@@ -411,12 +409,13 @@ def render_chat_luto():
 
             if usuario.get("tipo") == "visitante":
                 contexto_adicional = (
-                    "A pessoa que está acessando o memorial se chama {}. "
-                    "Ela está registrada como {} de {}."
+                    "A pessoa visitante autorizada se chama {}. "
+                    "Ela está registrada como {} de {} e está explorando "
+                    "as histórias compartilhadas."
                 ).format(
                     usuario.get("nome", "Visitante"),
                     usuario.get("parentesco", "relação não informada"),
-                    usuario.get("nome_falecido", "a pessoa memorializada")
+                    usuario.get("nome_falecido", "a pessoa responsável pela história")
                 )
 
             resposta = st.session_state.assistente_obj.conversar(
@@ -502,8 +501,9 @@ def _inicializar_chat():
             st.session_state.historico_assistente.append({
                 "tipo": "bot",
                 "texto": (
-                    "Olá. Este é o seu Assistente Memorial.\n\n"
-                    "Estou aqui para ajudar você a se conectar com seu ente querido."
+                    "Olá. Este é o Assistente de Histórias da aEterna.\n\n"
+                    "Estou aqui para ajudar você a explorar histórias, fotos, "
+                    "vídeos, valores e momentos compartilhados."
                 )
             })
         else:

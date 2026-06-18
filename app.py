@@ -19,6 +19,7 @@ from datetime import date
 from utils.logger import logger
 from utils.storage import StorageAeterna
 from utils.mercado_pago_service import MercadoPagoService
+from utils.media import exibir_foto_segura, exibir_video_seguro
 
 # ============================================================================
 # CONFIGURAÇÃO DA PÁGINA
@@ -36,7 +37,7 @@ def encontrar_icone_aba():
 icone_aba = encontrar_icone_aba()
 
 st.set_page_config(
-    page_title="aEterna - Seu Legado Digital",
+    page_title="aEterna - Memórias Vivas",
     page_icon=icone_aba,
     layout="wide",
     initial_sidebar_state="expanded"
@@ -351,18 +352,18 @@ def render_login():
                         st.error("❌ E-mail ou senha incorretos")
 
     with tab2:
-        st.markdown("### Acessar legado de alguém especial")
+        st.markdown("### Conhecer a história de alguém")
         with st.form("visitante_form"):
             nome_visitante = st.text_input("Seu nome", key="visitante_nome")
-            email_falecido = st.text_input("E-mail da pessoa falecida", key="visitante_email")
+            email_falecido = st.text_input("E-mail da pessoa responsável pela história", key="visitante_email")
             chave = st.text_input("Chave de acesso", type="password", key="visitante_chave")
-            submitted = st.form_submit_button("🕊️ ACESSAR LEGADO", width="stretch", type="primary")
+            submitted = st.form_submit_button("📖 ACESSAR HISTÓRIA", width="stretch", type="primary")
             if submitted:
                 if nome_visitante and email_falecido and chave:
                     if fazer_login_visitante(nome_visitante, chave, email_falecido):
                         st.success(f"✅ Bem-vindo(a), {nome_visitante}!")
                         logger.info(
-                            f"LOGIN_VISITANTE: {nome_visitante} acessou memorial de {email_falecido}"
+                            f"LOGIN_VISITANTE: {nome_visitante} acessou história de {email_falecido}"
                         )
                         st.rerun()
                     else:
@@ -481,13 +482,10 @@ def render_minha_historia():
                 if fotos:
                     st.markdown("**📷 Fotos desta memória**")
                     for foto in fotos:
-                        caminho_foto = foto.get("caminho") or ""
-                        if caminho_foto.startswith("http"):
-                            st.image(foto["caminho"], caption=foto.get("titulo", ""), width="stretch")
-                        elif caminho_foto and os.path.exists(caminho_foto):
-                            st.image(foto["caminho"], caption=foto.get("titulo", ""), width="stretch")
-                        else:
-                            st.warning("📷 Foto indisponível neste ambiente.")
+                        exibir_foto_segura(
+                            foto.get("caminho"),
+                            caption=foto.get("titulo", ""),
+                        )
                 try:
                     videos = videos_por_memoria.get(memoria["id"], [])
                 except Exception as e:
@@ -496,8 +494,10 @@ def render_minha_historia():
                 if videos:
                     st.markdown("**🎥 Vídeos desta memória**")
                     for video in videos:
-                        if video.get("caminho") and os.path.exists(video["caminho"]):
-                            st.video(video["caminho"])
+                        exibir_video_seguro(
+                            video.get("caminho"),
+                            legenda=video.get("titulo", ""),
+                        )
 
 
 # ============================================================================
@@ -691,17 +691,7 @@ def render_videos():
                         st.markdown(f"**👥 Para:** {video['destinatario']}")
                     st.markdown(
                         f"**🔓 Acesso para:** {', '.join(nomes_acesso) if nomes_acesso else 'Todos os contatos'}")
-                    caminho_video = video.get("caminho") or ""
-
-                    if caminho_video.startswith("http"):
-                        st.video(caminho_video)
-                    elif caminho_video and os.path.exists(caminho_video):
-                        st.video(caminho_video)
-                    else:
-                        st.warning(
-                            "🎥 Este vídeo foi cadastrado antes da migração para o Storage "
-                            "e o arquivo não está disponível neste ambiente."
-                        )
+                    exibir_video_seguro(video.get("caminho"))
 
                     if st.button(f"🗑️ Remover", key=f"del_video_{video['id']}"):
                         db.deletar_video(video['id'], st.session_state.usuario_atual['id'])
@@ -717,7 +707,7 @@ def render_videos_visitante():
     )
 
     st.markdown(
-        f"<h3 style='color: #2E8B57;'>🕊️ Mensagens de {nome_falecido} para você</h3>",
+        f"<h3 style='color: #2E8B57;'>🎥 Vídeos compartilhados por {nome_falecido}</h3>",
         unsafe_allow_html=True
     )
 
@@ -734,10 +724,7 @@ def render_videos_visitante():
 
             st.markdown(f"**Categoria:** {video.get('categoria', '')}")
 
-            if video.get("caminho"):
-                st.video(video["caminho"])
-            else:
-                st.warning("Vídeo indisponível.")
+            exibir_video_seguro(video.get("caminho"))
 
 
 # ============================================================================
@@ -894,14 +881,10 @@ def render_fotos():
                         )
                     )
 
-                    caminho_foto = foto.get("caminho") or ""
-
-                    if caminho_foto.startswith("http"):
-                        st.image(caminho_foto, width="stretch")
-                    elif caminho_foto and os.path.exists(caminho_foto):
-                        st.image(caminho_foto, width="stretch")
-                    else:
-                        st.warning("📷 Foto indisponível neste ambiente.")
+                    exibir_foto_segura(
+                        foto.get("caminho"),
+                        caption=foto.get("titulo", ""),
+                    )
 
                     if st.button(
                         "🗑️ Remover",
@@ -919,7 +902,7 @@ def render_fotos_visitante():
     nome_falecido = usuario.get("nome_falecido", "essa pessoa")
 
     st.markdown(
-        f"<h3 style='color: #2E8B57;'>📷 Fotos de {nome_falecido}</h3>",
+        f"<h3 style='color: #2E8B57;'>📷 Fotos compartilhadas por {nome_falecido}</h3>",
         unsafe_allow_html=True
     )
 
@@ -934,14 +917,10 @@ def render_fotos_visitante():
             if foto.get("descricao"):
                 st.markdown(foto["descricao"])
 
-            caminho_foto = foto.get("caminho") or ""
-
-            if caminho_foto.startswith("http"):
-                st.image(caminho_foto, width="stretch")
-            elif caminho_foto and os.path.exists(caminho_foto):
-                st.image(caminho_foto, width="stretch")
-            else:
-                st.warning("📷 Foto indisponível neste ambiente.")
+            exibir_foto_segura(
+                foto.get("caminho"),
+                caption=foto.get("titulo", ""),
+            )
 
 # ============================================================================
 # CONTATOS (COMPLETO)
@@ -1010,7 +989,7 @@ def render_contatos():
                 is_prioridade = st.checkbox("Marcar como contato prioritário")
 
                 acesso_central_luto = st.checkbox(
-                    "Permitir acesso ao Assistente Memorial",
+                    "Permitir acesso ao Assistente de Histórias",
                     value=False
                 )
 
@@ -1081,7 +1060,7 @@ def render_contatos():
 def render_preferencias():
     st.markdown("<h3 style='color: #2E8B57;'>👤 Minha Essência</h3>", unsafe_allow_html=True)
     st.info(
-        "Essas informações ajudam o Assistente de Legado e o Assistente Memorial "
+        "Essas informações ajudam os Assistentes da aEterna "
         "a compreender melhor sua história, seus valores, gostos e lembranças importantes."
     )
 
@@ -1091,22 +1070,11 @@ def render_preferencias():
 
     foto_atual = db.obter_foto_usuario(usuario_id)
 
-    foto_atual = foto_atual or ""
-
-    if foto_atual.startswith("http"):
-        st.image(
-            foto_atual,
-            caption="Sua foto atual",
-            width=180
-        )
-    elif foto_atual and os.path.exists(foto_atual):
-        st.image(
-            foto_atual,
-            caption="Sua foto atual",
-            width=180
-        )
-    else:
-        st.info("Sua foto de perfil anterior não está disponível neste ambiente. Envie uma nova foto para atualizar.")
+    exibir_foto_segura(
+        foto_atual,
+        caption="Sua foto atual",
+        width=180,
+    )
 
     with st.form("form_foto_perfil_usuario", clear_on_submit=True):
         foto_usuario = st.file_uploader(
@@ -1834,13 +1802,13 @@ def main():
                 st.session_state.usuario_atual["id"]
             )
 
-            abas = ["🕊️ Assistente Memorial"]
+            abas = ["📖 Assistente de Histórias"]
 
             if videos_visitante:
-                abas.append(f"🎥 Mensagens ({len(videos_visitante)})")
+                abas.append(f"🎥 Vídeos compartilhados ({len(videos_visitante)})")
 
             if fotos_visitante:
-                abas.append(f"📷 Fotos ({len(fotos_visitante)})")
+                abas.append(f"📷 Fotos compartilhadas ({len(fotos_visitante)})")
 
             tabs = st.tabs(abas)
 
@@ -1861,7 +1829,7 @@ def main():
 
             st.markdown("""
             <div class="footer-aeterna">
-                <p>✨ aEterna - Assistente Memorial ✨</p>
+                <p>✨ aEterna — Memórias vivas para quem você ama ✨</p>
             </div>
             """, unsafe_allow_html=True)
 

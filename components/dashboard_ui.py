@@ -286,15 +286,15 @@ def render_sidebar_premium(
         if usuario.get("tipo") == "visitante":
             nome_falecido = usuario.get("nome_falecido", "essa pessoa")
 
-            st.markdown(f"### Memorial de {nome_falecido}")
+            st.markdown(f"### Histórias de {nome_falecido}")
 
-            st.markdown("💬 Assistente Memorial")
+            st.markdown("📖 Assistente de Histórias")
 
             if qtd_videos > 0:
-                st.markdown(f"🎥 Vídeos disponíveis: **{qtd_videos}**")
+                st.markdown(f"🎥 Vídeos compartilhados: **{qtd_videos}**")
 
             if qtd_memorias > 0:
-                st.markdown(f"💬 Memórias disponíveis: **{qtd_memorias}**")
+                st.markdown(f"💬 Histórias disponíveis: **{qtd_memorias}**")
 
             if qtd_cofre > 0:
                 st.markdown(f"🔒 Itens liberados: **{qtd_cofre}**")
