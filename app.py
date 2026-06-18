@@ -254,6 +254,12 @@ if 'crypto' not in st.session_state:
     st.session_state.crypto = None
 if 'historico_assistente' not in st.session_state:
     st.session_state.historico_assistente = []
+if 'modo_visualizacao' not in st.session_state:
+    st.session_state.modo_visualizacao = "minha_historia"
+if 'historia_atual_usuario_id' not in st.session_state:
+    st.session_state.historia_atual_usuario_id = None
+if 'historia_atual_nome' not in st.session_state:
+    st.session_state.historia_atual_nome = None
 
 
 # ============================================================================
@@ -269,6 +275,11 @@ def fazer_login(email, senha):
 
         st.session_state.autenticado = True
         st.session_state.usuario_atual = usuario
+        st.session_state.modo_acesso = "usuario"
+        st.session_state.modo_visualizacao = "minha_historia"
+        st.session_state.historia_atual_usuario_id = usuario["id"]
+        st.session_state.historia_atual_nome = usuario["nome_completo"]
+        st.session_state.historico_assistente = []
 
         return True
 
@@ -304,6 +315,9 @@ def fazer_logout():
     st.session_state.falecido_id = None
     st.session_state.crypto = None
     st.session_state.historico_assistente = []
+    st.session_state.modo_visualizacao = "minha_historia"
+    st.session_state.historia_atual_usuario_id = None
+    st.session_state.historia_atual_nome = None
     st.rerun()
 
 
@@ -873,13 +887,13 @@ def render_videos():
                         db.deletar_video(video['id'], st.session_state.usuario_atual['id'])
                         st.rerun()
 
-def render_videos_visitante():
+def render_videos_visitante(contato_id=None, nome_pessoa=None):
     usuario = st.session_state.usuario_atual
-    contato_id = usuario["id"]
-
-    nome_falecido = st.session_state.usuario_atual.get(
-        "nome_falecido",
-        "essa pessoa"
+    contato_id = contato_id or usuario["id"]
+    nome_falecido = (
+        nome_pessoa
+        or usuario.get("nome_falecido")
+        or "essa pessoa"
     )
 
     st.markdown(
@@ -1072,10 +1086,14 @@ def render_fotos():
                         )
                         st.rerun()
 
-def render_fotos_visitante():
+def render_fotos_visitante(contato_id=None, nome_pessoa=None):
     usuario = st.session_state.usuario_atual
-    contato_id = usuario["id"]
-    nome_falecido = usuario.get("nome_falecido", "essa pessoa")
+    contato_id = contato_id or usuario["id"]
+    nome_falecido = (
+        nome_pessoa
+        or usuario.get("nome_falecido")
+        or "essa pessoa"
+    )
 
     st.markdown(
         f"<h3 style='color: #2E8B57;'>📷 Fotos compartilhadas por {nome_falecido}</h3>",
@@ -1926,6 +1944,175 @@ def render_admin_panel():
 
 
 # ============================================================================
+# REDE PRIVADA DE HISTÓRIAS
+# ============================================================================
+def selecionar_minha_historia():
+    usuario = st.session_state.usuario_atual or {}
+    st.session_state.modo_visualizacao = "minha_historia"
+    st.session_state.historia_atual_usuario_id = usuario.get("id")
+    st.session_state.historia_atual_nome = usuario.get("nome_completo")
+    st.session_state.historico_assistente = []
+    st.session_state.pop("assistente_obj", None)
+    st.session_state.pop("assistente_modo", None)
+    st.session_state.pop("assistente_usuario_id", None)
+
+
+def selecionar_historia_compartilhada(historia: dict):
+    st.session_state.modo_visualizacao = "historia_compartilhada"
+    st.session_state.historia_atual_usuario_id = historia["usuario_id"]
+    st.session_state.historia_atual_nome = historia.get("nome_completo")
+    st.session_state.historico_assistente = []
+    st.session_state.pop("assistente_obj", None)
+    st.session_state.pop("assistente_modo", None)
+    st.session_state.pop("assistente_usuario_id", None)
+
+
+def render_navegacao_historias(historias_compartilhadas: list):
+    with st.sidebar:
+        st.markdown("---")
+        st.markdown('<div class="ae-sidebar-section">Minha área</div>', unsafe_allow_html=True)
+
+        if st.button(
+            "📖 Minha História",
+            key="navegar_minha_historia",
+            use_container_width=True,
+            type=(
+                "primary"
+                if st.session_state.modo_visualizacao == "minha_historia"
+                else "secondary"
+            ),
+        ):
+            selecionar_minha_historia()
+            st.rerun()
+
+        st.markdown(
+            '<div class="ae-sidebar-section">Histórias compartilhadas comigo</div>',
+            unsafe_allow_html=True,
+        )
+
+        if not historias_compartilhadas:
+            st.caption("Nenhuma história foi compartilhada com você ainda.")
+            return
+
+        for historia in historias_compartilhadas:
+            nome = historia.get("nome_completo") or historia.get("nome") or "Pessoa"
+            selecionada = (
+                st.session_state.modo_visualizacao == "historia_compartilhada"
+                and st.session_state.historia_atual_usuario_id == historia["usuario_id"]
+            )
+
+            if st.button(
+                f"👤 História de {nome}",
+                key=f"navegar_historia_{historia['usuario_id']}",
+                use_container_width=True,
+                type="primary" if selecionada else "secondary",
+            ):
+                selecionar_historia_compartilhada(historia)
+                st.rerun()
+
+
+def render_assistente_historia_compartilhada(
+        usuario_logado: dict,
+        acesso: dict,
+):
+    usuario_original = st.session_state.usuario_atual
+    falecido_id_original = st.session_state.falecido_id
+
+    usuario_visitante = {
+        "id": acesso["contato_id"],
+        "usuario_id": acesso["usuario_id"],
+        "nome": usuario_logado.get("nome", "Visitante"),
+        "tipo": "visitante",
+        "nome_falecido": acesso.get("nome_completo") or acesso.get("nome"),
+        "email": usuario_logado.get("email", ""),
+        "parentesco": acesso.get("parentesco", ""),
+        "usuario_logado_compartilhado": True,
+    }
+
+    try:
+        st.session_state.usuario_atual = usuario_visitante
+        st.session_state.falecido_id = acesso["usuario_id"]
+        render_assistente()
+    finally:
+        st.session_state.usuario_atual = usuario_original
+        st.session_state.falecido_id = falecido_id_original
+
+
+def render_visao_historia_compartilhada(
+        acesso: dict,
+        usuario_logado: dict,
+):
+    usuario_id = acesso["usuario_id"]
+    contato_id = acesso["contato_id"]
+    nome_pessoa = acesso.get("nome_completo") or acesso.get("nome") or "esta pessoa"
+    nome_visitante = usuario_logado.get("nome") or "Visitante"
+
+    memorias = db.listar_memorias_usuario(usuario_id)
+    fotos = db.listar_fotos_por_contato(contato_id)
+    videos = db.listar_videos_por_contato(contato_id)
+
+    try:
+        preferencias = db.obter_preferencias(usuario_id)
+    except Exception as exc:
+        print("Erro ao carregar preferências para história compartilhada:", exc)
+        preferencias = {}
+
+    st.session_state.videos_visitante_cache = videos
+    st.session_state.fotos_visitante_cache = fotos
+
+    falecido_id_original = st.session_state.falecido_id
+    try:
+        st.session_state.falecido_id = usuario_id
+        render_cabecalho_visitante(nome_pessoa, nome_visitante)
+
+        abas = [
+            "👤 Sobre",
+            f"📖 Histórias ({len(memorias)})",
+            "🌟 Aprendizados",
+            "💬 Assistente de Histórias",
+        ]
+
+        if videos:
+            abas.append(f"🎥 Vídeos compartilhados ({len(videos)})")
+        if fotos:
+            abas.append(f"📷 Fotos compartilhadas ({len(fotos)})")
+
+        tabs = st.tabs(abas)
+
+        with tabs[0]:
+            render_sobre_visitante(nome_pessoa, memorias, preferencias)
+        with tabs[1]:
+            render_historias_visitante(memorias)
+        with tabs[2]:
+            render_aprendizados_visitante(memorias, preferencias)
+        with tabs[3]:
+            render_assistente_historia_compartilhada(usuario_logado, acesso)
+
+        indice = 4
+        if videos:
+            with tabs[indice]:
+                render_videos_visitante(
+                    contato_id=contato_id,
+                    nome_pessoa=nome_pessoa,
+                )
+            indice += 1
+        if fotos:
+            with tabs[indice]:
+                render_fotos_visitante(
+                    contato_id=contato_id,
+                    nome_pessoa=nome_pessoa,
+                )
+    finally:
+        st.session_state.falecido_id = falecido_id_original
+
+    st.markdown("""
+    <div class="footer-aeterna">
+        <p>✨ aEterna — Memórias vivas para quem você ama ✨</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+# ============================================================================
 # MAIN
 # ============================================================================
 def main():
@@ -2043,6 +2230,15 @@ def main():
             "nome_completo",
             "Usuário"
         )
+        usuario_logado = st.session_state.usuario_atual
+
+        try:
+            historias_compartilhadas = db.listar_historias_compartilhadas_comigo(
+                usuario_logado.get("email", "")
+            )
+        except Exception as exc:
+            print("Erro ao listar histórias compartilhadas:", exc)
+            historias_compartilhadas = []
 
         is_admin = (
                 st.session_state.usuario_atual.get("tipo") == "admin"
@@ -2076,6 +2272,26 @@ def main():
             is_admin=is_admin,
             fazer_logout=fazer_logout
         )
+
+        render_navegacao_historias(historias_compartilhadas)
+
+        if st.session_state.modo_visualizacao == "historia_compartilhada":
+            historia_usuario_id = st.session_state.historia_atual_usuario_id
+            acesso = db.usuario_pode_acessar_historia(
+                usuario_logado.get("email", ""),
+                historia_usuario_id,
+            )
+
+            if not acesso:
+                st.warning(
+                    "Você não possui autorização para acessar esta história. "
+                    "Voltamos para a sua área."
+                )
+                selecionar_minha_historia()
+                st.rerun()
+
+            render_visao_historia_compartilhada(acesso, usuario_logado)
+            return
 
         if is_admin:
             tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([

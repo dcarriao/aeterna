@@ -102,30 +102,31 @@ def render_chat_luto():
                     • Existe alguma mensagem compartilhada comigo?
                     • Quais valores aparecem nessas histórias?
                     """.format(nome_falecido=nome_falecido))
-        st.markdown("""
-                    ---
-                    ### ✨ Também quer preservar sua história?
+        if not usuario.get("usuario_logado_compartilhado"):
+            st.markdown("""
+                        ---
+                        ### ✨ Também quer preservar sua história?
 
-                    Crie seu espaço na aEterna para registrar histórias, fotos, vídeos e momentos importantes da sua vida.
-                    """)
+                        Crie seu espaço na aEterna para registrar histórias, fotos, vídeos e momentos importantes da sua vida.
+                        """)
 
-        if st.button("✨ Criar minha história"):
-            for key in [
-                "autenticado",
-                "usuario_atual",
-                "modo_acesso",
-                "falecido_id",
-                "historico_assistente",
-                "assistente_obj",
-                "assistente_modo",
-                "assistente_usuario_id",
-            ]:
-                if key in st.session_state:
-                    del st.session_state[key]
+            if st.button("✨ Criar minha história"):
+                for key in [
+                    "autenticado",
+                    "usuario_atual",
+                    "modo_acesso",
+                    "falecido_id",
+                    "historico_assistente",
+                    "assistente_obj",
+                    "assistente_modo",
+                    "assistente_usuario_id",
+                ]:
+                    if key in st.session_state:
+                        del st.session_state[key]
 
-            st.session_state.autenticado = False
-            st.session_state.login_mode = "cadastro"
-            st.rerun()
+                st.session_state.autenticado = False
+                st.session_state.login_mode = "cadastro"
+                st.rerun()
     else:
         st.markdown("## Assistente de Legado")
         st.markdown("""
@@ -416,7 +417,7 @@ def render_chat_luto():
         usuario = st.session_state.get("usuario_atual") or {}
 
         if usuario.get("tipo") == "visitante":
-            falecido_id = st.session_state.get("falecido_id")
+            contato_id = usuario.get("id")
 
             palavras = _extrair_palavras_relevantes(mensagem.strip())
 
@@ -424,8 +425,8 @@ def render_chat_luto():
                 if not isinstance(palavra, str):
                     continue
 
-                resultado = db.buscar_fotos_por_texto(
-                    falecido_id,
+                resultado = db.buscar_fotos_por_contato_e_texto(
+                    contato_id,
                     palavra
                 )
 

@@ -180,7 +180,7 @@ class BancoDados:
         # Inserir plano padrão
         self.executar(cursor, "SELECT COUNT(*) FROM planos")
         if cursor.fetchone()[0] == 0:
-            cself.executar(cursor, '''
+            self.executar(cursor, '''
                 INSERT INTO planos (nome, preco, descricao, max_contatos, max_prioridades, max_mensagens_ia, max_videos_total, max_videos_por_categoria, tem_agendamento, tem_videos_ia)
                 VALUES ('Gratuito', 0, 'Plano básico gratuito', 10, 3, 50, 10, 5, 1, 0)
             ''')
@@ -758,6 +758,55 @@ class BancoDados:
             cursor.close()
             conn.close()
 
+    def buscar_fotos_por_contato_e_texto(
+            self,
+            contato_id: int,
+            texto: str,
+    ) -> List[Dict]:
+        if not contato_id or not texto:
+            return []
+
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            termo = f"%{texto.lower()}%"
+
+            self.executar(cursor, """
+                SELECT DISTINCT
+                    f.id,
+                    f.titulo,
+                    f.descricao,
+                    f.categoria,
+                    f.caminho_arquivo
+                FROM fotos f
+                JOIN fotos_contatos fc ON fc.foto_id = f.id
+                WHERE fc.contato_id = ?
+                  AND (
+                    LOWER(COALESCE(f.titulo, '')) LIKE ?
+                    OR LOWER(COALESCE(f.descricao, '')) LIKE ?
+                    OR LOWER(COALESCE(f.categoria, '')) LIKE ?
+                  )
+                LIMIT 5
+            """, (
+                contato_id,
+                termo,
+                termo,
+                termo,
+            ))
+
+            rows = cursor.fetchall()
+            return [{
+                "id": row[0],
+                "titulo": row[1] or "",
+                "descricao": row[2] or "",
+                "categoria": row[3] or "",
+                "caminho": row[4],
+            } for row in rows]
+        finally:
+            cursor.close()
+            conn.close()
+
     def deletar_foto(self, foto_id: int, usuario_id: int) -> bool:
         conn = self.conectar()
         cursor = conn.cursor()
@@ -958,6 +1007,140 @@ class BancoDados:
             "acesso_central_luto": r[11] or 0,
             "chave_acesso": r[12] or ""
         } for r in rows]
+
+    def listar_historias_compartilhadas_comigo(self, email: str) -> List[Dict]:
+        email_normalizado = (email or "").strip().lower()
+        if not email_normalizado:
+            return []
+
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            self.executar(cursor, """
+                SELECT
+                    u.id,
+                    u.nome,
+                    u.sobrenome,
+                    u.email,
+                    c.id,
+                    c.chave_acesso,
+                    c.parentesco
+                FROM contatos c
+                JOIN usuarios u ON u.id = c.usuario_id
+                WHERE LOWER(TRIM(c.email)) = ?
+                  AND COALESCE(c.acesso_central_luto, 0) = 1
+                  AND COALESCE(u.ativo, 1) = 1
+                ORDER BY u.nome, u.sobrenome, c.id
+            """, (email_normalizado,))
+
+            rows = cursor.fetchall()
+            historias = []
+            usuarios_adicionados = set()
+
+            for row in rows:
+                usuario_id = row[0]
+                if usuario_id in usuarios_adicionados:
+                    continue
+
+                usuarios_adicionados.add(usuario_id)
+                historias.append({
+                    "usuario_id": usuario_id,
+                    "nome": row[1] or "",
+                    "sobrenome": row[2] or "",
+                    "nome_completo": f"{row[1] or ''} {row[2] or ''}".strip(),
+                    "email": row[3] or "",
+                    "contato_id": row[4],
+                    "chave_acesso": row[5] or "",
+                    "parentesco": row[6] or "",
+                })
+
+            return historias
+        finally:
+            cursor.close()
+            conn.close()
+
+    def usuario_pode_acessar_historia(
+            self,
+            email: str,
+            usuario_id: int,
+    ) -> Optional[Dict]:
+        email_normalizado = (email or "").strip().lower()
+        if not email_normalizado or not usuario_id:
+            return None
+
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            self.executar(cursor, """
+                SELECT
+                    c.id,
+                    c.parentesco,
+                    c.chave_acesso,
+                    u.id,
+                    u.nome,
+                    u.sobrenome,
+                    u.email
+                FROM contatos c
+                JOIN usuarios u ON u.id = c.usuario_id
+                WHERE LOWER(TRIM(c.email)) = ?
+                  AND c.usuario_id = ?
+                  AND COALESCE(c.acesso_central_luto, 0) = 1
+                  AND COALESCE(u.ativo, 1) = 1
+                ORDER BY c.id
+                LIMIT 1
+            """, (email_normalizado, usuario_id))
+
+            row = cursor.fetchone()
+            if not row:
+                return None
+
+            return {
+                "contato_id": row[0],
+                "parentesco": row[1] or "",
+                "chave_acesso": row[2] or "",
+                "usuario_id": row[3],
+                "nome": row[4] or "",
+                "sobrenome": row[5] or "",
+                "nome_completo": f"{row[4] or ''} {row[5] or ''}".strip(),
+                "email": row[6] or "",
+            }
+        finally:
+            cursor.close()
+            conn.close()
+
+    def obter_usuario_por_id(self, usuario_id: int) -> Optional[Dict]:
+        if not usuario_id:
+            return None
+
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            self.executar(cursor, """
+                SELECT id, nome, sobrenome, email, tipo, plano_id, ativo
+                FROM usuarios
+                WHERE id = ?
+            """, (usuario_id,))
+
+            row = cursor.fetchone()
+            if not row:
+                return None
+
+            return {
+                "id": row[0],
+                "nome": row[1] or "",
+                "sobrenome": row[2] or "",
+                "nome_completo": f"{row[1] or ''} {row[2] or ''}".strip(),
+                "email": row[3] or "",
+                "tipo": row[4] or "usuario",
+                "plano_id": row[5],
+                "ativo": row[6] if row[6] is not None else 1,
+            }
+        finally:
+            cursor.close()
+            conn.close()
 
     def listar_memorias_usuario(self, usuario_id: int):
         conn = self.conectar()

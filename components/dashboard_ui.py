@@ -309,7 +309,7 @@ def render_sidebar_premium(
             st.markdown("---")
             return
 
-        st.markdown('<div class="ae-sidebar-section">Seu legado</div>', unsafe_allow_html=True)
+        st.markdown('<div class="ae-sidebar-section">Sua história</div>', unsafe_allow_html=True)
 
         stats_html = (
             f'<div class="ae-sidebar-stat"><div class="ae-sidebar-stat-label">🎥 Vídeos</div><div class="ae-sidebar-stat-value">{qtd_videos}</div></div>'
@@ -341,7 +341,7 @@ def render_painel_inicial(nome_exibido, qtd_videos, qtd_contatos, qtd_cofre=0, q
     cards_html = (
         '<div class="ae-dashboard-grid">'
         f'<div class="ae-dashboard-card"><div class="ae-dashboard-card-icon">🎥</div><div class="ae-dashboard-card-label">Histórias registradas</div><div class="ae-dashboard-card-value">{qtd_videos}</div><div class="ae-dashboard-card-note">Mensagens em vídeo para o futuro.</div></div>'
-        f'<div class="ae-dashboard-card"><div class="ae-dashboard-card-icon">👥</div><div class="ae-dashboard-card-label">Contatos de confiança</div><div class="ae-dashboard-card-value">{qtd_contatos}</div><div class="ae-dashboard-card-note">Pessoas autorizadas a acessar seu legado.</div></div>'
+        f'<div class="ae-dashboard-card"><div class="ae-dashboard-card-icon">👥</div><div class="ae-dashboard-card-label">Contatos de confiança</div><div class="ae-dashboard-card-value">{qtd_contatos}</div><div class="ae-dashboard-card-note">Pessoas autorizadas a acessar sua história.</div></div>'
         f'<div class="ae-dashboard-card"><div class="ae-dashboard-card-icon">🔒</div><div class="ae-dashboard-card-label">Fotos preservadas</div><div class="ae-dashboard-card-value">{qtd_cofre}</div><div class="ae-dashboard-card-note">Documentos e informações importantes.</div></div>'
         f'<div class="ae-dashboard-card"><div class="ae-dashboard-card-icon">💬</div><div class="ae-dashboard-card-label">Pessoas importantes</div><div class="ae-dashboard-card-value">{qtd_memorias}</div><div class="ae-dashboard-card-note">Histórias, valores e ensinamentos.</div></div>'
         '</div>'
