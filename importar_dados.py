@@ -278,7 +278,7 @@ def main():
     print(f"\n🌿 Agora:")
     print(f"   1. Execute: streamlit run app.py")
     print(f"   2. Faça login com: {email}")
-    print(f"   3. Vá na aba '🤖 Assistente de Luto'")
+    print(f"   3. Vá na aba '🤖 Assistente de Histórias'")
     print("")
 
 

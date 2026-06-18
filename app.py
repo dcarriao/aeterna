@@ -1,6 +1,7 @@
 import streamlit as st
 from PIL import Image
 import os
+import html
 from datetime import datetime
 import secrets
 from utils.banco import BancoDados
@@ -501,7 +502,182 @@ def render_minha_historia():
 
 
 # ============================================================================
-# ASSISTENTE DE LUTO (CHAT DENTRO DA CAIXA)
+# EXPERIÊNCIA DO VISITANTE
+# ============================================================================
+
+def render_cabecalho_visitante(nome_pessoa: str, nome_visitante: str):
+    nome_pessoa_seguro = html.escape(nome_pessoa or "esta pessoa")
+    nome_visitante_seguro = html.escape(nome_visitante or "Visitante")
+
+    st.markdown(
+        f"""
+        <style>
+        .ae-visitor-hero {{
+            background:
+                radial-gradient(circle at 84% 18%, rgba(212,168,79,0.24), transparent 30%),
+                linear-gradient(135deg, #2B1747 0%, #45265f 68%, #6a3d73 100%);
+            color: white;
+            border: 1px solid rgba(212,168,79,0.42);
+            border-radius: 28px;
+            padding: 1.7rem 1.9rem;
+            margin-bottom: 1.15rem;
+            box-shadow: 0 18px 50px rgba(43,23,71,0.18);
+        }}
+        .ae-visitor-hero h1 {{
+            color: #f2d89b;
+            margin: 0 0 0.45rem;
+            font-size: 2rem;
+        }}
+        .ae-visitor-hero p {{
+            color: rgba(255,255,255,0.9);
+            margin: 0.25rem 0;
+            line-height: 1.55;
+        }}
+        .ae-visitor-card {{
+            background: rgba(255,255,255,0.94);
+            border: 1px solid rgba(212,168,79,0.28);
+            border-radius: 20px;
+            padding: 1rem 1.1rem;
+            box-shadow: 0 10px 28px rgba(43,23,71,0.07);
+            margin-bottom: 0.8rem;
+        }}
+        </style>
+        <div class="ae-visitor-hero">
+            <h1>📖 A história de {nome_pessoa_seguro}</h1>
+            <p><strong>{nome_visitante_seguro}</strong>, conheça histórias, momentos, aprendizados e memórias que {nome_pessoa_seguro} decidiu preservar.</p>
+            <p>Este é um espaço de memórias vivas, criado para aproximar pessoas e gerações.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def render_sobre_visitante(nome_pessoa: str, memorias: list, preferencias: dict):
+    st.markdown(f"## 👤 Sobre {nome_pessoa}")
+
+    resumo = preferencias.get("personalidade_extra", "").strip()
+    if not resumo:
+        for memoria in memorias:
+            conteudo = (memoria.get("conteudo") or "").strip()
+            if conteudo:
+                resumo = conteudo[:420] + ("…" if len(conteudo) > 420 else "")
+                break
+
+    col_foto, col_resumo = st.columns([0.32, 0.68])
+
+    with col_foto:
+        try:
+            foto_perfil = db.obter_foto_usuario(st.session_state.falecido_id)
+        except Exception as exc:
+            print("Erro ao carregar foto da pessoa:", exc)
+            foto_perfil = None
+
+        if foto_perfil:
+            exibir_foto_segura(
+                foto_perfil,
+                caption=nome_pessoa,
+                width="stretch",
+            )
+        else:
+            st.info("Ainda não há uma foto de perfil compartilhada.")
+
+    with col_resumo:
+        if resumo:
+            st.markdown(
+                f'<div class="ae-visitor-card">{html.escape(resumo)}</div>',
+                unsafe_allow_html=True,
+            )
+        else:
+            st.info(
+                f"{nome_pessoa} ainda não registrou um resumo pessoal. "
+                "Explore as outras seções para conhecer as histórias compartilhadas."
+            )
+
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Histórias", len(memorias))
+        col2.metric(
+            "Fotos",
+            len(st.session_state.get("fotos_visitante_cache", [])),
+        )
+        col3.metric(
+            "Vídeos",
+            len(st.session_state.get("videos_visitante_cache", [])),
+        )
+
+
+def render_historias_visitante(memorias: list):
+    st.markdown("## 📖 Histórias compartilhadas")
+
+    if not memorias:
+        st.info("Ainda não há histórias registradas para explorar.")
+        return
+
+    for memoria in memorias:
+        titulo = memoria.get("titulo") or "História sem título"
+        categoria = memoria.get("categoria") or "História"
+
+        with st.expander(f"📚 {titulo} · {categoria.title()}"):
+            conteudo = memoria.get("conteudo") or ""
+            if conteudo:
+                st.markdown(conteudo)
+            else:
+                st.info("Esta história ainda não possui uma descrição.")
+
+
+def render_aprendizados_visitante(memorias: list, preferencias: dict):
+    st.markdown("## 🌟 Aprendizados e valores")
+
+    itens = []
+
+    personalidade = preferencias.get("personalidade_extra", "").strip()
+    if personalidade:
+        itens.append(("Valores e jeito de ser", personalidade))
+
+    melhor_lembranca = preferencias.get("melhor_lembranca", "").strip()
+    if melhor_lembranca:
+        itens.append(("Uma lembrança importante", melhor_lembranca))
+
+    dia_feliz = preferencias.get("dia_mais_feliz", "").strip()
+    if dia_feliz:
+        itens.append(("Um momento marcante", dia_feliz))
+
+    categorias_aprendizado = (
+        "valor",
+        "aprend",
+        "conselho",
+        "ensinamento",
+        "superação",
+    )
+    for memoria in memorias:
+        categoria = (memoria.get("categoria") or "").lower()
+        if any(termo in categoria for termo in categorias_aprendizado):
+            conteudo = (memoria.get("conteudo") or "").strip()
+            if conteudo:
+                itens.append(
+                    (memoria.get("titulo") or "Aprendizado compartilhado", conteudo)
+                )
+
+    if not itens:
+        st.info(
+            "Ainda não há aprendizados ou valores destacados. "
+            "O Assistente de Histórias pode ajudar a explorar o conteúdo já registrado."
+        )
+        return
+
+    for titulo, conteudo in itens:
+        st.markdown(
+            f"""
+            <div class="ae-visitor-card">
+                <strong style="color:#2B1747;">{html.escape(titulo)}</strong>
+                <div style="margin-top:0.35rem;color:#51455b;line-height:1.55;">{html.escape(conteudo)}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+
+# ============================================================================
+# ASSISTENTE DE HISTÓRIAS
 # ============================================================================
 
 def render_assistente():
@@ -1675,12 +1851,27 @@ def render_cofre():
                         if doc['descricao']:
                             st.markdown(f"**Descrição:** {doc['descricao']}")
 
-                        if doc['caminho_arquivo'] and os.path.exists(doc['caminho_arquivo']):
-                            if doc['nome_original'].lower().endswith(('.png', '.jpg', '.jpeg')):
-                                st.image(doc['caminho_arquivo'], width=150)
-                            elif doc['nome_original'].lower().endswith('.pdf'):
-                                with open(doc['caminho_arquivo'], "rb") as f:
-                                    st.download_button("📄 Baixar PDF", f, file_name=doc['nome_original'])
+                        if doc['nome_original'].lower().endswith(('.png', '.jpg', '.jpeg')):
+                            exibir_foto_segura(
+                                doc.get("caminho_arquivo"),
+                                caption=doc.get("titulo", ""),
+                                width=150,
+                            )
+                        elif doc['nome_original'].lower().endswith('.pdf'):
+                            try:
+                                caminho_documento = doc.get("caminho_arquivo") or ""
+                                if caminho_documento and os.path.exists(caminho_documento):
+                                    with open(caminho_documento, "rb") as f:
+                                        st.download_button(
+                                            "📄 Baixar PDF",
+                                            f,
+                                            file_name=doc['nome_original'],
+                                        )
+                                else:
+                                    st.warning("📄 Este documento não está disponível neste ambiente.")
+                            except Exception as exc:
+                                print("Erro ao carregar documento:", exc)
+                                st.warning("📄 Não foi possível carregar este documento agora.")
 
                         if st.button(f"🗑️ Excluir", key=f"del_doc_{doc['id']}"):
                             if doc['caminho_arquivo'] and os.path.exists(doc['caminho_arquivo']):
@@ -1754,15 +1945,9 @@ def main():
 
         if st.session_state.usuario_atual.get("tipo") == "visitante":
             nome_exibido = st.session_state.usuario_atual.get("nome", "Visitante")
-
-            render_sidebar_premium(
-                nome_exibido=nome_exibido,
-                qtd_videos=0,
-                qtd_contatos=0,
-                qtd_cofre=0,
-                qtd_memorias=0,
-                is_admin=False,
-                fazer_logout=fazer_logout
+            nome_pessoa = st.session_state.usuario_atual.get(
+                "nome_falecido",
+                "esta pessoa",
             )
 
             videos_visitante = db.listar_videos_por_contato(
@@ -1773,36 +1958,39 @@ def main():
                 st.session_state.usuario_atual["id"]
             )
 
-            qtd_videos = len(
-                db.listar_videos_por_contato(
-                    st.session_state.usuario_atual["id"]
-                )
+            memorias_visitante = db.listar_memorias_usuario(
+                st.session_state.falecido_id
             )
 
-            qtd_memorias = len(
-                db.listar_memorias_usuario(
+            try:
+                preferencias_visitante = db.obter_preferencias(
                     st.session_state.falecido_id
                 )
+            except Exception as exc:
+                print("Erro ao carregar preferências para visitante:", exc)
+                preferencias_visitante = {}
+
+            st.session_state.videos_visitante_cache = videos_visitante
+            st.session_state.fotos_visitante_cache = fotos_visitante
+
+            render_sidebar_premium(
+                nome_exibido=nome_exibido,
+                qtd_videos=len(videos_visitante),
+                qtd_contatos=0,
+                qtd_cofre=0,
+                qtd_memorias=len(memorias_visitante),
+                is_admin=False,
+                fazer_logout=fazer_logout
             )
 
-            qtd_contatos = len(
-                db.listar_contatos_usuario(
-                    st.session_state.falecido_id
-                )
-            )
+            render_cabecalho_visitante(nome_pessoa, nome_exibido)
 
-            #qtd_documentos = len(
-            #    db.listar_cofre_usuario(
-            #        st.session_state.falecido_id
-            #    )
-            #)
-            qtd_documentos = 0
-
-            videos_visitante = db.listar_videos_por_contato(
-                st.session_state.usuario_atual["id"]
-            )
-
-            abas = ["📖 Assistente de Histórias"]
+            abas = [
+                "👤 Sobre",
+                f"📖 Histórias ({len(memorias_visitante)})",
+                "🌟 Aprendizados",
+                "💬 Assistente de Histórias",
+            ]
 
             if videos_visitante:
                 abas.append(f"🎥 Vídeos compartilhados ({len(videos_visitante)})")
@@ -1813,9 +2001,25 @@ def main():
             tabs = st.tabs(abas)
 
             with tabs[0]:
+                render_sobre_visitante(
+                    nome_pessoa,
+                    memorias_visitante,
+                    preferencias_visitante,
+                )
+
+            with tabs[1]:
+                render_historias_visitante(memorias_visitante)
+
+            with tabs[2]:
+                render_aprendizados_visitante(
+                    memorias_visitante,
+                    preferencias_visitante,
+                )
+
+            with tabs[3]:
                 render_assistente()
 
-            indice = 1
+            indice = 4
 
             if videos_visitante:
                 with tabs[indice]:

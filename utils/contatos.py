@@ -49,7 +49,7 @@ class GerenciadorContatos:
                                 key="contato_data_nascimento"
                             )
         with col2:
-            acesso_central_luto = st.checkbox("Dar acesso à Central de Luto", key="contato_acesso_luto")
+            acesso_central_luto = st.checkbox("Dar acesso ao Assistente de Histórias", key="contato_acesso_luto")
             prioridade = st.checkbox("Marcar como contato prioritário", key="contato_prioridade")
 
         # Datas especiais (JSON)
@@ -143,7 +143,7 @@ class GerenciadorContatos:
                     st.markdown(f"**📱 WhatsApp:** {contato['whatsapp'] or 'Não informado'}")
                     st.markdown(f"**👨‍👩‍👧 Parentesco:** {contato['parentesco'] or 'Não informado'}")
                     st.markdown(
-                        f"**🔓 Acesso Central de Luto:** {'✅ Sim' if contato.get('acesso_central_luto') else '❌ Não'}")
+                        f"**🔓 Acesso às histórias:** {'✅ Sim' if contato.get('acesso_central_luto') else '❌ Não'}")
                     if contato.get('data_nascimento'):
                         st.markdown(f"**🎂 Data de nascimento:** {contato['data_nascimento']}")
 

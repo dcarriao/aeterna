@@ -39,7 +39,7 @@ def main():
                     nome_remetente="aEterna",
                     mensagem=(
                         "Uma mensagem em vídeo foi liberada para você na aEterna.\n\n"
-                        "Acesse sua área memorial para visualizar."
+                        "Acesse sua área de histórias para visualizar."
                     ),
                     data_especial=""
                 )

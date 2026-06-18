@@ -502,7 +502,7 @@ class AssistenteLuto:
 
     def _prompt_sistema_legado(self):
         return """
-    Você é o Assistente de Legado da aEterna.
+    Você é o Assistente de Histórias da aEterna.
     Você conversa diretamente com a pessoa usuária para ajudá-la a registrar sua história, memórias, valores, preferências e mensagens futuras.
 
     Seu papel:
@@ -510,7 +510,7 @@ class AssistenteLuto:
     - ajudar a transformar relatos em memórias bem escritas;
     - organizar fatos pessoais sem inventar nada;
     - sugerir temas de registro;
-    - responder como um assistente cuidadoso, não como memorial póstumo.
+    - responder como um assistente cuidadoso de memórias vivas.
 
     Nunca invente informações.
     Use somente o que a pessoa contou ou o contexto cadastrado.
@@ -563,7 +563,7 @@ class AssistenteLuto:
             )
 
             entrada = f"""
-    CONTEXTO DISPONÍVEL SOBRE O LEGADO:
+    CONTEXTO DISPONÍVEL SOBRE A HISTÓRIA:
     {contexto}
 
     MENSAGEM DA PESSOA USUÁRIA:
@@ -589,7 +589,7 @@ class AssistenteLuto:
         texto = mensagem.lower()
         # só para deploy
         return {
-            "saudade": any(p in texto for p in ["saudade", "falta", "sinto falta", "lembrar", "lembrança", "memória"]),
+            "lembranca": any(p in texto for p in ["saudade", "falta", "sinto falta", "lembrar", "lembrança", "memória"]),
             "conselho": any(p in texto for p in ["conselho", "ajuda", "dúvida", "duvida", "decidir", "decisão", "decisao"]),
             "tristeza": any(p in texto for p in ["triste", "difícil", "dificil", "chorando", "deprimido", "sozinho", "sozinha"]),
             "felicidade": any(p in texto for p in ["feliz", "alegria", "conquista", "consegui", "vitória", "vitoria"]),
@@ -611,16 +611,16 @@ class AssistenteLuto:
                 "mas esse tipo de dor merece ajuda humana imediata."
             )
 
-        if intencao["saudade"]:
+        if intencao["lembranca"]:
             if preferencias.get("lembranca"):
                 return (
-                    f"A saudade pode vir com muita força. Uma lembrança registrada sobre {nome} foi: "
-                    f"“{preferencias['lembranca']}”. Talvez hoje seja um bom momento para escrever o que essa memória "
-                    "representa para você."
+                    f"Uma lembrança registrada sobre {nome} foi: "
+                    f"“{preferencias['lembranca']}”. Essa memória ajuda a conhecer melhor "
+                    "os momentos importantes dessa história."
                 )
             return (
-                f"A saudade mostra que houve vínculo, presença e amor. Ainda há poucas memórias registradas sobre {nome}. "
-                "Se quiser, você pode me contar uma lembrança agora, e eu posso ajudar a transformá-la em uma memória preservada."
+                f"Ainda há poucas memórias registradas sobre {nome}. "
+                "Posso ajudar você a explorar as histórias e informações que já estão disponíveis."
             )
 
         if intencao["conselho"]:
@@ -642,8 +642,8 @@ class AssistenteLuto:
                     "você não precisa resolver tudo agora."
                 )
             return (
-                "Sinto muito que esse momento esteja pesado. Posso ficar aqui com você nessa conversa. "
-                "Se quiser, me conte o que mais está doendo hoje: a falta, uma lembrança específica ou algo que ficou sem dizer?"
+                "Sinto muito que esse momento esteja difícil. Converse também com alguém de confiança. "
+                "Aqui, posso ajudar a explorar uma história ou lembrança específica que tenha sido registrada."
             )
 
         if intencao["felicidade"]:
@@ -653,8 +653,8 @@ class AssistenteLuto:
                     f"{preferencias['dia_feliz']}. Talvez essa conquista também mereça virar uma lembrança guardada aqui."
                 )
             return (
-                "Que bom ler isso. As alegrias também fazem parte do legado. "
-                "Se quiser, posso ajudar você a transformar essa conquista em uma mensagem ou memória para guardar."
+                "Que bom ler isso. As alegrias também fazem parte da história. "
+                "Se quiser, posso ajudar você a transformar essa conquista em uma memória para guardar."
             )
 
         if intencao["musica"] and preferencias.get("musica"):
@@ -671,8 +671,8 @@ class AssistenteLuto:
 
         if contexto.strip():
             return (
-                f"Estou aqui para ajudar a preservar o legado de {nome}. "
-                "Você pode me contar uma lembrança, pedir ajuda para escrever uma mensagem, ou perguntar sobre algo já registrado."
+                f"Estou aqui para ajudar a explorar e preservar a história de {nome}. "
+                "Você pode perguntar sobre memórias, valores, preferências ou momentos já registrados."
             )
 
         return (
@@ -707,7 +707,7 @@ class AssistenteLuto:
 
         return (
             f"✨ Hoje pode ser um bom dia para registrar uma nova memória sobre {nome}. "
-            "Pequenas histórias também fazem parte de um grande legado."
+            "Pequenas histórias também conectam gerações."
         )
 
     def estatisticas(self) -> Dict:

@@ -32,7 +32,7 @@ def render_landing():
     with c3:
         st.markdown("""
         <div class="ae-card">
-            <h3>Assistente de luto</h3>
+            <h3>Assistente de Histórias</h3>
             <p>Um espaço acolhedor para preservar memórias e conversar com respeito.</p>
         </div>
         """, unsafe_allow_html=True)

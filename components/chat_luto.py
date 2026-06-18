@@ -84,31 +84,13 @@ def render_chat_luto():
 
     if modo == "memorial":
         nome_falecido = usuario.get("nome_falecido", "essa pessoa especial")
-        nome_visitante = usuario.get("nome", "você")
 
-        st.markdown(f"""
-                    <div style="
-                        background: linear-gradient(135deg, #2b1747 0%, #6f4e37 100%);
-                        color: white;
-                        padding: 32px;
-                        border-radius: 24px;
-                        margin-bottom: 24px;
-                        box-shadow: 0 20px 60px rgba(43, 23, 71, 0.25);
-                    ">
-                        <h1 style="color: #f2c572; margin-bottom: 12px;">📖 Histórias de {nome_falecido}</h1>
-                        <p style="font-size: 1.1rem; line-height: 1.6;">
-                            {nome_visitante}, este é um espaço que {nome_falecido} compartilhou com você.
-                        </p>
-                        <p style="font-size: 1rem; opacity: 0.92;">
-                            Aqui você pode acessar histórias, fotos, vídeos e mensagens autorizadas,
-                            preservadas para manter vivas as memórias e os momentos importantes.
-                        </p>
-                        <p style="font-size: 0.88rem; opacity: 0.78;">
-                            O assistente responde apenas com base nas histórias e informações registradas.
-                            Ele não inventa fatos e não substitui uma conversa real com a família.
-                        </p>
-                    </div>
-                    """, unsafe_allow_html=True)
+        st.markdown("## 💬 Converse com o Assistente de Histórias")
+        st.info(
+            f"Explore histórias, valores e momentos compartilhados por {nome_falecido}. "
+            "O assistente usa apenas informações registradas, não inventa fatos "
+            "e não fala como se fosse a pessoa."
+        )
 
         st.markdown("""
                     ### 💬 Por onde começar?

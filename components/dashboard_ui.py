@@ -7,8 +7,8 @@ def aplicar_css_dashboard():
 [data-testid="stAppViewContainer"] {
     background:
         radial-gradient(circle at 18% 10%, rgba(74,38,110,0.10), transparent 26%),
-        radial-gradient(circle at 84% 18%, rgba(212,175,55,0.08), transparent 24%),
-        linear-gradient(180deg, #f7fbf5 0%, #eef8ef 100%);
+        radial-gradient(circle at 84% 18%, rgba(212,168,79,0.10), transparent 24%),
+        linear-gradient(180deg, #F7F3EA 0%, #f5efe5 100%);
 }
 
 .block-container {
@@ -268,10 +268,17 @@ def render_sidebar_premium(
                 unsafe_allow_html=True
             )
 
-            st.image(
-                "assets/logo-sidebar.png",
-                width=180
-            )
+            try:
+                st.image(
+                    "assets/logo-sidebar.png",
+                    width=180
+                )
+            except Exception as exc:
+                print("Erro ao carregar logo da sidebar:", exc)
+                st.markdown(
+                    '<div class="ae-sidebar-logo">aEterna</div>',
+                    unsafe_allow_html=True,
+                )
 
             st.markdown(
                 '</div>',
