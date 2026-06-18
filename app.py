@@ -719,11 +719,24 @@ def render_contribuicoes_aprovadas(contribuicoes: list):
             f"""
             <div class="ae-visitor-card" style="border-left:4px solid #D4A84F;">
                 <strong style="color:#2B1747;">Lembrança compartilhada por {nome}</strong>
-                <div style="margin-top:0.45rem;color:#51455b;line-height:1.55;">{texto}</div>
+                {f'<div style="margin-top:0.45rem;color:#51455b;line-height:1.55;">{texto}</div>' if texto else ''}
             </div>
             """,
             unsafe_allow_html=True,
         )
+        arquivo_url = contribuicao.get("arquivo_url")
+        arquivo_tipo = contribuicao.get("arquivo_tipo", "")
+        if arquivo_url:
+            if arquivo_tipo.startswith("image/"):
+                exibir_foto_segura(
+                    arquivo_url,
+                    caption=contribuicao.get("arquivo_nome", ""),
+                )
+            elif arquivo_tipo.startswith("video/"):
+                exibir_video_seguro(
+                    arquivo_url,
+                    legenda=contribuicao.get("arquivo_nome", ""),
+                )
 
 
 def render_form_contribuicao_memoria(
@@ -750,6 +763,11 @@ def render_form_contribuicao_memoria(
                 placeholder="Conte um detalhe, uma lembrança ou um complemento para esta história.",
                 height=130,
             )
+            arquivo = st.file_uploader(
+                "Foto ou vídeo (opcional)",
+                type=["jpg", "jpeg", "png", "webp", "mp4", "mov", "webm"],
+                key=f"arquivo_contribuicao_{usuario_dono_id}_{memoria_id}",
+            )
             enviar = st.form_submit_button(
                 "Enviar contribuição",
                 type="primary",
@@ -758,12 +776,63 @@ def render_form_contribuicao_memoria(
 
         if enviar:
             texto_normalizado = (texto or "").strip()
-            if len(texto_normalizado) < 3:
-                st.warning("Escreva uma lembrança antes de enviar.")
+            if not texto_normalizado and not arquivo:
+                st.warning("Escreva uma lembrança ou envie uma foto/vídeo para contribuir.")
                 return
 
+            email = usuario_logado.get("email", "")
+            if not db.pode_contribuir_memoria(email, usuario_dono_id, memoria_id):
+                st.error("Seu acesso a esta memória não está mais disponível.")
+                return
+
+            arquivo_url = arquivo_nome = arquivo_tipo = storage_bucket = storage_path = None
+            arquivo_tamanho = None
+            tipo_contribuicao = "texto"
+            if arquivo:
+                extensao = arquivo.name.rsplit(".", 1)[-1].lower()
+                fotos_validas = {"jpg", "jpeg", "png", "webp"}
+                videos_validos = {"mp4", "mov", "webm"}
+                arquivo_tamanho = arquivo.size
+                if extensao in fotos_validas:
+                    if arquivo_tamanho > 10 * 1024 * 1024:
+                        st.warning("A foto deve ter no máximo 10 MB.")
+                        return
+                    storage_bucket = "fotos"
+                    tipo_midia = "foto"
+                elif extensao in videos_validos:
+                    if arquivo_tamanho > 100 * 1024 * 1024:
+                        st.warning("O vídeo deve ter no máximo 100 MB.")
+                        return
+                    storage_bucket = "videos"
+                    tipo_midia = "video"
+                else:
+                    st.warning("Formato de arquivo não permitido.")
+                    return
+
+                try:
+                    upload = storage.upload_contribuicao(
+                        storage_bucket,
+                        arquivo,
+                        usuario_dono_id,
+                        memoria_id,
+                    )
+                except Exception as exc:
+                    print("Erro no upload da contribuição:", exc)
+                    st.error("Não foi possível enviar esta mídia agora.")
+                    return
+
+                arquivo_url = upload["url"]
+                storage_path = upload["path"]
+                arquivo_nome = arquivo.name
+                arquivo_tipo = arquivo.type or (
+                    f"image/{extensao}" if tipo_midia == "foto" else f"video/{extensao}"
+                )
+                tipo_contribuicao = (
+                    f"texto_{tipo_midia}" if texto_normalizado else tipo_midia
+                )
+
             try:
-                contribuicao_id = db.criar_contribuicao_texto(
+                contribuicao_id = db.criar_contribuicao(
                     email_contribuidor=usuario_logado.get("email", ""),
                     nome_contribuidor=(
                         usuario_logado.get("nome_completo")
@@ -773,15 +842,32 @@ def render_form_contribuicao_memoria(
                     usuario_dono_id=usuario_dono_id,
                     memoria_id=memoria_id,
                     texto=texto_normalizado,
+                    tipo_contribuicao=tipo_contribuicao,
+                    arquivo_url=arquivo_url,
+                    arquivo_nome=arquivo_nome,
+                    arquivo_tipo=arquivo_tipo,
+                    arquivo_tamanho=arquivo_tamanho,
+                    storage_bucket=storage_bucket,
+                    storage_path=storage_path,
                 )
             except Exception as exc:
                 print("Erro ao enviar contribuição:", exc)
+                if storage_bucket and storage_path:
+                    try:
+                        storage.remover_arquivo(storage_bucket, storage_path)
+                    except Exception:
+                        pass
                 st.error("Não foi possível enviar sua contribuição agora.")
                 return
 
             if contribuicao_id:
                 st.success("Sua contribuição foi enviada para aprovação.")
             else:
+                if storage_bucket and storage_path:
+                    try:
+                        storage.remover_arquivo(storage_bucket, storage_path)
+                    except Exception:
+                        pass
                 st.error(
                     "Não foi possível enviar esta contribuição. "
                     "Verifique se seu acesso à história continua ativo."
@@ -2439,7 +2525,22 @@ def render_contribuicoes_pendentes(usuario_dono_id: int):
             st.markdown(f"### {titulo}")
             if data_texto:
                 st.caption(data_texto)
-            st.markdown(contribuicao.get("texto") or "")
+            if contribuicao.get("texto"):
+                st.markdown(contribuicao["texto"])
+
+            arquivo_url = contribuicao.get("arquivo_url")
+            arquivo_tipo = contribuicao.get("arquivo_tipo", "")
+            if arquivo_url:
+                if arquivo_tipo.startswith("image/"):
+                    exibir_foto_segura(
+                        arquivo_url,
+                        caption=contribuicao.get("arquivo_nome", ""),
+                    )
+                elif arquivo_tipo.startswith("video/"):
+                    exibir_video_seguro(
+                        arquivo_url,
+                        legenda=contribuicao.get("arquivo_nome", ""),
+                    )
 
             col_aprovar, col_rejeitar = st.columns(2)
             with col_aprovar:

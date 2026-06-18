@@ -1654,13 +1654,20 @@ class BancoDados:
             cursor.close()
             conn.close()
 
-    def criar_contribuicao_texto(
+    def criar_contribuicao(
             self,
             email_contribuidor: str,
             nome_contribuidor: str,
             usuario_dono_id: int,
             memoria_id: int,
             texto: str,
+            tipo_contribuicao: str = "texto",
+            arquivo_url: str = None,
+            arquivo_nome: str = None,
+            arquivo_tipo: str = None,
+            arquivo_tamanho: int = None,
+            storage_bucket: str = None,
+            storage_path: str = None,
     ) -> Optional[int]:
         email_normalizado = (email_contribuidor or "").strip().lower()
         nome_normalizado = (nome_contribuidor or "").strip() or email_normalizado
@@ -1670,7 +1677,10 @@ class BancoDados:
             not email_normalizado
             or not usuario_dono_id
             or not memoria_id
-            or len(texto_normalizado) < 3
+            or tipo_contribuicao not in (
+                "texto", "foto", "video", "texto_foto", "texto_video"
+            )
+            or (not texto_normalizado and not arquivo_url)
         ):
             return None
 
@@ -1687,6 +1697,12 @@ class BancoDados:
                     conteudo_id,
                     tipo_contribuicao,
                     texto,
+                    arquivo_url,
+                    arquivo_nome,
+                    arquivo_tipo,
+                    arquivo_tamanho,
+                    storage_bucket,
+                    storage_path,
                     status,
                     criado_em
                 )
@@ -1696,8 +1712,9 @@ class BancoDados:
                     %s,
                     'memoria',
                     m.id,
-                    'texto',
                     %s,
+                    %s,
+                    %s, %s, %s, %s, %s, %s,
                     'pendente',
                     NOW()
                 FROM memorias m
@@ -1727,7 +1744,14 @@ class BancoDados:
             """, (
                 email_normalizado,
                 nome_normalizado,
+                tipo_contribuicao,
                 texto_normalizado,
+                arquivo_url,
+                arquivo_nome,
+                arquivo_tipo,
+                arquivo_tamanho,
+                storage_bucket,
+                storage_path,
                 memoria_id,
                 usuario_dono_id,
                 email_normalizado,
@@ -1743,6 +1767,62 @@ class BancoDados:
         finally:
             cursor.close()
             conn.close()
+
+    def pode_contribuir_memoria(
+            self,
+            email_contribuidor: str,
+            usuario_dono_id: int,
+            memoria_id: int,
+    ) -> bool:
+        email = (email_contribuidor or "").strip().lower()
+        if not email or not usuario_dono_id or not memoria_id:
+            return False
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("""
+                SELECT 1
+                FROM memorias m
+                JOIN contatos c ON c.usuario_id = m.usuario_id
+                WHERE m.id = %s
+                  AND m.usuario_id = %s
+                  AND LOWER(TRIM(c.email)) = %s
+                  AND COALESCE(c.acesso_central_luto, 0) = 1
+                  AND (
+                        m.visibilidade = 'contatos'
+                        OR (
+                            m.visibilidade = 'seletivo'
+                            AND EXISTS (
+                                SELECT 1 FROM conteudo_permissoes cp
+                                WHERE cp.tipo_conteudo = 'memoria'
+                                  AND cp.conteudo_id = m.id
+                                  AND cp.contato_id = c.id
+                            )
+                        )
+                  )
+                LIMIT 1
+            """, (memoria_id, usuario_dono_id, email))
+            return cursor.fetchone() is not None
+        finally:
+            cursor.close()
+            conn.close()
+
+    def criar_contribuicao_texto(
+            self,
+            email_contribuidor: str,
+            nome_contribuidor: str,
+            usuario_dono_id: int,
+            memoria_id: int,
+            texto: str,
+    ) -> Optional[int]:
+        return self.criar_contribuicao(
+            email_contribuidor,
+            nome_contribuidor,
+            usuario_dono_id,
+            memoria_id,
+            texto,
+            tipo_contribuicao="texto",
+        )
 
     def contar_contribuicoes_pendentes(self, usuario_dono_id: int) -> int:
         if not usuario_dono_id:
@@ -1783,6 +1863,12 @@ class BancoDados:
                     c.conteudo_id,
                     c.tipo_contribuicao,
                     c.texto,
+                    c.arquivo_url,
+                    c.arquivo_nome,
+                    c.arquivo_tipo,
+                    c.arquivo_tamanho,
+                    c.storage_bucket,
+                    c.storage_path,
                     c.criado_em,
                     m.titulo
                 FROM contribuicoes c
@@ -1804,8 +1890,14 @@ class BancoDados:
                 "conteudo_id": row[4],
                 "tipo_contribuicao": row[5],
                 "texto": row[6] or "",
-                "criado_em": row[7],
-                "memoria_titulo": row[8] or "História sem título",
+                "arquivo_url": row[7],
+                "arquivo_nome": row[8] or "",
+                "arquivo_tipo": row[9] or "",
+                "arquivo_tamanho": row[10] or 0,
+                "storage_bucket": row[11] or "",
+                "storage_path": row[12] or "",
+                "criado_em": row[13],
+                "memoria_titulo": row[14] or "História sem título",
             } for row in rows]
         finally:
             cursor.close()
@@ -1871,6 +1963,9 @@ class BancoDados:
                     c.usuario_contribuidor_nome,
                     c.usuario_contribuidor_email,
                     c.texto,
+                    c.arquivo_url,
+                    c.arquivo_nome,
+                    c.arquivo_tipo,
                     c.criado_em,
                     c.avaliado_em
                 FROM contribuicoes c
@@ -1879,7 +1974,6 @@ class BancoDados:
                  AND m.usuario_id = c.usuario_dono_id
                 WHERE c.usuario_dono_id = %s
                   AND c.tipo_conteudo = 'memoria'
-                  AND c.tipo_contribuicao = 'texto'
                   AND c.status = 'aprovado'
                 ORDER BY c.criado_em ASC
             """, (usuario_dono_id,))
@@ -1892,8 +1986,11 @@ class BancoDados:
                     "contribuidor_nome": row[2] or row[3] or "Pessoa convidada",
                     "contribuidor_email": row[3] or "",
                     "texto": row[4] or "",
-                    "criado_em": row[5],
-                    "avaliado_em": row[6],
+                    "arquivo_url": row[5],
+                    "arquivo_nome": row[6] or "",
+                    "arquivo_tipo": row[7] or "",
+                    "criado_em": row[8],
+                    "avaliado_em": row[9],
                 })
 
             return resultado
