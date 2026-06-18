@@ -1318,6 +1318,239 @@ class BancoDados:
             cursor.close()
             conn.close()
 
+    def criar_contribuicao_texto(
+            self,
+            email_contribuidor: str,
+            nome_contribuidor: str,
+            usuario_dono_id: int,
+            memoria_id: int,
+            texto: str,
+    ) -> Optional[int]:
+        email_normalizado = (email_contribuidor or "").strip().lower()
+        nome_normalizado = (nome_contribuidor or "").strip() or email_normalizado
+        texto_normalizado = (texto or "").strip()
+
+        if (
+            not email_normalizado
+            or not usuario_dono_id
+            or not memoria_id
+            or len(texto_normalizado) < 3
+        ):
+            return None
+
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute("""
+                INSERT INTO contribuicoes (
+                    usuario_dono_id,
+                    usuario_contribuidor_email,
+                    usuario_contribuidor_nome,
+                    tipo_conteudo,
+                    conteudo_id,
+                    tipo_contribuicao,
+                    texto,
+                    status,
+                    criado_em
+                )
+                SELECT
+                    m.usuario_id,
+                    %s,
+                    %s,
+                    'memoria',
+                    m.id,
+                    'texto',
+                    %s,
+                    'pendente',
+                    NOW()
+                FROM memorias m
+                WHERE m.id = %s
+                  AND m.usuario_id = %s
+                  AND EXISTS (
+                      SELECT 1
+                      FROM contatos c
+                      WHERE c.usuario_id = m.usuario_id
+                        AND LOWER(TRIM(c.email)) = %s
+                        AND COALESCE(c.acesso_central_luto, 0) = 1
+                  )
+                RETURNING id
+            """, (
+                email_normalizado,
+                nome_normalizado,
+                texto_normalizado,
+                memoria_id,
+                usuario_dono_id,
+                email_normalizado,
+            ))
+
+            row = cursor.fetchone()
+            conn.commit()
+            return row[0] if row else None
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            cursor.close()
+            conn.close()
+
+    def contar_contribuicoes_pendentes(self, usuario_dono_id: int) -> int:
+        if not usuario_dono_id:
+            return 0
+
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute("""
+                SELECT COUNT(*)
+                FROM contribuicoes
+                WHERE usuario_dono_id = %s
+                  AND status = 'pendente'
+            """, (usuario_dono_id,))
+            return int(cursor.fetchone()[0] or 0)
+        finally:
+            cursor.close()
+            conn.close()
+
+    def listar_contribuicoes_pendentes(
+            self,
+            usuario_dono_id: int,
+    ) -> List[Dict]:
+        if not usuario_dono_id:
+            return []
+
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute("""
+                SELECT
+                    c.id,
+                    c.usuario_contribuidor_nome,
+                    c.usuario_contribuidor_email,
+                    c.tipo_conteudo,
+                    c.conteudo_id,
+                    c.tipo_contribuicao,
+                    c.texto,
+                    c.criado_em,
+                    m.titulo
+                FROM contribuicoes c
+                JOIN memorias m
+                  ON c.tipo_conteudo = 'memoria'
+                 AND m.id = c.conteudo_id
+                 AND m.usuario_id = c.usuario_dono_id
+                WHERE c.usuario_dono_id = %s
+                  AND c.status = 'pendente'
+                ORDER BY c.criado_em ASC
+            """, (usuario_dono_id,))
+
+            rows = cursor.fetchall()
+            return [{
+                "id": row[0],
+                "contribuidor_nome": row[1] or row[2] or "Pessoa convidada",
+                "contribuidor_email": row[2] or "",
+                "tipo_conteudo": row[3],
+                "conteudo_id": row[4],
+                "tipo_contribuicao": row[5],
+                "texto": row[6] or "",
+                "criado_em": row[7],
+                "memoria_titulo": row[8] or "História sem título",
+            } for row in rows]
+        finally:
+            cursor.close()
+            conn.close()
+
+    def avaliar_contribuicao(
+            self,
+            contribuicao_id: int,
+            usuario_dono_id: int,
+            decisao: str,
+    ) -> bool:
+        if decisao not in ("aprovado", "rejeitado"):
+            return False
+        if not contribuicao_id or not usuario_dono_id:
+            return False
+
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute("""
+                UPDATE contribuicoes
+                SET
+                    status = %s,
+                    avaliado_em = NOW(),
+                    avaliado_por = %s
+                WHERE id = %s
+                  AND usuario_dono_id = %s
+                  AND status = 'pendente'
+                RETURNING id
+            """, (
+                decisao,
+                usuario_dono_id,
+                contribuicao_id,
+                usuario_dono_id,
+            ))
+
+            row = cursor.fetchone()
+            conn.commit()
+            return bool(row)
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            cursor.close()
+            conn.close()
+
+    def listar_contribuicoes_aprovadas_memorias(
+            self,
+            usuario_dono_id: int,
+    ) -> Dict[int, List[Dict]]:
+        if not usuario_dono_id:
+            return {}
+
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute("""
+                SELECT
+                    c.id,
+                    c.conteudo_id,
+                    c.usuario_contribuidor_nome,
+                    c.usuario_contribuidor_email,
+                    c.texto,
+                    c.criado_em,
+                    c.avaliado_em
+                FROM contribuicoes c
+                JOIN memorias m
+                  ON m.id = c.conteudo_id
+                 AND m.usuario_id = c.usuario_dono_id
+                WHERE c.usuario_dono_id = %s
+                  AND c.tipo_conteudo = 'memoria'
+                  AND c.tipo_contribuicao = 'texto'
+                  AND c.status = 'aprovado'
+                ORDER BY c.criado_em ASC
+            """, (usuario_dono_id,))
+
+            resultado = {}
+            for row in cursor.fetchall():
+                memoria_id = row[1]
+                resultado.setdefault(memoria_id, []).append({
+                    "id": row[0],
+                    "contribuidor_nome": row[2] or row[3] or "Pessoa convidada",
+                    "contribuidor_email": row[3] or "",
+                    "texto": row[4] or "",
+                    "criado_em": row[5],
+                    "avaliado_em": row[6],
+                })
+
+            return resultado
+        finally:
+            cursor.close()
+            conn.close()
+
     def listar_memorias_usuario(self, usuario_id: int):
         conn = self.conectar()
         cursor = conn.cursor()

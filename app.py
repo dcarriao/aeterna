@@ -441,6 +441,9 @@ def render_minha_historia():
 
     fotos_por_memoria = db.listar_fotos_por_memorias_usuario(usuario_id)
     videos_por_memoria = db.listar_videos_por_memorias_usuario(usuario_id)
+    contribuicoes_por_memoria = db.listar_contribuicoes_aprovadas_memorias(
+        usuario_id
+    )
 
     if not memorias:
         st.info("📭 Você ainda não tem memórias registradas.")
@@ -488,6 +491,9 @@ def render_minha_historia():
                     st.markdown(f"**Pessoas:** {memoria['pessoas_relacionadas']}")
 
                 st.markdown(memoria.get("conteudo", ""))
+                render_contribuicoes_aprovadas(
+                    contribuicoes_por_memoria.get(memoria["id"], [])
+                )
 
                 try:
                     fotos = fotos_por_memoria.get(memoria["id"], [])
@@ -619,12 +625,111 @@ def render_sobre_visitante(nome_pessoa: str, memorias: list, preferencias: dict)
         )
 
 
-def render_historias_visitante(memorias: list):
+def render_contribuicoes_aprovadas(contribuicoes: list):
+    if not contribuicoes:
+        return
+
+    st.markdown("---")
+    st.markdown("#### 🤝 Lembranças compartilhadas")
+
+    for contribuicao in contribuicoes:
+        nome = html.escape(
+            contribuicao.get("contribuidor_nome") or "Pessoa convidada"
+        )
+        texto = html.escape(contribuicao.get("texto") or "").replace("\n", "<br>")
+        st.markdown(
+            f"""
+            <div class="ae-visitor-card" style="border-left:4px solid #D4A84F;">
+                <strong style="color:#2B1747;">Lembrança compartilhada por {nome}</strong>
+                <div style="margin-top:0.45rem;color:#51455b;line-height:1.55;">{texto}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+
+def render_form_contribuicao_memoria(
+        memoria: dict,
+        usuario_dono_id: int,
+        usuario_logado: dict,
+):
+    memoria_id = memoria.get("id")
+    if not memoria_id:
+        return
+
+    with st.expander("🤝 Adicionar lembrança"):
+        st.markdown("**Compartilhe uma lembrança sobre este momento**")
+        st.caption(
+            "Sua contribuição será enviada ao dono da história e só aparecerá após aprovação."
+        )
+
+        with st.form(
+            f"form_contribuicao_memoria_{usuario_dono_id}_{memoria_id}",
+            clear_on_submit=True,
+        ):
+            texto = st.text_area(
+                "Sua lembrança",
+                placeholder="Conte um detalhe, uma lembrança ou um complemento para esta história.",
+                height=130,
+            )
+            enviar = st.form_submit_button(
+                "Enviar contribuição",
+                type="primary",
+                use_container_width=True,
+            )
+
+        if enviar:
+            texto_normalizado = (texto or "").strip()
+            if len(texto_normalizado) < 3:
+                st.warning("Escreva uma lembrança antes de enviar.")
+                return
+
+            try:
+                contribuicao_id = db.criar_contribuicao_texto(
+                    email_contribuidor=usuario_logado.get("email", ""),
+                    nome_contribuidor=(
+                        usuario_logado.get("nome_completo")
+                        or usuario_logado.get("nome")
+                        or "Pessoa convidada"
+                    ),
+                    usuario_dono_id=usuario_dono_id,
+                    memoria_id=memoria_id,
+                    texto=texto_normalizado,
+                )
+            except Exception as exc:
+                print("Erro ao enviar contribuição:", exc)
+                st.error("Não foi possível enviar sua contribuição agora.")
+                return
+
+            if contribuicao_id:
+                st.success("Sua contribuição foi enviada para aprovação.")
+            else:
+                st.error(
+                    "Não foi possível enviar esta contribuição. "
+                    "Verifique se seu acesso à história continua ativo."
+                )
+
+
+def render_historias_visitante(
+        memorias: list,
+        usuario_dono_id: int = None,
+        usuario_logado: dict = None,
+        permitir_contribuicao: bool = False,
+):
     st.markdown("## 📖 Histórias compartilhadas")
 
     if not memorias:
         st.info("Ainda não há histórias registradas para explorar.")
         return
+
+    contribuicoes_por_memoria = {}
+    if usuario_dono_id:
+        try:
+            contribuicoes_por_memoria = (
+                db.listar_contribuicoes_aprovadas_memorias(usuario_dono_id)
+            )
+        except Exception as exc:
+            print("Erro ao listar contribuições aprovadas:", exc)
 
     for memoria in memorias:
         titulo = memoria.get("titulo") or "História sem título"
@@ -636,6 +741,21 @@ def render_historias_visitante(memorias: list):
                 st.markdown(conteudo)
             else:
                 st.info("Esta história ainda não possui uma descrição.")
+
+            render_contribuicoes_aprovadas(
+                contribuicoes_por_memoria.get(memoria.get("id"), [])
+            )
+
+            if (
+                permitir_contribuicao
+                and usuario_dono_id
+                and usuario_logado
+            ):
+                render_form_contribuicao_memoria(
+                    memoria,
+                    usuario_dono_id,
+                    usuario_logado,
+                )
 
 
 def render_aprendizados_visitante(memorias: list, preferencias: dict):
@@ -1995,7 +2115,10 @@ def formatar_novidades_historia(novidades: dict) -> str:
     return " · ".join(partes) if partes else "Tudo visto"
 
 
-def render_navegacao_historias(historias_compartilhadas: list):
+def render_navegacao_historias(
+        historias_compartilhadas: list,
+        contribuicoes_pendentes: int = 0,
+):
     with st.sidebar:
         st.markdown("---")
         st.markdown('<div class="ae-sidebar-section">Minha área</div>', unsafe_allow_html=True)
@@ -2012,6 +2135,12 @@ def render_navegacao_historias(historias_compartilhadas: list):
         ):
             selecionar_minha_historia()
             st.rerun()
+
+        if contribuicoes_pendentes:
+            st.caption(
+                f"🤝 {contribuicoes_pendentes} "
+                f"{'contribuição aguardando aprovação' if contribuicoes_pendentes == 1 else 'contribuições aguardando aprovação'}"
+            )
 
         st.markdown(
             '<div class="ae-sidebar-section">Histórias compartilhadas comigo</div>',
@@ -2119,7 +2248,12 @@ def render_visao_historia_compartilhada(
         with tabs[0]:
             render_sobre_visitante(nome_pessoa, memorias, preferencias)
         with tabs[1]:
-            render_historias_visitante(memorias)
+            render_historias_visitante(
+                memorias,
+                usuario_dono_id=usuario_id,
+                usuario_logado=usuario_logado,
+                permitir_contribuicao=True,
+            )
         with tabs[2]:
             render_aprendizados_visitante(memorias, preferencias)
         with tabs[3]:
@@ -2147,6 +2281,82 @@ def render_visao_historia_compartilhada(
         <p>✨ aEterna — Memórias vivas para quem você ama ✨</p>
     </div>
     """, unsafe_allow_html=True)
+
+
+def render_contribuicoes_pendentes(usuario_dono_id: int):
+    st.markdown("## 🤝 Contribuições pendentes")
+    st.caption(
+        "Lembranças enviadas por pessoas autorizadas. "
+        "A memória original não será alterada."
+    )
+
+    contribuicoes = db.listar_contribuicoes_pendentes(usuario_dono_id)
+    if not contribuicoes:
+        st.info("Nenhuma contribuição aguardando aprovação.")
+        return
+
+    for contribuicao in contribuicoes:
+        nome = contribuicao.get("contribuidor_nome") or "Pessoa convidada"
+        titulo = contribuicao.get("memoria_titulo") or "História sem título"
+        criado_em = contribuicao.get("criado_em")
+        data_texto = (
+            criado_em.strftime("%d/%m/%Y às %H:%M")
+            if hasattr(criado_em, "strftime")
+            else str(criado_em or "")
+        )
+
+        with st.container(border=True):
+            st.markdown(f"**{nome} enviou uma lembrança para:**")
+            st.markdown(f"### {titulo}")
+            if data_texto:
+                st.caption(data_texto)
+            st.markdown(contribuicao.get("texto") or "")
+
+            col_aprovar, col_rejeitar = st.columns(2)
+            with col_aprovar:
+                if st.button(
+                    "✅ Aprovar",
+                    key=f"aprovar_contribuicao_{contribuicao['id']}",
+                    type="primary",
+                    use_container_width=True,
+                ):
+                    try:
+                        aprovado = db.avaliar_contribuicao(
+                            contribuicao["id"],
+                            usuario_dono_id,
+                            "aprovado",
+                        )
+                    except Exception as exc:
+                        print("Erro ao aprovar contribuição:", exc)
+                        st.error("Não foi possível aprovar esta contribuição agora.")
+                    else:
+                        if aprovado:
+                            st.success("Contribuição aprovada.")
+                            st.rerun()
+                        else:
+                            st.warning("Esta contribuição não está mais pendente.")
+
+            with col_rejeitar:
+                if st.button(
+                    "Rejeitar",
+                    key=f"rejeitar_contribuicao_{contribuicao['id']}",
+                    use_container_width=True,
+                ):
+                    try:
+                        rejeitado = db.avaliar_contribuicao(
+                            contribuicao["id"],
+                            usuario_dono_id,
+                            "rejeitado",
+                        )
+                    except Exception as exc:
+                        print("Erro ao rejeitar contribuição:", exc)
+                        st.error("Não foi possível rejeitar esta contribuição agora.")
+                    else:
+                        if rejeitado:
+                            st.success("Contribuição rejeitada.")
+                            st.rerun()
+                        else:
+                            st.warning("Esta contribuição não está mais pendente.")
 
 
 # ============================================================================
@@ -2232,7 +2442,10 @@ def main():
                 )
 
             with tabs[1]:
-                render_historias_visitante(memorias_visitante)
+                render_historias_visitante(
+                    memorias_visitante,
+                    usuario_dono_id=st.session_state.falecido_id,
+                )
 
             with tabs[2]:
                 render_aprendizados_visitante(
@@ -2268,6 +2481,14 @@ def main():
             "Usuário"
         )
         usuario_logado = st.session_state.usuario_atual
+
+        try:
+            contribuicoes_pendentes = db.contar_contribuicoes_pendentes(
+                usuario_logado.get("id")
+            )
+        except Exception as exc:
+            print("Erro ao contar contribuições pendentes:", exc)
+            contribuicoes_pendentes = 0
 
         try:
             historias_compartilhadas = db.listar_historias_compartilhadas_comigo(
@@ -2349,7 +2570,10 @@ def main():
             fazer_logout=fazer_logout
         )
 
-        render_navegacao_historias(historias_compartilhadas)
+        render_navegacao_historias(
+            historias_compartilhadas,
+            contribuicoes_pendentes=contribuicoes_pendentes,
+        )
 
         if st.session_state.modo_visualizacao == "historia_compartilhada":
             render_visao_historia_compartilhada(
@@ -2359,7 +2583,7 @@ def main():
             return
 
         if is_admin:
-            tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
+            tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
                 "🏠 Painel",
                 "💬 Assistente",
                 "🎥 Vídeos",
@@ -2367,6 +2591,7 @@ def main():
                 "👤 Minha Essência",
                 "📝 Lembranças",
                 "🔒 Cofre",
+                f"🤝 Contribuições ({contribuicoes_pendentes})",
                 "👑 Admin"
             ])
             with tab0:
@@ -2390,9 +2615,11 @@ def main():
             with tab6:
                 render_cofre()
             with tab7:
+                render_contribuicoes_pendentes(usuario_logado["id"])
+            with tab8:
                 render_admin_panel()
         else:
-            tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
+            tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
                 "🏠 Painel",
                 "✨ Assistente",
                 "📖 Minha História",
@@ -2402,6 +2629,7 @@ def main():
                 "🌟 Quem Sou Eu",
                 "💌 Mensagens para o Futuro",
                 "🔒 Cofre",
+                f"🤝 Contribuições ({contribuicoes_pendentes})",
                 "💎 Planos"
             ])
             with tab0:
@@ -2429,6 +2657,8 @@ def main():
             with tab8:
                 render_cofre()
             with tab9:
+                render_contribuicoes_pendentes(usuario_logado["id"])
+            with tab10:
                 render_planos()
 
         st.markdown("""
