@@ -11,9 +11,16 @@ import streamlit as st
 
 
 class AssistenteLuto:
-    def __init__(self, usuario_id: int, modo: str = "legado", arquivo_db: str = "dados/cofre.db"):
+    def __init__(
+            self,
+            usuario_id: int,
+            modo: str = "legado",
+            arquivo_db: str = "dados/cofre.db",
+            contato_id: int = None,
+    ):
         self.usuario_id = usuario_id
         self.modo = modo
+        self.contato_id = contato_id
         self.arquivo_db = self._resolver_caminho_db(arquivo_db)
 
     def sugerir_metadados_memoria(self, texto: str) -> dict:
@@ -426,13 +433,38 @@ class AssistenteLuto:
         cursor = conn.cursor()
 
         try:
-            cursor.execute("""
-                SELECT titulo, conteudo, categoria, origem, data_criacao
-                FROM memorias
-                WHERE usuario_id = %s
-                ORDER BY data_criacao DESC
-                LIMIT %s
-            """, (self.usuario_id, limite))
+            if self.modo == "memorial" and self.contato_id:
+                cursor.execute("""
+                    SELECT m.titulo, m.conteudo, m.categoria,
+                           m.origem, m.data_criacao
+                    FROM memorias m
+                    JOIN contatos c ON c.usuario_id = m.usuario_id
+                    WHERE m.usuario_id = %s
+                      AND c.id = %s
+                      AND COALESCE(c.acesso_central_luto, 0) = 1
+                      AND (
+                            m.visibilidade = 'contatos'
+                            OR (
+                                m.visibilidade = 'seletivo'
+                                AND EXISTS (
+                                    SELECT 1 FROM conteudo_permissoes cp
+                                    WHERE cp.tipo_conteudo = 'memoria'
+                                      AND cp.conteudo_id = m.id
+                                      AND cp.contato_id = c.id
+                                )
+                            )
+                      )
+                    ORDER BY m.data_criacao DESC
+                    LIMIT %s
+                """, (self.usuario_id, self.contato_id, limite))
+            else:
+                cursor.execute("""
+                    SELECT titulo, conteudo, categoria, origem, data_criacao
+                    FROM memorias
+                    WHERE usuario_id = %s
+                    ORDER BY data_criacao DESC
+                    LIMIT %s
+                """, (self.usuario_id, limite))
 
             rows = cursor.fetchall()
 
@@ -463,9 +495,17 @@ class AssistenteLuto:
         nome = self._buscar_nome_usuario()
         personalidade = self._buscar_personalidade()
         preferencias = self._buscar_preferencias()
-        memorias_txt = self._buscar_memorias_txt()
+        memorias_txt = (
+            ""
+            if self.modo == "memorial"
+            else self._buscar_memorias_txt()
+        )
         memorias_supabase = self._buscar_memorias_supabase()
-        contexto_tabelas = self._buscar_contexto_tabelas()
+        contexto_tabelas = (
+            ""
+            if self.modo == "memorial"
+            else self._buscar_contexto_tabelas()
+        )
 
         partes = [f"NOME DE REFERÊNCIA: {nome}"]
 

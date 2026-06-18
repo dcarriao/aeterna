@@ -120,6 +120,7 @@ def render_chat_luto():
                     "assistente_obj",
                     "assistente_modo",
                     "assistente_usuario_id",
+                    "assistente_contato_id",
                 ]:
                     if key in st.session_state:
                         del st.session_state[key]
@@ -234,6 +235,37 @@ def render_chat_luto():
                             value=sugestoes.get("pessoas_relacionadas", "")
                         )
 
+                        contatos = db.listar_contatos_usuario(
+                            st.session_state.get("usuario_atual", {}).get("id")
+                        )
+                        visibilidade = st.radio(
+                            "Quem pode ver esta memória?",
+                            ["privado", "contatos", "seletivo"],
+                            format_func=lambda valor: {
+                                "privado": "🔒 Somente eu",
+                                "contatos": "👥 Todos os meus contatos",
+                                "seletivo": "✨ Escolher contatos específicos",
+                            }[valor],
+                            key="visibilidade_" + chave_base,
+                        )
+                        mapa_contatos = {
+                            contato["nome_completo"]: contato["id"]
+                            for contato in contatos
+                        }
+                        contatos_selecionados_nomes = (
+                            st.multiselect(
+                                "Contatos que poderão ver",
+                                list(mapa_contatos.keys()),
+                                key="contatos_" + chave_base,
+                            )
+                            if visibilidade == "seletivo"
+                            else []
+                        )
+                        contatos_selecionados = [
+                            mapa_contatos[nome]
+                            for nome in contatos_selecionados_nomes
+                        ]
+
                         foto_memoria = st.file_uploader(
                             "📷 Adicionar foto a esta memória (opcional)",
                             type=["png", "jpg", "jpeg", "webp"],
@@ -255,6 +287,10 @@ def render_chat_luto():
                         if salvar_final:
                             usuario = st.session_state.get("usuario_atual")
 
+                            if visibilidade == "seletivo" and not contatos_selecionados:
+                                st.warning("Selecione pelo menos um contato.")
+                                st.stop()
+
                             if data_evento:
                                 try:
                                     datetime.strptime(data_evento, "%Y-%m-%d")
@@ -269,7 +305,9 @@ def render_chat_luto():
                                 origem="assistente",
                                 local=local or None,
                                 data_evento=data_evento or None,
-                                pessoas_relacionadas=pessoas_relacionadas or None
+                                pessoas_relacionadas=pessoas_relacionadas or None,
+                                visibilidade=visibilidade,
+                                contatos_ids=contatos_selecionados,
                             )
 
                             if foto_memoria:
@@ -288,7 +326,8 @@ def render_chat_luto():
                                     descricao=st.session_state["texto_memoria_" + chave_base][:300],
                                     categoria=categoria or "livre",
                                     caminho_arquivo=caminho_foto,
-                                    contatos_ids=[]
+                                    contatos_ids=contatos_selecionados,
+                                    visibilidade=visibilidade,
                                 )
 
                                 db.associar_foto_memoria(
@@ -310,8 +349,9 @@ def render_chat_luto():
                                     titulo=titulo or "Vídeo da memória",
                                     destinatario=pessoas_relacionadas or "",
                                     caminho_arquivo=caminho_video,
-                                    contatos_ids=[],
-                                    categoria=categoria or "livre"
+                                    contatos_ids=contatos_selecionados,
+                                    categoria=categoria or "livre",
+                                    visibilidade=visibilidade,
                                 )
 
                                 db.associar_video_memoria(
@@ -471,13 +511,18 @@ def _inicializar_chat():
         "assistente_obj" not in st.session_state
         or st.session_state.get("assistente_modo") != modo
         or st.session_state.get("assistente_usuario_id") != usuario_id_referencia
+        or st.session_state.get("assistente_contato_id") != usuario.get("id")
     ):
         st.session_state.assistente_obj = AssistenteLuto(
             usuario_id_referencia,
-            modo=modo
+            modo=modo,
+            contato_id=usuario.get("id") if modo == "memorial" else None,
         )
         st.session_state.assistente_modo = modo
         st.session_state.assistente_usuario_id = usuario_id_referencia
+        st.session_state.assistente_contato_id = (
+            usuario.get("id") if modo == "memorial" else None
+        )
 
     if not st.session_state.historico_assistente:
         if modo == "memorial":

@@ -417,13 +417,15 @@ class BancoDados:
         conn = self.conectar()
         cursor = conn.cursor()
         self.executar(cursor,'''
-            SELECT id, titulo, destinatario, caminho_arquivo, categoria, data_criacao 
+            SELECT id, titulo, destinatario, caminho_arquivo, categoria,
+                   data_criacao, visibilidade
             FROM videos WHERE usuario_id = ? ORDER BY data_criacao DESC
         ''', (usuario_id,))
         rows = cursor.fetchall()
         conn.close()
         return [{"id": r[0], "titulo": r[1], "destinatario": r[2], "caminho": r[3],
-                 "categoria": r[4] if len(r) > 4 else "geral", "data": r[5]} for r in rows]
+                 "categoria": r[4] if len(r) > 4 else "geral", "data": r[5],
+                 "visibilidade": r[6] or "contatos"} for r in rows]
 
     def adicionar_video(self, usuario_id: int, titulo: str, destinatario: str, caminho_arquivo: str,
                         categoria: str = "geral"):
@@ -445,8 +447,15 @@ class BancoDados:
             destinatario: str,
             caminho_arquivo: str,
             contatos_ids: List[int],
-            categoria: str = "geral"
+            categoria: str = "geral",
+            visibilidade: str = "contatos",
     ):
+        if visibilidade not in ("privado", "contatos", "seletivo"):
+            raise ValueError("Visibilidade inválida.")
+        contatos_ids = list(dict.fromkeys(contatos_ids or []))
+        if visibilidade == "seletivo" and not contatos_ids:
+            raise ValueError("Selecione pelo menos um contato.")
+
         conn = self.conectar()
         cursor = conn.cursor()
 
@@ -458,16 +467,18 @@ class BancoDados:
                         titulo,
                         destinatario,
                         caminho_arquivo,
-                        categoria
+                        categoria,
+                        visibilidade
                     )
-                    VALUES (%s, %s, %s, %s, %s)
+                    VALUES (%s, %s, %s, %s, %s, %s)
                     RETURNING id
                 ''', (
                     usuario_id,
                     titulo,
                     destinatario,
                     caminho_arquivo,
-                    categoria
+                    categoria,
+                    visibilidade,
                 ))
 
                 video_id = cursor.fetchone()[0]
@@ -498,11 +509,33 @@ class BancoDados:
                         video_id,
                         contato_id
                     )
-                    VALUES (%s, %s)
+                    SELECT %s, c.id
+                    FROM contatos c
+                    WHERE c.id = %s AND c.usuario_id = %s
                 ''', (
                     video_id,
-                    contato_id
+                    contato_id,
+                    usuario_id,
                 ))
+                self.executar(cursor, """
+                    INSERT INTO conteudo_permissoes (
+                        tipo_conteudo, conteudo_id, contato_id
+                    )
+                    SELECT 'video', %s, c.id
+                    FROM contatos c
+                    WHERE c.id = %s AND c.usuario_id = %s
+                    ON CONFLICT DO NOTHING
+                """, (video_id, contato_id, usuario_id))
+
+            if visibilidade == "seletivo":
+                cursor.execute("""
+                    SELECT COUNT(*)
+                    FROM conteudo_permissoes
+                    WHERE tipo_conteudo = 'video'
+                      AND conteudo_id = %s
+                """, (video_id,))
+                if cursor.fetchone()[0] == 0:
+                    raise ValueError("Nenhum contato válido foi selecionado.")
 
             conn.commit()
             return video_id
@@ -528,6 +561,10 @@ class BancoDados:
                 except:
                     pass
             self.executar(cursor,"DELETE FROM videos WHERE id = ? AND usuario_id = ?", (id_video, usuario_id))
+            self.executar(cursor, """
+                DELETE FROM conteudo_permissoes
+                WHERE tipo_conteudo = 'video' AND conteudo_id = ?
+            """, (id_video,))
             conn.commit()
             conn.close()
             return True
@@ -561,8 +598,21 @@ class BancoDados:
                 v.categoria,
                 v.data_criacao
             FROM videos v
-            JOIN videos_acesso va ON va.video_id = v.id
-            WHERE va.contato_id = %s
+            JOIN contatos c ON c.usuario_id = v.usuario_id
+            WHERE c.id = %s
+              AND COALESCE(c.acesso_central_luto, 0) = 1
+              AND (
+                    v.visibilidade = 'contatos'
+                    OR (
+                        v.visibilidade = 'seletivo'
+                        AND EXISTS (
+                            SELECT 1 FROM conteudo_permissoes cp
+                            WHERE cp.tipo_conteudo = 'video'
+                              AND cp.conteudo_id = v.id
+                              AND cp.contato_id = c.id
+                        )
+                    )
+              )
             ORDER BY v.data_criacao DESC
         """, (contato_id,))
 
@@ -590,7 +640,14 @@ class BancoDados:
             categoria: str,
             caminho_arquivo: str,
             contatos_ids: List[int],
+            visibilidade: str = "contatos",
     ):
+        if visibilidade not in ("privado", "contatos", "seletivo"):
+            raise ValueError("Visibilidade inválida.")
+        contatos_ids = list(dict.fromkeys(contatos_ids or []))
+        if visibilidade == "seletivo" and not contatos_ids:
+            raise ValueError("Selecione pelo menos um contato.")
+
         conn = self.conectar()
         cursor = conn.cursor()
 
@@ -601,9 +658,10 @@ class BancoDados:
                     titulo,
                     descricao,
                     categoria,
-                    caminho_arquivo
+                    caminho_arquivo,
+                    visibilidade
                 )
-                VALUES (%s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s)
                 RETURNING id
             """, (
                 usuario_id,
@@ -611,6 +669,7 @@ class BancoDados:
                 descricao,
                 categoria,
                 caminho_arquivo,
+                visibilidade,
             ))
 
             foto_id = cursor.fetchone()[0]
@@ -621,11 +680,33 @@ class BancoDados:
                         foto_id,
                         contato_id
                     )
-                    VALUES (%s, %s)
+                    SELECT %s, c.id
+                    FROM contatos c
+                    WHERE c.id = %s AND c.usuario_id = %s
                 """, (
                     foto_id,
                     contato_id,
+                    usuario_id,
                 ))
+                self.executar(cursor, """
+                    INSERT INTO conteudo_permissoes (
+                        tipo_conteudo, conteudo_id, contato_id
+                    )
+                    SELECT 'foto', %s, c.id
+                    FROM contatos c
+                    WHERE c.id = %s AND c.usuario_id = %s
+                    ON CONFLICT DO NOTHING
+                """, (foto_id, contato_id, usuario_id))
+
+            if visibilidade == "seletivo":
+                cursor.execute("""
+                    SELECT COUNT(*)
+                    FROM conteudo_permissoes
+                    WHERE tipo_conteudo = 'foto'
+                      AND conteudo_id = %s
+                """, (foto_id,))
+                if cursor.fetchone()[0] == 0:
+                    raise ValueError("Nenhum contato válido foi selecionado.")
 
             conn.commit()
             return foto_id
@@ -644,7 +725,8 @@ class BancoDados:
         cursor = conn.cursor()
 
         self.executar(cursor, """
-            SELECT id, titulo, descricao, categoria, caminho_arquivo, data_criacao
+            SELECT id, titulo, descricao, categoria, caminho_arquivo,
+                   data_criacao, visibilidade
             FROM fotos
             WHERE usuario_id = %s
             ORDER BY data_criacao DESC
@@ -660,6 +742,7 @@ class BancoDados:
             "categoria": r[3] or "",
             "caminho": r[4],
             "data_criacao": r[5],
+            "visibilidade": r[6] or "contatos",
         } for r in rows]
 
     def listar_fotos_por_contato(self, contato_id: int) -> List[Dict]:
@@ -675,8 +758,21 @@ class BancoDados:
                 f.caminho_arquivo,
                 f.data_criacao
             FROM fotos f
-            JOIN fotos_contatos fc ON fc.foto_id = f.id
-            WHERE fc.contato_id = %s
+            JOIN contatos c ON c.usuario_id = f.usuario_id
+            WHERE c.id = %s
+              AND COALESCE(c.acesso_central_luto, 0) = 1
+              AND (
+                    f.visibilidade = 'contatos'
+                    OR (
+                        f.visibilidade = 'seletivo'
+                        AND EXISTS (
+                            SELECT 1 FROM conteudo_permissoes cp
+                            WHERE cp.tipo_conteudo = 'foto'
+                              AND cp.conteudo_id = f.id
+                              AND cp.contato_id = c.id
+                        )
+                    )
+              )
             ORDER BY f.data_criacao DESC
         """, (contato_id,))
 
@@ -780,8 +876,21 @@ class BancoDados:
                     f.categoria,
                     f.caminho_arquivo
                 FROM fotos f
-                JOIN fotos_contatos fc ON fc.foto_id = f.id
-                WHERE fc.contato_id = ?
+                JOIN contatos c ON c.usuario_id = f.usuario_id
+                WHERE c.id = ?
+                  AND COALESCE(c.acesso_central_luto, 0) = 1
+                  AND (
+                        f.visibilidade = 'contatos'
+                        OR (
+                            f.visibilidade = 'seletivo'
+                            AND EXISTS (
+                                SELECT 1 FROM conteudo_permissoes cp
+                                WHERE cp.tipo_conteudo = 'foto'
+                                  AND cp.conteudo_id = f.id
+                                  AND cp.contato_id = c.id
+                            )
+                        )
+                  )
                   AND (
                     LOWER(COALESCE(f.titulo, '')) LIKE ?
                     OR LOWER(COALESCE(f.descricao, '')) LIKE ?
@@ -828,6 +937,10 @@ class BancoDados:
             self.executar(cursor, """
                 DELETE FROM fotos_contatos
                 WHERE foto_id = %s
+            """, (foto_id,))
+            self.executar(cursor, """
+                DELETE FROM conteudo_permissoes
+                WHERE tipo_conteudo = 'foto' AND conteudo_id = %s
             """, (foto_id,))
 
             self.executar(cursor, """
@@ -1007,6 +1120,165 @@ class BancoDados:
             "acesso_central_luto": r[11] or 0,
             "chave_acesso": r[12] or ""
         } for r in rows]
+
+    def listar_memorias_por_contato(self, contato_id: int) -> List[Dict]:
+        if not contato_id:
+            return []
+
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("""
+                SELECT
+                    m.id, m.categoria, m.titulo, m.conteudo,
+                    m.origem, m.data_criacao, m.local,
+                    m.data_evento, m.pessoas_relacionadas
+                FROM memorias m
+                JOIN contatos c ON c.usuario_id = m.usuario_id
+                WHERE c.id = %s
+                  AND COALESCE(c.acesso_central_luto, 0) = 1
+                  AND (
+                        m.visibilidade = 'contatos'
+                        OR (
+                            m.visibilidade = 'seletivo'
+                            AND EXISTS (
+                                SELECT 1 FROM conteudo_permissoes cp
+                                WHERE cp.tipo_conteudo = 'memoria'
+                                  AND cp.conteudo_id = m.id
+                                  AND cp.contato_id = c.id
+                            )
+                        )
+                  )
+                ORDER BY m.data_criacao DESC
+            """, (contato_id,))
+            return [{
+                "id": row[0],
+                "categoria": row[1] or "",
+                "titulo": row[2] or "Memória sem título",
+                "conteudo": row[3] or "",
+                "origem": row[4] or "",
+                "data_criacao": row[5],
+                "local": row[6],
+                "data_evento": row[7],
+                "pessoas_relacionadas": row[8],
+            } for row in cursor.fetchall()]
+        finally:
+            cursor.close()
+            conn.close()
+
+    def atualizar_visibilidade_conteudo(
+            self,
+            tipo_conteudo: str,
+            conteudo_id: int,
+            usuario_dono_id: int,
+            visibilidade: str,
+            contatos_ids: List[int],
+    ) -> bool:
+        tabelas = {
+            "memoria": "memorias",
+            "foto": "fotos",
+            "video": "videos",
+        }
+        tabela = tabelas.get(tipo_conteudo)
+        if not tabela or visibilidade not in ("privado", "contatos", "seletivo"):
+            return False
+        contatos_ids = list(dict.fromkeys(contatos_ids or []))
+        if visibilidade == "seletivo" and not contatos_ids:
+            return False
+
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            cursor.execute(
+                f"""
+                UPDATE {tabela}
+                SET visibilidade = %s
+                WHERE id = %s AND usuario_id = %s
+                RETURNING id
+                """,
+                (visibilidade, conteudo_id, usuario_dono_id),
+            )
+            if not cursor.fetchone():
+                conn.rollback()
+                return False
+
+            cursor.execute("""
+                DELETE FROM conteudo_permissoes
+                WHERE tipo_conteudo = %s AND conteudo_id = %s
+            """, (tipo_conteudo, conteudo_id))
+            if tipo_conteudo == "foto":
+                cursor.execute(
+                    "DELETE FROM fotos_contatos WHERE foto_id = %s",
+                    (conteudo_id,),
+                )
+            elif tipo_conteudo == "video":
+                cursor.execute(
+                    "DELETE FROM videos_acesso WHERE video_id = %s",
+                    (conteudo_id,),
+                )
+
+            if visibilidade == "seletivo":
+                for contato_id in contatos_ids:
+                    cursor.execute("""
+                        INSERT INTO conteudo_permissoes (
+                            tipo_conteudo, conteudo_id, contato_id
+                        )
+                        SELECT %s, %s, c.id
+                        FROM contatos c
+                        WHERE c.id = %s AND c.usuario_id = %s
+                        ON CONFLICT DO NOTHING
+                    """, (
+                        tipo_conteudo,
+                        conteudo_id,
+                        contato_id,
+                        usuario_dono_id,
+                    ))
+                    if tipo_conteudo == "foto":
+                        cursor.execute("""
+                            INSERT INTO fotos_contatos (foto_id, contato_id)
+                            SELECT %s, c.id
+                            FROM contatos c
+                            WHERE c.id = %s AND c.usuario_id = %s
+                        """, (conteudo_id, contato_id, usuario_dono_id))
+                    elif tipo_conteudo == "video":
+                        cursor.execute("""
+                            INSERT INTO videos_acesso (video_id, contato_id)
+                            SELECT %s, c.id
+                            FROM contatos c
+                            WHERE c.id = %s AND c.usuario_id = %s
+                        """, (conteudo_id, contato_id, usuario_dono_id))
+
+            conn.commit()
+            return True
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            cursor.close()
+            conn.close()
+
+    def listar_contatos_permitidos_conteudo(
+            self,
+            tipo_conteudo: str,
+            conteudo_id: int,
+            usuario_dono_id: int,
+    ) -> List[int]:
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("""
+                SELECT cp.contato_id
+                FROM conteudo_permissoes cp
+                JOIN contatos c ON c.id = cp.contato_id
+                WHERE cp.tipo_conteudo = %s
+                  AND cp.conteudo_id = %s
+                  AND c.usuario_id = %s
+                ORDER BY cp.contato_id
+            """, (tipo_conteudo, conteudo_id, usuario_dono_id))
+            return [row[0] for row in cursor.fetchall()]
+        finally:
+            cursor.close()
+            conn.close()
 
     def listar_historias_compartilhadas_comigo(self, email: str) -> List[Dict]:
         email_normalizado = (email or "").strip().lower()
@@ -1253,55 +1525,119 @@ class BancoDados:
             if ultimo_acesso is None:
                 cursor.execute("""
                     SELECT COUNT(*)
-                    FROM memorias
-                    WHERE usuario_id = %s
-                """, (dono_historia_id,))
+                    FROM memorias m
+                    WHERE m.usuario_id = %s
+                      AND (
+                            m.visibilidade = 'contatos'
+                            OR (
+                                m.visibilidade = 'seletivo'
+                                AND EXISTS (
+                                    SELECT 1 FROM conteudo_permissoes cp
+                                    WHERE cp.tipo_conteudo = 'memoria'
+                                      AND cp.conteudo_id = m.id
+                                      AND cp.contato_id = %s
+                                )
+                            )
+                      )
+                """, (dono_historia_id, contato_id))
                 memorias = cursor.fetchone()[0]
 
                 cursor.execute("""
                     SELECT COUNT(DISTINCT f.id)
                     FROM fotos f
-                    JOIN fotos_contatos fc ON fc.foto_id = f.id
                     WHERE f.usuario_id = %s
-                      AND fc.contato_id = %s
+                      AND (
+                            f.visibilidade = 'contatos'
+                            OR (
+                                f.visibilidade = 'seletivo'
+                                AND EXISTS (
+                                    SELECT 1 FROM conteudo_permissoes cp
+                                    WHERE cp.tipo_conteudo = 'foto'
+                                      AND cp.conteudo_id = f.id
+                                      AND cp.contato_id = %s
+                                )
+                            )
+                      )
                 """, (dono_historia_id, contato_id))
                 fotos = cursor.fetchone()[0]
 
                 cursor.execute("""
                     SELECT COUNT(DISTINCT v.id)
                     FROM videos v
-                    JOIN videos_acesso va ON va.video_id = v.id
                     WHERE v.usuario_id = %s
-                      AND va.contato_id = %s
+                      AND (
+                            v.visibilidade = 'contatos'
+                            OR (
+                                v.visibilidade = 'seletivo'
+                                AND EXISTS (
+                                    SELECT 1 FROM conteudo_permissoes cp
+                                    WHERE cp.tipo_conteudo = 'video'
+                                      AND cp.conteudo_id = v.id
+                                      AND cp.contato_id = %s
+                                )
+                            )
+                      )
                 """, (dono_historia_id, contato_id))
                 videos = cursor.fetchone()[0]
             else:
                 cursor.execute("""
                     SELECT COUNT(*)
-                    FROM memorias
-                    WHERE usuario_id = %s
-                      AND data_criacao > %s
-                """, (dono_historia_id, ultimo_acesso))
+                    FROM memorias m
+                    WHERE m.usuario_id = %s
+                      AND m.data_criacao > %s
+                      AND (
+                            m.visibilidade = 'contatos'
+                            OR (
+                                m.visibilidade = 'seletivo'
+                                AND EXISTS (
+                                    SELECT 1 FROM conteudo_permissoes cp
+                                    WHERE cp.tipo_conteudo = 'memoria'
+                                      AND cp.conteudo_id = m.id
+                                      AND cp.contato_id = %s
+                                )
+                            )
+                      )
+                """, (dono_historia_id, ultimo_acesso, contato_id))
                 memorias = cursor.fetchone()[0]
 
                 cursor.execute("""
                     SELECT COUNT(DISTINCT f.id)
                     FROM fotos f
-                    JOIN fotos_contatos fc ON fc.foto_id = f.id
                     WHERE f.usuario_id = %s
-                      AND fc.contato_id = %s
                       AND f.data_criacao > %s
-                """, (dono_historia_id, contato_id, ultimo_acesso))
+                      AND (
+                            f.visibilidade = 'contatos'
+                            OR (
+                                f.visibilidade = 'seletivo'
+                                AND EXISTS (
+                                    SELECT 1 FROM conteudo_permissoes cp
+                                    WHERE cp.tipo_conteudo = 'foto'
+                                      AND cp.conteudo_id = f.id
+                                      AND cp.contato_id = %s
+                                )
+                            )
+                      )
+                """, (dono_historia_id, ultimo_acesso, contato_id))
                 fotos = cursor.fetchone()[0]
 
                 cursor.execute("""
                     SELECT COUNT(DISTINCT v.id)
                     FROM videos v
-                    JOIN videos_acesso va ON va.video_id = v.id
                     WHERE v.usuario_id = %s
-                      AND va.contato_id = %s
                       AND v.data_criacao > %s
-                """, (dono_historia_id, contato_id, ultimo_acesso))
+                      AND (
+                            v.visibilidade = 'contatos'
+                            OR (
+                                v.visibilidade = 'seletivo'
+                                AND EXISTS (
+                                    SELECT 1 FROM conteudo_permissoes cp
+                                    WHERE cp.tipo_conteudo = 'video'
+                                      AND cp.conteudo_id = v.id
+                                      AND cp.contato_id = %s
+                                )
+                            )
+                      )
+                """, (dono_historia_id, ultimo_acesso, contato_id))
                 videos = cursor.fetchone()[0]
 
             memorias = int(memorias or 0)
@@ -1367,6 +1703,19 @@ class BancoDados:
                 FROM memorias m
                 WHERE m.id = %s
                   AND m.usuario_id = %s
+                  AND (
+                        m.visibilidade = 'contatos'
+                        OR (
+                            m.visibilidade = 'seletivo'
+                            AND EXISTS (
+                                SELECT 1 FROM conteudo_permissoes cp
+                                JOIN contatos c2 ON c2.id = cp.contato_id
+                                WHERE cp.tipo_conteudo = 'memoria'
+                                  AND cp.conteudo_id = m.id
+                                  AND LOWER(TRIM(c2.email)) = %s
+                            )
+                        )
+                  )
                   AND EXISTS (
                       SELECT 1
                       FROM contatos c
@@ -1381,6 +1730,7 @@ class BancoDados:
                 texto_normalizado,
                 memoria_id,
                 usuario_dono_id,
+                email_normalizado,
                 email_normalizado,
             ))
 
@@ -1556,7 +1906,8 @@ class BancoDados:
         cursor = conn.cursor()
 
         self.executar(cursor, """
-            SELECT id, categoria, titulo, conteudo, origem, data_criacao
+            SELECT id, categoria, titulo, conteudo, origem, data_criacao,
+                   visibilidade, local, data_evento, pessoas_relacionadas
             FROM memorias
             WHERE usuario_id = ?
             ORDER BY data_criacao DESC
@@ -1572,6 +1923,10 @@ class BancoDados:
             "conteudo": r[3],
             "origem": r[4],
             "data_criacao": r[5],
+            "visibilidade": r[6] or "contatos",
+            "local": r[7],
+            "data_evento": r[8],
+            "pessoas_relacionadas": r[9],
         } for r in rows]
 
     def atualizar_foto_usuario(self, usuario_id: int, caminho_foto: str):
@@ -1618,8 +1973,16 @@ class BancoDados:
             origem: str = "assistente",
             local: str = None,
             data_evento: str = None,
-            pessoas_relacionadas: str = None
+            pessoas_relacionadas: str = None,
+            visibilidade: str = "contatos",
+            contatos_ids: List[int] = None,
     ):
+        if visibilidade not in ("privado", "contatos", "seletivo"):
+            raise ValueError("Visibilidade inválida.")
+        contatos_ids = list(dict.fromkeys(contatos_ids or []))
+        if visibilidade == "seletivo" and not contatos_ids:
+            raise ValueError("Selecione pelo menos um contato.")
+
         conn = self.conectar()
         cursor = conn.cursor()
 
@@ -1634,8 +1997,9 @@ class BancoDados:
                     local,
                     data_evento,
                     pessoas_relacionadas
+                    , visibilidade
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
             """, (
                 usuario_id,
@@ -1645,13 +2009,36 @@ class BancoDados:
                 origem,
                 local,
                 data_evento,
-                pessoas_relacionadas
+                pessoas_relacionadas,
+                visibilidade,
             ))
 
             memoria_id = cursor.fetchone()[0]
+            if visibilidade == "seletivo":
+                for contato_id in contatos_ids or []:
+                    cursor.execute("""
+                        INSERT INTO conteudo_permissoes (
+                            tipo_conteudo, conteudo_id, contato_id
+                        )
+                        SELECT 'memoria', %s, c.id
+                        FROM contatos c
+                        WHERE c.id = %s AND c.usuario_id = %s
+                        ON CONFLICT DO NOTHING
+                    """, (memoria_id, contato_id, usuario_id))
+                cursor.execute("""
+                    SELECT COUNT(*)
+                    FROM conteudo_permissoes
+                    WHERE tipo_conteudo = 'memoria'
+                      AND conteudo_id = %s
+                """, (memoria_id,))
+                if cursor.fetchone()[0] == 0:
+                    raise ValueError("Nenhum contato válido foi selecionado.")
             conn.commit()
             return memoria_id
 
+        except Exception:
+            conn.rollback()
+            raise
         finally:
             cursor.close()
             conn.close()

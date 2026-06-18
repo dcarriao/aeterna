@@ -431,6 +431,77 @@ def render_login():
 # MINHA HISTORIA
 # ============================================================================
 
+ROTULOS_VISIBILIDADE = {
+    "privado": "🔒 Somente eu",
+    "contatos": "👥 Todos os meus contatos",
+    "seletivo": "✨ Pessoas selecionadas",
+}
+
+
+def render_editor_visibilidade(
+        tipo_conteudo: str,
+        conteudo: dict,
+        usuario_id: int,
+        contatos: list,
+):
+    visibilidade_atual = conteudo.get("visibilidade") or "contatos"
+    st.caption(ROTULOS_VISIBILIDADE.get(visibilidade_atual, "👥 Todos os meus contatos"))
+
+    with st.expander("Alterar quem pode ver"):
+        opcoes = list(ROTULOS_VISIBILIDADE.keys())
+        visibilidade = st.radio(
+            "Quem pode ver este conteúdo?",
+            opcoes,
+            index=opcoes.index(visibilidade_atual),
+            format_func=lambda valor: ROTULOS_VISIBILIDADE[valor],
+            key=f"vis_{tipo_conteudo}_{conteudo['id']}",
+        )
+
+        contatos_atuais = db.listar_contatos_permitidos_conteudo(
+            tipo_conteudo,
+            conteudo["id"],
+            usuario_id,
+        )
+        mapa_contatos = {
+            contato["nome_completo"]: contato["id"]
+            for contato in contatos
+        }
+        selecionados_nomes = []
+        if visibilidade == "seletivo":
+            selecionados_nomes = st.multiselect(
+                "Escolha os contatos",
+                list(mapa_contatos.keys()),
+                default=[
+                    nome for nome, contato_id in mapa_contatos.items()
+                    if contato_id in contatos_atuais
+                ],
+                key=f"contatos_vis_{tipo_conteudo}_{conteudo['id']}",
+            )
+
+        if st.button(
+            "Salvar visibilidade",
+            key=f"salvar_vis_{tipo_conteudo}_{conteudo['id']}",
+            use_container_width=True,
+        ):
+            contatos_ids = [
+                mapa_contatos[nome]
+                for nome in selecionados_nomes
+            ]
+            if visibilidade == "seletivo" and not contatos_ids:
+                st.warning("Selecione pelo menos um contato.")
+            elif db.atualizar_visibilidade_conteudo(
+                tipo_conteudo,
+                conteudo["id"],
+                usuario_id,
+                visibilidade,
+                contatos_ids,
+            ):
+                st.success("Visibilidade atualizada.")
+                st.rerun()
+            else:
+                st.error("Não foi possível atualizar a visibilidade.")
+
+
 def render_minha_historia():
     st.markdown("<h3 style='color: #2E8B57;'>📖 Minha História</h3>", unsafe_allow_html=True)
     st.info("Aqui suas memórias começam a formar uma linha viva da sua história.")
@@ -441,6 +512,7 @@ def render_minha_historia():
 
     fotos_por_memoria = db.listar_fotos_por_memorias_usuario(usuario_id)
     videos_por_memoria = db.listar_videos_por_memorias_usuario(usuario_id)
+    contatos = db.listar_contatos_usuario(usuario_id)
     contribuicoes_por_memoria = db.listar_contribuicoes_aprovadas_memorias(
         usuario_id
     )
@@ -491,6 +563,12 @@ def render_minha_historia():
                     st.markdown(f"**Pessoas:** {memoria['pessoas_relacionadas']}")
 
                 st.markdown(memoria.get("conteudo", ""))
+                render_editor_visibilidade(
+                    "memoria",
+                    memoria,
+                    usuario_id,
+                    contatos,
+                )
                 render_contribuicoes_aprovadas(
                     contribuicoes_por_memoria.get(memoria["id"], [])
                 )
@@ -860,7 +938,7 @@ def render_videos():
                 categoria = st.selectbox(
                     "Categoria",
                     [
-                        "Mensagem após falecimento",
+                        "Momento importante",
                         "Para pessoa específica",
                         "Para data especial"
                     ]
@@ -870,18 +948,29 @@ def render_videos():
 
                 contatos_selecionados = []
                 opcoes_contato = {}
+                visibilidade_video = st.radio(
+                    "Visibilidade",
+                    ["privado", "contatos", "seletivo"],
+                    format_func=lambda valor: ROTULOS_VISIBILIDADE[valor],
+                    key="visibilidade_novo_video",
+                )
 
                 if not contatos:
-                    st.warning("⚠️ Cadastre contatos primeiro para definir quem pode ver o vídeo")
+                    if visibilidade_video == "seletivo":
+                        st.warning("⚠️ Cadastre contatos para usar o compartilhamento seletivo")
                 else:
                     opcoes_contato = {
                         c["nome_completo"]: c["id"]
                         for c in contatos
                     }
 
-                    contatos_selecionados_nomes = st.multiselect(
-                        "Selecione os contatos que terão acesso ao vídeo",
-                        list(opcoes_contato.keys())
+                    contatos_selecionados_nomes = (
+                        st.multiselect(
+                            "Selecione os contatos que terão acesso ao vídeo",
+                            list(opcoes_contato.keys())
+                        )
+                        if visibilidade_video == "seletivo"
+                        else []
                     )
 
                     contatos_selecionados = [
@@ -941,6 +1030,8 @@ def render_videos():
                 if salvar_video:
                     if not titulo or not arquivo_video:
                         st.error("❌ Preencha o título e selecione um vídeo")
+                    elif visibilidade_video == "seletivo" and not contatos_selecionados:
+                        st.error("Selecione pelo menos um contato.")
                     else:
                         try:
                             upload = storage.upload_streamlit_file(
@@ -958,7 +1049,8 @@ def render_videos():
                                 destinatario=destinatario,
                                 caminho_arquivo=caminho,
                                 contatos_ids=contatos_selecionados,
-                                categoria=categoria
+                                categoria=categoria,
+                                visibilidade=visibilidade_video,
                             )
 
                             if memoria_id:
@@ -1000,8 +1092,17 @@ def render_videos():
                     if video.get('destinatario'):
                         st.markdown(f"**👥 Para:** {video['destinatario']}")
                     st.markdown(
-                        f"**🔓 Acesso para:** {', '.join(nomes_acesso) if nomes_acesso else 'Todos os contatos'}")
+                        f"**🔓 Acesso para:** "
+                        f"{', '.join(nomes_acesso) if video.get('visibilidade') == 'seletivo' and nomes_acesso else ROTULOS_VISIBILIDADE.get(video.get('visibilidade', 'contatos'), 'Todos os contatos')}")
                     exibir_video_seguro(video.get("caminho"))
+                    render_editor_visibilidade(
+                        "video",
+                        video,
+                        st.session_state.usuario_atual["id"],
+                        db.listar_contatos_usuario(
+                            st.session_state.usuario_atual["id"]
+                        ),
+                    )
 
                     if st.button(f"🗑️ Remover", key=f"del_video_{video['id']}"):
                         db.deletar_video(video['id'], st.session_state.usuario_atual['id'])
@@ -1076,8 +1177,16 @@ def render_fotos():
                     st.session_state.usuario_atual["id"]
                 )
 
+                visibilidade_foto = st.radio(
+                    "Visibilidade",
+                    ["privado", "contatos", "seletivo"],
+                    format_func=lambda valor: ROTULOS_VISIBILIDADE[valor],
+                    key="visibilidade_nova_foto",
+                )
+
                 if not contatos:
-                    st.warning("Cadastre contatos primeiro para definir quem pode ver a foto.")
+                    if visibilidade_foto == "seletivo":
+                        st.warning("Cadastre contatos para usar o compartilhamento seletivo.")
                     contatos_selecionados = []
                 else:
                     opcoes_contato = {
@@ -1085,9 +1194,13 @@ def render_fotos():
                         for c in contatos
                     }
 
-                    contatos_selecionados_nomes = st.multiselect(
-                        "Selecione os contatos que terão acesso à foto",
-                        list(opcoes_contato.keys()),
+                    contatos_selecionados_nomes = (
+                        st.multiselect(
+                            "Selecione os contatos que terão acesso à foto",
+                            list(opcoes_contato.keys()),
+                        )
+                        if visibilidade_foto == "seletivo"
+                        else []
                     )
 
                     contatos_selecionados = [
@@ -1131,6 +1244,8 @@ def render_fotos():
                 if salvar:
                     if not titulo or not arquivo_foto:
                         st.error("Informe um título e selecione uma foto.")
+                    elif visibilidade_foto == "seletivo" and not contatos_selecionados:
+                        st.error("Selecione pelo menos um contato.")
                     else:
                         try:
                             upload = storage.upload_streamlit_file(
@@ -1149,6 +1264,7 @@ def render_fotos():
                                 categoria=categoria,
                                 caminho_arquivo=caminho,
                                 contatos_ids=contatos_selecionados,
+                                visibilidade=visibilidade_foto,
                             )
 
                             if memoria_id:
@@ -1186,14 +1302,25 @@ def render_fotos():
                     st.markdown(
                         "**Acesso para:** {}".format(
                             ", ".join(nomes_acesso)
-                            if nomes_acesso
-                            else "Nenhum contato específico"
+                            if foto.get("visibilidade") == "seletivo" and nomes_acesso
+                            else ROTULOS_VISIBILIDADE.get(
+                                foto.get("visibilidade", "contatos"),
+                                "Todos os contatos",
+                            )
                         )
                     )
 
                     exibir_foto_segura(
                         foto.get("caminho"),
                         caption=foto.get("titulo", ""),
+                    )
+                    render_editor_visibilidade(
+                        "foto",
+                        foto,
+                        st.session_state.usuario_atual["id"],
+                        db.listar_contatos_usuario(
+                            st.session_state.usuario_atual["id"]
+                        ),
                     )
 
                     if st.button(
@@ -2075,6 +2202,7 @@ def selecionar_minha_historia():
     st.session_state.pop("assistente_obj", None)
     st.session_state.pop("assistente_modo", None)
     st.session_state.pop("assistente_usuario_id", None)
+    st.session_state.pop("assistente_contato_id", None)
 
 
 def selecionar_historia_compartilhada(historia: dict):
@@ -2085,6 +2213,7 @@ def selecionar_historia_compartilhada(historia: dict):
     st.session_state.pop("assistente_obj", None)
     st.session_state.pop("assistente_modo", None)
     st.session_state.pop("assistente_usuario_id", None)
+    st.session_state.pop("assistente_contato_id", None)
 
 
 def formatar_novidades_historia(novidades: dict) -> str:
@@ -2213,7 +2342,7 @@ def render_visao_historia_compartilhada(
     nome_pessoa = acesso.get("nome_completo") or acesso.get("nome") or "esta pessoa"
     nome_visitante = usuario_logado.get("nome") or "Visitante"
 
-    memorias = db.listar_memorias_usuario(usuario_id)
+    memorias = db.listar_memorias_por_contato(contato_id)
     fotos = db.listar_fotos_por_contato(contato_id)
     videos = db.listar_videos_por_contato(contato_id)
 
@@ -2392,8 +2521,8 @@ def main():
                 st.session_state.usuario_atual["id"]
             )
 
-            memorias_visitante = db.listar_memorias_usuario(
-                st.session_state.falecido_id
+            memorias_visitante = db.listar_memorias_por_contato(
+                st.session_state.usuario_atual["id"]
             )
 
             try:
