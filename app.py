@@ -513,7 +513,7 @@ def render_minha_historia():
     fotos_por_memoria = db.listar_fotos_por_memorias_usuario(usuario_id)
     videos_por_memoria = db.listar_videos_por_memorias_usuario(usuario_id)
     contatos = db.listar_contatos_usuario(usuario_id)
-    contribuicoes_por_memoria = db.listar_contribuicoes_aprovadas_memorias(
+    contribuicoes_por_memoria = carregar_contribuicoes_aprovadas_memorias(
         usuario_id
     )
 
@@ -739,6 +739,22 @@ def render_contribuicoes_aprovadas(contribuicoes: list):
                 )
 
 
+def carregar_contribuicoes_aprovadas_memorias(usuario_id: int) -> dict:
+    listar = getattr(db, "listar_contribuicoes_aprovadas_memorias", None)
+    if not callable(listar):
+        print("listar_contribuicoes_aprovadas_memorias indisponível no runtime.")
+        return {}
+
+    try:
+        return listar(usuario_id) or {}
+    except AttributeError as exc:
+        print("Erro de atributo ao listar contribuições aprovadas:", exc)
+        return {}
+    except Exception as exc:
+        print("Erro ao listar contribuições aprovadas:", exc)
+        return {}
+
+
 def render_form_contribuicao_memoria(
         memoria: dict,
         usuario_dono_id: int,
@@ -888,12 +904,9 @@ def render_historias_visitante(
 
     contribuicoes_por_memoria = {}
     if usuario_dono_id:
-        try:
-            contribuicoes_por_memoria = (
-                db.listar_contribuicoes_aprovadas_memorias(usuario_dono_id)
-            )
-        except Exception as exc:
-            print("Erro ao listar contribuições aprovadas:", exc)
+        contribuicoes_por_memoria = carregar_contribuicoes_aprovadas_memorias(
+            usuario_dono_id
+        )
 
     for memoria in memorias:
         titulo = memoria.get("titulo") or "História sem título"
