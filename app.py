@@ -2978,106 +2978,240 @@ def render_inicio(
         print("Erro ao carregar memórias recentes:", exc)
         memorias = []
 
+    try:
+        fotos_por_memoria = db.listar_fotos_por_memorias_usuario(usuario_id)
+        videos_por_memoria = db.listar_videos_por_memorias_usuario(usuario_id)
+    except Exception as exc:
+        print("Erro ao carregar mídia da home:", exc)
+        fotos_por_memoria = {}
+        videos_por_memoria = {}
+
+    try:
+        contatos = db.listar_contatos_usuario(usuario_id)
+    except Exception as exc:
+        print("Erro ao carregar pessoas importantes:", exc)
+        contatos = []
+
     novidades_historias = sum(
         int((historia.get("novidades") or {}).get("total", 0) or 0)
         for historia in historias_compartilhadas
     )
     total_novidades = novidades_historias + int(contribuicoes_pendentes or 0)
 
-    col_top_text, col_top_action = st.columns([0.78, 0.22])
+    def resumo_curto(texto: str, limite: int = 118) -> str:
+        texto = (texto or "").strip()
+        if not texto:
+            return "Uma história preservada no seu espaço privado."
+        if len(texto) <= limite:
+            return texto
+        return texto[:limite].rsplit(" ", 1)[0] + "..."
+
+    def imagem_local_para_data_uri(caminho: str) -> str:
+        try:
+            if not caminho or not os.path.exists(caminho):
+                return ""
+            mime_type = mimetypes.guess_type(caminho)[0] or "image/jpeg"
+            with open(caminho, "rb") as arquivo:
+                encoded = base64.b64encode(arquivo.read()).decode("ascii")
+            return f"data:{mime_type};base64,{encoded}"
+        except Exception as exc:
+            print("Erro ao preparar miniatura da home:", exc)
+            return ""
+
+    def media_home_memoria(memoria: dict) -> str:
+        fotos = fotos_por_memoria.get(memoria["id"], [])
+        videos = videos_por_memoria.get(memoria["id"], [])
+        if fotos:
+            caminho_foto = (fotos[0].get("caminho") or "").strip()
+            imagem_src = (
+                caminho_foto
+                if caminho_foto.startswith(("http://", "https://"))
+                else imagem_local_para_data_uri(caminho_foto)
+            )
+            if imagem_src:
+                return (
+                    '<div class="ae-live-story-media">'
+                    f'<img src="{html.escape(imagem_src, quote=True)}" alt="Miniatura da história">'
+                    "</div>"
+                )
+        if videos:
+            return (
+                '<div class="ae-live-story-media ae-live-story-media-video">'
+                "<span>🎥</span><strong>Vídeo</strong>"
+                "</div>"
+            )
+        return (
+            '<div class="ae-live-story-media ae-live-story-media-fallback">'
+            "<span>📖</span><strong>História</strong>"
+            "</div>"
+        )
+
+    def card_historia_home(memoria: dict) -> str:
+        titulo = html.escape(memoria.get("titulo") or "História sem título")
+        data = html.escape(str(memoria.get("data_evento") or ""))
+        resumo = html.escape(resumo_curto(memoria.get("conteudo") or ""))
+        data_html = f'<span class="ae-live-story-date">{data}</span>' if data else ""
+        return (
+            '<div class="ae-live-story-card">'
+            f"{media_home_memoria(memoria)}"
+            '<div class="ae-live-story-body">'
+            f"<h3>{titulo}</h3>"
+            f"{data_html}"
+            f"<p>{resumo}</p>"
+            "</div>"
+            "</div>"
+        )
+
+    def pessoa_card(contato: dict) -> str:
+        nome = contato.get("nome_completo") or contato.get("nome") or "Pessoa"
+        inicial = html.escape(nome[:1].upper() or "P")
+        relacao = "Você compartilha histórias com ela"
+        if contato.get("parentesco"):
+            relacao = f"{contato['parentesco']} nas suas histórias"
+        elif contato.get("acesso_central_luto"):
+            relacao = "Pode ver algumas das suas histórias"
+        return (
+            '<div class="ae-live-person-card">'
+            f'<div class="ae-live-avatar">{inicial}</div>'
+            f'<strong>{html.escape(nome)}</strong>'
+            f'<span>{html.escape(relacao)}</span>'
+            "</div>"
+        )
+
+    def compartilhada_card(historia: dict) -> str:
+        nome = historia.get("nome_completo") or historia.get("nome") or "Pessoa importante"
+        novidades = historia.get("novidades") or {}
+        detalhe = (
+            formatar_novidades_historia(novidades)
+            if int(novidades.get("total", 0) or 0)
+            else "Compartilhou um espaço de histórias com você"
+        )
+        return (
+            '<div class="ae-live-shared-card">'
+            '<div class="ae-live-avatar ae-live-avatar-shared">🤝</div>'
+            f'<strong>{html.escape(nome)}</strong>'
+            f'<span>{html.escape(detalhe)}</span>'
+            "</div>"
+        )
+
+    col_top_text, col_top_action = st.columns([0.78, 0.22], vertical_alignment="center")
     with col_top_text:
         st.markdown(
             f"""
-            <div class="ae-home-top">
+            <div class="ae-live-home-top">
                 <h1>Olá, {html.escape(primeiro_nome)}</h1>
-                <p>Seu espaço privado para registrar e compartilhar histórias.</p>
+                <p>Seu espaço privado para preservar e compartilhar histórias com quem realmente importa.</p>
             </div>
             """,
             unsafe_allow_html=True,
         )
     with col_top_action:
-        st.markdown('<div class="ae-top-action-spacer"></div>', unsafe_allow_html=True)
-        if st.button("+ Registrar momento", type="primary", use_container_width=True):
+        if st.button("+ Contar uma História", key="home_contar_historia", type="primary", use_container_width=True):
             navegar_para("assistente")
             st.rerun()
 
-    st.markdown(
-        f"""
-        <div class="ae-home-stats">
-            <div class="ae-stat-card"><span>📖 Minha História</span><strong>{len(memorias)}</strong></div>
-            <div class="ae-stat-card"><span>👥 Pessoas</span><strong>{int(qtd_pessoas or 0)}</strong></div>
-            <div class="ae-stat-card"><span>🤝 Compartilhadas</span><strong>{len(historias_compartilhadas)}</strong></div>
-            <div class="ae-stat-card"><span>🔔 Novidades</span><strong>{total_novidades}</strong></div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    st.markdown('<div class="ae-live-home-rule"></div>', unsafe_allow_html=True)
 
-    col_hist, col_mem = st.columns(2)
-    with col_hist:
-        itens_novidades = []
-        for historia in historias_compartilhadas:
-            novidades = historia.get("novidades") or {}
-            if int(novidades.get("total", 0) or 0):
-                nome = historia.get("nome_completo") or historia.get("nome") or "Pessoa"
-                itens_novidades.append(f"{nome}: {formatar_novidades_historia(novidades)}")
-        if contribuicoes_pendentes:
-            itens_novidades.append(
-                f"{contribuicoes_pendentes} contribuição(ões) aguardando avaliação"
-            )
-        corpo = "".join(
-            f"<li>{html.escape(item)}</li>" for item in itens_novidades[:3]
-        ) or "<li>Sem novidades por enquanto.</li>"
+    st.markdown('<div class="ae-live-section-title">Continue sua história</div>', unsafe_allow_html=True)
+    if memorias:
+        colunas_memorias = st.columns(4)
+        for indice, memoria in enumerate(memorias[:4]):
+            with colunas_memorias[indice]:
+                st.markdown(card_historia_home(memoria), unsafe_allow_html=True)
+    else:
         st.markdown(
-            f"""
-            <div class="ae-home-panel">
-                <div class="ae-panel-title">🔔 Novidades</div>
-                <ul>{corpo}</ul>
+            """
+            <div class="ae-live-empty-card">
+                <strong>Sua primeira história ainda está esperando.</strong>
+                <span>Quando você contar uma história, ela aparecerá aqui.</span>
             </div>
             """,
             unsafe_allow_html=True,
         )
-        if st.button("Ver todas", key="home_ver_novidades", use_container_width=True):
-            navegar_para("novidades")
+    if st.button("Ver minha história", key="home_ver_minha_historia", use_container_width=False):
+        navegar_para("minha_historia")
+        st.rerun()
+
+    col_pessoas, col_compartilhadas = st.columns([0.58, 0.42])
+    with col_pessoas:
+        st.markdown('<div class="ae-live-section-title">Pessoas importantes</div>', unsafe_allow_html=True)
+        pessoas_html = "".join(
+            pessoa_card(contato)
+            for contato in contatos[:4]
+        )
+        if not pessoas_html:
+            pessoas_html = (
+                '<div class="ae-live-empty-card ae-live-empty-card-small">'
+                "<strong>Suas pessoas importantes aparecerão aqui.</strong>"
+                "<span>Adicione contatos para organizar com quem suas histórias serão compartilhadas.</span>"
+                "</div>"
+            )
+        st.markdown(f'<div class="ae-live-people-grid">{pessoas_html}</div>', unsafe_allow_html=True)
+        if st.button("Ver pessoas", key="home_ver_pessoas", use_container_width=False):
+            navegar_para("pessoas")
             st.rerun()
 
-    with col_mem:
+    with col_compartilhadas:
+        st.markdown('<div class="ae-live-section-title">Compartilhadas comigo</div>', unsafe_allow_html=True)
         if historias_compartilhadas:
-            corpo = "".join(
-                f"<li>{html.escape(h.get('nome_completo') or h.get('nome') or 'Pessoa')}</li>"
-                for h in historias_compartilhadas[:3]
+            compartilhadas_html = "".join(
+                compartilhada_card(historia)
+                for historia in historias_compartilhadas[:2]
             )
         else:
-            corpo = "<li>Nenhuma história compartilhada ainda.</li>"
-        st.markdown(
-            f"""
-            <div class="ae-home-panel">
-                <div class="ae-panel-title">👥 Compartilhadas comigo</div>
-                <ul>{corpo}</ul>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        if st.button("Ver todas", key="home_ver_historias", use_container_width=True):
+            compartilhadas_html = (
+                '<div class="ae-live-empty-card ae-live-empty-card-small">'
+                "<strong>Nenhuma história foi compartilhada com você ainda.</strong>"
+                "<span>Quando alguém importante compartilhar histórias com você, elas aparecerão aqui.</span>"
+                "</div>"
+            )
+        st.markdown(f'<div class="ae-live-shared-grid">{compartilhadas_html}</div>', unsafe_allow_html=True)
+        if st.button("Ver compartilhadas", key="home_ver_historias", use_container_width=False):
             navegar_para("historias_compartilhadas")
             st.rerun()
 
-    recentes = "".join(
-        f"<li>{html.escape(memoria.get('titulo') or 'História sem título')}</li>"
-        for memoria in memorias[:3]
-    ) or "<li>Você ainda não registrou nenhuma história.</li>"
+    itens_novidades = []
+    for historia in historias_compartilhadas:
+        novidades = historia.get("novidades") or {}
+        if int(novidades.get("total", 0) or 0):
+            nome = historia.get("nome_completo") or historia.get("nome") or "Pessoa"
+            itens_novidades.append(
+                f"{nome}: {formatar_novidades_historia(novidades)}"
+            )
+    if contribuicoes_pendentes:
+        itens_novidades.append(
+            f"{contribuicoes_pendentes} contribuição aguardando avaliação"
+        )
+    if memorias:
+        itens_novidades.append(
+            f"Você criou a história \"{memorias[0].get('titulo') or 'História sem título'}\""
+        )
+
+    st.markdown('<div class="ae-live-section-title">O que aconteceu recentemente</div>', unsafe_allow_html=True)
+    if itens_novidades:
+        novidades_html = "".join(
+            f'<div class="ae-live-news-item">✨ {html.escape(item)}</div>'
+            for item in itens_novidades[:3]
+        )
+    else:
+        novidades_html = (
+            '<div class="ae-live-news-item">Sem novidades por enquanto. Quando algo importante acontecer, aparece aqui.</div>'
+        )
+    st.markdown(f'<div class="ae-live-news-list">{novidades_html}</div>', unsafe_allow_html=True)
+    if st.button("Ver novidades", key="home_ver_novidades", use_container_width=False):
+        navegar_para("novidades")
+        st.rerun()
+
     st.markdown(
         f"""
-        <div class="ae-home-panel ae-recent-panel">
-            <div class="ae-panel-title">📖 Minhas memórias recentes</div>
-            <ul>{recentes}</ul>
+        <div class="ae-live-subtle-metrics">
+            <span>{len(memorias)} histórias preservadas</span>
+            <span>{int(qtd_pessoas or len(contatos) or 0)} pessoas importantes</span>
+            <span>{total_novidades} novidades</span>
         </div>
         """,
         unsafe_allow_html=True,
     )
-    if st.button("Ver minha história", key="home_ver_minha_historia", use_container_width=True):
-        navegar_para("minha_historia")
-        st.rerun()
 
 
 def render_historias_compartilhadas_lista(historias_compartilhadas: list):
