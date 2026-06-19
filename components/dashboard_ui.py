@@ -533,8 +533,8 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-story-top {
-    min-height: 58px;
-    max-height: 78px;
+    min-height: 46px;
+    max-height: 62px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -542,28 +542,28 @@ button[data-baseweb="tab"][aria-selected="true"] {
     border: 0;
     border-radius: 0;
     padding: 0;
-    margin-top: -2.35rem;
+    margin-top: -2.65rem;
     margin-bottom: 0;
     box-shadow: none;
 }
 
 .ae-story-top h2 {
     color: #2B1747;
-    margin: 0 0 0.28rem;
-    font-size: 1.82rem;
+    margin: 0 0 0.18rem;
+    font-size: 1.62rem;
     letter-spacing: -0.035em;
 }
 
 .ae-story-top p {
     color: #6F6478;
     margin: 0;
-    font-size: 0.92rem;
+    font-size: 0.84rem;
 }
 
 .ae-story-header-rule {
     height: 1px;
     background: rgba(212,168,79,0.26);
-    margin: 0.16rem 0 0.62rem;
+    margin: 0.1rem 0 0.44rem;
 }
 
 .ae-empty-story {
@@ -592,9 +592,9 @@ button[data-baseweb="tab"][aria-selected="true"] {
 
 .ae-story-section-title {
     color: #2B1747;
-    font-size: 1.18rem;
+    font-size: 1.08rem;
     font-weight: 950;
-    margin: 0.52rem 0 0.38rem;
+    margin: 0.34rem 0 0.28rem;
 }
 
 .ae-story-shelf-title {
@@ -605,7 +605,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-story-card {
-    height: 274px;
+    height: 232px;
     width: 100%;
     overflow: hidden;
     display: flex;
@@ -618,7 +618,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-story-media {
-    height: 108px;
+    height: 86px;
     width: 100%;
     overflow: hidden;
     display: flex;
@@ -678,16 +678,16 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-story-body {
-    min-height: 166px;
-    padding: 0.74rem 0.86rem 0.68rem;
+    min-height: 146px;
+    padding: 0.58rem 0.76rem 0.55rem;
     display: flex;
     flex-direction: column;
 }
 
 .ae-story-card h3 {
     color: #2B1747;
-    margin: 0 0 0.28rem;
-    font-size: 0.98rem;
+    margin: 0 0 0.18rem;
+    font-size: 0.9rem;
     line-height: 1.2;
     min-height: 2.36em;
     display: -webkit-box;
@@ -699,15 +699,15 @@ button[data-baseweb="tab"][aria-selected="true"] {
 .ae-story-date {
     color: #6F6478;
     font-weight: 700;
-    font-size: 0.74rem;
-    min-height: 0.86rem;
+    font-size: 0.68rem;
+    min-height: 0.74rem;
 }
 
 .ae-story-card p {
     color: #2F2440;
-    margin: 0.36rem 0 0;
-    font-size: 0.82rem;
-    line-height: 1.35;
+    margin: 0.24rem 0 0;
+    font-size: 0.76rem;
+    line-height: 1.28;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -719,7 +719,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
     flex-wrap: wrap;
     gap: 0.28rem;
     margin-top: auto;
-    padding-top: 0.46rem;
+    padding-top: 0.28rem;
 }
 
 .ae-story-indicators span {
@@ -727,39 +727,52 @@ button[data-baseweb="tab"][aria-selected="true"] {
     background: rgba(247,243,234,0.92);
     border: 1px solid rgba(212,168,79,0.20);
     border-radius: 999px;
-    padding: 0.16rem 0.42rem;
-    font-size: 0.68rem;
+    padding: 0.1rem 0.32rem;
+    font-size: 0.6rem;
     font-weight: 800;
 }
 
 div[data-testid="stPopover"] button {
-    min-height: 2rem;
-    padding: 0.22rem 0.62rem;
+    min-height: 1.72rem;
+    padding: 0.14rem 0.48rem;
     border-color: rgba(212,168,79,0.35);
     color: #5F536B;
     background: rgba(255,255,255,0.72);
-    font-size: 0.82rem;
+    font-size: 0.72rem;
 }
 
 div[data-testid="stPopover"] {
-    margin-top: -2.45rem;
+    margin-top: -2.1rem;
     margin-left: 0.6rem;
     position: relative;
     z-index: 3;
 }
 
+.st-key-minha_historia_contar_historia {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.st-key-minha_historia_contar_historia button {
+    width: 215px !important;
+    min-height: 2.05rem !important;
+    padding: 0.24rem 0.72rem !important;
+    border-radius: 8px !important;
+    font-size: 0.78rem !important;
+}
+
 .ae-story-section-title-collections {
-    margin-top: 0.9rem;
+    margin-top: 0.42rem;
 }
 
 .ae-collection-box {
     background: rgba(255,255,255,0.52);
     border: 1px solid rgba(212,168,79,0.22);
     border-radius: 16px;
-    padding: 0.72rem;
+    padding: 0.55rem;
     box-shadow: 0 12px 30px rgba(43,23,71,0.06);
-    min-height: 178px;
-    margin-bottom: 0.55rem;
+    min-height: 136px;
+    margin-bottom: 0.35rem;
 }
 
 .ae-collection-head {
@@ -767,18 +780,18 @@ div[data-testid="stPopover"] {
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
-    margin-bottom: 0.55rem;
+    margin-bottom: 0.36rem;
 }
 
 .ae-collection-head h3 {
     color: #2B1747;
-    font-size: 0.92rem;
+    font-size: 0.78rem;
     margin: 0;
 }
 
 .ae-collection-head span {
     color: #2B1747;
-    font-size: 0.74rem;
+    font-size: 0.66rem;
     font-weight: 850;
     white-space: nowrap;
 }
@@ -786,7 +799,7 @@ div[data-testid="stPopover"] {
 .ae-collection-mini-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.5rem;
+    gap: 0.34rem;
 }
 
 .ae-collection-mini-card {
@@ -794,12 +807,12 @@ div[data-testid="stPopover"] {
     border: 1px solid rgba(212,168,79,0.20);
     border-radius: 10px;
     overflow: hidden;
-    min-height: 126px;
+    min-height: 92px;
     box-shadow: 0 8px 18px rgba(43,23,71,0.06);
 }
 
 .ae-collection-mini-media {
-    height: 54px;
+    height: 38px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -836,13 +849,13 @@ div[data-testid="stPopover"] {
 }
 
 .ae-collection-mini-body {
-    padding: 0.4rem 0.44rem;
+    padding: 0.3rem 0.34rem;
 }
 
 .ae-collection-mini-body strong {
     color: #2B1747;
     display: block;
-    font-size: 0.68rem;
+    font-size: 0.58rem;
     line-height: 1.18;
     min-height: 2.35em;
     display: -webkit-box;
@@ -854,15 +867,15 @@ div[data-testid="stPopover"] {
 .ae-collection-mini-body > span {
     color: #6F6478;
     display: block;
-    font-size: 0.62rem;
-    margin-top: 0.16rem;
+    font-size: 0.54rem;
+    margin-top: 0.1rem;
 }
 
 .ae-collection-mini-indicators {
     display: flex;
     gap: 0.25rem;
     flex-wrap: wrap;
-    margin-top: 0.25rem;
+    margin-top: 0.16rem;
 }
 
 .ae-collection-mini-indicators span {
