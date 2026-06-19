@@ -849,7 +849,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-important-person-card {
-    height: 178px;
+    height: 214px;
     background: rgba(255,255,255,0.94);
     border: 1px solid rgba(212,168,79,0.22);
     border-radius: 16px;
@@ -895,14 +895,14 @@ button[data-baseweb="tab"][aria-selected="true"] {
     font-size: 0.76rem;
     line-height: 1.32;
     margin: 0;
-    min-height: 2em;
+    min-height: 2.55em;
 }
 
 .ae-important-indicators {
     display: flex;
     flex-wrap: wrap;
     gap: 0.25rem;
-    margin-top: 0.55rem;
+    margin-top: 0.72rem;
 }
 
 .ae-important-indicators span {
