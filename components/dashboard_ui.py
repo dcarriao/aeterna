@@ -809,7 +809,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
     font-size: 0.88rem;
 }
 
-.ae-people-presentes {
+.st-key-ae_people_presentes_panel {
     position: relative;
     background: rgba(255,255,255,0.82);
     border: 1px solid rgba(212,168,79,0.18);
@@ -819,7 +819,17 @@ button[data-baseweb="tab"][aria-selected="true"] {
     box-shadow: 0 12px 30px rgba(43,23,71,0.055);
 }
 
-.ae-people-presentes strong {
+.st-key-ae_people_presentes_panel [data-testid="stVerticalBlock"] {
+    gap: 0.45rem;
+}
+
+.ae-people-presentes,
+.ae-people-presentes-head {
+    position: relative;
+}
+
+.ae-people-presentes strong,
+.ae-people-presentes-head strong {
     color: #2B1747;
     display: block;
     font-size: 1.04rem;
@@ -834,14 +844,16 @@ button[data-baseweb="tab"][aria-selected="true"] {
     font-size: 1rem;
 }
 
-.ae-people-presentes div {
+.ae-people-presentes div,
+.ae-people-ranking-chips {
     display: flex;
     flex-wrap: wrap;
     gap: 0.55rem 0.8rem;
     align-items: center;
 }
 
-.ae-people-presentes span {
+.ae-people-presentes span,
+.ae-people-ranking-chips span {
     background: rgba(255,255,255,0.76);
     border: 1px solid rgba(104,72,164,0.24);
     border-radius: 999px;
@@ -875,9 +887,10 @@ button[data-baseweb="tab"][aria-selected="true"] {
     border-left: 1px solid rgba(242,181,16,0.34);
 }
 
-.ae-people-presentes p {
+.ae-people-presentes p,
+.ae-people-suggestion-note {
     color: #6F6478;
-    margin: 0.75rem 0 0;
+    margin: 0.25rem 0 0 !important;
     font-size: 0.82rem;
 }
 
@@ -1009,7 +1022,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
     cursor: default;
 }
 
-.ae-suggestion-buttons-anchor + div [data-testid="stButton"] button {
+.st-key-ae_people_presentes_panel .ae-suggestion-buttons-anchor + div [data-testid="stButton"] button {
     min-height: 1.78rem !important;
     border-radius: 999px !important;
     background: rgba(255,248,231,0.92) !important;
@@ -1022,7 +1035,11 @@ button[data-baseweb="tab"][aria-selected="true"] {
     white-space: nowrap !important;
 }
 
-.ae-suggestion-buttons-anchor + div [data-testid="stHorizontalBlock"] [data-testid="column"]:last-child button {
+.st-key-ae_people_presentes_panel .ae-suggestion-buttons-anchor + div [data-testid="stHorizontalBlock"] [data-testid="column"] button[kind="secondary"] {
+    margin-top: 0 !important;
+}
+
+.st-key-ae_people_presentes_panel .ae-suggestion-buttons-anchor + div [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2n) button {
     padding-left: 0.2rem !important;
     padding-right: 0.2rem !important;
     opacity: 0.78;
