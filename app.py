@@ -670,10 +670,23 @@ def render_minha_historia():
     def render_colecao_box(categoria: str, itens: list):
         categoria_nome = nome_categoria(categoria)
         titulo = html.escape(categoria_nome)
-        mini_cards = "".join(
+        mini_cards_itens = [
             mini_card_memoria_html(memoria)
             for memoria in itens[:3]
-        )
+        ]
+        while len(mini_cards_itens) < 3:
+            mini_cards_itens.append(
+                '<div class="ae-collection-mini-card ae-collection-mini-card-empty">'
+                '<div class="ae-collection-mini-media ae-collection-mini-media-fallback">'
+                "<span>📖</span>"
+                "</div>"
+                '<div class="ae-collection-mini-body">'
+                "<strong>Próxima história</strong>"
+                "<span>Aguardando novo capítulo</span>"
+                "</div>"
+                "</div>"
+            )
+        mini_cards = "".join(mini_cards_itens)
         st.markdown(
             (
                 '<div class="ae-collection-box">'

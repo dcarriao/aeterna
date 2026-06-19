@@ -742,7 +742,7 @@ div[data-testid="stPopover"] button {
 }
 
 div[data-testid="stPopover"] {
-    margin-top: -2.1rem;
+    margin-top: 0.12rem;
     margin-left: 0.6rem;
     position: relative;
     z-index: 3;
@@ -809,6 +809,11 @@ div[data-testid="stPopover"] {
     overflow: hidden;
     min-height: 92px;
     box-shadow: 0 8px 18px rgba(43,23,71,0.06);
+}
+
+.ae-collection-mini-card-empty {
+    opacity: 0.58;
+    border-style: dashed;
 }
 
 .ae-collection-mini-media {
