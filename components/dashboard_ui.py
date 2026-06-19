@@ -823,7 +823,16 @@ button[data-baseweb="tab"][aria-selected="true"] {
     gap: 0.45rem;
 }
 
-.ae-people-presentes,
+.ae-people-presentes {
+    position: relative;
+    background: rgba(255,255,255,0.82);
+    border: 1px solid rgba(212,168,79,0.18);
+    border-radius: 14px;
+    padding: 1.05rem 1.15rem 0.85rem;
+    margin: 0.9rem 0 1.05rem;
+    box-shadow: 0 12px 30px rgba(43,23,71,0.055);
+}
+
 .ae-people-presentes-head {
     position: relative;
 }
@@ -840,6 +849,9 @@ button[data-baseweb="tab"][aria-selected="true"] {
     position: absolute;
     right: 1rem;
     top: 1rem;
+    background: transparent !important;
+    border: 0 !important;
+    padding: 0 !important;
     color: #6F6478;
     font-size: 1rem;
 }
@@ -870,6 +882,10 @@ button[data-baseweb="tab"][aria-selected="true"] {
     align-items: center;
     gap: 0.72rem;
     padding: 0.36rem 0.48rem 0.36rem 0.78rem;
+}
+
+.ae-people-suggestion-row {
+    margin-top: 0.72rem;
 }
 
 .ae-suggestion-chip a {
