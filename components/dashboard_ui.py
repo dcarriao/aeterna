@@ -890,6 +890,14 @@ button[data-baseweb="tab"][aria-selected="true"] {
     box-shadow: 0 10px 24px rgba(43,23,71,0.05);
 }
 
+.ae-inline-person-form [data-testid="stFormSubmitButton"] button {
+    background: linear-gradient(135deg, #2FA866 0%, #176D2B 100%) !important;
+    border: 0 !important;
+    color: #FFFFFF !important;
+    border-radius: 10px !important;
+    font-weight: 900 !important;
+}
+
 .ae-suggestion-chip a {
     color: #9A5A00 !important;
     text-decoration: none !important;

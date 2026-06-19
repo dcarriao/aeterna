@@ -2138,11 +2138,39 @@ def render_contatos():
                             use_container_width=True,
                         ):
                             partes_nome = nome_sugerido.split()
-                            st.session_state.contato_prefill_nome = partes_nome[0] if partes_nome else nome_sugerido
-                            st.session_state.contato_prefill_sobrenome = " ".join(partes_nome[1:])
-                            st.session_state.contato_prefill_normalizado = nome_normalizado
-                            st.session_state.contato_prefill_origem = "sugestao"
-                            st.session_state.abrir_form_contato = True
+                            nome_contato = partes_nome[0] if partes_nome else nome_sugerido
+                            sobrenome_contato = " ".join(partes_nome[1:])
+                            db.adicionar_contato(
+                                usuario_id=usuario_id,
+                                nome=nome_contato,
+                                sobrenome=sobrenome_contato,
+                                email="",
+                                telefone="",
+                                whatsapp="",
+                                parentesco="",
+                                data_nascimento="",
+                                is_prioridade=0,
+                                prioridade_order=0,
+                                acesso_central_luto=0,
+                                chave_acesso="",
+                            )
+                            db.atualizar_status_pessoa_sugerida(
+                                usuario_id,
+                                nome_normalizado,
+                                "aceita",
+                                nome_sugerido=nome_sugerido,
+                                score=int(sugestao.get("score") or 0),
+                                origem=sugestao.get("origem") or "",
+                            )
+                            st.session_state.contato_salvo_msg = f"✅ {nome_sugerido} adicionado como pessoa importante."
+                            st.session_state.contato_chave_msg = "Nenhum acesso foi liberado automaticamente."
+                            st.session_state.pop("contato_prefill_nome", None)
+                            st.session_state.pop("contato_prefill_sobrenome", None)
+                            st.session_state.pop("contato_prefill_normalizado", None)
+                            st.session_state.pop("contato_prefill_origem", None)
+                            st.session_state.pop("abrir_form_contato", None)
+                            st.session_state.pop("contato_nome_cadastro", None)
+                            st.session_state.pop("contato_sobrenome_cadastro", None)
                             st.rerun()
             st.markdown(
                 '<p class="ae-people-suggestion-note">⭐ Sugestões encontradas automaticamente nas suas histórias. Clique no nome para adicionar.</p>',
