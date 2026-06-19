@@ -11,6 +11,18 @@ def aplicar_css_dashboard():
         linear-gradient(180deg, #F7F3EA 0%, #f5efe5 100%);
 }
 
+#MainMenu,
+footer,
+header,
+[data-testid="stToolbar"],
+[data-testid="stDecoration"],
+[data-testid="stStatusWidget"],
+[data-testid="stDeployButton"],
+[data-testid="stMainMenu"] {
+    display: none !important;
+    visibility: hidden !important;
+}
+
 .block-container,
 [data-testid="stMainBlockContainer"] {
     padding-top: 0 !important;
@@ -771,8 +783,10 @@ div[data-testid="stPopover"] {
     border-radius: 16px;
     padding: 0.55rem;
     box-shadow: 0 12px 30px rgba(43,23,71,0.06);
-    min-height: 136px;
+    height: 142px;
+    min-height: 142px;
     margin-bottom: 0.35rem;
+    overflow: hidden;
 }
 
 .ae-collection-head {
@@ -800,6 +814,8 @@ div[data-testid="stPopover"] {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.34rem;
+    height: 104px;
+    align-items: stretch;
 }
 
 .ae-collection-mini-card {
@@ -807,7 +823,8 @@ div[data-testid="stPopover"] {
     border: 1px solid rgba(212,168,79,0.20);
     border-radius: 10px;
     overflow: hidden;
-    min-height: 92px;
+    height: 104px;
+    min-height: 104px;
     box-shadow: 0 8px 18px rgba(43,23,71,0.06);
 }
 
@@ -901,7 +918,7 @@ div[data-testid="stPopover"] {
     text-align: center;
     color: #8a7b95;
     font-size: 0.76rem;
-    padding: 1.1rem 0 0.4rem;
+    padding: 0.55rem 0 0;
 }
 
 @media (max-width: 1100px) {
