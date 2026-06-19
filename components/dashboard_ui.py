@@ -526,6 +526,74 @@ button[data-baseweb="tab"][aria-selected="true"] {
     margin-top: 0.55rem;
 }
 
+.ae-story-top {
+    background: rgba(255,255,255,0.96);
+    border: 1px solid rgba(212,168,79,0.22);
+    border-radius: 22px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 0.7rem;
+    box-shadow: 0 10px 28px rgba(43,23,71,0.07);
+}
+
+.ae-story-top h2 {
+    color: #2B1747;
+    margin: 0 0 0.18rem;
+    font-size: 1.45rem;
+}
+
+.ae-story-top p {
+    color: #6F6478;
+    margin: 0;
+    font-size: 0.93rem;
+}
+
+.ae-empty-story {
+    background:
+        radial-gradient(circle at top right, rgba(212,168,79,0.18), transparent 36%),
+        rgba(255,255,255,0.96);
+    border: 1px dashed rgba(212,168,79,0.45);
+    border-radius: 24px;
+    padding: 1.35rem 1.2rem;
+    margin: 0.85rem 0;
+    text-align: center;
+    box-shadow: 0 12px 34px rgba(43,23,71,0.07);
+}
+
+.ae-empty-story h3 {
+    color: #2B1747;
+    margin: 0;
+    font-size: 1.15rem;
+}
+
+.ae-story-card {
+    background: rgba(255,255,255,0.97);
+    border: 1px solid rgba(212,168,79,0.24);
+    border-radius: 20px;
+    padding: 0.9rem 1rem;
+    margin: 0.45rem 0 0.35rem;
+    min-height: 124px;
+    box-shadow: 0 12px 30px rgba(43,23,71,0.07);
+}
+
+.ae-story-card h3 {
+    color: #2B1747;
+    margin: 0.25rem 0 0.24rem;
+    font-size: 1.02rem;
+}
+
+.ae-story-card span {
+    color: #B77A46;
+    font-weight: 900;
+    font-size: 0.78rem;
+}
+
+.ae-story-card p {
+    color: #5F536B;
+    margin: 0.38rem 0 0;
+    font-size: 0.86rem;
+    line-height: 1.42;
+}
+
 .footer-aeterna {
     text-align: center;
     color: #8a7b95;
