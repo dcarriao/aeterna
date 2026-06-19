@@ -2425,6 +2425,168 @@ class BancoDados:
         conn.close()
 
     # ========================================================================
+    # PESSOAS SUGERIDAS AUTOMATICAMENTE
+    # ========================================================================
+
+    def garantir_tabela_pessoas_sugeridas(self):
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            if self.usa_postgres:
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS pessoas_sugeridas (
+                        id SERIAL PRIMARY KEY,
+                        usuario_id INTEGER NOT NULL,
+                        nome_sugerido TEXT NOT NULL,
+                        nome_normalizado TEXT NOT NULL,
+                        score INTEGER DEFAULT 0,
+                        origem TEXT,
+                        status TEXT DEFAULT 'pendente',
+                        criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        UNIQUE (usuario_id, nome_normalizado)
+                    )
+                """)
+            else:
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS pessoas_sugeridas (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        usuario_id INTEGER NOT NULL,
+                        nome_sugerido TEXT NOT NULL,
+                        nome_normalizado TEXT NOT NULL,
+                        score INTEGER DEFAULT 0,
+                        origem TEXT,
+                        status TEXT DEFAULT 'pendente',
+                        criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        UNIQUE (usuario_id, nome_normalizado)
+                    )
+                """)
+            conn.commit()
+        finally:
+            conn.close()
+
+    def sincronizar_pessoas_sugeridas(self, usuario_id: int, sugestoes: List[Dict]):
+        self.garantir_tabela_pessoas_sugeridas()
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            for sugestao in sugestoes:
+                nome = sugestao.get("nome") or ""
+                nome_normalizado = sugestao.get("nome_normalizado") or ""
+                score = int(sugestao.get("score") or 0)
+                origem = sugestao.get("origem") or ""
+                if not nome or not nome_normalizado:
+                    continue
+
+                self.executar(
+                    cursor,
+                    "SELECT status FROM pessoas_sugeridas WHERE usuario_id = ? AND nome_normalizado = ?",
+                    (usuario_id, nome_normalizado),
+                )
+                row = cursor.fetchone()
+                if not row:
+                    self.executar(
+                        cursor,
+                        """
+                        INSERT INTO pessoas_sugeridas
+                            (usuario_id, nome_sugerido, nome_normalizado, score, origem, status)
+                        VALUES (?, ?, ?, ?, ?, 'pendente')
+                        """,
+                        (usuario_id, nome, nome_normalizado, score, origem),
+                    )
+                elif row[0] == "pendente":
+                    self.executar(
+                        cursor,
+                        """
+                        UPDATE pessoas_sugeridas
+                        SET nome_sugerido = ?, score = ?, origem = ?, atualizado_em = CURRENT_TIMESTAMP
+                        WHERE usuario_id = ? AND nome_normalizado = ? AND status = 'pendente'
+                        """,
+                        (nome, score, origem, usuario_id, nome_normalizado),
+                    )
+            conn.commit()
+        finally:
+            conn.close()
+
+    def listar_pessoas_sugeridas_pendentes(self, usuario_id: int, limite: int = 3) -> List[Dict]:
+        self.garantir_tabela_pessoas_sugeridas()
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            self.executar(
+                cursor,
+                """
+                SELECT id, nome_sugerido, nome_normalizado, score, origem, status
+                FROM pessoas_sugeridas
+                WHERE usuario_id = ? AND status = 'pendente'
+                ORDER BY score DESC, atualizado_em DESC
+                LIMIT ?
+                """,
+                (usuario_id, limite),
+            )
+            rows = cursor.fetchall()
+            return [
+                {
+                    "id": r[0],
+                    "nome": r[1],
+                    "nome_normalizado": r[2],
+                    "score": r[3] or 0,
+                    "origem": r[4] or "",
+                    "status": r[5],
+                }
+                for r in rows
+            ]
+        finally:
+            conn.close()
+
+    def atualizar_status_pessoa_sugerida(
+            self,
+            usuario_id: int,
+            nome_normalizado: str,
+            status: str,
+            nome_sugerido: str = "",
+            score: int = 0,
+            origem: str = "",
+    ):
+        if status not in ("pendente", "aceita", "ignorada"):
+            raise ValueError("Status inválido para pessoa sugerida.")
+
+        self.garantir_tabela_pessoas_sugeridas()
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            self.executar(
+                cursor,
+                "SELECT id FROM pessoas_sugeridas WHERE usuario_id = ? AND nome_normalizado = ?",
+                (usuario_id, nome_normalizado),
+            )
+            row = cursor.fetchone()
+            if row:
+                self.executar(
+                    cursor,
+                    """
+                    UPDATE pessoas_sugeridas
+                    SET status = ?, atualizado_em = CURRENT_TIMESTAMP
+                    WHERE usuario_id = ? AND nome_normalizado = ?
+                    """,
+                    (status, usuario_id, nome_normalizado),
+                )
+            else:
+                self.executar(
+                    cursor,
+                    """
+                    INSERT INTO pessoas_sugeridas
+                        (usuario_id, nome_sugerido, nome_normalizado, score, origem, status)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    """,
+                    (usuario_id, nome_sugerido or nome_normalizado, nome_normalizado, score, origem, status),
+                )
+            conn.commit()
+        finally:
+            conn.close()
+
+    # ========================================================================
     # AGENDAMENTOS (LEMBRANÇAS PROGRAMADAS)
     # ========================================================================
     def criar_agendamento(
