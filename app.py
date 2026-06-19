@@ -1911,7 +1911,23 @@ def render_contatos():
 
             parentesco = st.selectbox(
                 "Relação",
-                ["", "Filho(a)", "Cônjuge", "Irmão(ã)", "Amigo(a)", "Advogado(a)", "Primo(a)", "Outro"]
+                [
+                    "",
+                    "Mãe",
+                    "Pai",
+                    "Filho(a)",
+                    "Cônjuge",
+                    "Irmão(ã)",
+                    "Avó",
+                    "Avô",
+                    "Neto(a)",
+                    "Tio(a)",
+                    "Sobrinho(a)",
+                    "Primo(a)",
+                    "Amigo(a)",
+                    "Advogado(a)",
+                    "Outro",
+                ]
             )
 
             data_nascimento = st.date_input(
