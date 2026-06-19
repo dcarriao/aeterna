@@ -533,8 +533,8 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-story-top {
-    min-height: 72px;
-    max-height: 96px;
+    min-height: 58px;
+    max-height: 78px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -542,28 +542,28 @@ button[data-baseweb="tab"][aria-selected="true"] {
     border: 0;
     border-radius: 0;
     padding: 0;
-    margin-top: -2rem;
+    margin-top: -2.35rem;
     margin-bottom: 0;
     box-shadow: none;
 }
 
 .ae-story-top h2 {
     color: #2B1747;
-    margin: 0 0 0.48rem;
-    font-size: 2rem;
+    margin: 0 0 0.28rem;
+    font-size: 1.82rem;
     letter-spacing: -0.035em;
 }
 
 .ae-story-top p {
     color: #6F6478;
     margin: 0;
-    font-size: 1rem;
+    font-size: 0.92rem;
 }
 
 .ae-story-header-rule {
     height: 1px;
     background: rgba(212,168,79,0.26);
-    margin: 0.35rem 0 0.85rem;
+    margin: 0.16rem 0 0.62rem;
 }
 
 .ae-empty-story {
@@ -592,9 +592,9 @@ button[data-baseweb="tab"][aria-selected="true"] {
 
 .ae-story-section-title {
     color: #2B1747;
-    font-size: 1.32rem;
+    font-size: 1.18rem;
     font-weight: 950;
-    margin: 0.82rem 0 0.55rem;
+    margin: 0.52rem 0 0.38rem;
 }
 
 .ae-story-shelf-title {
@@ -605,7 +605,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-story-card {
-    height: 330px;
+    height: 274px;
     width: 100%;
     overflow: hidden;
     display: flex;
@@ -613,12 +613,12 @@ button[data-baseweb="tab"][aria-selected="true"] {
     background: rgba(255,255,255,0.98);
     border: 1px solid rgba(212,168,79,0.24);
     border-radius: 16px;
-    margin: 0.35rem 0 0.2rem;
+    margin: 0.18rem 0 0;
     box-shadow: 0 12px 28px rgba(43,23,71,0.08);
 }
 
 .ae-story-media {
-    height: 142px;
+    height: 108px;
     width: 100%;
     overflow: hidden;
     display: flex;
@@ -645,8 +645,8 @@ button[data-baseweb="tab"][aria-selected="true"] {
 .ae-story-media span {
     color: #F7F3EA;
     display: block;
-    font-size: 2.15rem;
-    margin-bottom: 0.24rem;
+    font-size: 1.65rem;
+    margin-bottom: 0.16rem;
 }
 
 .ae-story-media strong {
@@ -678,16 +678,16 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-story-body {
-    min-height: 188px;
-    padding: 0.85rem 0.95rem 0.85rem;
+    min-height: 166px;
+    padding: 0.74rem 0.86rem 0.68rem;
     display: flex;
     flex-direction: column;
 }
 
 .ae-story-card h3 {
     color: #2B1747;
-    margin: 0 0 0.42rem;
-    font-size: 1.08rem;
+    margin: 0 0 0.28rem;
+    font-size: 0.98rem;
     line-height: 1.2;
     min-height: 2.36em;
     display: -webkit-box;
@@ -699,15 +699,15 @@ button[data-baseweb="tab"][aria-selected="true"] {
 .ae-story-date {
     color: #6F6478;
     font-weight: 700;
-    font-size: 0.82rem;
-    min-height: 1rem;
+    font-size: 0.74rem;
+    min-height: 0.86rem;
 }
 
 .ae-story-card p {
     color: #2F2440;
-    margin: 0.48rem 0 0;
-    font-size: 0.92rem;
-    line-height: 1.44;
+    margin: 0.36rem 0 0;
+    font-size: 0.82rem;
+    line-height: 1.35;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -719,7 +719,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
     flex-wrap: wrap;
     gap: 0.28rem;
     margin-top: auto;
-    padding-top: 0.7rem;
+    padding-top: 0.46rem;
 }
 
 .ae-story-indicators span {
@@ -734,25 +734,32 @@ button[data-baseweb="tab"][aria-selected="true"] {
 
 div[data-testid="stPopover"] button {
     min-height: 2rem;
-    padding: 0.28rem 0.72rem;
+    padding: 0.22rem 0.62rem;
     border-color: rgba(212,168,79,0.35);
     color: #5F536B;
     background: rgba(255,255,255,0.72);
     font-size: 0.82rem;
 }
 
+div[data-testid="stPopover"] {
+    margin-top: -2.45rem;
+    margin-left: 0.6rem;
+    position: relative;
+    z-index: 3;
+}
+
 .ae-story-section-title-collections {
-    margin-top: 1.55rem;
+    margin-top: 0.9rem;
 }
 
 .ae-collection-box {
     background: rgba(255,255,255,0.52);
     border: 1px solid rgba(212,168,79,0.22);
     border-radius: 16px;
-    padding: 1rem;
+    padding: 0.72rem;
     box-shadow: 0 12px 30px rgba(43,23,71,0.06);
-    min-height: 250px;
-    margin-bottom: 1rem;
+    min-height: 178px;
+    margin-bottom: 0.55rem;
 }
 
 .ae-collection-head {
@@ -760,18 +767,18 @@ div[data-testid="stPopover"] button {
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
-    margin-bottom: 0.9rem;
+    margin-bottom: 0.55rem;
 }
 
 .ae-collection-head h3 {
     color: #2B1747;
-    font-size: 1.12rem;
+    font-size: 0.92rem;
     margin: 0;
 }
 
 .ae-collection-head span {
     color: #2B1747;
-    font-size: 0.84rem;
+    font-size: 0.74rem;
     font-weight: 850;
     white-space: nowrap;
 }
@@ -779,7 +786,7 @@ div[data-testid="stPopover"] button {
 .ae-collection-mini-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.75rem;
+    gap: 0.5rem;
 }
 
 .ae-collection-mini-card {
@@ -787,12 +794,12 @@ div[data-testid="stPopover"] button {
     border: 1px solid rgba(212,168,79,0.20);
     border-radius: 10px;
     overflow: hidden;
-    min-height: 176px;
+    min-height: 126px;
     box-shadow: 0 8px 18px rgba(43,23,71,0.06);
 }
 
 .ae-collection-mini-media {
-    height: 82px;
+    height: 54px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -813,13 +820,13 @@ div[data-testid="stPopover"] button {
 
 .ae-collection-mini-media span {
     display: block;
-    font-size: 1.35rem;
+    font-size: 1.05rem;
 }
 
 .ae-collection-mini-media strong {
     display: block;
     color: white;
-    font-size: 0.72rem;
+    font-size: 0.58rem;
 }
 
 .ae-collection-mini-media-fallback {
@@ -829,13 +836,13 @@ div[data-testid="stPopover"] button {
 }
 
 .ae-collection-mini-body {
-    padding: 0.55rem 0.58rem;
+    padding: 0.4rem 0.44rem;
 }
 
 .ae-collection-mini-body strong {
     color: #2B1747;
     display: block;
-    font-size: 0.8rem;
+    font-size: 0.68rem;
     line-height: 1.18;
     min-height: 2.35em;
     display: -webkit-box;
@@ -847,15 +854,15 @@ div[data-testid="stPopover"] button {
 .ae-collection-mini-body > span {
     color: #6F6478;
     display: block;
-    font-size: 0.72rem;
-    margin-top: 0.25rem;
+    font-size: 0.62rem;
+    margin-top: 0.16rem;
 }
 
 .ae-collection-mini-indicators {
     display: flex;
     gap: 0.25rem;
     flex-wrap: wrap;
-    margin-top: 0.45rem;
+    margin-top: 0.25rem;
 }
 
 .ae-collection-mini-indicators span {

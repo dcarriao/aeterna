@@ -514,7 +514,7 @@ def render_minha_historia():
     memorias = db.listar_memorias_usuario(st.session_state.usuario_atual["id"])
     usuario_id = st.session_state.usuario_atual["id"]
 
-    col_header, col_acao = st.columns([0.72, 0.28], vertical_alignment="center")
+    col_header, col_acao = st.columns([0.82, 0.18], vertical_alignment="center")
     with col_header:
         st.markdown(
             """
@@ -534,7 +534,7 @@ def render_minha_historia():
         if st.button(
             rotulo_cta,
             key="minha_historia_contar_historia",
-            use_container_width=True,
+            use_container_width=False,
         ):
             navegar_para("assistente")
             st.rerun()
