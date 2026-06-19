@@ -15,8 +15,8 @@ Ao utilizar a plataforma, você concorda com os seguintes termos:
 3. É proibido utilizar a plataforma para conteúdos ilícitos, ofensivos,
 fraudulentos ou que violem direitos de terceiros.
 4. A aEterna poderá suspender contas que violem estes termos.
-5. O Assistente de Memória utiliza inteligência artificial como ferramenta
-de apoio e não substitui profissionais de saúde, psicólogos, médicos,
+5. O Curador de Histórias é uma ferramenta de apoio para organização de memórias
+e não substitui profissionais de saúde, psicólogos, médicos,
 advogados ou serviços de emergência.
 6. A aEterna não garante disponibilidade ininterrupta do serviço.
 7. Os conteúdos permanecem de propriedade de seus respectivos titulares.

@@ -42,17 +42,17 @@ class GerenciadorAgendamentos:
         video_id = None
 
         if tipo == "texto":
-            opcao_texto = st.radio("Como criar o texto?", ["Escrever manualmente", "Gerar com IA"],
+            opcao_texto = st.radio("Como criar o texto?", ["Escrever manualmente", "Receber perguntas do Curador"],
                                    key="agendamento_opcao")
 
             if opcao_texto == "Escrever manualmente":
                 conteudo = st.text_area("Digite sua mensagem:", height=150, key="agendamento_texto")
             else:
                 if plano.get("tem_videos_ia", False):
-                    st.info("🤖 Em breve: IA generativa para criar mensagens personalizadas")
+                    st.info("Em breve, o Curador ajudará você com perguntas simples para organizar mensagens.")
                     conteudo = st.text_area("Ou digite manualmente:", height=150, key="agendamento_texto_ia")
                 else:
-                    st.info("💡 Geração por IA disponível em planos pagos.")
+                    st.info("O Curador estará disponível em planos pagos.")
                     conteudo = st.text_area("Digite sua mensagem:", height=150, key="agendamento_texto")
         else:
             # Vídeo - selecionar da biblioteca
@@ -79,7 +79,7 @@ class GerenciadorAgendamentos:
                 data_termino=data_termino.strftime("%Y-%m-%d") if data_termino else "",
                 conteudo=conteudo,
                 video_id=video_id,
-                gerar_por_ia=1 if tipo == "texto" and opcao_texto == "Gerar com IA" else 0
+                gerar_por_ia=1 if tipo == "texto" and opcao_texto == "Receber perguntas do Curador" else 0
             )
 
             st.success(f"✅ Lembrança agendada para {data_envio.strftime('%d/%m/%Y')}!")

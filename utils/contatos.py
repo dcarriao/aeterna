@@ -49,7 +49,7 @@ class GerenciadorContatos:
                                 key="contato_data_nascimento"
                             )
         with col2:
-            acesso_central_luto = st.checkbox("Dar acesso ao Assistente de Histórias", key="contato_acesso_luto")
+            acesso_central_luto = st.checkbox("Permitir explorar histórias compartilhadas", key="contato_acesso_luto")
             prioridade = st.checkbox("Marcar como contato prioritário", key="contato_prioridade")
 
         # Datas especiais (JSON)

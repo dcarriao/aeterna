@@ -627,7 +627,7 @@ def render_sidebar_premium(
 
             st.markdown(f"### Histórias de {nome_falecido}")
 
-            st.markdown("📖 Assistente de Histórias")
+            st.markdown("🔎 Explorar História")
 
             if qtd_videos > 0:
                 st.markdown(f"🎥 Vídeos compartilhados: **{qtd_videos}**")
@@ -674,7 +674,7 @@ def render_painel_inicial(nome_exibido, qtd_videos, qtd_contatos, qtd_cofre=0, q
         '<li>Adicione fotos que representem momentos especiais.</li>'
         '<li>Cadastre pessoas importantes para conectar à sua história.</li>'
         '<li>Registre datas que merecem ser lembradas.</li>'
-        '<li>Use o Assistente para transformar lembranças soltas em histórias organizadas.</li>'
+        '<li>Use o Curador para organizar lembranças com perguntas simples.</li>'
         '</ul>'
         '</div>'
     )

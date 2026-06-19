@@ -28,7 +28,7 @@ class AssistenteLuto:
 
         if not api_key:
             return {
-                "titulo": "Memória registrada via assistente",
+                "titulo": "Memória registrada com o Curador",
                 "categoria": "livre",
                 "local": "",
                 "data_evento": "",
@@ -74,7 +74,7 @@ class AssistenteLuto:
             dados = json.loads(raw)
 
             return {
-                "titulo": dados.get("titulo") or "Memória registrada via assistente",
+                "titulo": dados.get("titulo") or "Memória registrada com o Curador",
                 "categoria": dados.get("categoria") or "livre",
                 "local": dados.get("local") or "",
                 "data_evento": dados.get("data_evento") or "",
@@ -84,7 +84,7 @@ class AssistenteLuto:
         except Exception as e:
             print("Erro ao sugerir metadados da memória:", e)
             return {
-                "titulo": "Memória registrada via assistente",
+                "titulo": "Memória registrada com o Curador",
                 "categoria": "livre",
                 "local": "",
                 "data_evento": "",
@@ -542,23 +542,25 @@ class AssistenteLuto:
 
     def _prompt_sistema_legado(self):
         return """
-    Você é o Assistente de Histórias da aEterna.
-    Você conversa diretamente com a pessoa usuária para ajudá-la a registrar sua história, memórias, valores, preferências e mensagens futuras.
+    Você é o Curador de Histórias da aEterna.
+    Você conversa diretamente com a pessoa usuária para ajudá-la a lembrar, organizar e registrar sua história, memórias, valores, preferências e mensagens futuras.
 
     Seu papel:
     - fazer perguntas acolhedoras;
-    - ajudar a transformar relatos em memórias bem escritas;
+    - fazer perguntas simples para enriquecer relatos;
     - organizar fatos pessoais sem inventar nada;
     - sugerir temas de registro;
-    - responder como um assistente cuidadoso de memórias vivas.
+    - agir como um entrevistador cuidadoso.
 
     Nunca invente informações.
+    Não escreva a história sozinho.
+    Não diga que sabe o que aconteceu.
     Use somente o que a pessoa contou ou o contexto cadastrado.
     """.strip()
 
     def _prompt_sistema_luto(self):
         return """
-    Você é o Assistente de Histórias da aEterna.
+    Você é o Explorador de Histórias da aEterna.
 
     Sua função é ajudar visitantes autorizados a conhecer histórias, memórias,
     fotos, vídeos, valores e momentos importantes compartilhados por uma pessoa.
@@ -568,6 +570,8 @@ class AssistenteLuto:
     - ajudar a pessoa visitante a explorar o conteúdo compartilhado;
     - dar respostas humanas, claras, afetuosas e naturais;
     - nunca inventar fatos;
+    - nunca especular;
+    - nunca completar lacunas;
     - nunca fingir ser a pessoa;
     - nunca falar como se a pessoa tivesse morrido;
     - tratar todo o conteúdo como histórias vivas compartilhadas com pessoas importantes.
@@ -623,7 +627,10 @@ class AssistenteLuto:
             return None
 
         except Exception as exc:
-            return f"DEBUG OPENAI ERROR: {type(exc).__name__}: {exc}"
+            return (
+                "Não consegui continuar agora. "
+                "Tente novamente em alguns instantes."
+            )
 
     def _classificar_intencao(self, mensagem: str) -> Dict[str, bool]:
         texto = mensagem.lower()

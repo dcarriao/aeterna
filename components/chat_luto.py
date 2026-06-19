@@ -85,11 +85,11 @@ def render_chat_luto():
     if modo == "memorial":
         nome_pessoa = usuario.get("nome_falecido", "esta pessoa")
 
-        st.markdown("## 💬 Converse com o Assistente de Histórias")
+        st.markdown("## 🔎 Explorar História")
         st.info(
-            f"Posso ajudar você a explorar histórias, memórias, fotos, vídeos "
+            f"Explore histórias, memórias, fotos, vídeos "
             f"e aprendizados compartilhados por {nome_pessoa}. "
-            "Uso apenas informações registradas, não invento fatos e não falo como se fosse a pessoa."
+            "As respostas usam apenas informações registradas e autorizadas."
         )
 
         st.markdown("""
@@ -129,18 +129,18 @@ def render_chat_luto():
                 st.session_state.login_mode = "cadastro"
                 st.rerun()
     else:
-        st.markdown("## Assistente de Histórias")
+        st.markdown("## Curador de Histórias")
         st.markdown("""
-            Este espaço existe para ajudar você a registrar histórias, memórias, aprendizados e momentos importantes.
+            Este espaço ajuda você a lembrar, organizar e registrar histórias, memórias, aprendizados e momentos importantes.
         
-            Você pode conversar livremente sobre qualquer assunto que desejar.
+            O Curador faz perguntas simples, como um entrevistador cuidadoso.
         
-            Também posso sugerir temas importantes para organizar suas lembranças e compartilhar com pessoas queridas quando fizer sentido.
+            Ele não inventa fatos e não escreve a história sozinho: você conduz o que será registrado.
             """)
         st.markdown(
             """
 
-            ### 💡 Sugestões de conversa
+            ### 💡 Perguntas para começar
     
             • Minha infância
     
@@ -165,7 +165,7 @@ def render_chat_luto():
             )
 
     if st.session_state.get("ultimo_erro_openai"):
-        st.error(f"Erro OpenAI: {st.session_state['ultimo_erro_openai']}")
+        st.error("Não foi possível continuar agora. Tente novamente em alguns instantes.")
 
 
     historico = st.session_state.get("historico_assistente", [])
@@ -207,7 +207,7 @@ def render_chat_luto():
                     sugestoes = st.session_state["sugestoes_" + chave_base]
 
                     with st.form("form_" + chave_base):
-                        st.markdown("#### 💡 Sugestões para organizar esta memória")
+                        st.markdown("#### 💡 Curador: organizar esta memória")
 
                         titulo = st.text_input(
                             "Título",
@@ -300,9 +300,9 @@ def render_chat_luto():
                             memoria_id = db.salvar_memoria(
                                 usuario_id=usuario["id"],
                                 conteudo=st.session_state["texto_memoria_" + chave_base],
-                                titulo=titulo or "Memória registrada via assistente",
+                                titulo=titulo or "Memória registrada com o Curador",
                                 categoria=categoria or "livre",
-                                origem="assistente",
+                                origem="curador",
                                 local=local or None,
                                 data_evento=data_evento or None,
                                 pessoas_relacionadas=pessoas_relacionadas or None,
@@ -450,7 +450,7 @@ def render_chat_luto():
                 "Desculpe, tive uma dificuldade para responder agora. "
                 "Tente novamente em alguns instantes."
             )
-            st.error(f"Erro no assistente: {exc}")
+            st.error("Não foi possível continuar agora. Tente novamente em alguns instantes.")
 
         fotos_relacionadas = []
 
@@ -529,16 +529,15 @@ def _inicializar_chat():
             st.session_state.historico_assistente.append({
                 "tipo": "bot",
                 "texto": (
-                    "Olá. Este é o Assistente de Histórias da aEterna.\n\n"
-                    "Estou aqui para ajudar você a explorar histórias, fotos, "
-                    "vídeos, valores e momentos compartilhados."
+                    "Olá. Vamos explorar esta história.\n\n"
+                    "Posso ajudar você a descobrir histórias, fotos, vídeos, valores e momentos compartilhados."
                 )
             })
         else:
             st.session_state.historico_assistente.append({
                 "tipo": "bot",
                 "texto": (
-                    "Olá. Este é o seu Assistente de Histórias.\n\n"
-                    "Estou aqui para ajudar você a registrar histórias, valores, aprendizados e lembranças importantes da sua vida."
+                    "Olá. Este é o Curador de Histórias.\n\n"
+                    "Estou aqui para fazer perguntas simples e ajudar você a registrar histórias, valores, aprendizados e lembranças importantes da sua vida."
                 )
             })

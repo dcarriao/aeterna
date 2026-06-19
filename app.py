@@ -1012,7 +1012,7 @@ def render_aprendizados_visitante(memorias: list, preferencias: dict):
     if not itens:
         st.info(
             "Ainda não há aprendizados ou valores destacados. "
-            "O Assistente de Histórias pode ajudar a explorar o conteúdo já registrado."
+            "O Explorador de Histórias pode ajudar a descobrir o conteúdo já registrado."
         )
         return
 
@@ -1029,7 +1029,7 @@ def render_aprendizados_visitante(memorias: list, preferencias: dict):
 
 
 # ============================================================================
-# ASSISTENTE DE HISTÓRIAS
+# CURADOR / EXPLORADOR DE HISTÓRIAS
 # ============================================================================
 
 def render_assistente():
@@ -1311,6 +1311,18 @@ def render_fotos():
                     height=100,
                 )
 
+                with st.expander("Curador: história por trás da foto", expanded=False):
+                    st.markdown("Vamos registrar a história por trás desta foto.")
+                    st.markdown(
+                        """
+                        - Quem aparece nesta foto?
+                        - Onde ela foi tirada?
+                        - Em que época foi?
+                        - O que estava acontecendo?
+                        - Por que ela é importante para você?
+                        """
+                    )
+
                 st.markdown("**👥 Quem pode ver esta foto?**")
 
                 contatos = db.listar_contatos_usuario(
@@ -1577,7 +1589,7 @@ def render_contatos():
                 is_prioridade = st.checkbox("Marcar como contato prioritário")
 
                 acesso_central_luto = st.checkbox(
-                    "Permitir acesso ao Assistente de Histórias",
+                    "Permitir explorar histórias compartilhadas",
                     value=False
                 )
 
@@ -1671,7 +1683,7 @@ def render_contatos():
 def render_preferencias():
     st.markdown("<h3 style='color: #2E8B57;'>👤 Minha Essência</h3>", unsafe_allow_html=True)
     st.info(
-        "Essas informações ajudam os Assistentes da aEterna "
+        "Essas informações ajudam o Curador e o Explorador da aEterna "
         "a compreender melhor sua história, seus valores, gostos e lembranças importantes."
     )
 
@@ -1750,7 +1762,7 @@ def render_preferencias():
                                        height=80, key="pref_triste")
 
         st.markdown("**🌟 Como você gostaria de ser lembrado?**")
-        personalidade_extra = st.text_area("Algo mais que você quer que o assistente saiba sobre você?",
+        personalidade_extra = st.text_area("Algo mais que você quer registrar sobre você?",
                                            value=preferencias.get('personalidade_extra', ''),
                                            height=100, key="pref_extra")
 
@@ -2057,7 +2069,7 @@ def render_agendamentos():
                     if tipo == "texto":
                         opcao_texto = st.radio(
                             "Como criar?",
-                            ["Escrever manualmente", "Gerar com IA (em breve)"]
+                            ["Escrever manualmente", "Receber perguntas do Curador (em breve)"]
                         )
 
                         if opcao_texto == "Escrever manualmente":
@@ -2066,7 +2078,7 @@ def render_agendamentos():
                                 height=150
                             )
                         else:
-                            st.info("🤖 Geração por IA disponível em breve!")
+                            st.info("Em breve, o Curador ajudará você com perguntas simples para organizar esta mensagem.")
                             conteudo = st.text_area(
                                 "Digite sua mensagem:",
                                 height=150
@@ -2534,7 +2546,7 @@ def render_visao_historia_compartilhada(
             "👤 Sobre",
             f"📖 Histórias ({len(memorias)})",
             "🌟 Aprendizados",
-            "💬 Assistente de Histórias",
+            "🔎 Explorar História",
         ]
 
         if videos:
@@ -2726,7 +2738,7 @@ def render_sidebar_principal(
 
         with st.expander("🧩 Mais", expanded=False):
             for label, pagina in (
-                ("Assistente de Histórias", "assistente"),
+                ("Curador de Histórias", "assistente"),
                 ("Fotos", "fotos"),
                 ("Vídeos", "videos"),
                 ("Quem Sou Eu", "quem_sou_eu"),
@@ -3053,7 +3065,7 @@ def main():
                 "👤 Sobre",
                 f"📖 Histórias ({len(memorias_visitante)})",
                 "🌟 Aprendizados",
-                "💬 Assistente de Histórias",
+                "🔎 Explorar História",
             ]
 
             if videos_visitante:
