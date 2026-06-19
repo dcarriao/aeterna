@@ -1009,6 +1009,39 @@ button[data-baseweb="tab"][aria-selected="true"] {
     cursor: default;
 }
 
+.ae-relation-cta {
+    position: static !important;
+    margin-top: auto !important;
+    width: 100% !important;
+    border: 1px solid rgba(104,72,164,0.28);
+    border-radius: 8px;
+    color: #2B1747;
+    font-weight: 950;
+    font-size: 0.82rem;
+    text-align: center;
+    padding: 0.42rem 0.6rem;
+    background: rgba(255,255,255,0.72);
+    box-sizing: border-box;
+}
+
+.ae-suggestion-buttons-anchor + div [data-testid="stButton"] button {
+    min-height: 1.85rem !important;
+    border-radius: 999px !important;
+    background: rgba(255,248,231,0.92) !important;
+    border: 1px solid rgba(242,181,16,0.45) !important;
+    color: #9A5A00 !important;
+    font-size: 0.72rem !important;
+    font-weight: 950 !important;
+    padding: 0.22rem 0.55rem !important;
+    box-shadow: none !important;
+}
+
+.ae-suggestion-buttons-anchor + div [data-testid="stHorizontalBlock"] [data-testid="column"]:last-child button {
+    padding-left: 0.2rem !important;
+    padding-right: 0.2rem !important;
+    opacity: 0.78;
+}
+
 .ae-invites-panel {
     background: rgba(255,255,255,0.80);
     border: 1px solid rgba(212,168,79,0.18);
