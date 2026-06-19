@@ -1507,7 +1507,7 @@ def render_fotos_visitante(contato_id=None, nome_pessoa=None):
 # CONTATOS (COMPLETO)
 # ============================================================================
 def render_contatos():
-    st.markdown("<h3 style='color: #2E8B57;'>👨‍👩‍👧‍👦 Pessoas Importantes</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #2B1747;'>👥 Pessoas</h3>", unsafe_allow_html=True)
 
     plano = db.obter_plano_usuario(st.session_state.usuario_atual['id'])
     contatos_atual = db.contar_contatos_usuario(st.session_state.usuario_atual['id'])
@@ -1515,8 +1515,15 @@ def render_contatos():
     prioridades_atual = db.contar_contatos_prioritarios(st.session_state.usuario_atual['id'])
     max_prioridades = plano.get("max_prioridades", 3) if plano else 3
 
-    st.info(
-        f"📊 Você tem {contatos_atual} de {max_contatos} contatos | Prioritários: {prioridades_atual} de {max_prioridades}")
+    st.markdown(
+        f"""
+        <div class="ae-people-summary">
+            <span>{contatos_atual}/{max_contatos} pessoas conectadas</span>
+            <span>{prioridades_atual}/{max_prioridades} prioritárias</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     if st.session_state.get("contato_salvo_msg"):
         st.success(st.session_state.contato_salvo_msg)
@@ -1618,7 +1625,30 @@ def render_contatos():
             st.info("Você ainda não adicionou pessoas importantes.")
         else:
             for contato in contatos:
-                with st.expander(f"👤 {contato['nome_completo']} {'⭐' if contato['is_prioridade'] else ''}"):
+                contextos = []
+                if contato.get("acesso_central_luto"):
+                    contextos.append("Compartilha histórias com você")
+                if contato.get("email") and contato.get("acesso_central_luto"):
+                    contextos.append("Pode contribuir")
+                if contato.get("whatsapp"):
+                    contextos.append("Recebe mensagens futuras")
+                if not contextos:
+                    contextos.append("Pessoa importante")
+
+                st.markdown(
+                    f"""
+                    <div class="ae-person-card">
+                        <div class="ae-avatar">👤</div>
+                        <div>
+                            <h3>{html.escape(contato['nome_completo'])} {'⭐' if contato.get('is_prioridade') else ''}</h3>
+                            <p>{html.escape(contextos[0])}</p>
+                            <span>{html.escape(contato.get('parentesco') or 'Relação não informada')}</span>
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+                with st.expander("Detalhes", expanded=False):
                     st.markdown(f"**Email:** {contato['email']}")
                     if contato.get('whatsapp'):
                         st.markdown(f"**WhatsApp:** {contato['whatsapp']}")
@@ -2685,20 +2715,20 @@ def render_sidebar_principal(
     with st.sidebar:
         _botao_sidebar("🏠 Início", "inicio")
         _botao_sidebar("📖 Minha História", "minha_historia")
+        _botao_sidebar("👥 Pessoas", "pessoas")
         _botao_sidebar(
-            "👥 Histórias Compartilhadas",
+            "🤝 Compartilhadas Comigo",
             "historias_compartilhadas",
             sum(int((h.get("novidades") or {}).get("total", 0) or 0) for h in historias_compartilhadas),
         )
         _botao_sidebar("🔔 Novidades", "novidades", contribuicoes_pendentes)
-        _botao_sidebar("🤝 Contribuições", "contribuicoes", contribuicoes_pendentes)
+        _botao_sidebar("✨ Contribuições", "contribuicoes", contribuicoes_pendentes)
 
         with st.expander("🧩 Mais", expanded=False):
             for label, pagina in (
                 ("Assistente de Histórias", "assistente"),
                 ("Fotos", "fotos"),
                 ("Vídeos", "videos"),
-                ("Pessoas", "pessoas"),
                 ("Quem Sou Eu", "quem_sou_eu"),
                 ("Mensagens para o Futuro", "mensagens"),
                 ("Cofre", "cofre"),
@@ -2733,8 +2763,13 @@ def render_sidebar_principal(
         st.markdown('<div class="ae-sidebar-divider"></div>', unsafe_allow_html=True)
         primeiro_nome = str(nome_exibido or "Você").split()[0]
         with st.expander(f"👤 {primeiro_nome}", expanded=False):
+            st.caption("Plano Familiar")
+            st.caption("R$ 19,90/mês ou R$ 199/ano")
             if st.button("Meu plano", key="perfil_meu_plano", use_container_width=True):
                 navegar_para("planos")
+                st.rerun()
+            if st.button("Configurações", key="perfil_configuracoes", use_container_width=True):
+                navegar_para("quem_sou_eu")
                 st.rerun()
             if st.button("Sair", key="nav_sair", use_container_width=True):
                 fazer_logout()
@@ -2745,6 +2780,7 @@ def render_inicio(
         usuario_id: int,
         historias_compartilhadas: list,
         contribuicoes_pendentes: int,
+        qtd_pessoas: int = 0,
 ):
     primeiro_nome = str(nome_exibido or "Olá").split()[0]
 
@@ -2780,10 +2816,10 @@ def render_inicio(
     st.markdown(
         f"""
         <div class="ae-home-stats">
-            <div class="ae-stat-card"><span>📖 Histórias</span><strong>{len(memorias)}</strong></div>
-            <div class="ae-stat-card"><span>👥 Compartilhadas</span><strong>{len(historias_compartilhadas)}</strong></div>
+            <div class="ae-stat-card"><span>📖 Minha História</span><strong>{len(memorias)}</strong></div>
+            <div class="ae-stat-card"><span>👥 Pessoas</span><strong>{int(qtd_pessoas or 0)}</strong></div>
+            <div class="ae-stat-card"><span>🤝 Compartilhadas</span><strong>{len(historias_compartilhadas)}</strong></div>
             <div class="ae-stat-card"><span>🔔 Novidades</span><strong>{total_novidades}</strong></div>
-            <div class="ae-stat-card"><span>🤝 Contribuições</span><strong>{int(contribuicoes_pendentes or 0)}</strong></div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -3187,6 +3223,7 @@ def main():
                 usuario_logado["id"],
                 historias_compartilhadas,
                 contribuicoes_pendentes,
+                qtd_contatos,
             )
         elif pagina == "minha_historia":
             render_minha_historia()
@@ -3221,6 +3258,7 @@ def main():
                 usuario_logado["id"],
                 historias_compartilhadas,
                 contribuicoes_pendentes,
+                qtd_contatos,
             )
 
         st.markdown("""

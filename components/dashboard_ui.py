@@ -441,7 +441,8 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-activity-card,
-.ae-shared-card {
+.ae-shared-card,
+.ae-person-card {
     display: flex;
     gap: 1rem;
     align-items: flex-start;
@@ -466,6 +467,51 @@ button[data-baseweb="tab"][aria-selected="true"] {
     color: #5F536B;
     margin: 0;
     line-height: 1.45;
+}
+
+.ae-people-summary {
+    display: flex;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+    margin: 0.2rem 0 0.65rem;
+}
+
+.ae-people-summary span {
+    background: rgba(255,255,255,0.92);
+    border: 1px solid rgba(212,168,79,0.22);
+    border-radius: 999px;
+    color: #2B1747;
+    font-size: 0.82rem;
+    font-weight: 900;
+    padding: 0.38rem 0.7rem;
+}
+
+.ae-person-card {
+    background: rgba(255,255,255,0.96);
+    border: 1px solid rgba(212,168,79,0.20);
+    border-radius: 18px;
+    padding: 0.78rem 0.9rem;
+    box-shadow: 0 8px 22px rgba(43,23,71,0.06);
+    margin-bottom: 0.38rem;
+}
+
+.ae-person-card h3 {
+    color: #2B1747;
+    font-size: 1rem;
+    margin: 0 0 0.16rem;
+}
+
+.ae-person-card p,
+.ae-person-card span {
+    color: #5F536B;
+    margin: 0;
+    font-size: 0.84rem;
+    line-height: 1.35;
+}
+
+.ae-person-card span {
+    color: #B77A46;
+    font-weight: 900;
 }
 
 .ae-shared-card span {
