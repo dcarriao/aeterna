@@ -915,62 +915,21 @@ button[data-baseweb="tab"][aria-selected="true"] {
     font-weight: 800;
 }
 
-.ae-found-people-header {
-    margin: 1rem 0 0.45rem;
+.ae-people-presentes + div [data-testid="stButton"] button {
+    background: rgba(247,243,234,0.92) !important;
+    border: 1px solid rgba(212,168,79,0.26) !important;
+    border-radius: 999px !important;
+    color: #5F536B !important;
+    font-size: 0.72rem !important;
+    font-weight: 900 !important;
+    min-height: 1.7rem !important;
+    padding: 0.16rem 0.55rem !important;
+    box-shadow: none !important;
 }
 
-.ae-found-people-header h3 {
-    color: #2B1747;
-    font-size: 1.08rem;
-    font-weight: 950;
-    margin: 0 0 0.22rem;
-}
-
-.ae-found-people-header p,
-.ae-found-people-empty {
-    color: #6F6478;
-    font-size: 0.84rem;
-    margin: 0;
-}
-
-.ae-found-people-empty {
-    background: rgba(255,255,255,0.80);
-    border: 1px dashed rgba(212,168,79,0.30);
-    border-radius: 16px;
-    padding: 0.85rem 1rem;
-    margin-bottom: 0.7rem;
-}
-
-.ae-found-person-card {
-    min-height: 148px;
-    background: rgba(255,255,255,0.92);
-    border: 1px solid rgba(212,168,79,0.22);
-    border-radius: 16px;
-    padding: 0.85rem;
-    box-shadow: 0 10px 24px rgba(43,23,71,0.05);
-    margin-bottom: 0.25rem;
-}
-
-.ae-found-person-card h3 {
-    color: #2B1747;
-    font-size: 0.98rem;
-    line-height: 1.18;
-    margin: 0 0 0.18rem;
-    font-weight: 950;
-}
-
-.ae-found-person-card strong {
-    color: #B77A46;
-    display: block;
-    font-size: 0.72rem;
-    margin-bottom: 0.34rem;
-}
-
-.ae-found-person-card p {
-    color: #5F536B;
-    font-size: 0.78rem;
-    line-height: 1.35;
-    margin: 0;
+.ae-people-presentes + div [data-testid="stButton"] button:hover {
+    border-color: rgba(212,168,79,0.55) !important;
+    transform: translateY(-1px);
 }
 
 .ae-shared-card span {
