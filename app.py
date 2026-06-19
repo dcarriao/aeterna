@@ -533,7 +533,6 @@ def render_minha_historia():
             rotulo_cta,
             key="minha_historia_contar_historia",
             use_container_width=True,
-            type="primary",
         ):
             navegar_para("assistente")
             st.rerun()
@@ -583,34 +582,27 @@ def render_minha_historia():
             caminho_foto = (fotos[0].get("caminho") or "").strip()
             imagem_src = caminho_foto if caminho_foto.startswith(("http://", "https://")) else imagem_local_para_data_uri(caminho_foto)
             if imagem_src:
-                return f"""
-                <div class="ae-story-media ae-story-media-photo">
-                    <img
-                        src="{html.escape(imagem_src, quote=True)}"
-                        alt="Miniatura da história"
-                        onerror="this.style.display='none';this.nextElementSibling.style.display='block';"
-                    >
-                    <div class="ae-story-media-photo-fallback">
-                        <span>📖</span>
-                        <strong>História preservada</strong>
-                    </div>
-                </div>
-                """
+                imagem_segura = html.escape(imagem_src, quote=True)
+                return (
+                    '<div class="ae-story-media ae-story-media-photo">'
+                    f'<img src="{imagem_segura}" alt="Miniatura da história">'
+                    "</div>"
+                )
 
         if videos:
-            return """
-            <div class="ae-story-media ae-story-media-video">
-                <span>🎥</span>
-                <strong>Vídeo preservado</strong>
-            </div>
-            """
+            return (
+                '<div class="ae-story-media ae-story-media-video">'
+                "<span>🎥</span>"
+                "<strong>Vídeo preservado</strong>"
+                "</div>"
+            )
 
-        return """
-        <div class="ae-story-media ae-story-media-fallback">
-            <span>📖</span>
-            <strong>História preservada</strong>
-        </div>
-        """
+        return (
+            '<div class="ae-story-media ae-story-media-fallback">'
+            "<span>📖</span>"
+            "<strong>História preservada</strong>"
+            "</div>"
+        )
 
     def indicadores_memoria(memoria: dict) -> str:
         indicadores = []
@@ -634,21 +626,23 @@ def render_minha_historia():
 
     def render_card_memoria(memoria: dict, categoria: str):
         data_evento = memoria.get("data_evento") or ""
-        st.markdown(
-            f"""
-            <div class="ae-story-card">
-                {media_card_memoria(memoria)}
-                <div class="ae-story-body">
-                <div class="ae-card-label">{html.escape(categoria)}</div>
-                <h3>📖 {html.escape(memoria.get("titulo") or "História sem título")}</h3>
-                <span class="ae-story-date">{html.escape(str(data_evento))}</span>
-                <p>{html.escape(resumo_memoria(memoria))}</p>
-                <div class="ae-story-indicators">{indicadores_memoria(memoria)}</div>
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
+        titulo = html.escape(memoria.get("titulo") or "História sem título")
+        data_evento_segura = html.escape(str(data_evento))
+        resumo_seguro = html.escape(resumo_memoria(memoria))
+        categoria_segura = html.escape(categoria)
+        card_html = (
+            '<div class="ae-story-card">'
+            f"{media_card_memoria(memoria)}"
+            '<div class="ae-story-body">'
+            f'<div class="ae-card-label">{categoria_segura}</div>'
+            f"<h3>📖 {titulo}</h3>"
+            f'<span class="ae-story-date">{data_evento_segura}</span>'
+            f"<p>{resumo_seguro}</p>"
+            f'<div class="ae-story-indicators">{indicadores_memoria(memoria)}</div>'
+            "</div>"
+            "</div>"
         )
+        st.markdown(card_html, unsafe_allow_html=True)
 
     def render_detalhes_memoria(memoria: dict):
         if memoria.get("data_evento"):
