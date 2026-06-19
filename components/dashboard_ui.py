@@ -12,11 +12,11 @@ def aplicar_css_dashboard():
 }
 
 .block-container {
-    padding-top: 1.35rem !important;
+    padding-top: 0.2rem !important;
     padding-bottom: 0.65rem !important;
-    max-width: 1280px !important;
-    width: calc(100vw - 280px) !important;
-    margin-left: clamp(2.25rem, 4vw, 4.75rem) !important;
+    max-width: 1320px !important;
+    width: calc(100vw - 245px) !important;
+    margin-left: clamp(1.25rem, 2.4vw, 3.1rem) !important;
     margin-right: auto !important;
     padding-left: 0 !important;
     padding-right: 0 !important;
@@ -561,7 +561,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
 .ae-story-header-rule {
     height: 1px;
     background: rgba(212,168,79,0.26);
-    margin: 0.5rem 0 1.15rem;
+    margin: 0.35rem 0 0.85rem;
 }
 
 .ae-empty-story {
@@ -592,7 +592,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
     color: #2B1747;
     font-size: 1.32rem;
     font-weight: 950;
-    margin: 1.1rem 0 0.65rem;
+    margin: 0.82rem 0 0.55rem;
 }
 
 .ae-story-shelf-title {
@@ -603,7 +603,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-story-card {
-    height: 350px;
+    height: 330px;
     width: 100%;
     overflow: hidden;
     display: flex;
@@ -616,7 +616,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-story-media {
-    height: 154px;
+    height: 142px;
     width: 100%;
     overflow: hidden;
     display: flex;
@@ -676,8 +676,8 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-story-body {
-    min-height: 196px;
-    padding: 0.95rem 1rem 0.95rem;
+    min-height: 188px;
+    padding: 0.85rem 0.95rem 0.85rem;
     display: flex;
     flex-direction: column;
 }
@@ -703,7 +703,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
 
 .ae-story-card p {
     color: #2F2440;
-    margin: 0.62rem 0 0;
+    margin: 0.48rem 0 0;
     font-size: 0.92rem;
     line-height: 1.44;
     display: -webkit-box;
@@ -740,7 +740,7 @@ div[data-testid="stPopover"] button {
 }
 
 .ae-story-section-title-collections {
-    margin-top: 2rem;
+    margin-top: 1.55rem;
 }
 
 .ae-collection-box {
