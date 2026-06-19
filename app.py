@@ -3132,7 +3132,7 @@ def render_inicio(
         navegar_para("minha_historia")
         st.rerun()
 
-    col_pessoas, col_compartilhadas = st.columns([0.58, 0.42])
+    col_pessoas, col_compartilhadas = st.columns(2)
     with col_pessoas:
         st.markdown('<div class="ae-live-section-title">Pessoas importantes</div>', unsafe_allow_html=True)
         pessoas_html = "".join(
@@ -3201,17 +3201,6 @@ def render_inicio(
     if st.button("Ver novidades", key="home_ver_novidades", use_container_width=False):
         navegar_para("novidades")
         st.rerun()
-
-    st.markdown(
-        f"""
-        <div class="ae-live-subtle-metrics">
-            <span>{len(memorias)} histórias preservadas</span>
-            <span>{int(qtd_pessoas or len(contatos) or 0)} pessoas importantes</span>
-            <span>{total_novidades} novidades</span>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
 
 
 def render_historias_compartilhadas_lista(historias_compartilhadas: list):
