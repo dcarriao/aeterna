@@ -910,7 +910,9 @@ button[data-baseweb="tab"][aria-selected="true"] {
 
 .ae-important-person-card {
     position: relative;
-    min-height: 236px;
+    min-height: 252px;
+    display: flex;
+    flex-direction: column;
     background: rgba(255,255,255,0.94);
     border: 1px solid rgba(212,168,79,0.22);
     border-radius: 12px;
@@ -981,6 +983,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
     flex-direction: column;
     gap: 0.24rem;
     margin-top: 0.3rem;
+    margin-bottom: 0.55rem;
 }
 
 .ae-important-indicators span {
@@ -994,10 +997,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-relation-button {
-    position: absolute;
-    left: 0.8rem;
-    right: 0.8rem;
-    bottom: 0.75rem;
+    margin-top: auto;
     border: 1px solid rgba(104,72,164,0.28);
     border-radius: 8px;
     color: #2B1747;
@@ -1006,6 +1006,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
     text-align: center;
     padding: 0.42rem 0.6rem;
     background: rgba(255,255,255,0.68);
+    cursor: default;
 }
 
 .ae-invites-panel {
