@@ -856,8 +856,8 @@ button[data-baseweb="tab"][aria-selected="true"] {
     border-color: rgba(242,181,16,0.45);
     display: inline-flex;
     align-items: center;
-    gap: 0.42rem;
-    padding: 0.36rem 0.55rem 0.36rem 0.75rem;
+    gap: 0.72rem;
+    padding: 0.36rem 0.48rem 0.36rem 0.78rem;
 }
 
 .ae-suggestion-chip a {
@@ -868,10 +868,11 @@ button[data-baseweb="tab"][aria-selected="true"] {
 
 .ae-suggestion-chip .ae-chip-x {
     color: #9A5A00 !important;
-    opacity: 0.78;
-    font-size: 0.95rem;
+    opacity: 0.72;
+    font-size: 1.05rem;
     line-height: 1;
-    padding: 0 0.18rem;
+    padding: 0 0.28rem 0 0.42rem;
+    border-left: 1px solid rgba(242,181,16,0.34);
 }
 
 .ae-people-presentes p {
@@ -894,7 +895,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
     margin: 0.75rem 0 0.7rem;
 }
 
-.ae-people-grid-heading h3 {
+.ae-people-grid-heading div {
     color: #2B1747;
     font-size: 1.08rem;
     font-weight: 950;
@@ -909,19 +910,19 @@ button[data-baseweb="tab"][aria-selected="true"] {
 
 .ae-important-person-card {
     position: relative;
-    min-height: 285px;
+    min-height: 236px;
     background: rgba(255,255,255,0.94);
     border: 1px solid rgba(212,168,79,0.22);
     border-radius: 12px;
-    padding: 0.9rem 0.8rem 0.75rem;
+    padding: 0.82rem 0.8rem 0.7rem;
     box-shadow: 0 10px 26px rgba(43,23,71,0.06);
     overflow: hidden;
     margin-bottom: 0.65rem;
 }
 
 .ae-important-avatar {
-    width: 76px;
-    height: 76px;
+    width: 56px;
+    height: 56px;
     border-radius: 999px;
     background: linear-gradient(135deg, rgba(212,168,79,0.30), rgba(43,23,71,0.10));
     color: #6848A4;
@@ -929,8 +930,8 @@ button[data-baseweb="tab"][aria-selected="true"] {
     align-items: center;
     justify-content: center;
     font-weight: 950;
-    font-size: 1.55rem;
-    margin: 0 auto 0.65rem;
+    font-size: 1.18rem;
+    margin: 0.15rem auto 0.62rem;
 }
 
 .ae-card-menu {
@@ -946,7 +947,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
     color: #2B1747;
     font-size: 1.02rem;
     line-height: 1.18;
-    margin: 0 0 0.18rem;
+    margin: 0 0 0.12rem;
     text-align: left;
     display: -webkit-box;
     -webkit-line-clamp: 1;
@@ -958,13 +959,13 @@ button[data-baseweb="tab"][aria-selected="true"] {
     color: #4A2E8C;
     display: block;
     font-size: 0.78rem;
-    margin-bottom: 0.55rem;
+    margin-bottom: 0.42rem;
 }
 
 .ae-card-divider {
     height: 1px;
     background: rgba(212,168,79,0.20);
-    margin: 0.35rem 0 0.55rem;
+    margin: 0.28rem 0 0.45rem;
 }
 
 .ae-important-person-card p {
@@ -988,7 +989,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
     border: 0;
     border-radius: 0;
     padding: 0;
-    font-size: 0.74rem;
+    font-size: 0.72rem;
     font-weight: 800;
 }
 
@@ -1003,7 +1004,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
     font-weight: 950;
     font-size: 0.82rem;
     text-align: center;
-    padding: 0.48rem 0.6rem;
+    padding: 0.42rem 0.6rem;
     background: rgba(255,255,255,0.68);
 }
 

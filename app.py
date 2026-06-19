@@ -1818,13 +1818,15 @@ def extrair_pessoas_encontradas(memorias: list, contatos: list, ignoradas_usuari
             nome = tokens[indice + 1]
             if re.match(r"^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]", nome):
                 anterior = normalizar_nome_pessoa(tokens[indice - 1]) if indice > 0 else ""
-                score = 5
+                score = 20
+                forte = False
                 if anterior in possessivos:
-                    score += 5
-                registrar_candidato(nome, memoria, score, forte=True)
+                    score = 200
+                    forte = True
+                registrar_candidato(nome, memoria, score, forte=forte)
 
         for candidato in re.findall(r"\b[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ][^\W\d_]{2,}\b", texto, flags=re.UNICODE):
-            registrar_candidato(candidato, memoria, 2, forte=False)
+            registrar_candidato(candidato, memoria, 10, forte=False)
 
     resultado = []
     for item in sugestoes.values():
@@ -1832,10 +1834,10 @@ def extrair_pessoas_encontradas(memorias: list, contatos: list, ignoradas_usuari
         item["historias"] = list(dict.fromkeys(item["historias"]))[:5]
         item["nome_normalizado"] = normalizar_nome_pessoa(item["nome"])
         item["origem"] = ", ".join(item["historias"][:3])
-        if item["forte"] or item["ocorrencias"] >= 2 or item["quantidade"] >= 2:
+        if item["forte"] or item["score"] >= 60:
             resultado.append(item)
 
-    return sorted(resultado, key=lambda sugestao: (-sugestao["score"], -sugestao["quantidade"], sugestao["nome"]))[:3]
+    return sorted(resultado, key=lambda sugestao: (-sugestao["score"], -sugestao["quantidade"], sugestao["nome"]))[:8]
 
 
 def render_contatos():
@@ -2061,9 +2063,18 @@ def render_contatos():
         return
 
     sugestoes_detectadas = extrair_pessoas_encontradas(memorias_usuario, contatos)
+    sugestoes_detectadas_norm = {
+        sugestao.get("nome_normalizado") or normalizar_nome_pessoa(sugestao.get("nome", ""))
+        for sugestao in sugestoes_detectadas
+    }
     try:
         db.sincronizar_pessoas_sugeridas(usuario_id, sugestoes_detectadas)
-        sugestoes_pessoas = db.listar_pessoas_sugeridas_pendentes(usuario_id, limite=3)
+        sugestoes_pessoas = [
+            sugestao
+            for sugestao in db.listar_pessoas_sugeridas_pendentes(usuario_id, limite=12)
+            if (sugestao.get("nome_normalizado") or normalizar_nome_pessoa(sugestao.get("nome", "")))
+               in sugestoes_detectadas_norm
+        ][:3]
     except Exception as exc:
         print("Erro ao sincronizar sugestões de pessoas:", exc)
         sugestoes_pessoas = sugestoes_detectadas[:3]
@@ -2145,7 +2156,7 @@ def render_contatos():
         )
 
     st.markdown(
-        '<div class="ae-people-grid-heading"><h3>Sua rede de pessoas</h3><span>Ver todas ›</span></div>',
+        '<div class="ae-people-grid-heading"><div>Sua rede de pessoas</div><span>Ver todas ›</span></div>',
         unsafe_allow_html=True,
     )
     for inicio in range(0, len(contatos), 5):
@@ -2184,24 +2195,6 @@ def render_contatos():
                     """,
                     unsafe_allow_html=True,
                 )
-                with st.expander(f"Ver relação de {nome_exibido}", expanded=False):
-                    st.markdown(f"**Relação:** {html.escape(relacao)}")
-                    st.markdown(f"**Histórias em que aparece:** {presencas.get(contato['id'], 0)}")
-                    st.markdown(
-                        "**Permissões atuais:** "
-                        + (
-                            "Pode explorar histórias compartilhadas"
-                            if contato.get("acesso_central_luto")
-                            else "Acesso direto não habilitado"
-                        )
-                    )
-                    if contato.get("chave_acesso"):
-                        st.markdown("**Chave de acesso:**")
-                        st.code(contato["chave_acesso"])
-                    if st.button(f"🗑️ Remover", key=f"del_contato_{contato['id']}"):
-                        db.deletar_contato(contato['id'], st.session_state.usuario_atual['id'])
-                        st.rerun()
-
     try:
         convites = db.listar_convites_pessoas(usuario_id, limite=4)
     except Exception as exc:
@@ -2233,7 +2226,7 @@ def render_contatos():
         st.markdown(
             f"""
             <div class="ae-invites-panel">
-                <div class="ae-people-grid-heading"><h3>Convites enviados</h3><span>Ver todos ›</span></div>
+                <div class="ae-people-grid-heading"><div>Convites enviados</div><span>Ver todos ›</span></div>
                 <div class="ae-invites-grid">{''.join(itens_convite)}</div>
             </div>
             """,
