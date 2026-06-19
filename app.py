@@ -662,7 +662,6 @@ def render_minha_historia():
             '<div class="ae-collection-mini-body">'
             f"<strong>{titulo}</strong>"
             f"<span>{data_evento}</span>"
-            f'<div class="ae-collection-mini-indicators">{indicadores_memoria(memoria)}</div>'
             "</div>"
             "</div>"
         )

@@ -783,8 +783,8 @@ div[data-testid="stPopover"] {
     border-radius: 16px;
     padding: 0.55rem;
     box-shadow: 0 12px 30px rgba(43,23,71,0.06);
-    height: 184px;
-    min-height: 184px;
+    height: 176px;
+    min-height: 176px;
     margin-bottom: 0.35rem;
     overflow: hidden;
 }
@@ -814,7 +814,7 @@ div[data-testid="stPopover"] {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.34rem;
-    height: 132px;
+    height: 124px;
     align-items: stretch;
 }
 
@@ -823,8 +823,8 @@ div[data-testid="stPopover"] {
     border: 1px solid rgba(212,168,79,0.20);
     border-radius: 10px;
     overflow: hidden;
-    height: 132px;
-    min-height: 132px;
+    height: 124px;
+    min-height: 124px;
     box-shadow: 0 8px 18px rgba(43,23,71,0.06);
 }
 
@@ -834,7 +834,7 @@ div[data-testid="stPopover"] {
 }
 
 .ae-collection-mini-media {
-    height: 62px;
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -891,24 +891,6 @@ div[data-testid="stPopover"] {
     display: block;
     font-size: 0.6rem;
     margin-top: 0.16rem;
-}
-
-.ae-collection-mini-indicators {
-    display: none;
-}
-
-.ae-collection-mini-indicators span {
-    color: #6F6478;
-    background: rgba(247,243,234,0.90);
-    border: 1px solid rgba(212,168,79,0.18);
-    border-radius: 999px;
-    padding: 0.1rem 0.32rem;
-    font-size: 0.58rem;
-    font-weight: 800;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 .footer-aeterna {
