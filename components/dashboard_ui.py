@@ -783,8 +783,8 @@ div[data-testid="stPopover"] {
     border-radius: 16px;
     padding: 0.55rem;
     box-shadow: 0 12px 30px rgba(43,23,71,0.06);
-    height: 196px;
-    min-height: 196px;
+    height: 184px;
+    min-height: 184px;
     margin-bottom: 0.35rem;
     overflow: hidden;
 }
@@ -814,7 +814,7 @@ div[data-testid="stPopover"] {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.34rem;
-    height: 146px;
+    height: 132px;
     align-items: stretch;
 }
 
@@ -823,8 +823,8 @@ div[data-testid="stPopover"] {
     border: 1px solid rgba(212,168,79,0.20);
     border-radius: 10px;
     overflow: hidden;
-    height: 146px;
-    min-height: 146px;
+    height: 132px;
+    min-height: 132px;
     box-shadow: 0 8px 18px rgba(43,23,71,0.06);
 }
 
@@ -834,7 +834,7 @@ div[data-testid="stPopover"] {
 }
 
 .ae-collection-mini-media {
-    height: 68px;
+    height: 62px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -871,7 +871,7 @@ div[data-testid="stPopover"] {
 }
 
 .ae-collection-mini-body {
-    padding: 0.46rem 0.46rem;
+    padding: 0.42rem 0.46rem;
 }
 
 .ae-collection-mini-body strong {
@@ -894,10 +894,7 @@ div[data-testid="stPopover"] {
 }
 
 .ae-collection-mini-indicators {
-    display: flex;
-    gap: 0.25rem;
-    flex-wrap: wrap;
-    margin-top: 0.26rem;
+    display: none;
 }
 
 .ae-collection-mini-indicators span {
