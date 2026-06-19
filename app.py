@@ -1878,6 +1878,10 @@ def render_contatos():
     contato_prefill_nome = st.session_state.get("contato_prefill_nome", "")
     contato_prefill_sobrenome = st.session_state.get("contato_prefill_sobrenome", "")
     contato_origem_sugestao = st.session_state.get("contato_prefill_origem") == "sugestao"
+    if contato_prefill_nome and not st.session_state.get("contato_nome_cadastro"):
+        st.session_state.contato_nome_cadastro = contato_prefill_nome
+    if contato_prefill_sobrenome and not st.session_state.get("contato_sobrenome_cadastro"):
+        st.session_state.contato_sobrenome_cadastro = contato_prefill_sobrenome
 
     with st.expander("➕ Adicionar Pessoa Importante", expanded=bool(st.session_state.get("abrir_form_contato"))):
         with st.form("form_adicionar_contato", clear_on_submit=True):
@@ -2125,8 +2129,6 @@ def render_contatos():
                         st.session_state.contato_prefill_sobrenome = " ".join(partes_nome[1:])
                         st.session_state.contato_prefill_normalizado = nome_normalizado
                         st.session_state.contato_prefill_origem = "sugestao"
-                        st.session_state.contato_nome_cadastro = partes_nome[0] if partes_nome else nome_sugerido
-                        st.session_state.contato_sobrenome_cadastro = " ".join(partes_nome[1:])
                         st.session_state.abrir_form_contato = True
                         st.rerun()
                 with sugestao_cols[indice * 2 + 1]:
