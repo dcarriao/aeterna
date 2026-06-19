@@ -539,6 +539,8 @@ def render_minha_historia():
             navegar_para("assistente")
             st.rerun()
 
+    st.markdown('<div class="ae-story-header-rule"></div>', unsafe_allow_html=True)
+
     if not memorias:
         st.markdown(
             """
@@ -576,7 +578,7 @@ def render_minha_historia():
             print("Erro ao preparar miniatura local:", exc)
             return ""
 
-    def media_card_memoria(memoria: dict) -> str:
+    def media_card_memoria(memoria: dict, classe_base: str = "ae-story-media") -> str:
         fotos = fotos_por_memoria.get(memoria["id"], [])
         videos = videos_por_memoria.get(memoria["id"], [])
 
@@ -586,23 +588,23 @@ def render_minha_historia():
             if imagem_src:
                 imagem_segura = html.escape(imagem_src, quote=True)
                 return (
-                    '<div class="ae-story-media ae-story-media-photo">'
+                    f'<div class="{classe_base} {classe_base}-photo">'
                     f'<img src="{imagem_segura}" alt="Miniatura da história">'
                     "</div>"
                 )
 
         if videos:
             return (
-                '<div class="ae-story-media ae-story-media-video">'
+                f'<div class="{classe_base} {classe_base}-video">'
                 "<span>🎥</span>"
-                "<strong>Vídeo preservado</strong>"
+                "<strong>Vídeo</strong>"
                 "</div>"
             )
 
         return (
-            '<div class="ae-story-media ae-story-media-fallback">'
+            f'<div class="{classe_base} {classe_base}-fallback">'
             "<span>📖</span>"
-            "<strong>História preservada</strong>"
+            "<strong>História</strong>"
             "</div>"
         )
 
@@ -626,18 +628,23 @@ def render_minha_historia():
             f"<span>{html.escape(indicador)}</span>" for indicador in indicadores
         )
 
-    def render_card_memoria(memoria: dict, categoria: str):
+    def render_card_memoria(memoria: dict, categoria: str, mostrar_categoria: bool = False):
         data_evento = memoria.get("data_evento") or ""
         titulo = html.escape(memoria.get("titulo") or "História sem título")
         data_evento_segura = html.escape(str(data_evento))
         resumo_seguro = html.escape(resumo_memoria(memoria))
         categoria_segura = html.escape(categoria)
+        categoria_html = (
+            f'<div class="ae-card-label">{categoria_segura}</div>'
+            if mostrar_categoria
+            else ""
+        )
         card_html = (
             '<div class="ae-story-card">'
             f"{media_card_memoria(memoria)}"
             '<div class="ae-story-body">'
-            f'<div class="ae-card-label">{categoria_segura}</div>'
-            f"<h3>📖 {titulo}</h3>"
+            f"{categoria_html}"
+            f"<h3>{titulo}</h3>"
             f'<span class="ae-story-date">{data_evento_segura}</span>'
             f"<p>{resumo_seguro}</p>"
             f'<div class="ae-story-indicators">{indicadores_memoria(memoria)}</div>'
@@ -645,6 +652,42 @@ def render_minha_historia():
             "</div>"
         )
         st.markdown(card_html, unsafe_allow_html=True)
+
+    def mini_card_memoria_html(memoria: dict) -> str:
+        titulo = html.escape(memoria.get("titulo") or "História sem título")
+        data_evento = html.escape(str(memoria.get("data_evento") or ""))
+        return (
+            '<div class="ae-collection-mini-card">'
+            f'{media_card_memoria(memoria, "ae-collection-mini-media")}'
+            '<div class="ae-collection-mini-body">'
+            f"<strong>{titulo}</strong>"
+            f"<span>{data_evento}</span>"
+            f'<div class="ae-collection-mini-indicators">{indicadores_memoria(memoria)}</div>'
+            "</div>"
+            "</div>"
+        )
+
+    def render_colecao_box(categoria: str, itens: list):
+        categoria_nome = nome_categoria(categoria)
+        titulo = html.escape(categoria_nome)
+        mini_cards = "".join(
+            mini_card_memoria_html(memoria)
+            for memoria in itens[:3]
+        )
+        st.markdown(
+            (
+                '<div class="ae-collection-box">'
+                '<div class="ae-collection-head">'
+                f'<h3>{icone_categoria(categoria)} {titulo}</h3>'
+                '<span>Ver todas ›</span>'
+                "</div>"
+                '<div class="ae-collection-mini-grid">'
+                f"{mini_cards}"
+                "</div>"
+                "</div>"
+            ),
+            unsafe_allow_html=True,
+        )
 
     def render_detalhes_memoria(memoria: dict, key_contexto: str):
         if memoria.get("data_evento"):
@@ -744,35 +787,21 @@ def render_minha_historia():
         categoria = memoria.get("categoria") or "livre"
         grupos.setdefault(categoria, []).append(memoria)
 
-    st.markdown('<div class="ae-story-section-title">Coleções</div>', unsafe_allow_html=True)
-    for categoria, itens in grupos.items():
-        categoria_nome = nome_categoria(categoria)
-        st.markdown(
-            f'<div class="ae-story-shelf-title">{icone_categoria(categoria)} {html.escape(categoria_nome)}</div>',
-            unsafe_allow_html=True,
-        )
-        categoria_identificador = f"{categoria_nome}_{categoria or 'livre'}"
-        categoria_chave = "".join(
-            caractere if caractere.isalnum() else "_"
-            for caractere in categoria_identificador.lower()
-        )
-        mostrar_todas_chave = f"minha_historia_mostrar_todas_{categoria_chave}"
-        limite = len(itens) if st.session_state.get(mostrar_todas_chave) else 4
-
-        render_prateleira(
-            itens[:limite],
-            categoria_nome,
-            contexto=f"colecao_{categoria_chave}",
-            quantidade_colunas=4,
-        )
-
-        if len(itens) > 4 and not st.session_state.get(mostrar_todas_chave):
-            if st.button(
-                "Ver todas",
-                key=f"botao_{mostrar_todas_chave}",
-                use_container_width=True,
-            ):
-                st.session_state[mostrar_todas_chave] = True
+    st.markdown('<div class="ae-story-section-title ae-story-section-title-collections">Coleções</div>', unsafe_allow_html=True)
+    grupos_ordenados = sorted(
+        grupos.items(),
+        key=lambda item: len(item[1]),
+        reverse=True,
+    )
+    for inicio in range(0, len(grupos_ordenados), 3):
+        colunas_colecoes = st.columns(3)
+        for indice, coluna in enumerate(colunas_colecoes):
+            posicao = inicio + indice
+            if posicao >= len(grupos_ordenados):
+                continue
+            categoria, itens = grupos_ordenados[posicao]
+            with coluna:
+                render_colecao_box(categoria, itens)
 
 
 # ============================================================================

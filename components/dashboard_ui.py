@@ -14,7 +14,7 @@ def aplicar_css_dashboard():
 .block-container {
     padding-top: 0.65rem !important;
     padding-bottom: 0.65rem !important;
-    max-width: 1090px !important;
+    max-width: 1200px !important;
 }
 
 /* Sidebar premium */
@@ -526,34 +526,37 @@ button[data-baseweb="tab"][aria-selected="true"] {
     margin-top: 0.55rem;
 }
 
-.block-container {
-    max-width: 1200px;
-}
-
 .ae-story-top {
-    min-height: 86px;
-    max-height: 110px;
+    min-height: 72px;
+    max-height: 96px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    background: rgba(255,255,255,0.94);
-    border: 1px solid rgba(212,168,79,0.20);
-    border-radius: 18px;
-    padding: 0.82rem 1rem;
-    margin-bottom: 0.45rem;
-    box-shadow: 0 8px 22px rgba(43,23,71,0.06);
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    margin-bottom: 0.1rem;
+    box-shadow: none;
 }
 
 .ae-story-top h2 {
     color: #2B1747;
-    margin: 0 0 0.14rem;
-    font-size: 1.38rem;
+    margin: 0 0 0.48rem;
+    font-size: 2rem;
+    letter-spacing: -0.035em;
 }
 
 .ae-story-top p {
     color: #6F6478;
     margin: 0;
-    font-size: 0.92rem;
+    font-size: 1rem;
+}
+
+.ae-story-header-rule {
+    height: 1px;
+    background: rgba(212,168,79,0.26);
+    margin: 0.5rem 0 1.15rem;
 }
 
 .ae-empty-story {
@@ -582,9 +585,9 @@ button[data-baseweb="tab"][aria-selected="true"] {
 
 .ae-story-section-title {
     color: #2B1747;
-    font-size: 1.16rem;
+    font-size: 1.32rem;
     font-weight: 950;
-    margin: 1.35rem 0 0.55rem;
+    margin: 1.1rem 0 0.65rem;
 }
 
 .ae-story-shelf-title {
@@ -595,7 +598,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-story-card {
-    height: 304px;
+    height: 350px;
     width: 100%;
     overflow: hidden;
     display: flex;
@@ -608,7 +611,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-story-media {
-    height: 145px;
+    height: 154px;
     width: 100%;
     overflow: hidden;
     display: flex;
@@ -642,7 +645,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
 .ae-story-media strong {
     color: #F7F3EA;
     display: block;
-    font-size: 0.86rem;
+    font-size: 0.8rem;
 }
 
 .ae-story-media-video {
@@ -661,21 +664,23 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-story-media-fallback span,
-.ae-story-media-fallback strong {
+.ae-story-media-fallback strong,
+.ae-collection-mini-media-fallback span,
+.ae-collection-mini-media-fallback strong {
     color: #2B1747;
 }
 
 .ae-story-body {
-    min-height: 159px;
-    padding: 0.72rem 0.82rem 0.78rem;
+    min-height: 196px;
+    padding: 0.95rem 1rem 0.95rem;
     display: flex;
     flex-direction: column;
 }
 
 .ae-story-card h3 {
     color: #2B1747;
-    margin: 0.24rem 0 0.14rem;
-    font-size: 0.98rem;
+    margin: 0 0 0.42rem;
+    font-size: 1.08rem;
     line-height: 1.2;
     min-height: 2.36em;
     display: -webkit-box;
@@ -685,17 +690,17 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-story-date {
-    color: #B77A46;
-    font-weight: 900;
-    font-size: 0.76rem;
+    color: #6F6478;
+    font-weight: 700;
+    font-size: 0.82rem;
     min-height: 1rem;
 }
 
 .ae-story-card p {
-    color: #5F536B;
-    margin: 0.32rem 0 0;
-    font-size: 0.82rem;
-    line-height: 1.34;
+    color: #2F2440;
+    margin: 0.62rem 0 0;
+    font-size: 0.92rem;
+    line-height: 1.44;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -707,7 +712,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
     flex-wrap: wrap;
     gap: 0.28rem;
     margin-top: auto;
-    padding-top: 0.48rem;
+    padding-top: 0.7rem;
 }
 
 .ae-story-indicators span {
@@ -727,6 +732,137 @@ div[data-testid="stPopover"] button {
     color: #5F536B;
     background: rgba(255,255,255,0.72);
     font-size: 0.82rem;
+}
+
+.ae-story-section-title-collections {
+    margin-top: 2rem;
+}
+
+.ae-collection-box {
+    background: rgba(255,255,255,0.52);
+    border: 1px solid rgba(212,168,79,0.22);
+    border-radius: 16px;
+    padding: 1rem;
+    box-shadow: 0 12px 30px rgba(43,23,71,0.06);
+    min-height: 250px;
+    margin-bottom: 1rem;
+}
+
+.ae-collection-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.9rem;
+}
+
+.ae-collection-head h3 {
+    color: #2B1747;
+    font-size: 1.12rem;
+    margin: 0;
+}
+
+.ae-collection-head span {
+    color: #2B1747;
+    font-size: 0.84rem;
+    font-weight: 850;
+    white-space: nowrap;
+}
+
+.ae-collection-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.ae-collection-mini-card {
+    background: rgba(255,255,255,0.95);
+    border: 1px solid rgba(212,168,79,0.20);
+    border-radius: 10px;
+    overflow: hidden;
+    min-height: 176px;
+    box-shadow: 0 8px 18px rgba(43,23,71,0.06);
+}
+
+.ae-collection-mini-media {
+    height: 82px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 75% 18%, rgba(212,168,79,0.26), transparent 34%),
+        linear-gradient(135deg, #2B1747, #6D3E71);
+    color: white;
+    text-align: center;
+}
+
+.ae-collection-mini-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.ae-collection-mini-media span {
+    display: block;
+    font-size: 1.35rem;
+}
+
+.ae-collection-mini-media strong {
+    display: block;
+    color: white;
+    font-size: 0.72rem;
+}
+
+.ae-collection-mini-media-fallback {
+    background:
+        radial-gradient(circle at 80% 18%, rgba(212,168,79,0.30), transparent 34%),
+        linear-gradient(135deg, #F7F3EA, #EFE3C8);
+}
+
+.ae-collection-mini-body {
+    padding: 0.55rem 0.58rem;
+}
+
+.ae-collection-mini-body strong {
+    color: #2B1747;
+    display: block;
+    font-size: 0.8rem;
+    line-height: 1.18;
+    min-height: 2.35em;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.ae-collection-mini-body > span {
+    color: #6F6478;
+    display: block;
+    font-size: 0.72rem;
+    margin-top: 0.25rem;
+}
+
+.ae-collection-mini-indicators {
+    display: flex;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+    margin-top: 0.45rem;
+}
+
+.ae-collection-mini-indicators span {
+    color: #6F6478;
+    background: rgba(247,243,234,0.90);
+    border: 1px solid rgba(212,168,79,0.18);
+    border-radius: 999px;
+    padding: 0.1rem 0.32rem;
+    font-size: 0.58rem;
+    font-weight: 800;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .footer-aeterna {
