@@ -1695,19 +1695,20 @@ def render_fotos_visitante(contato_id=None, nome_pessoa=None):
 # CONTATOS (COMPLETO)
 # ============================================================================
 def render_contatos():
-    st.markdown("<h3 style='color: #2B1747;'>👥 Pessoas</h3>", unsafe_allow_html=True)
-
     plano = db.obter_plano_usuario(st.session_state.usuario_atual['id'])
     contatos_atual = db.contar_contatos_usuario(st.session_state.usuario_atual['id'])
     max_contatos = plano.get("max_contatos", 10) if plano else 10
     prioridades_atual = db.contar_contatos_prioritarios(st.session_state.usuario_atual['id'])
     max_prioridades = plano.get("max_prioridades", 3) if plano else 3
+    contatos = db.listar_contatos_usuario(st.session_state.usuario_atual['id'])
 
     st.markdown(
-        f"""
-        <div class="ae-people-summary">
-            <span>{contatos_atual}/{max_contatos} pessoas conectadas</span>
-            <span>{prioridades_atual}/{max_prioridades} prioritárias</span>
+        """
+        <div class="ae-people-hero">
+            <div>
+                <h2>👥 Pessoas Importantes</h2>
+                <p>As pessoas que fazem parte da sua história.</p>
+            </div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -1722,129 +1723,207 @@ def render_contatos():
             del st.session_state.contato_chave_msg
             st.rerun()
 
-    col1, col2 = st.columns([1, 2])
+    with st.expander("➕ Adicionar Pessoa Importante", expanded=False):
+        with st.form("form_adicionar_contato", clear_on_submit=True):
+            st.markdown("**📝 Nome completo ***")
 
-    with col1:
-        with st.expander("➕ Adicionar contato", expanded=False):
+            col_n1, col_n2 = st.columns(2)
+            with col_n1:
+                nome = st.text_input("nome", placeholder="Nome", label_visibility="collapsed")
+            with col_n2:
+                sobrenome = st.text_input("sobrenome", placeholder="Sobrenome", label_visibility="collapsed")
 
-            with st.form("form_adicionar_contato", clear_on_submit=True):
-                st.markdown("**📝 Nome completo ***")
+            st.markdown("**📧 Forma de contato ***")
 
-                col_n1, col_n2 = st.columns(2)
-                with col_n1:
-                    nome = st.text_input("nome", placeholder="Nome", label_visibility="collapsed")
-                with col_n2:
-                    sobrenome = st.text_input("sobrenome", placeholder="Sobrenome", label_visibility="collapsed")
+            col_c1, col_c2 = st.columns(2)
+            with col_c1:
+                email = st.text_input("email", placeholder="E-mail", label_visibility="collapsed")
+            with col_c2:
+                whatsapp = st.text_input("whatsapp", placeholder="WhatsApp", label_visibility="collapsed")
 
-                st.markdown("**📧 Forma de contato ***")
+            st.caption("⚠️ Pelo menos um contato (e-mail ou WhatsApp) é obrigatório")
 
-                col_c1, col_c2 = st.columns(2)
-                with col_c1:
-                    email = st.text_input("email", placeholder="E-mail", label_visibility="collapsed")
-                with col_c2:
-                    whatsapp = st.text_input("whatsapp", placeholder="WhatsApp", label_visibility="collapsed")
+            st.markdown("---")
+            st.markdown("#### ✨ Informações adicionais (opcional)")
 
-                st.caption("⚠️ Pelo menos um contato (e-mail ou WhatsApp) é obrigatório")
+            parentesco = st.selectbox(
+                "Relação",
+                ["", "Filho(a)", "Cônjuge", "Irmão(ã)", "Amigo(a)", "Advogado(a)", "Primo(a)", "Outro"]
+            )
 
-                st.markdown("---")
-                st.markdown("#### ✨ Informações adicionais (opcional)")
+            data_nascimento = st.date_input(
+                "Data de nascimento",
+                value=date(1990, 1, 1),
+                min_value=date(1900, 1, 1),
+                max_value=date.today(),
+                format="DD/MM/YYYY"
+            )
 
-                parentesco = st.selectbox(
-                    "Grau de parentesco",
-                    ["", "Filho(a)", "Cônjuge", "Irmão(ã)", "Amigo(a)", "Advogado(a)", "Outro"]
-                )
+            is_prioridade = st.checkbox("Marcar como pessoa prioritária")
 
-                data_nascimento = st.date_input(
-                    "Data de nascimento",
-                    value=date(1990, 1, 1),
-                    min_value=date(1900, 1, 1),
-                    max_value=date.today(),
-                    format="DD/MM/YYYY"
-                )
+            acesso_central_luto = st.checkbox(
+                "Permitir explorar histórias compartilhadas",
+                value=False
+            )
 
-                is_prioridade = st.checkbox("Marcar como contato prioritário")
+            salvar = st.form_submit_button(
+                "💾 Salvar pessoa importante",
+                type="primary",
+                width="stretch"
+            )
 
-                acesso_central_luto = st.checkbox(
-                    "Permitir explorar histórias compartilhadas",
-                    value=False
-                )
+            if salvar:
+                if not nome or not sobrenome:
+                    st.error("❌ Nome e sobrenome são obrigatórios")
+                elif not email and not whatsapp:
+                    st.error("❌ Informe pelo menos um contato (e-mail ou WhatsApp)")
+                elif is_prioridade and prioridades_atual >= max_prioridades:
+                    st.warning(
+                        f"⚠️ Você já tem {prioridades_atual} pessoas prioritárias. "
+                        f"Limite: {max_prioridades}."
+                    )
+                else:
+                    chave_acesso = secrets.token_hex(8)
 
-                salvar = st.form_submit_button(
-                    "💾 Salvar",
-                    type="primary",
-                    width="stretch"
-                )
+                    db.adicionar_contato(
+                        usuario_id=st.session_state.usuario_atual["id"],
+                        nome=nome,
+                        sobrenome=sobrenome,
+                        email=email,
+                        telefone="",
+                        whatsapp=whatsapp or "",
+                        parentesco=parentesco,
+                        data_nascimento=data_nascimento.strftime("%Y-%m-%d") if data_nascimento else "",
+                        is_prioridade=1 if is_prioridade else 0,
+                        prioridade_order=prioridades_atual + 1 if is_prioridade else 0,
+                        acesso_central_luto=1 if acesso_central_luto else 0,
+                        chave_acesso=chave_acesso,
+                    )
 
-                if salvar:
-                    if not nome or not sobrenome:
-                        st.error("❌ Nome e sobrenome são obrigatórios")
-                    elif not email and not whatsapp:
-                        st.error("❌ Informe pelo menos um contato (e-mail ou WhatsApp)")
-                    elif is_prioridade and prioridades_atual >= max_prioridades:
-                        st.warning(
-                            f"⚠️ Você já tem {prioridades_atual} contatos prioritários. "
-                            f"Limite: {max_prioridades}."
-                        )
-                    else:
-                        chave_acesso = secrets.token_hex(8)
+                    st.session_state.contato_salvo_msg = f"✅ {nome} {sobrenome} adicionado!"
+                    st.session_state.contato_chave_msg = f"🔑 Chave de acesso: {chave_acesso}"
+                    st.rerun()
 
-                        db.adicionar_contato(
-                            usuario_id=st.session_state.usuario_atual["id"],
-                            nome=nome,
-                            sobrenome=sobrenome,
-                            email=email,
-                            telefone="",
-                            whatsapp=whatsapp or "",
-                            parentesco=parentesco,
-                            data_nascimento=data_nascimento.strftime("%Y-%m-%d") if data_nascimento else "",
-                            is_prioridade=1 if is_prioridade else 0,
-                            prioridade_order=prioridades_atual + 1 if is_prioridade else 0,
-                            acesso_central_luto=1 if acesso_central_luto else 0,
-                            chave_acesso=chave_acesso,
-                        )
+    try:
+        memorias_usuario = db.listar_memorias_usuario(st.session_state.usuario_atual["id"])
+    except Exception as exc:
+        print("Erro ao carregar presenças nas histórias:", exc)
+        memorias_usuario = []
 
-                        st.session_state.contato_salvo_msg = f"✅ {nome} {sobrenome} adicionado!"
-                        st.session_state.contato_chave_msg = f"🔑 Chave de acesso: {chave_acesso}"
-                        st.rerun()
+    presencas = {}
+    for contato in contatos:
+        nome_contato = (contato.get("nome") or "").strip().lower()
+        nome_completo = (contato.get("nome_completo") or "").strip().lower()
+        if not nome_contato and not nome_completo:
+            continue
+        total = 0
+        for memoria in memorias_usuario:
+            texto_busca = " ".join([
+                str(memoria.get("titulo") or ""),
+                str(memoria.get("conteudo") or ""),
+                str(memoria.get("pessoas_relacionadas") or ""),
+            ]).lower()
+            if nome_completo and nome_completo in texto_busca:
+                total += 1
+            elif nome_contato and nome_contato in texto_busca:
+                total += 1
+        if total:
+            presencas[contato["id"]] = total
 
-    with col2:
-        contatos = db.listar_contatos_usuario(st.session_state.usuario_atual['id'])
-        if not contatos:
-            st.info("Você ainda não adicionou pessoas importantes.")
-        else:
-            for contato in contatos:
-                contextos = []
-                if contato.get("acesso_central_luto"):
-                    contextos.append("Compartilha histórias com você")
-                if contato.get("email") and contato.get("acesso_central_luto"):
-                    contextos.append("Pode contribuir")
-                if contato.get("whatsapp"):
-                    contextos.append("Recebe mensagens futuras")
-                if not contextos:
-                    contextos.append("Pessoa importante")
+    def contexto_pessoa(contato: dict) -> str:
+        if contato.get("acesso_central_luto"):
+            return "Pode ver algumas das suas histórias"
+        if contato.get("email"):
+            return "Pode contribuir com suas histórias"
+        if contato.get("whatsapp"):
+            return "Recebe mensagens futuras"
+        return "Faz parte da sua história"
 
+    def indicadores_pessoa(contato: dict) -> str:
+        itens = []
+        if presencas.get(contato["id"]):
+            itens.append(f"📖 {presencas[contato['id']]} histórias")
+        if contato.get("acesso_central_luto"):
+            itens.append("🔐 acesso ativo")
+        if contato.get("is_prioridade"):
+            itens.append("⭐ prioridade")
+        if not itens:
+            itens.append("🤝 pessoa importante")
+        return "".join(f"<span>{html.escape(item)}</span>" for item in itens[:3])
+
+    if not contatos:
+        st.markdown(
+            """
+            <div class="ae-people-empty">
+                <h3>👥 Sua história é construída com outras pessoas.</h3>
+                <p>Adicione familiares, amigos ou pessoas importantes para compartilhar histórias e memórias.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        if st.button("➕ Adicionar minha primeira pessoa", key="primeira_pessoa", use_container_width=False):
+            st.info("Abra o bloco “Adicionar Pessoa Importante” acima para começar.")
+        return
+
+    ranking = sorted(
+        (
+            (contato, presencas.get(contato["id"], 0))
+            for contato in contatos
+            if presencas.get(contato["id"], 0)
+        ),
+        key=lambda item: item[1],
+        reverse=True,
+    )
+    if ranking:
+        top_html = "".join(
+            f"<span>{html.escape(contato.get('nome_completo') or contato.get('nome') or 'Pessoa')} apareceu em {total} histórias</span>"
+            for contato, total in ranking[:3]
+        )
+        st.markdown(
+            f"""
+            <div class="ae-people-presentes">
+                <strong>Pessoas mais presentes nas suas histórias</strong>
+                <div>{top_html}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    st.markdown('<div class="ae-people-grid-title">Todas as pessoas importantes</div>', unsafe_allow_html=True)
+    for inicio in range(0, len(contatos), 3):
+        colunas = st.columns(3)
+        for indice, coluna in enumerate(colunas):
+            posicao = inicio + indice
+            if posicao >= len(contatos):
+                continue
+            contato = contatos[posicao]
+            nome_exibido = contato.get("nome_completo") or contato.get("nome") or "Pessoa"
+            inicial = html.escape(nome_exibido[:1].upper() or "P")
+            relacao = contato.get("parentesco") or "Relação importante"
+            with coluna:
                 st.markdown(
                     f"""
-                    <div class="ae-person-card">
-                        <div class="ae-avatar">👤</div>
-                        <div>
-                            <h3>{html.escape(contato['nome_completo'])} {'⭐' if contato.get('is_prioridade') else ''}</h3>
-                            <p>{html.escape(contextos[0])}</p>
-                            <span>{html.escape(contato.get('parentesco') or 'Relação não informada')}</span>
-                        </div>
+                    <div class="ae-important-person-card">
+                        <div class="ae-important-avatar">{inicial}</div>
+                        <h3>{html.escape(nome_exibido)} {'⭐' if contato.get('is_prioridade') else ''}</h3>
+                        <strong>{html.escape(relacao)}</strong>
+                        <p>{html.escape(contexto_pessoa(contato))}</p>
+                        <div class="ae-important-indicators">{indicadores_pessoa(contato)}</div>
                     </div>
                     """,
                     unsafe_allow_html=True,
                 )
-                with st.expander("Detalhes", expanded=False):
-                    st.markdown(f"**Email:** {contato['email']}")
-                    if contato.get('whatsapp'):
-                        st.markdown(f"**WhatsApp:** {contato['whatsapp']}")
-                    if contato.get('parentesco'):
-                        st.markdown(f"**Parentesco:** {contato['parentesco']}")
-                    if contato.get('data_nascimento'):
-                        st.markdown(f"**Data nascimento:** {contato['data_nascimento']}")
-                    st.markdown(f"**Prioritário:** {'✅ Sim' if contato.get('is_prioridade') else '❌ Não'}")
+                with st.expander(f"Ver relação de {nome_exibido}", expanded=False):
+                    st.markdown(f"**Relação:** {html.escape(relacao)}")
+                    st.markdown(f"**Histórias em que aparece:** {presencas.get(contato['id'], 0)}")
+                    st.markdown(
+                        "**Permissões atuais:** "
+                        + (
+                            "Pode explorar histórias compartilhadas"
+                            if contato.get("acesso_central_luto")
+                            else "Acesso direto não habilitado"
+                        )
+                    )
                     if contato.get("chave_acesso"):
                         st.markdown("**Chave de acesso:**")
                         st.code(contato["chave_acesso"])
