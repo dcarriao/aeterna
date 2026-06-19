@@ -508,7 +508,6 @@ def render_editor_visibilidade(
 
 def render_minha_historia():
     st.markdown("<h3 style='color: #2B1747;'>📖 Minha História</h3>", unsafe_allow_html=True)
-    st.info("Suas histórias ficam organizadas por tema. Abra uma categoria para explorar os momentos.")
 
     memorias = db.listar_memorias_usuario(st.session_state.usuario_atual["id"])
 
@@ -534,6 +533,30 @@ def render_minha_historia():
         categoria = memoria.get("categoria") or "livre"
         grupos.setdefault(categoria, []).append(memoria)
 
+    grupos_ordenados = sorted(
+        grupos.items(),
+        key=lambda item: len(item[1]),
+        reverse=True,
+    )
+    if len(grupos_ordenados) > 5:
+        visiveis = grupos_ordenados[:4]
+        extras = []
+        for _, itens_extra in grupos_ordenados[4:]:
+            extras.extend(itens_extra)
+        indice_livre = next(
+            (
+                indice
+                for indice, (categoria_visivel, _) in enumerate(visiveis)
+                if (categoria_visivel or "").lower() == "livre"
+            ),
+            None,
+        )
+        if indice_livre is not None:
+            visiveis[indice_livre][1].extend(extras)
+        else:
+            visiveis.append(("livre", extras))
+        grupos_ordenados = visiveis
+
     icones = {
         "família": "❤️",
         "familia": "❤️",
@@ -549,7 +572,7 @@ def render_minha_historia():
         "Outras Histórias": "📚"
     }
 
-    for categoria, itens in grupos.items():
+    for categoria, itens in grupos_ordenados:
         nome_categoria = {
             "livre": "Outras Histórias"
         }.get(categoria.lower(), categoria.title())
@@ -2660,9 +2683,6 @@ def render_sidebar_principal(
         is_admin: bool = False,
 ):
     with st.sidebar:
-        st.markdown("---")
-        st.markdown('<div class="ae-sidebar-section">Navegação</div>', unsafe_allow_html=True)
-
         _botao_sidebar("🏠 Início", "inicio")
         _botao_sidebar("📖 Minha História", "minha_historia")
         _botao_sidebar(
@@ -2710,19 +2730,14 @@ def render_sidebar_principal(
                 navegar_para("admin")
                 st.rerun()
 
-        st.markdown("---")
+        st.markdown('<div class="ae-sidebar-divider"></div>', unsafe_allow_html=True)
         primeiro_nome = str(nome_exibido or "Você").split()[0]
-        st.markdown(
-            f"""
-            <div class="ae-sidebar-user">
-                <div class="ae-sidebar-user-title">{html.escape(primeiro_nome)}</div>
-                <div class="ae-sidebar-user-subtitle">aEterna Beta</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        if st.button("Sair", key="nav_sair", use_container_width=True):
-            fazer_logout()
+        with st.expander(f"👤 {primeiro_nome}", expanded=False):
+            if st.button("Meu plano", key="perfil_meu_plano", use_container_width=True):
+                navegar_para("planos")
+                st.rerun()
+            if st.button("Sair", key="nav_sair", use_container_width=True):
+                fazer_logout()
 
 
 def render_inicio(
@@ -2743,107 +2758,102 @@ def render_inicio(
         int((historia.get("novidades") or {}).get("total", 0) or 0)
         for historia in historias_compartilhadas
     )
+    total_novidades = novidades_historias + int(contribuicoes_pendentes or 0)
+
+    col_top_text, col_top_action = st.columns([0.78, 0.22])
+    with col_top_text:
+        st.markdown(
+            f"""
+            <div class="ae-home-top">
+                <h1>Olá, {html.escape(primeiro_nome)}</h1>
+                <p>Seu espaço privado para registrar e compartilhar histórias.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with col_top_action:
+        st.markdown('<div class="ae-top-action-spacer"></div>', unsafe_allow_html=True)
+        if st.button("+ Registrar momento", type="primary", use_container_width=True):
+            navegar_para("assistente")
+            st.rerun()
 
     st.markdown(
         f"""
-        <div class="ae-home-hero">
-            <div class="ae-kicker">Rede privada de histórias</div>
-            <h1>Olá, {html.escape(primeiro_nome)}</h1>
-            <p>Este é seu espaço para registrar e compartilhar histórias com as pessoas que realmente importam.</p>
+        <div class="ae-home-stats">
+            <div class="ae-stat-card"><span>📖 Histórias</span><strong>{len(memorias)}</strong></div>
+            <div class="ae-stat-card"><span>👥 Compartilhadas</span><strong>{len(historias_compartilhadas)}</strong></div>
+            <div class="ae-stat-card"><span>🔔 Novidades</span><strong>{total_novidades}</strong></div>
+            <div class="ae-stat-card"><span>🤝 Contribuições</span><strong>{int(contribuicoes_pendentes or 0)}</strong></div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    col_principal, col_plano = st.columns([0.62, 0.38])
-    with col_principal:
-        st.markdown(
-            """
-            <div class="ae-home-card ae-home-card-feature">
-                <div class="ae-card-label">Continue sua história</div>
-                <h2>Registre um momento importante</h2>
-                <p>Registre uma memória, uma foto, um vídeo ou um aprendizado importante.</p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        if st.button("+ Registrar momento", type="primary", use_container_width=True):
-            navegar_para("assistente")
-            st.rerun()
-
-    with col_plano:
-        plano_id = int((st.session_state.usuario_atual or {}).get("plano_id", 1) or 1)
-        plano_ativo = plano_id > 1
-        st.markdown(
-            f"""
-            <div class="ae-home-card ae-plan-card">
-                <div class="ae-card-label">{'Plano ativo' if plano_ativo else 'Plano de avaliação'}</div>
-                <h2>{'Plano Familiar' if plano_ativo else '30 dias gratuitos'}</h2>
-                <p>{'Ativo para organizar e compartilhar suas histórias.' if plano_ativo else 'Você está explorando todos os recursos da aEterna.'}</p>
-                <p class="ae-small">{'Obrigado por fazer parte da aEterna.' if plano_ativo else 'Após esse período: R$ 19,90/mês ou R$ 199/ano.'}</p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        if st.button("Conhecer plano", use_container_width=True):
-            navegar_para("planos")
-            st.rerun()
-
-    st.markdown("### 🔔 Novidades")
-    novidades = []
-    if novidades_historias:
-        novidades.append(
-            f"{novidades_historias} novidade(s) nas histórias compartilhadas"
-        )
-    if contribuicoes_pendentes:
-        novidades.append(
-            f"{contribuicoes_pendentes} contribuição(ões) aguardando aprovação"
-        )
-
-    if novidades:
-        for item in novidades:
-            st.markdown(f"- {item}")
-    else:
-        st.info("Sem novidades por enquanto.")
-
     col_hist, col_mem = st.columns(2)
     with col_hist:
-        st.markdown("### 👥 Histórias compartilhadas comigo")
-        if historias_compartilhadas:
-            for historia in historias_compartilhadas[:3]:
+        itens_novidades = []
+        for historia in historias_compartilhadas:
+            novidades = historia.get("novidades") or {}
+            if int(novidades.get("total", 0) or 0):
                 nome = historia.get("nome_completo") or historia.get("nome") or "Pessoa"
-                novidades = historia.get("novidades") or {}
-                total_historias = contar_historias_compartilhadas(historia)
-                st.markdown(
-                    f"""
-                    <div class="ae-mini-card">
-                        <strong>👤 {html.escape(nome)}</strong>
-                        <span>{total_historias} {'história compartilhada' if total_historias == 1 else 'histórias compartilhadas'} · {resumo_novidades(novidades)}</span>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-            if st.button("Ver todas", key="home_ver_historias", use_container_width=True):
-                navegar_para("historias_compartilhadas")
-                st.rerun()
-        else:
-            st.info("Nenhuma história foi compartilhada com você ainda.")
+                itens_novidades.append(f"{nome}: {formatar_novidades_historia(novidades)}")
+        if contribuicoes_pendentes:
+            itens_novidades.append(
+                f"{contribuicoes_pendentes} contribuição(ões) aguardando avaliação"
+            )
+        corpo = "".join(
+            f"<li>{html.escape(item)}</li>" for item in itens_novidades[:3]
+        ) or "<li>Sem novidades por enquanto.</li>"
+        st.markdown(
+            f"""
+            <div class="ae-home-panel">
+                <div class="ae-panel-title">🔔 Novidades</div>
+                <ul>{corpo}</ul>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        if st.button("Ver todas", key="home_ver_novidades", use_container_width=True):
+            navegar_para("novidades")
+            st.rerun()
 
     with col_mem:
-        st.markdown("### 📖 Minhas memórias recentes")
-        if memorias:
-            for memoria in memorias[:5]:
-                titulo = memoria.get("titulo") or "História sem título"
-                categoria = memoria.get("categoria") or "História"
-                st.markdown(f"**{titulo}**  \n{categoria}")
-            if st.button("Ver minha história", key="home_ver_minha_historia", use_container_width=True):
-                navegar_para("minha_historia")
-                st.rerun()
+        if historias_compartilhadas:
+            corpo = "".join(
+                f"<li>{html.escape(h.get('nome_completo') or h.get('nome') or 'Pessoa')}</li>"
+                for h in historias_compartilhadas[:3]
+            )
         else:
-            st.info("Você ainda não registrou nenhuma história.")
-            if st.button("Registrar primeiro momento", key="home_primeiro_momento", use_container_width=True):
-                navegar_para("assistente")
-                st.rerun()
+            corpo = "<li>Nenhuma história compartilhada ainda.</li>"
+        st.markdown(
+            f"""
+            <div class="ae-home-panel">
+                <div class="ae-panel-title">👥 Compartilhadas comigo</div>
+                <ul>{corpo}</ul>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        if st.button("Ver todas", key="home_ver_historias", use_container_width=True):
+            navegar_para("historias_compartilhadas")
+            st.rerun()
+
+    recentes = "".join(
+        f"<li>{html.escape(memoria.get('titulo') or 'História sem título')}</li>"
+        for memoria in memorias[:3]
+    ) or "<li>Você ainda não registrou nenhuma história.</li>"
+    st.markdown(
+        f"""
+        <div class="ae-home-panel ae-recent-panel">
+            <div class="ae-panel-title">📖 Minhas memórias recentes</div>
+            <ul>{recentes}</ul>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    if st.button("Ver minha história", key="home_ver_minha_historia", use_container_width=True):
+        navegar_para("minha_historia")
+        st.rerun()
 
 
 def render_historias_compartilhadas_lista(historias_compartilhadas: list):

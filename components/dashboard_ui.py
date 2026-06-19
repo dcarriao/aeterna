@@ -12,9 +12,9 @@ def aplicar_css_dashboard():
 }
 
 .block-container {
-    padding-top: 1.4rem !important;
-    padding-bottom: 1.2rem !important;
-    max-width: 1180px !important;
+    padding-top: 0.65rem !important;
+    padding-bottom: 0.65rem !important;
+    max-width: 1090px !important;
 }
 
 /* Sidebar premium */
@@ -23,6 +23,15 @@ def aplicar_css_dashboard():
         radial-gradient(circle at 18% 8%, rgba(242,197,114,0.18), transparent 24%),
         linear-gradient(180deg, #140322 0%, #24113d 58%, #12021f 100%);
     border-right: 1px solid rgba(212,175,55,0.28);
+    min-width: 190px !important;
+    max-width: 220px !important;
+    width: 200px !important;
+}
+
+[data-testid="stSidebar"] > div:first-child {
+    width: 200px !important;
+    padding-left: 0.6rem !important;
+    padding-right: 0.6rem !important;
 }
 
 [data-testid="stSidebar"] * {
@@ -31,8 +40,8 @@ def aplicar_css_dashboard():
 
 .ae-sidebar-brand {
     text-align: center;
-    padding: 0.4rem 0;
-    margin-bottom: 0.8rem;
+    padding: 0.15rem 0 0.3rem;
+    margin-bottom: 0.35rem;
     border-bottom: 1px solid rgba(212,175,55,0.22);
 }
 
@@ -76,8 +85,8 @@ def aplicar_css_dashboard():
 .ae-sidebar-section {
     color: #f2c572 !important;
     font-weight: 900;
-    margin: 0.85rem 0 0.6rem;
-    font-size: 0.9rem;
+    margin: 0.45rem 0 0.35rem;
+    font-size: 0.78rem;
 }
 
 .ae-sidebar-stat {
@@ -117,6 +126,9 @@ def aplicar_css_dashboard():
     border: 1px solid rgba(212,175,55,0.22) !important;
     border-radius: 13px !important;
     font-weight: 900 !important;
+    min-height: 2.15rem !important;
+    padding: 0.28rem 0.45rem !important;
+    font-size: 0.82rem !important;
 }
 
 [data-testid="stSidebar"] div.stButton > button[kind="primary"] {
@@ -242,6 +254,108 @@ button[data-baseweb="tab"][aria-selected="true"] {
     box-shadow: 0 18px 55px rgba(43,23,71,0.15);
     border: 1px solid rgba(212,168,79,0.32);
     margin-bottom: 1rem;
+}
+
+.ae-home-top {
+    min-height: 54px;
+    margin-bottom: 0.15rem;
+}
+
+.ae-home-top h1 {
+    color: #2B1747;
+    margin: 0;
+    font-size: 1.55rem;
+    line-height: 1.1;
+}
+
+.ae-home-top p {
+    color: #6f6478;
+    margin: 0.15rem 0 0;
+    font-size: 0.88rem;
+}
+
+.ae-top-action-spacer {
+    height: 0.28rem;
+}
+
+.ae-home-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.55rem;
+    margin: 0.45rem 0 0.65rem;
+}
+
+.ae-stat-card {
+    background: rgba(255,255,255,0.96);
+    border: 1px solid rgba(212,168,79,0.22);
+    border-radius: 16px;
+    padding: 0.62rem 0.75rem;
+    box-shadow: 0 8px 22px rgba(43,23,71,0.06);
+    min-height: 64px;
+}
+
+.ae-stat-card span {
+    display: block;
+    color: #6f6478;
+    font-size: 0.78rem;
+    font-weight: 800;
+    line-height: 1.15;
+}
+
+.ae-stat-card strong {
+    display: block;
+    color: #2B1747;
+    font-size: 1.6rem;
+    line-height: 1.05;
+    margin-top: 0.18rem;
+}
+
+.ae-home-panel {
+    background: rgba(255,255,255,0.96);
+    border: 1px solid rgba(212,168,79,0.20);
+    border-radius: 17px;
+    padding: 0.7rem 0.85rem;
+    box-shadow: 0 8px 22px rgba(43,23,71,0.06);
+    min-height: 124px;
+    margin-bottom: 0.35rem;
+}
+
+.ae-recent-panel {
+    min-height: 96px;
+}
+
+.ae-panel-title {
+    color: #2B1747;
+    font-size: 0.92rem;
+    font-weight: 900;
+    margin-bottom: 0.35rem;
+}
+
+.ae-home-panel ul {
+    margin: 0;
+    padding-left: 1rem;
+    color: #5F536B;
+    font-size: 0.84rem;
+    line-height: 1.55;
+}
+
+.ae-home-panel li {
+    margin: 0.05rem 0;
+}
+
+.ae-sidebar-divider {
+    height: 1px;
+    background: rgba(212,175,55,0.18);
+    margin: 0.55rem 0 0.4rem;
+}
+
+[data-testid="stSidebar"] details {
+    margin-top: 0.25rem;
+}
+
+[data-testid="stSidebar"] details summary {
+    font-size: 0.86rem !important;
+    font-weight: 900 !important;
 }
 
 .ae-home-hero h1 {
@@ -379,6 +493,12 @@ button[data-baseweb="tab"][aria-selected="true"] {
     }
 }
 
+@media (min-width: 701px) {
+    .element-container {
+        margin-bottom: 0.28rem !important;
+    }
+}
+
 @media (max-width: 700px) {
     .ae-dashboard-grid {
         grid-template-columns: 1fr;
@@ -440,7 +560,7 @@ def render_sidebar_premium(
             try:
                 st.image(
                     "assets/logo-sidebar.png",
-                    width=180
+                    width=132
                 )
             except Exception as exc:
                 print("Erro ao carregar logo da sidebar:", exc)
@@ -475,10 +595,7 @@ def render_sidebar_premium(
             st.markdown("---")
             return
 
-        st.markdown(
-            '<div class="ae-sidebar-note">Espaço privado para histórias, momentos e pessoas importantes.</div>',
-            unsafe_allow_html=True,
-        )
+        return
 
 
 def render_painel_inicial(nome_exibido, qtd_videos, qtd_contatos, qtd_cofre=0, qtd_memorias=0):
