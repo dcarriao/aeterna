@@ -260,6 +260,8 @@ if 'historia_atual_usuario_id' not in st.session_state:
     st.session_state.historia_atual_usuario_id = None
 if 'historia_atual_nome' not in st.session_state:
     st.session_state.historia_atual_nome = None
+if 'pagina_atual' not in st.session_state:
+    st.session_state.pagina_atual = "inicio"
 
 
 # ============================================================================
@@ -277,6 +279,7 @@ def fazer_login(email, senha):
         st.session_state.usuario_atual = usuario
         st.session_state.modo_acesso = "usuario"
         st.session_state.modo_visualizacao = "minha_historia"
+        st.session_state.pagina_atual = "inicio"
         st.session_state.historia_atual_usuario_id = usuario["id"]
         st.session_state.historia_atual_nome = usuario["nome_completo"]
         st.session_state.historico_assistente = []
@@ -316,6 +319,7 @@ def fazer_logout():
     st.session_state.crypto = None
     st.session_state.historico_assistente = []
     st.session_state.modo_visualizacao = "minha_historia"
+    st.session_state.pagina_atual = "inicio"
     st.session_state.historia_atual_usuario_id = None
     st.session_state.historia_atual_nome = None
     st.rerun()
@@ -503,8 +507,8 @@ def render_editor_visibilidade(
 
 
 def render_minha_historia():
-    st.markdown("<h3 style='color: #2E8B57;'>📖 Minha História</h3>", unsafe_allow_html=True)
-    st.info("Aqui suas memórias começam a formar uma linha viva da sua história.")
+    st.markdown("<h3 style='color: #2B1747;'>📖 Minha História</h3>", unsafe_allow_html=True)
+    st.info("Suas histórias ficam organizadas por tema. Abra uma categoria para explorar os momentos.")
 
     memorias = db.listar_memorias_usuario(st.session_state.usuario_atual["id"])
 
@@ -538,7 +542,6 @@ def render_minha_historia():
         "conquista": "🏆",
         "conquistas": "🏆",
         "amor": "💕",
-        "perda": "🕊️",
         "valores": "🌟",
         "Outras Histórias": "📚"
     }
@@ -549,10 +552,21 @@ def render_minha_historia():
         }.get(categoria.lower(), categoria.title())
         icone = icones.get(categoria.lower(), "📌")
 
-        st.markdown(f"### {icone} {nome_categoria}")
-
-        for memoria in itens:
-            with st.expander(memoria.get("titulo", "Memória")):
+        with st.expander(
+            f"{icone} {nome_categoria} — {len(itens)} "
+            f"{'história' if len(itens) == 1 else 'histórias'}",
+            expanded=False,
+        ):
+            for memoria in itens:
+                st.markdown(
+                    f"""
+                    <div class="ae-memory-card">
+                        <div class="ae-card-label">{html.escape(nome_categoria)}</div>
+                        <h3>{html.escape(memoria.get("titulo", "Memória"))}</h3>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
                 if memoria.get("data_evento"):
                     st.markdown(f"**Data:** {memoria['data_evento']}")
 
@@ -597,6 +611,7 @@ def render_minha_historia():
                             video.get("caminho"),
                             legenda=video.get("titulo", ""),
                         )
+                st.markdown("---")
 
 
 # ============================================================================
@@ -2533,7 +2548,7 @@ def render_contribuicoes_pendentes(usuario_dono_id: int):
             else str(criado_em or "")
         )
 
-        with st.container(border=True):
+        with st.container():
             st.markdown(f"**{nome} enviou uma lembrança para:**")
             st.markdown(f"### {titulo}")
             if data_texto:
@@ -2600,6 +2615,259 @@ def render_contribuicoes_pendentes(usuario_dono_id: int):
                             st.rerun()
                         else:
                             st.warning("Esta contribuição não está mais pendente.")
+
+
+def navegar_para(pagina: str):
+    st.session_state.pagina_atual = pagina
+    selecionar_minha_historia()
+
+
+def _botao_sidebar(label: str, pagina: str, badge: int = 0):
+    texto = f"{label} ({badge})" if badge else label
+    selecionado = st.session_state.get("pagina_atual") == pagina
+    if st.sidebar.button(
+        texto,
+        key=f"nav_principal_{pagina}",
+        use_container_width=True,
+        type="primary" if selecionado else "secondary",
+    ):
+        navegar_para(pagina)
+        st.rerun()
+
+
+def render_sidebar_principal(
+        nome_exibido: str,
+        historias_compartilhadas: list,
+        contribuicoes_pendentes: int,
+        is_admin: bool = False,
+):
+    with st.sidebar:
+        st.markdown("---")
+        st.markdown('<div class="ae-sidebar-section">Navegação</div>', unsafe_allow_html=True)
+
+        _botao_sidebar("🏠 Início", "inicio")
+        _botao_sidebar("📖 Minha História", "minha_historia")
+        _botao_sidebar(
+            "👥 Histórias Compartilhadas",
+            "historias_compartilhadas",
+            sum(int((h.get("novidades") or {}).get("total", 0) or 0) for h in historias_compartilhadas),
+        )
+        _botao_sidebar("🔔 Novidades", "novidades", contribuicoes_pendentes)
+        _botao_sidebar("🤝 Contribuições", "contribuicoes", contribuicoes_pendentes)
+
+        with st.expander("🧩 Mais", expanded=False):
+            for label, pagina in (
+                ("Assistente de Histórias", "assistente"),
+                ("Fotos", "fotos"),
+                ("Vídeos", "videos"),
+                ("Pessoas", "pessoas"),
+                ("Quem Sou Eu", "quem_sou_eu"),
+                ("Mensagens para o Futuro", "mensagens"),
+                ("Cofre", "cofre"),
+                ("Meu plano", "planos"),
+            ):
+                if st.button(
+                    label,
+                    key=f"nav_mais_{pagina}",
+                    use_container_width=True,
+                    type=(
+                        "primary"
+                        if st.session_state.get("pagina_atual") == pagina
+                        else "secondary"
+                    ),
+                ):
+                    navegar_para(pagina)
+                    st.rerun()
+
+            if is_admin and st.button(
+                "Admin",
+                key="nav_mais_admin",
+                use_container_width=True,
+                type=(
+                    "primary"
+                    if st.session_state.get("pagina_atual") == "admin"
+                    else "secondary"
+                ),
+            ):
+                navegar_para("admin")
+                st.rerun()
+
+        st.markdown("---")
+        primeiro_nome = str(nome_exibido or "Você").split()[0]
+        st.markdown(
+            f"""
+            <div class="ae-sidebar-user">
+                <div class="ae-sidebar-user-title">{html.escape(primeiro_nome)}</div>
+                <div class="ae-sidebar-user-subtitle">aEterna Beta</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        if st.button("Sair", key="nav_sair", use_container_width=True):
+            fazer_logout()
+
+
+def render_inicio(
+        nome_exibido: str,
+        usuario_id: int,
+        historias_compartilhadas: list,
+        contribuicoes_pendentes: int,
+):
+    primeiro_nome = str(nome_exibido or "Olá").split()[0]
+
+    try:
+        memorias = db.listar_memorias_usuario(usuario_id)
+    except Exception as exc:
+        print("Erro ao carregar memórias recentes:", exc)
+        memorias = []
+
+    novidades_historias = sum(
+        int((historia.get("novidades") or {}).get("total", 0) or 0)
+        for historia in historias_compartilhadas
+    )
+
+    st.markdown(
+        f"""
+        <div class="ae-home-hero">
+            <div class="ae-kicker">Rede privada de histórias</div>
+            <h1>Olá, {html.escape(primeiro_nome)}</h1>
+            <p>Este é seu espaço privado para registrar, organizar e compartilhar histórias com quem realmente importa.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    col_principal, col_plano = st.columns([0.62, 0.38])
+    with col_principal:
+        st.markdown(
+            """
+            <div class="ae-home-card ae-home-card-feature">
+                <div class="ae-card-label">Continue sua história</div>
+                <h2>Registre um momento importante</h2>
+                <p>Registre uma memória, uma foto, um vídeo ou um aprendizado importante.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        if st.button("+ Registrar momento", type="primary", use_container_width=True):
+            navegar_para("assistente")
+            st.rerun()
+
+    with col_plano:
+        st.markdown(
+            """
+            <div class="ae-home-card ae-plan-card">
+                <div class="ae-card-label">Plano de avaliação</div>
+                <h2>30 dias grátis</h2>
+                <p>Você está no período de teste da aEterna.</p>
+                <p class="ae-small">Depois, continue por R$ 19,90/mês ou R$ 199/ano.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        if st.button("Ver plano", use_container_width=True):
+            navegar_para("planos")
+            st.rerun()
+
+    st.markdown("### 🔔 Novidades")
+    novidades = []
+    if novidades_historias:
+        novidades.append(
+            f"{novidades_historias} novidade(s) nas histórias compartilhadas"
+        )
+    if contribuicoes_pendentes:
+        novidades.append(
+            f"{contribuicoes_pendentes} contribuição(ões) aguardando aprovação"
+        )
+
+    if novidades:
+        for item in novidades:
+            st.markdown(f"- {item}")
+    else:
+        st.info("Sem novidades por enquanto.")
+
+    col_hist, col_mem = st.columns(2)
+    with col_hist:
+        st.markdown("### 👥 Histórias compartilhadas comigo")
+        if historias_compartilhadas:
+            for historia in historias_compartilhadas[:3]:
+                nome = historia.get("nome_completo") or historia.get("nome") or "Pessoa"
+                novidades = historia.get("novidades") or {}
+                st.markdown(
+                    f"**{nome}**  \n{formatar_novidades_historia(novidades)}"
+                )
+            if st.button("Ver todas", key="home_ver_historias", use_container_width=True):
+                navegar_para("historias_compartilhadas")
+                st.rerun()
+        else:
+            st.caption("Nenhuma história compartilhada ainda.")
+
+    with col_mem:
+        st.markdown("### 📖 Minhas memórias recentes")
+        if memorias:
+            for memoria in memorias[:5]:
+                titulo = memoria.get("titulo") or "História sem título"
+                categoria = memoria.get("categoria") or "História"
+                st.markdown(f"**{titulo}**  \n{categoria}")
+            if st.button("Ver minha história", key="home_ver_minha_historia", use_container_width=True):
+                navegar_para("minha_historia")
+                st.rerun()
+        else:
+            st.caption("Comece registrando seu primeiro momento.")
+
+
+def render_historias_compartilhadas_lista(historias_compartilhadas: list):
+    st.markdown("## 👥 Histórias compartilhadas comigo")
+    if not historias_compartilhadas:
+        st.info("Nenhuma história foi compartilhada com você ainda.")
+        return
+
+    for historia in historias_compartilhadas:
+        nome = historia.get("nome_completo") or historia.get("nome") or "Pessoa"
+        novidades = historia.get("novidades") or {}
+        with st.container():
+            st.markdown(f"### História de {nome}")
+            st.caption(formatar_novidades_historia(novidades))
+            if st.button(
+                "Abrir história",
+                key=f"abrir_historia_compartilhada_{historia['usuario_id']}",
+                use_container_width=True,
+            ):
+                selecionar_historia_compartilhada(historia)
+                st.session_state.pagina_atual = "historias_compartilhadas"
+                st.rerun()
+
+
+def render_novidades(
+        historias_compartilhadas: list,
+        contribuicoes_pendentes: int,
+):
+    st.markdown("## 🔔 Novidades")
+    total_historias = sum(
+        int((historia.get("novidades") or {}).get("total", 0) or 0)
+        for historia in historias_compartilhadas
+    )
+
+    if not total_historias and not contribuicoes_pendentes:
+        st.info("Sem novidades por enquanto.")
+        return
+
+    if total_historias:
+        st.markdown("### Histórias compartilhadas")
+        for historia in historias_compartilhadas:
+            novidades = historia.get("novidades") or {}
+            if int(novidades.get("total", 0) or 0):
+                nome = historia.get("nome_completo") or historia.get("nome") or "Pessoa"
+                st.markdown(f"- **{nome}:** {formatar_novidades_historia(novidades)}")
+
+    if contribuicoes_pendentes:
+        st.markdown("### Contribuições")
+        st.markdown(
+            f"- {contribuicoes_pendentes} contribuição(ões) aguardando aprovação."
+        )
+        if st.button("Revisar contribuições", use_container_width=True):
+            navegar_para("contribuicoes")
+            st.rerun()
 
 
 # ============================================================================
@@ -2784,24 +3052,25 @@ def main():
                 st.session_state.usuario_atual.get("tipo") == "admin"
         )
 
-        #qtd_videos = len(
-        #    db.listar_videos_usuario(
-        #        st.session_state.usuario_atual["id"]
-        #    )
-        #)
+        try:
+            qtd_videos = len(db.listar_videos_usuario(usuario_logado["id"]))
+        except Exception as exc:
+            print("Erro ao contar vídeos:", exc)
+            qtd_videos = 0
 
-        #qtd_contatos = len(
-        #    db.listar_contatos_usuario(
-        #        st.session_state.usuario_atual["id"]
-        #    )
-        #)
+        try:
+            qtd_contatos = len(db.listar_contatos_usuario(usuario_logado["id"]))
+        except Exception as exc:
+            print("Erro ao contar pessoas:", exc)
+            qtd_contatos = 0
 
-        qtd_videos = 0
-        qtd_contatos = 0
+        try:
+            qtd_memorias = len(db.listar_memorias_usuario(usuario_logado["id"]))
+        except Exception as exc:
+            print("Erro ao contar memórias:", exc)
+            qtd_memorias = 0
 
-        # Ajustaremos depois para dados reais
         qtd_cofre = 0
-        qtd_memorias = 0
 
         render_sidebar_premium(
             nome_exibido=nome_exibido,
@@ -2813,9 +3082,11 @@ def main():
             fazer_logout=fazer_logout
         )
 
-        render_navegacao_historias(
+        render_sidebar_principal(
+            nome_exibido,
             historias_compartilhadas,
-            contribuicoes_pendentes=contribuicoes_pendentes,
+            contribuicoes_pendentes,
+            is_admin=is_admin,
         )
 
         if st.session_state.modo_visualizacao == "historia_compartilhada":
@@ -2825,84 +3096,49 @@ def main():
             )
             return
 
-        if is_admin:
-            tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
-                "🏠 Painel",
-                "💬 Assistente",
-                "🎥 Vídeos",
-                "👥 Família",
-                "👤 Minha Essência",
-                "📝 Lembranças",
-                "🔒 Cofre",
-                f"🤝 Contribuições ({contribuicoes_pendentes})",
-                "👑 Admin"
-            ])
-            with tab0:
-                render_painel_inicial(
-                    nome_exibido,
-                    qtd_videos,
-                    qtd_contatos,
-                    qtd_cofre,
-                    qtd_memorias
-                )
-            with tab1:
-                render_assistente()
-            with tab2:
-                render_videos()
-            with tab3:
-                render_contatos()
-            with tab4:
-                render_preferencias()
-            with tab5:
-                render_agendamentos()
-            with tab6:
-                render_cofre()
-            with tab7:
-                render_contribuicoes_pendentes(usuario_logado["id"])
-            with tab8:
-                render_admin_panel()
+        pagina = st.session_state.get("pagina_atual", "inicio")
+
+        if pagina == "inicio":
+            render_inicio(
+                nome_exibido,
+                usuario_logado["id"],
+                historias_compartilhadas,
+                contribuicoes_pendentes,
+            )
+        elif pagina == "minha_historia":
+            render_minha_historia()
+        elif pagina == "historias_compartilhadas":
+            render_historias_compartilhadas_lista(historias_compartilhadas)
+        elif pagina == "novidades":
+            render_novidades(historias_compartilhadas, contribuicoes_pendentes)
+        elif pagina == "contribuicoes":
+            render_contribuicoes_pendentes(usuario_logado["id"])
+        elif pagina == "assistente":
+            render_assistente()
+        elif pagina == "videos":
+            render_videos()
+        elif pagina == "fotos":
+            render_fotos()
+        elif pagina == "pessoas":
+            render_contatos()
+        elif pagina == "quem_sou_eu":
+            render_preferencias()
+        elif pagina == "mensagens":
+            render_agendamentos()
+        elif pagina == "cofre":
+            render_cofre()
+        elif pagina == "planos":
+            render_planos()
+        elif pagina == "admin" and is_admin:
+            render_admin_panel()
         else:
-            tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
-                "🏠 Painel",
-                "✨ Assistente",
-                "📖 Minha História",
-                "🎥 Vídeos",
-                "📷 Fotos",
-                "👨‍👩‍👧‍👦 Pessoas",
-                "🌟 Quem Sou Eu",
-                "💌 Mensagens para o Futuro",
-                "🔒 Cofre",
-                f"🤝 Contribuições ({contribuicoes_pendentes})",
-                "💎 Planos"
-            ])
-            with tab0:
-                render_painel_inicial(
-                    nome_exibido,
-                    qtd_videos,
-                    qtd_contatos,
-                    qtd_cofre,
-                    qtd_memorias
-                )
-            with tab1:
-                render_assistente()
-            with tab2:
-                render_minha_historia()
-            with tab3:
-                render_videos()
-            with tab4:
-                render_fotos()
-            with tab5:
-                render_contatos()
-            with tab6:
-                render_preferencias()
-            with tab7:
-                render_agendamentos()
-            with tab8:
-                render_cofre()
-            with tab9:
-                render_contribuicoes_pendentes(usuario_logado["id"])
-            with tab10:
-                render_planos()
+            st.session_state.pagina_atual = "inicio"
+            render_inicio(
+                nome_exibido,
+                usuario_logado["id"],
+                historias_compartilhadas,
+                contribuicoes_pendentes,
+            )
 
         st.markdown("""
         <div class="footer-aeterna">

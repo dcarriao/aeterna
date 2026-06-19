@@ -112,11 +112,17 @@ def aplicar_css_dashboard():
 }
 
 [data-testid="stSidebar"] div.stButton > button {
+    background: rgba(255,255,255,0.08) !important;
+    color: rgba(255,255,255,0.90) !important;
+    border: 1px solid rgba(212,175,55,0.22) !important;
+    border-radius: 13px !important;
+    font-weight: 900 !important;
+}
+
+[data-testid="stSidebar"] div.stButton > button[kind="primary"] {
     background: linear-gradient(135deg, #f8dc92, #d4af37 62%, #b77a46) !important;
     color: #1b0f2e !important;
     border: 0 !important;
-    border-radius: 13px !important;
-    font-weight: 900 !important;
 }
 
 /* Tabs mais limpas e compactas */
@@ -226,6 +232,79 @@ button[data-baseweb="tab"][aria-selected="true"] {
     font-size: 0.9rem;
 }
 
+.ae-home-hero {
+    background:
+        radial-gradient(circle at 82% 18%, rgba(242,197,114,0.24), transparent 30%),
+        linear-gradient(135deg, #2B1747 0%, #3a1f5f 56%, #8a5a2b 100%);
+    color: white;
+    border-radius: 30px;
+    padding: 1.75rem 1.9rem;
+    box-shadow: 0 18px 55px rgba(43,23,71,0.15);
+    border: 1px solid rgba(212,168,79,0.32);
+    margin-bottom: 1rem;
+}
+
+.ae-home-hero h1 {
+    color: #F2C572;
+    font-size: 2rem;
+    margin: 0.2rem 0 0.45rem;
+}
+
+.ae-home-hero p {
+    color: rgba(255,255,255,0.84);
+    font-size: 1rem;
+    line-height: 1.55;
+    max-width: 820px;
+    margin: 0;
+}
+
+.ae-kicker,
+.ae-card-label {
+    color: #B77A46;
+    font-size: 0.76rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.ae-home-card,
+.ae-memory-card {
+    background: rgba(255,255,255,0.96);
+    border-radius: 22px;
+    padding: 1.15rem 1.25rem;
+    border: 1px solid rgba(212,168,79,0.24);
+    box-shadow: 0 12px 34px rgba(43,23,71,0.08);
+    margin-bottom: 0.75rem;
+}
+
+.ae-home-card h2,
+.ae-memory-card h3 {
+    color: #2B1747;
+    margin: 0.28rem 0 0.4rem;
+}
+
+.ae-home-card p {
+    color: #5F536B;
+    line-height: 1.55;
+    margin: 0;
+}
+
+.ae-home-card-feature {
+    min-height: 172px;
+}
+
+.ae-plan-card {
+    background:
+        radial-gradient(circle at 80% 18%, rgba(212,168,79,0.18), transparent 32%),
+        rgba(255,255,255,0.97);
+}
+
+.ae-small {
+    margin-top: 0.65rem !important;
+    font-size: 0.86rem;
+    color: #7A6D84 !important;
+}
+
 .footer-aeterna {
     text-align: center;
     color: #8a7b95;
@@ -285,9 +364,6 @@ def render_sidebar_premium(
                 unsafe_allow_html=True
             )
 
-        if fazer_logout and st.button("🚪 Encerrar sessão", use_container_width=True):
-            fazer_logout()
-
         usuario = st.session_state.get("usuario_atual") or {}
 
         if usuario.get("tipo") == "visitante":
@@ -309,19 +385,8 @@ def render_sidebar_premium(
             st.markdown("---")
             return
 
-        st.markdown('<div class="ae-sidebar-section">Sua história</div>', unsafe_allow_html=True)
-
-        stats_html = (
-            f'<div class="ae-sidebar-stat"><div class="ae-sidebar-stat-label">🎥 Vídeos</div><div class="ae-sidebar-stat-value">{qtd_videos}</div></div>'
-            f'<div class="ae-sidebar-stat"><div class="ae-sidebar-stat-label">👥 Família</div><div class="ae-sidebar-stat-value">{qtd_contatos}</div></div>'
-            f'<div class="ae-sidebar-stat"><div class="ae-sidebar-stat-label">🔒 Cofre</div><div class="ae-sidebar-stat-value">{qtd_cofre}</div></div>'
-            f'<div class="ae-sidebar-stat"><div class="ae-sidebar-stat-label">💬 Memórias</div><div class="ae-sidebar-stat-value">{qtd_memorias}</div></div>'
-        )
-        st.markdown(stats_html, unsafe_allow_html=True)
-
-        perfil = "Administrador" if is_admin else "Usuário"
         st.markdown(
-            f'<div class="ae-sidebar-note">Perfil: {perfil}<br>aEterna Beta</div>',
+            '<div class="ae-sidebar-note">Espaço privado para histórias, momentos e pessoas importantes.</div>',
             unsafe_allow_html=True,
         )
 
