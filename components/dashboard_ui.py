@@ -774,7 +774,7 @@ div[data-testid="stPopover"] {
 }
 
 .ae-story-section-title-collections {
-    margin-top: 0.42rem;
+    margin-top: 0.7rem;
 }
 
 .ae-collection-box {
@@ -783,8 +783,8 @@ div[data-testid="stPopover"] {
     border-radius: 16px;
     padding: 0.55rem;
     box-shadow: 0 12px 30px rgba(43,23,71,0.06);
-    height: 142px;
-    min-height: 142px;
+    height: 172px;
+    min-height: 172px;
     margin-bottom: 0.35rem;
     overflow: hidden;
 }
@@ -814,7 +814,7 @@ div[data-testid="stPopover"] {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.34rem;
-    height: 104px;
+    height: 134px;
     align-items: stretch;
 }
 
@@ -823,8 +823,8 @@ div[data-testid="stPopover"] {
     border: 1px solid rgba(212,168,79,0.20);
     border-radius: 10px;
     overflow: hidden;
-    height: 104px;
-    min-height: 104px;
+    height: 134px;
+    min-height: 134px;
     box-shadow: 0 8px 18px rgba(43,23,71,0.06);
 }
 
@@ -834,7 +834,7 @@ div[data-testid="stPopover"] {
 }
 
 .ae-collection-mini-media {
-    height: 38px;
+    height: 62px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -871,13 +871,13 @@ div[data-testid="stPopover"] {
 }
 
 .ae-collection-mini-body {
-    padding: 0.3rem 0.34rem;
+    padding: 0.42rem 0.44rem;
 }
 
 .ae-collection-mini-body strong {
     color: #2B1747;
     display: block;
-    font-size: 0.58rem;
+    font-size: 0.68rem;
     line-height: 1.18;
     min-height: 2.35em;
     display: -webkit-box;
@@ -889,15 +889,15 @@ div[data-testid="stPopover"] {
 .ae-collection-mini-body > span {
     color: #6F6478;
     display: block;
-    font-size: 0.54rem;
-    margin-top: 0.1rem;
+    font-size: 0.6rem;
+    margin-top: 0.16rem;
 }
 
 .ae-collection-mini-indicators {
     display: flex;
     gap: 0.25rem;
     flex-wrap: wrap;
-    margin-top: 0.16rem;
+    margin-top: 0.26rem;
 }
 
 .ae-collection-mini-indicators span {
@@ -918,7 +918,7 @@ div[data-testid="stPopover"] {
     text-align: center;
     color: #8a7b95;
     font-size: 0.76rem;
-    padding: 0.55rem 0 0;
+    padding: 0.75rem 0 0;
 }
 
 @media (max-width: 1100px) {
