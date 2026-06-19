@@ -1091,8 +1091,16 @@ class BancoDados:
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (usuario_id, nome, sobrenome, email, telefone, whatsapp, parentesco,
               data_nascimento, datas_especiais, is_prioridade, prioridade_order, acesso_central_luto, chave_acesso))
+        self.executar(cursor, """
+            SELECT id FROM contatos
+            WHERE usuario_id = ? AND nome = ? AND sobrenome = ?
+            ORDER BY id DESC
+            LIMIT 1
+        """, (usuario_id, nome, sobrenome))
+        row = cursor.fetchone()
         conn.commit()
         conn.close()
+        return row[0] if row else None
 
     def listar_contatos_usuario(self, usuario_id: int) -> List[Dict]:
         conn = self.conectar()
@@ -2583,6 +2591,100 @@ class BancoDados:
                     (usuario_id, nome_sugerido or nome_normalizado, nome_normalizado, score, origem, status),
                 )
             conn.commit()
+        finally:
+            conn.close()
+
+    # ========================================================================
+    # CONVITES DE PESSOAS IMPORTANTES
+    # ========================================================================
+
+    def garantir_tabela_convites_pessoas(self):
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            if self.usa_postgres:
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS convites_pessoas (
+                        id SERIAL PRIMARY KEY,
+                        usuario_id INTEGER NOT NULL,
+                        contato_id INTEGER,
+                        nome_destinatario TEXT NOT NULL,
+                        email_destinatario TEXT NOT NULL,
+                        status TEXT DEFAULT 'enviado',
+                        criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                """)
+            else:
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS convites_pessoas (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        usuario_id INTEGER NOT NULL,
+                        contato_id INTEGER,
+                        nome_destinatario TEXT NOT NULL,
+                        email_destinatario TEXT NOT NULL,
+                        status TEXT DEFAULT 'enviado',
+                        criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                """)
+            conn.commit()
+        finally:
+            conn.close()
+
+    def registrar_convite_pessoa(
+            self,
+            usuario_id: int,
+            contato_id: int,
+            nome_destinatario: str,
+            email_destinatario: str,
+            status: str = "enviado",
+    ):
+        self.garantir_tabela_convites_pessoas()
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            self.executar(
+                cursor,
+                """
+                INSERT INTO convites_pessoas
+                    (usuario_id, contato_id, nome_destinatario, email_destinatario, status)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (usuario_id, contato_id, nome_destinatario, email_destinatario, status),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+
+    def listar_convites_pessoas(self, usuario_id: int, limite: int = 4) -> List[Dict]:
+        self.garantir_tabela_convites_pessoas()
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            self.executar(
+                cursor,
+                """
+                SELECT id, contato_id, nome_destinatario, email_destinatario, status, criado_em
+                FROM convites_pessoas
+                WHERE usuario_id = ?
+                ORDER BY criado_em DESC
+                LIMIT ?
+                """,
+                (usuario_id, limite),
+            )
+            rows = cursor.fetchall()
+            return [
+                {
+                    "id": r[0],
+                    "contato_id": r[1],
+                    "nome": r[2],
+                    "email": r[3],
+                    "status": r[4] or "enviado",
+                    "criado_em": r[5],
+                }
+                for r in rows
+            ]
         finally:
             conn.close()
 

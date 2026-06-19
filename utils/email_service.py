@@ -63,6 +63,48 @@ https://aeternalegado.com.br
             print(f"Erro: {e}")
             return False
 
+    def enviar_convite_pessoa_importante(
+            self,
+            destinatario_email: str,
+            nome_destinatario: str,
+            nome_usuario: str,
+    ) -> bool:
+        """Envia convite para uma pessoa adicionada à história do usuário."""
+        if not self.email_remetente or not self.email_senha:
+            print("⚠️ Email não configurado")
+            return False
+
+        try:
+            assunto = f"Você foi adicionado à história de {nome_usuario}"
+            corpo = f"""
+Olá {nome_destinatario},
+
+{nome_usuario} adicionou você como uma pessoa importante em sua história na aEterna.
+
+Você poderá acompanhar histórias compartilhadas, contribuir com lembranças e preservar suas próprias histórias.
+
+Criar minha conta:
+https://aeterna.streamlit.app
+
+✨ aEterna — Memórias que atravessam o tempo e unem gerações.
+"""
+
+            msg = MIMEMultipart()
+            msg["From"] = self.email_remetente
+            msg["To"] = destinatario_email
+            msg["Subject"] = assunto
+            msg.attach(MIMEText(corpo, "plain", "utf-8"))
+
+            server = smtplib.SMTP(self.smtp_server, self.smtp_port)
+            server.starttls()
+            server.login(self.email_remetente, self.email_senha)
+            server.send_message(msg)
+            server.quit()
+            return True
+        except Exception as e:
+            print(f"Erro ao enviar convite de pessoa importante: {e}")
+            return False
+
 
 def processar_agendamentos():
     """Verifica agendamentos pendentes e envia mensagens"""

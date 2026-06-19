@@ -6,6 +6,7 @@ import base64
 import mimetypes
 import re
 import unicodedata
+from urllib.parse import quote
 from datetime import datetime
 import secrets
 from utils.banco import BancoDados
@@ -25,6 +26,7 @@ from utils.logger import logger
 from utils.storage import StorageAeterna
 from utils.mercado_pago_service import MercadoPagoService
 from utils.media import exibir_foto_segura, exibir_video_seguro
+from utils.email_service import EmailService
 
 # ============================================================================
 # CONFIGURAÇÃO DA PÁGINA
@@ -1845,17 +1847,23 @@ def render_contatos():
     max_prioridades = plano.get("max_prioridades", 3) if plano else 3
     contatos = db.listar_contatos_usuario(usuario_id)
 
-    st.markdown(
-        """
-        <div class="ae-people-hero">
-            <div>
-                <h2>👥 Pessoas Importantes</h2>
-                <p>As pessoas que fazem parte da sua história.</p>
+    cab_col, acao_col = st.columns([0.72, 0.28], vertical_alignment="center")
+    with cab_col:
+        st.markdown(
+            """
+            <div class="ae-people-hero">
+                <div>
+                    <h2>👥 Pessoas Importantes</h2>
+                    <p>As pessoas que fazem parte da sua história.</p>
+                </div>
             </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+            """,
+            unsafe_allow_html=True,
+        )
+    with acao_col:
+        if st.button("＋ Adicionar Pessoa", key="abrir_adicionar_pessoa_topo", type="primary", use_container_width=True):
+            st.session_state.abrir_form_contato = True
+            st.rerun()
 
     if st.session_state.get("contato_salvo_msg"):
         st.success(st.session_state.contato_salvo_msg)
@@ -1935,7 +1943,7 @@ def render_contatos():
                 else:
                     chave_acesso = "" if contato_origem_sugestao else secrets.token_hex(8)
 
-                    db.adicionar_contato(
+                    contato_id_criado = db.adicionar_contato(
                         usuario_id=st.session_state.usuario_atual["id"],
                         nome=nome,
                         sobrenome=sobrenome,
@@ -1949,6 +1957,24 @@ def render_contatos():
                         acesso_central_luto=0 if contato_origem_sugestao else (1 if acesso_central_luto else 0),
                         chave_acesso=chave_acesso,
                     )
+
+                    if email:
+                        nome_usuario = (
+                            f"{st.session_state.usuario_atual.get('nome', '')} "
+                            f"{st.session_state.usuario_atual.get('sobrenome', '')}"
+                        ).strip() or "Alguém"
+                        convite_enviado = EmailService().enviar_convite_pessoa_importante(
+                            destinatario_email=email,
+                            nome_destinatario=f"{nome} {sobrenome}".strip(),
+                            nome_usuario=nome_usuario,
+                        )
+                        db.registrar_convite_pessoa(
+                            usuario_id=usuario_id,
+                            contato_id=contato_id_criado,
+                            nome_destinatario=f"{nome} {sobrenome}".strip(),
+                            email_destinatario=email,
+                            status="enviado" if convite_enviado else "aguardando_configuracao",
+                        )
 
                     st.session_state.contato_salvo_msg = f"✅ {nome} {sobrenome} adicionado!"
                     st.session_state.contato_chave_msg = (
@@ -2041,6 +2067,45 @@ def render_contatos():
     except Exception as exc:
         print("Erro ao sincronizar sugestões de pessoas:", exc)
         sugestoes_pessoas = sugestoes_detectadas[:3]
+
+    sugestoes_por_nome = {
+        sugestao.get("nome_normalizado") or normalizar_nome_pessoa(sugestao.get("nome", "")): sugestao
+        for sugestao in sugestoes_pessoas
+    }
+    acao_adicionar = st.query_params.get("adicionar_pessoa")
+    acao_ignorar = st.query_params.get("ignorar_pessoa")
+    if isinstance(acao_adicionar, list):
+        acao_adicionar = acao_adicionar[0] if acao_adicionar else None
+    if isinstance(acao_ignorar, list):
+        acao_ignorar = acao_ignorar[0] if acao_ignorar else None
+
+    if acao_adicionar and acao_adicionar in sugestoes_por_nome:
+        sugestao = sugestoes_por_nome[acao_adicionar]
+        nome_sugerido = sugestao["nome"]
+        partes_nome = nome_sugerido.split()
+        st.session_state.contato_prefill_nome = partes_nome[0] if partes_nome else nome_sugerido
+        st.session_state.contato_prefill_sobrenome = " ".join(partes_nome[1:])
+        st.session_state.contato_prefill_normalizado = sugestao.get("nome_normalizado") or normalizar_nome_pessoa(nome_sugerido)
+        st.session_state.contato_prefill_origem = "sugestao"
+        st.session_state.contato_nome_cadastro = partes_nome[0] if partes_nome else nome_sugerido
+        st.session_state.contato_sobrenome_cadastro = " ".join(partes_nome[1:])
+        st.session_state.abrir_form_contato = True
+        st.query_params.clear()
+        st.rerun()
+
+    if acao_ignorar and acao_ignorar in sugestoes_por_nome:
+        sugestao = sugestoes_por_nome[acao_ignorar]
+        db.atualizar_status_pessoa_sugerida(
+            usuario_id,
+            sugestao.get("nome_normalizado") or normalizar_nome_pessoa(sugestao.get("nome", "")),
+            "ignorada",
+            nome_sugerido=sugestao.get("nome", ""),
+            score=int(sugestao.get("score") or 0),
+            origem=sugestao.get("origem") or "",
+        )
+        st.query_params.clear()
+        st.rerun()
+
     ranking = sorted(
         (
             (contato, presencas.get(contato["id"], 0))
@@ -2052,58 +2117,39 @@ def render_contatos():
     )
     if ranking or sugestoes_pessoas:
         top_html = "".join(
-            f"<span>{html.escape(contato.get('nome_completo') or contato.get('nome') or 'Pessoa')} apareceu em {total} histórias</span>"
+            f"<span class='ae-person-chip'>👥 {html.escape(contato.get('nome') or contato.get('nome_completo') or 'Pessoa')} • {total} histórias</span>"
             for contato, total in ranking[:3]
+        )
+        sugestoes_html = "".join(
+            (
+                "<span class='ae-suggestion-chip'>"
+                f"<a title='Nome encontrado repetidamente nas suas histórias. Clique para adicionar como Pessoa Importante.' "
+                f"href='?adicionar_pessoa={quote(sugestao.get('nome_normalizado') or normalizar_nome_pessoa(sugestao.get('nome', '')))}'>"
+                f"⭐ {html.escape(sugestao.get('nome', 'Pessoa'))}</a>"
+                f"<a class='ae-chip-x' title='Ignorar sugestão' "
+                f"href='?ignorar_pessoa={quote(sugestao.get('nome_normalizado') or normalizar_nome_pessoa(sugestao.get('nome', '')))}'>×</a>"
+                "</span>"
+            )
+            for sugestao in sugestoes_pessoas
         )
         st.markdown(
             f"""
             <div class="ae-people-presentes">
+                <span class="ae-people-info">ⓘ</span>
                 <strong>Pessoas mais presentes nas suas histórias</strong>
-                <div>{top_html}</div>
+                <div>{top_html}{sugestoes_html}</div>
+                <p>⭐ Sugestões encontradas automaticamente nas suas histórias. Clique no nome para adicionar.</p>
             </div>
             """,
             unsafe_allow_html=True,
         )
-        if sugestoes_pessoas:
-            colunas_sugestoes = st.columns(min(3, len(sugestoes_pessoas)))
-            for indice, sugestao in enumerate(sugestoes_pessoas):
-                nome_sugerido = sugestao["nome"]
-                partes_nome = nome_sugerido.split()
-                with colunas_sugestoes[indice]:
-                    chip_col, ignorar_col = st.columns([0.78, 0.22])
-                    with chip_col:
-                        if st.button(
-                            f"⭐ {nome_sugerido}",
-                            key=f"sugestao_chip_{normalizar_nome_pessoa(nome_sugerido).replace(' ', '_')}",
-                            help="Nome identificado nas suas histórias. Clique para adicionar como Pessoa Importante.",
-                        ):
-                            st.session_state.contato_prefill_nome = partes_nome[0] if partes_nome else nome_sugerido
-                            st.session_state.contato_prefill_sobrenome = " ".join(partes_nome[1:])
-                            st.session_state.contato_prefill_normalizado = sugestao.get("nome_normalizado") or normalizar_nome_pessoa(nome_sugerido)
-                            st.session_state.contato_prefill_origem = "sugestao"
-                            st.session_state.contato_nome_cadastro = partes_nome[0] if partes_nome else nome_sugerido
-                            st.session_state.contato_sobrenome_cadastro = " ".join(partes_nome[1:])
-                            st.session_state.abrir_form_contato = True
-                            st.rerun()
-                    with ignorar_col:
-                        if st.button(
-                            "✕",
-                            key=f"ignorar_sugestao_{normalizar_nome_pessoa(nome_sugerido).replace(' ', '_')}",
-                            help=f"Ignorar {nome_sugerido}",
-                        ):
-                            db.atualizar_status_pessoa_sugerida(
-                                usuario_id,
-                                sugestao.get("nome_normalizado") or normalizar_nome_pessoa(nome_sugerido),
-                                "ignorada",
-                                nome_sugerido=nome_sugerido,
-                                score=int(sugestao.get("score") or 0),
-                                origem=sugestao.get("origem") or "",
-                            )
-                            st.rerun()
 
-    st.markdown('<div class="ae-people-grid-title">Todas as pessoas importantes</div>', unsafe_allow_html=True)
-    for inicio in range(0, len(contatos), 3):
-        colunas = st.columns(3)
+    st.markdown(
+        '<div class="ae-people-grid-heading"><h3>Sua rede de pessoas</h3><span>Ver todas ›</span></div>',
+        unsafe_allow_html=True,
+    )
+    for inicio in range(0, len(contatos), 5):
+        colunas = st.columns(5)
         for indice, coluna in enumerate(colunas):
             posicao = inicio + indice
             if posicao >= len(contatos):
@@ -2112,15 +2158,28 @@ def render_contatos():
             nome_exibido = contato.get("nome_completo") or contato.get("nome") or "Pessoa"
             inicial = html.escape(nome_exibido[:1].upper() or "P")
             relacao = contato.get("parentesco") or "Relação importante"
+            historias_contato = presencas.get(contato["id"], 0)
+            indicadores_card = []
+            indicadores_card.append(f"👥 {historias_contato} histórias")
+            if contato.get("acesso_central_luto"):
+                indicadores_card.append("🔓 acesso ativo")
+            elif contato.get("email"):
+                indicadores_card.append("✉ convidada")
+            if contato.get("is_prioridade"):
+                indicadores_card.append("⭐ prioridade")
+            indicadores_html = "".join(f"<span>{html.escape(item)}</span>" for item in indicadores_card[:3])
             with coluna:
                 st.markdown(
                     f"""
                     <div class="ae-important-person-card">
+                        <div class="ae-card-menu">⋮</div>
                         <div class="ae-important-avatar">{inicial}</div>
-                        <h3>{html.escape(nome_exibido)} {'⭐' if contato.get('is_prioridade') else ''}</h3>
+                        <h3>{html.escape(nome_exibido)}</h3>
                         <strong>{html.escape(relacao)}</strong>
-                        <p>{html.escape(contexto_pessoa(contato))}</p>
-                        <div class="ae-important-indicators">{indicadores_pessoa(contato)}</div>
+                        <div class="ae-card-divider"></div>
+                        <p>Presente em {historias_contato} histórias</p>
+                        <div class="ae-important-indicators">{indicadores_html}</div>
+                        <div class="ae-relation-button">Ver relação</div>
                     </div>
                     """,
                     unsafe_allow_html=True,
@@ -2142,6 +2201,44 @@ def render_contatos():
                     if st.button(f"🗑️ Remover", key=f"del_contato_{contato['id']}"):
                         db.deletar_contato(contato['id'], st.session_state.usuario_atual['id'])
                         st.rerun()
+
+    try:
+        convites = db.listar_convites_pessoas(usuario_id, limite=4)
+    except Exception as exc:
+        print("Erro ao listar convites de pessoas:", exc)
+        convites = []
+
+    if convites:
+        itens_convite = []
+        for convite in convites:
+            nome_convite = html.escape(convite.get("nome") or "Pessoa")
+            inicial_convite = html.escape((convite.get("nome") or "P")[:1].upper())
+            status_convite = convite.get("status") or "enviado"
+            status_label = "Enviado" if status_convite == "enviado" else "Aguardando cadastro"
+            data_envio = str(convite.get("criado_em") or "")[:10]
+            itens_convite.append(
+                f"""
+                <div class="ae-invite-row">
+                    <div class="ae-invite-avatar">{inicial_convite}</div>
+                    <div>
+                        <strong>{nome_convite}</strong>
+                        <span>Convite enviado em {html.escape(data_envio)}</span>
+                    </div>
+                    <em>{html.escape(status_label)}</em>
+                    <b>⋮</b>
+                </div>
+                """
+            )
+
+        st.markdown(
+            f"""
+            <div class="ae-invites-panel">
+                <div class="ae-people-grid-heading"><h3>Convites enviados</h3><span>Ver todos ›</span></div>
+                <div class="ae-invites-grid">{''.join(itens_convite)}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
 
 # ============================================================================

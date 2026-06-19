@@ -810,35 +810,74 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-people-presentes {
-    background: rgba(255,255,255,0.66);
-    border: 1px solid rgba(212,168,79,0.20);
-    border-radius: 16px;
-    padding: 0.72rem 0.85rem;
-    margin: 0.65rem 0 0.85rem;
-    box-shadow: 0 8px 20px rgba(43,23,71,0.05);
+    position: relative;
+    background: rgba(255,255,255,0.82);
+    border: 1px solid rgba(212,168,79,0.18);
+    border-radius: 14px;
+    padding: 1.05rem 1.15rem 0.85rem;
+    margin: 0.9rem 0 1.05rem;
+    box-shadow: 0 12px 30px rgba(43,23,71,0.055);
 }
 
 .ae-people-presentes strong {
     color: #2B1747;
     display: block;
-    font-size: 0.9rem;
-    margin-bottom: 0.45rem;
+    font-size: 1.04rem;
+    margin-bottom: 0.7rem;
+}
+
+.ae-people-info {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    color: #6F6478;
+    font-size: 1rem;
 }
 
 .ae-people-presentes div {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.42rem;
+    gap: 0.55rem 0.8rem;
+    align-items: center;
 }
 
 .ae-people-presentes span {
-    background: rgba(247,243,234,0.92);
-    border: 1px solid rgba(212,168,79,0.20);
+    background: rgba(255,255,255,0.76);
+    border: 1px solid rgba(104,72,164,0.24);
     border-radius: 999px;
-    color: #5F536B;
-    font-size: 0.72rem;
-    font-weight: 800;
-    padding: 0.2rem 0.52rem;
+    color: #2B1747;
+    font-size: 0.84rem;
+    font-weight: 900;
+    padding: 0.42rem 0.85rem;
+}
+
+.ae-people-presentes .ae-suggestion-chip {
+    background: rgba(255,248,231,0.82);
+    border-color: rgba(242,181,16,0.45);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.42rem;
+    padding: 0.36rem 0.55rem 0.36rem 0.75rem;
+}
+
+.ae-suggestion-chip a {
+    color: #9A5A00 !important;
+    text-decoration: none !important;
+    font-weight: 950;
+}
+
+.ae-suggestion-chip .ae-chip-x {
+    color: #9A5A00 !important;
+    opacity: 0.78;
+    font-size: 0.95rem;
+    line-height: 1;
+    padding: 0 0.18rem;
+}
+
+.ae-people-presentes p {
+    color: #6F6478;
+    margin: 0.75rem 0 0;
+    font-size: 0.82rem;
 }
 
 .ae-people-grid-title {
@@ -848,35 +887,67 @@ button[data-baseweb="tab"][aria-selected="true"] {
     margin: 0.55rem 0 0.35rem;
 }
 
+.ae-people-grid-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0.75rem 0 0.7rem;
+}
+
+.ae-people-grid-heading h3 {
+    color: #2B1747;
+    font-size: 1.08rem;
+    font-weight: 950;
+    margin: 0;
+}
+
+.ae-people-grid-heading span {
+    color: #2B1747;
+    font-weight: 900;
+    font-size: 0.82rem;
+}
+
 .ae-important-person-card {
-    height: 214px;
+    position: relative;
+    min-height: 285px;
     background: rgba(255,255,255,0.94);
     border: 1px solid rgba(212,168,79,0.22);
-    border-radius: 16px;
-    padding: 0.85rem;
+    border-radius: 12px;
+    padding: 0.9rem 0.8rem 0.75rem;
     box-shadow: 0 10px 26px rgba(43,23,71,0.06);
     overflow: hidden;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.65rem;
 }
 
 .ae-important-avatar {
-    width: 38px;
-    height: 38px;
+    width: 76px;
+    height: 76px;
     border-radius: 999px;
     background: linear-gradient(135deg, rgba(212,168,79,0.30), rgba(43,23,71,0.10));
-    color: #2B1747;
+    color: #6848A4;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 950;
-    margin-bottom: 0.45rem;
+    font-size: 1.55rem;
+    margin: 0 auto 0.65rem;
+}
+
+.ae-card-menu {
+    position: absolute;
+    right: 0.7rem;
+    top: 0.55rem;
+    color: #1B0F2E;
+    font-size: 1.15rem;
+    font-weight: 900;
 }
 
 .ae-important-person-card h3 {
     color: #2B1747;
-    font-size: 1rem;
+    font-size: 1.02rem;
     line-height: 1.18;
     margin: 0 0 0.18rem;
+    text-align: left;
     display: -webkit-box;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
@@ -884,52 +955,116 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-important-person-card strong {
-    color: #B77A46;
+    color: #4A2E8C;
     display: block;
     font-size: 0.78rem;
-    margin-bottom: 0.32rem;
+    margin-bottom: 0.55rem;
+}
+
+.ae-card-divider {
+    height: 1px;
+    background: rgba(212,168,79,0.20);
+    margin: 0.35rem 0 0.55rem;
 }
 
 .ae-important-person-card p {
     color: #5F536B;
     font-size: 0.76rem;
     line-height: 1.32;
-    margin: 0;
-    min-height: 2.55em;
+    margin: 0 0 0.35rem;
+    min-height: auto;
 }
 
 .ae-important-indicators {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem;
-    margin-top: 0.72rem;
+    flex-direction: column;
+    gap: 0.24rem;
+    margin-top: 0.3rem;
 }
 
 .ae-important-indicators span {
     color: #6F6478;
-    background: rgba(247,243,234,0.92);
-    border: 1px solid rgba(212,168,79,0.18);
-    border-radius: 999px;
-    padding: 0.12rem 0.36rem;
-    font-size: 0.62rem;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    font-size: 0.74rem;
     font-weight: 800;
 }
 
-.ae-people-presentes + div [data-testid="stButton"] button {
-    background: rgba(247,243,234,0.92) !important;
-    border: 1px solid rgba(212,168,79,0.26) !important;
-    border-radius: 999px !important;
-    color: #5F536B !important;
-    font-size: 0.72rem !important;
-    font-weight: 900 !important;
-    min-height: 1.7rem !important;
-    padding: 0.16rem 0.55rem !important;
-    box-shadow: none !important;
+.ae-relation-button {
+    position: absolute;
+    left: 0.8rem;
+    right: 0.8rem;
+    bottom: 0.75rem;
+    border: 1px solid rgba(104,72,164,0.28);
+    border-radius: 8px;
+    color: #2B1747;
+    font-weight: 950;
+    font-size: 0.82rem;
+    text-align: center;
+    padding: 0.48rem 0.6rem;
+    background: rgba(255,255,255,0.68);
 }
 
-.ae-people-presentes + div [data-testid="stButton"] button:hover {
-    border-color: rgba(212,168,79,0.55) !important;
-    transform: translateY(-1px);
+.ae-invites-panel {
+    background: rgba(255,255,255,0.80);
+    border: 1px solid rgba(212,168,79,0.18);
+    border-radius: 14px;
+    padding: 0.8rem 0.9rem 0.9rem;
+    margin: 0.45rem 0 0.7rem;
+    box-shadow: 0 12px 30px rgba(43,23,71,0.055);
+}
+
+.ae-invites-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem;
+}
+
+.ae-invite-row {
+    display: grid;
+    grid-template-columns: 44px 1fr auto 20px;
+    align-items: center;
+    gap: 0.65rem;
+    border: 1px solid rgba(212,168,79,0.18);
+    border-radius: 10px;
+    padding: 0.55rem 0.65rem;
+    background: rgba(255,255,255,0.72);
+}
+
+.ae-invite-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+    background: rgba(104,72,164,0.14);
+    color: #6848A4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 950;
+}
+
+.ae-invite-row strong {
+    display: block;
+    color: #2B1747;
+    font-size: 0.86rem;
+}
+
+.ae-invite-row span {
+    display: block;
+    color: #6F6478;
+    font-size: 0.72rem;
+}
+
+.ae-invite-row em {
+    color: #1E5E9C;
+    background: rgba(213,230,250,0.72);
+    border-radius: 7px;
+    padding: 0.22rem 0.45rem;
+    font-style: normal;
+    font-size: 0.68rem;
+    font-weight: 900;
 }
 
 .ae-shared-card span {
