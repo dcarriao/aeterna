@@ -2105,44 +2105,46 @@ def render_contatos():
         )
         if sugestoes_pessoas:
             st.markdown('<div class="ae-suggestion-buttons-anchor"></div>', unsafe_allow_html=True)
-            sugestao_cols = st.columns(len(sugestoes_pessoas))
+            pesos_sugestoes = []
+            for _ in sugestoes_pessoas:
+                pesos_sugestoes.extend([1.2, 0.32])
+            pesos_sugestoes.append(8)
+            sugestao_cols = st.columns(pesos_sugestoes)
             for indice, sugestao in enumerate(sugestoes_pessoas):
                 nome_sugerido = sugestao.get("nome", "Pessoa")
                 partes_nome = nome_sugerido.split()
                 nome_normalizado = sugestao.get("nome_normalizado") or normalizar_nome_pessoa(nome_sugerido)
-                with sugestao_cols[indice]:
-                    nome_col, x_col = st.columns([0.82, 0.18])
-                    with nome_col:
-                        if st.button(
-                            f"⭐ {nome_sugerido}",
-                            key=f"add_sugestao_{nome_normalizado}",
-                            help="Nome encontrado repetidamente nas suas histórias. Clique para adicionar como Pessoa Importante.",
-                            use_container_width=True,
-                        ):
-                            st.session_state.contato_prefill_nome = partes_nome[0] if partes_nome else nome_sugerido
-                            st.session_state.contato_prefill_sobrenome = " ".join(partes_nome[1:])
-                            st.session_state.contato_prefill_normalizado = nome_normalizado
-                            st.session_state.contato_prefill_origem = "sugestao"
-                            st.session_state.contato_nome_cadastro = partes_nome[0] if partes_nome else nome_sugerido
-                            st.session_state.contato_sobrenome_cadastro = " ".join(partes_nome[1:])
-                            st.session_state.abrir_form_contato = True
-                            st.rerun()
-                    with x_col:
-                        if st.button(
-                            "×",
-                            key=f"ignore_sugestao_{nome_normalizado}",
-                            help=f"Ignorar {nome_sugerido}",
-                            use_container_width=True,
-                        ):
-                            db.atualizar_status_pessoa_sugerida(
-                                usuario_id,
-                                nome_normalizado,
-                                "ignorada",
-                                nome_sugerido=nome_sugerido,
-                                score=int(sugestao.get("score") or 0),
-                                origem=sugestao.get("origem") or "",
-                            )
-                            st.rerun()
+                with sugestao_cols[indice * 2]:
+                    if st.button(
+                        f"⭐ {nome_sugerido}",
+                        key=f"add_sugestao_{nome_normalizado}",
+                        help="Nome encontrado repetidamente nas suas histórias. Clique para adicionar como Pessoa Importante.",
+                        use_container_width=True,
+                    ):
+                        st.session_state.contato_prefill_nome = partes_nome[0] if partes_nome else nome_sugerido
+                        st.session_state.contato_prefill_sobrenome = " ".join(partes_nome[1:])
+                        st.session_state.contato_prefill_normalizado = nome_normalizado
+                        st.session_state.contato_prefill_origem = "sugestao"
+                        st.session_state.contato_nome_cadastro = partes_nome[0] if partes_nome else nome_sugerido
+                        st.session_state.contato_sobrenome_cadastro = " ".join(partes_nome[1:])
+                        st.session_state.abrir_form_contato = True
+                        st.rerun()
+                with sugestao_cols[indice * 2 + 1]:
+                    if st.button(
+                        "×",
+                        key=f"ignore_sugestao_{nome_normalizado}",
+                        help=f"Ignorar {nome_sugerido}",
+                        use_container_width=True,
+                    ):
+                        db.atualizar_status_pessoa_sugerida(
+                            usuario_id,
+                            nome_normalizado,
+                            "ignorada",
+                            nome_sugerido=nome_sugerido,
+                            score=int(sugestao.get("score") or 0),
+                            origem=sugestao.get("origem") or "",
+                        )
+                        st.rerun()
 
     st.markdown(
         '<div class="ae-people-grid-heading"><div>Sua rede de pessoas</div><span>Ver todas ›</span></div>',
@@ -2179,11 +2181,15 @@ def render_contatos():
                         <div class="ae-card-divider"></div>
                         <p>Presente em {historias_contato} histórias</p>
                         <div class="ae-important-indicators">{indicadores_html}</div>
-                        <div class="ae-relation-cta">Ver relação</div>
                     </div>
                     """,
                     unsafe_allow_html=True,
                 )
+                if st.button("Ver relação", key=f"ver_relacao_{contato['id']}", use_container_width=True):
+                    chave_relacao = f"mostrar_relacao_{contato['id']}"
+                    st.session_state[chave_relacao] = not st.session_state.get(chave_relacao, False)
+                if st.session_state.get(f"mostrar_relacao_{contato['id']}", False):
+                    st.caption(f"Relação: {relacao} · Histórias: {historias_contato}")
     try:
         convites = db.listar_convites_pessoas(usuario_id, limite=4)
     except Exception as exc:
