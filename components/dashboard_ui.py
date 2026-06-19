@@ -783,8 +783,8 @@ div[data-testid="stPopover"] {
     border-radius: 16px;
     padding: 0.55rem;
     box-shadow: 0 12px 30px rgba(43,23,71,0.06);
-    height: 176px;
-    min-height: 176px;
+    height: 214px;
+    min-height: 214px;
     margin-bottom: 0.35rem;
     overflow: hidden;
 }
@@ -814,7 +814,7 @@ div[data-testid="stPopover"] {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.34rem;
-    height: 124px;
+    height: 162px;
     align-items: stretch;
 }
 
