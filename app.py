@@ -2110,27 +2110,28 @@ def render_contatos():
         reverse=True,
     )
     if ranking or sugestoes_pessoas:
-        top_html = "".join(
-            f"<span class='ae-person-chip'>👥 {html.escape(contato.get('nome') or contato.get('nome_completo') or 'Pessoa')} • {total} histórias</span>"
-            for contato, total in ranking[:3]
-        )
         with st.container(key="ae_people_presentes_panel"):
             st.markdown(
-                f"""
+                """
                 <div class="ae-people-presentes-head">
                     <strong>Pessoas mais presentes nas suas histórias</strong>
-                    <div class="ae-people-ranking-chips">{top_html}</div>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
+            chips_cols = st.columns([1.42, 1.42, 1, 1, 1, 1, 1.2], gap="small")
+            for indice, (contato, total) in enumerate(ranking[:2]):
+                nome_chip = contato.get("nome") or contato.get("nome_completo") or "Pessoa"
+                with chips_cols[indice]:
+                    st.markdown(
+                        f"<div class='ae-person-chip ae-person-chip-static'>👥 {html.escape(nome_chip)} • {total} histórias</div>",
+                        unsafe_allow_html=True,
+                    )
             if sugestoes_pessoas:
-                st.markdown('<div class="ae-suggestion-buttons-anchor"></div>', unsafe_allow_html=True)
-                sugestao_cols = st.columns([1, 1, 1, 1, 3], gap="small")
                 for indice, sugestao in enumerate(sugestoes_pessoas[:4]):
                     nome_sugerido = sugestao.get("nome", "Pessoa")
                     nome_normalizado = sugestao.get("nome_normalizado") or normalizar_nome_pessoa(nome_sugerido)
-                    with sugestao_cols[indice]:
+                    with chips_cols[indice + 2]:
                         if st.button(
                             f"⭐ {nome_sugerido}",
                             key=f"add_sugestao_{nome_normalizado}",
@@ -3265,6 +3266,12 @@ def render_contribuicoes_pendentes(usuario_dono_id: int):
 
 def navegar_para(pagina: str):
     st.session_state.pagina_atual = pagina
+    if pagina == "pessoas":
+        st.session_state.pop("abrir_form_contato", None)
+        st.session_state.pop("contato_prefill_nome", None)
+        st.session_state.pop("contato_prefill_sobrenome", None)
+        st.session_state.pop("contato_prefill_normalizado", None)
+        st.session_state.pop("contato_prefill_origem", None)
     selecionar_minha_historia()
 
 

@@ -858,14 +858,20 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-people-presentes span,
-.ae-people-ranking-chips span {
+.ae-people-ranking-chips span,
+.ae-person-chip-static {
     background: rgba(255,255,255,0.76);
     border: 1px solid rgba(104,72,164,0.24);
     border-radius: 999px;
     color: #2B1747;
     font-size: 0.84rem;
     font-weight: 900;
-    padding: 0.42rem 0.85rem;
+    padding: 0.46rem 0.85rem;
+    min-height: 2.32rem;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
 }
 
 .ae-people-presentes .ae-suggestion-chip {
@@ -1048,27 +1054,17 @@ button[data-baseweb="tab"][aria-selected="true"] {
     cursor: default;
 }
 
-.st-key-ae_people_presentes_panel .ae-suggestion-buttons-anchor + div [data-testid="stButton"] button {
-    min-height: 1.78rem !important;
+.st-key-ae_people_presentes_panel [data-testid="stButton"] button {
+    min-height: 2.32rem !important;
     border-radius: 999px !important;
     background: rgba(255,248,231,0.92) !important;
     border: 1px solid rgba(242,181,16,0.45) !important;
     color: #9A5A00 !important;
-    font-size: 0.70rem !important;
+    font-size: 0.84rem !important;
     font-weight: 950 !important;
-    padding: 0.18rem 0.48rem !important;
+    padding: 0.28rem 0.7rem !important;
     box-shadow: none !important;
     white-space: nowrap !important;
-}
-
-.st-key-ae_people_presentes_panel .ae-suggestion-buttons-anchor + div [data-testid="stHorizontalBlock"] [data-testid="column"] button[kind="secondary"] {
-    margin-top: 0 !important;
-}
-
-.st-key-ae_people_presentes_panel .ae-suggestion-buttons-anchor + div [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(2n) button {
-    padding-left: 0.2rem !important;
-    padding-right: 0.2rem !important;
-    opacity: 0.78;
 }
 
 .ae-invites-panel {
