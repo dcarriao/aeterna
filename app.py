@@ -449,7 +449,9 @@ def render_editor_visibilidade(
         conteudo: dict,
         usuario_id: int,
         contatos: list,
+        key_contexto: str = "",
 ):
+    sufixo_key = f"_{key_contexto}" if key_contexto else ""
     visibilidade_atual = conteudo.get("visibilidade") or "contatos"
     st.caption(ROTULOS_VISIBILIDADE.get(visibilidade_atual, "👥 Todos os meus contatos"))
 
@@ -460,7 +462,7 @@ def render_editor_visibilidade(
             opcoes,
             index=opcoes.index(visibilidade_atual),
             format_func=lambda valor: ROTULOS_VISIBILIDADE[valor],
-            key=f"vis_{tipo_conteudo}_{conteudo['id']}",
+            key=f"vis_{tipo_conteudo}_{conteudo['id']}{sufixo_key}",
         )
 
         contatos_atuais = db.listar_contatos_permitidos_conteudo(
@@ -481,12 +483,12 @@ def render_editor_visibilidade(
                     nome for nome, contato_id in mapa_contatos.items()
                     if contato_id in contatos_atuais
                 ],
-                key=f"contatos_vis_{tipo_conteudo}_{conteudo['id']}",
+                key=f"contatos_vis_{tipo_conteudo}_{conteudo['id']}{sufixo_key}",
             )
 
         if st.button(
             "Salvar visibilidade",
-            key=f"salvar_vis_{tipo_conteudo}_{conteudo['id']}",
+            key=f"salvar_vis_{tipo_conteudo}_{conteudo['id']}{sufixo_key}",
             use_container_width=True,
         ):
             contatos_ids = [
@@ -644,7 +646,7 @@ def render_minha_historia():
         )
         st.markdown(card_html, unsafe_allow_html=True)
 
-    def render_detalhes_memoria(memoria: dict):
+    def render_detalhes_memoria(memoria: dict, key_contexto: str):
         if memoria.get("data_evento"):
             st.markdown(f"**Data:** {memoria['data_evento']}")
         if memoria.get("local"):
@@ -653,7 +655,13 @@ def render_minha_historia():
             st.markdown(f"**Pessoas:** {memoria['pessoas_relacionadas']}")
 
         st.markdown(memoria.get("conteudo", ""))
-        render_editor_visibilidade("memoria", memoria, usuario_id, contatos)
+        render_editor_visibilidade(
+            "memoria",
+            memoria,
+            usuario_id,
+            contatos,
+            key_contexto=key_contexto,
+        )
         render_contribuicoes_aprovadas(
             contribuicoes_por_memoria.get(memoria["id"], [])
         )
@@ -676,11 +684,16 @@ def render_minha_historia():
                     legenda=video.get("titulo", ""),
                 )
 
-    def render_acesso_historia(memoria: dict):
+    def render_acesso_historia(memoria: dict, key_contexto: str):
         with st.popover("Ler história", use_container_width=False):
-            render_detalhes_memoria(memoria)
+            render_detalhes_memoria(memoria, key_contexto)
 
-    def render_prateleira(itens: list, categoria_nome: str, quantidade_colunas: int = 4):
+    def render_prateleira(
+            itens: list,
+            categoria_nome: str,
+            contexto: str,
+            quantidade_colunas: int = 4,
+    ):
         for inicio in range(0, len(itens), quantidade_colunas):
             colunas = st.columns(quantidade_colunas)
             for indice, coluna in enumerate(colunas):
@@ -688,9 +701,10 @@ def render_minha_historia():
                 if posicao >= len(itens):
                     continue
                 memoria = itens[posicao]
+                key_contexto = f"{contexto}_{posicao}_{memoria['id']}"
                 with coluna:
                     render_card_memoria(memoria, categoria_nome)
-                    render_acesso_historia(memoria)
+                    render_acesso_historia(memoria, key_contexto)
 
     def nome_categoria(categoria: str) -> str:
         categoria_normalizada = (categoria or "livre").lower()
@@ -718,7 +732,12 @@ def render_minha_historia():
         }.get(categoria_normalizada, "📚")
 
     st.markdown('<div class="ae-story-section-title">Continue sua história</div>', unsafe_allow_html=True)
-    render_prateleira(memorias[:4], "Continue", quantidade_colunas=4)
+    render_prateleira(
+        memorias[:4],
+        "Continue",
+        contexto="continue",
+        quantidade_colunas=4,
+    )
 
     grupos = {}
     for memoria in memorias:
@@ -740,7 +759,12 @@ def render_minha_historia():
         mostrar_todas_chave = f"minha_historia_mostrar_todas_{categoria_chave}"
         limite = len(itens) if st.session_state.get(mostrar_todas_chave) else 4
 
-        render_prateleira(itens[:limite], categoria_nome, quantidade_colunas=4)
+        render_prateleira(
+            itens[:limite],
+            categoria_nome,
+            contexto=f"colecao_{categoria_chave}",
+            quantidade_colunas=4,
+        )
 
         if len(itens) > 4 and not st.session_state.get(mostrar_todas_chave):
             if st.button(
