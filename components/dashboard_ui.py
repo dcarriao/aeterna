@@ -11,12 +11,13 @@ def aplicar_css_dashboard():
         linear-gradient(180deg, #F7F3EA 0%, #f5efe5 100%);
 }
 
-.block-container {
-    padding-top: 0.2rem !important;
+.block-container,
+[data-testid="stMainBlockContainer"] {
+    padding-top: 0 !important;
     padding-bottom: 0.65rem !important;
-    max-width: 1320px !important;
-    width: calc(100vw - 245px) !important;
-    margin-left: clamp(1.25rem, 2.4vw, 3.1rem) !important;
+    max-width: 1540px !important;
+    width: calc(100vw - 285px) !important;
+    margin-left: clamp(1.25rem, 2.3vw, 3rem) !important;
     margin-right: auto !important;
     padding-left: 0 !important;
     padding-right: 0 !important;
@@ -541,7 +542,8 @@ button[data-baseweb="tab"][aria-selected="true"] {
     border: 0;
     border-radius: 0;
     padding: 0;
-    margin-bottom: 0.1rem;
+    margin-top: -2rem;
+    margin-bottom: 0;
     box-shadow: none;
 }
 
