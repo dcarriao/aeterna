@@ -2,6 +2,8 @@ import streamlit as st
 from PIL import Image
 import os
 import html
+import base64
+import mimetypes
 from datetime import datetime
 import secrets
 from utils.banco import BancoDados
@@ -507,48 +509,46 @@ def render_editor_visibilidade(
 
 
 def render_minha_historia():
-    st.markdown(
-        """
-        <div class="ae-story-top">
-            <div>
+    memorias = db.listar_memorias_usuario(st.session_state.usuario_atual["id"])
+    usuario_id = st.session_state.usuario_atual["id"]
+
+    col_header, col_acao = st.columns([0.72, 0.28], vertical_alignment="center")
+    with col_header:
+        st.markdown(
+            """
+            <div class="ae-story-top">
                 <h2>📖 Minha História</h2>
                 <p>As histórias que você escolheu preservar.</p>
             </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    memorias = db.listar_memorias_usuario(st.session_state.usuario_atual["id"])
-    usuario_id = st.session_state.usuario_atual["id"]
+            """,
+            unsafe_allow_html=True,
+        )
+    with col_acao:
+        rotulo_cta = (
+            "➕ Contar uma História"
+            if memorias
+            else "➕ Contar minha primeira história"
+        )
+        if st.button(
+            rotulo_cta,
+            key="minha_historia_contar_historia",
+            use_container_width=True,
+            type="primary",
+        ):
+            navegar_para("assistente")
+            st.rerun()
 
     if not memorias:
         st.markdown(
             """
             <div class="ae-empty-story">
                 <h3>📖 Sua história começa com o primeiro capítulo.</h3>
+                <p>Quando você registrar a primeira lembrança, ela aparecerá aqui como o primeiro capítulo da sua coleção viva.</p>
             </div>
             """,
             unsafe_allow_html=True,
         )
-        if st.button(
-            "➕ Contar minha primeira história",
-            key="minha_historia_primeiro_momento",
-            use_container_width=True,
-            type="primary",
-        ):
-            navegar_para("assistente")
-            st.rerun()
         return
-
-    if st.button(
-        "➕ Contar uma História",
-        key="minha_historia_contar_historia",
-        use_container_width=True,
-        type="primary",
-    ):
-        navegar_para("assistente")
-        st.rerun()
 
     fotos_por_memoria = db.listar_fotos_por_memorias_usuario(usuario_id)
     videos_por_memoria = db.listar_videos_por_memorias_usuario(usuario_id)
@@ -563,15 +563,88 @@ def render_minha_historia():
             return "Uma história preservada na sua coleção."
         return conteudo[:145].rsplit(" ", 1)[0] + ("..." if len(conteudo) > 145 else "")
 
+    def imagem_local_para_data_uri(caminho: str) -> str:
+        try:
+            if not caminho or not os.path.exists(caminho):
+                return ""
+            mime_type = mimetypes.guess_type(caminho)[0] or "image/jpeg"
+            with open(caminho, "rb") as arquivo:
+                encoded = base64.b64encode(arquivo.read()).decode("ascii")
+            return f"data:{mime_type};base64,{encoded}"
+        except Exception as exc:
+            print("Erro ao preparar miniatura local:", exc)
+            return ""
+
+    def media_card_memoria(memoria: dict) -> str:
+        fotos = fotos_por_memoria.get(memoria["id"], [])
+        videos = videos_por_memoria.get(memoria["id"], [])
+
+        if fotos:
+            caminho_foto = (fotos[0].get("caminho") or "").strip()
+            imagem_src = caminho_foto if caminho_foto.startswith(("http://", "https://")) else imagem_local_para_data_uri(caminho_foto)
+            if imagem_src:
+                return f"""
+                <div class="ae-story-media ae-story-media-photo">
+                    <img
+                        src="{html.escape(imagem_src, quote=True)}"
+                        alt="Miniatura da história"
+                        onerror="this.style.display='none';this.nextElementSibling.style.display='block';"
+                    >
+                    <div class="ae-story-media-photo-fallback">
+                        <span>📖</span>
+                        <strong>História preservada</strong>
+                    </div>
+                </div>
+                """
+
+        if videos:
+            return """
+            <div class="ae-story-media ae-story-media-video">
+                <span>🎥</span>
+                <strong>Vídeo preservado</strong>
+            </div>
+            """
+
+        return """
+        <div class="ae-story-media ae-story-media-fallback">
+            <span>📖</span>
+            <strong>História preservada</strong>
+        </div>
+        """
+
+    def indicadores_memoria(memoria: dict) -> str:
+        indicadores = []
+        visibilidade = (memoria.get("visibilidade") or "contatos").lower()
+        if visibilidade == "privado":
+            indicadores.append("🔒 Privada")
+        elif visibilidade == "seletivo":
+            indicadores.append("👥 Seletiva")
+        else:
+            indicadores.append("🤝 Compartilhada")
+
+        total_contribuicoes = len(
+            contribuicoes_por_memoria.get(memoria["id"], [])
+        )
+        if total_contribuicoes:
+            indicadores.append(f"💬 {total_contribuicoes} contribuição")
+
+        return "".join(
+            f"<span>{html.escape(indicador)}</span>" for indicador in indicadores
+        )
+
     def render_card_memoria(memoria: dict, categoria: str):
         data_evento = memoria.get("data_evento") or ""
         st.markdown(
             f"""
             <div class="ae-story-card">
+                {media_card_memoria(memoria)}
+                <div class="ae-story-body">
                 <div class="ae-card-label">{html.escape(categoria)}</div>
                 <h3>📖 {html.escape(memoria.get("titulo") or "História sem título")}</h3>
-                <span>{html.escape(str(data_evento))}</span>
+                <span class="ae-story-date">{html.escape(str(data_evento))}</span>
                 <p>{html.escape(resumo_memoria(memoria))}</p>
+                <div class="ae-story-indicators">{indicadores_memoria(memoria)}</div>
+                </div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -609,6 +682,22 @@ def render_minha_historia():
                     legenda=video.get("titulo", ""),
                 )
 
+    def render_acesso_historia(memoria: dict):
+        with st.popover("Ler história", use_container_width=False):
+            render_detalhes_memoria(memoria)
+
+    def render_prateleira(itens: list, categoria_nome: str, quantidade_colunas: int = 4):
+        for inicio in range(0, len(itens), quantidade_colunas):
+            colunas = st.columns(quantidade_colunas)
+            for indice, coluna in enumerate(colunas):
+                posicao = inicio + indice
+                if posicao >= len(itens):
+                    continue
+                memoria = itens[posicao]
+                with coluna:
+                    render_card_memoria(memoria, categoria_nome)
+                    render_acesso_historia(memoria)
+
     def nome_categoria(categoria: str) -> str:
         categoria_normalizada = (categoria or "livre").lower()
         return {
@@ -634,48 +723,38 @@ def render_minha_historia():
             "livre": "📚",
         }.get(categoria_normalizada, "📚")
 
-    st.markdown("### Continue sua história")
-    colunas_recentes = st.columns(min(3, len(memorias)))
-    for indice, memoria in enumerate(memorias[:3]):
-        with colunas_recentes[indice]:
-            render_card_memoria(memoria, "Continue")
-            with st.expander("Abrir história", expanded=False):
-                render_detalhes_memoria(memoria)
+    st.markdown('<div class="ae-story-section-title">Continue sua história</div>', unsafe_allow_html=True)
+    render_prateleira(memorias[:4], "Continue", quantidade_colunas=4)
 
     grupos = {}
     for memoria in memorias:
         categoria = memoria.get("categoria") or "livre"
         grupos.setdefault(categoria, []).append(memoria)
 
-    st.markdown("### Coleções")
+    st.markdown('<div class="ae-story-section-title">Coleções</div>', unsafe_allow_html=True)
     for categoria, itens in grupos.items():
         categoria_nome = nome_categoria(categoria)
-        st.markdown(f"#### {icone_categoria(categoria)} {categoria_nome}")
+        st.markdown(
+            f'<div class="ae-story-shelf-title">{icone_categoria(categoria)} {html.escape(categoria_nome)}</div>',
+            unsafe_allow_html=True,
+        )
         categoria_identificador = f"{categoria_nome}_{categoria or 'livre'}"
         categoria_chave = "".join(
             caractere if caractere.isalnum() else "_"
             for caractere in categoria_identificador.lower()
         )
         mostrar_todas_chave = f"minha_historia_mostrar_todas_{categoria_chave}"
+        limite = len(itens) if st.session_state.get(mostrar_todas_chave) else 4
 
-        for memoria in itens[:3]:
-            render_card_memoria(memoria, categoria_nome)
-            with st.expander("Abrir história", expanded=False):
-                render_detalhes_memoria(memoria)
+        render_prateleira(itens[:limite], categoria_nome, quantidade_colunas=4)
 
-        if len(itens) > 3 and not st.session_state.get(mostrar_todas_chave):
+        if len(itens) > 4 and not st.session_state.get(mostrar_todas_chave):
             if st.button(
                 "Ver todas",
                 key=f"botao_{mostrar_todas_chave}",
                 use_container_width=True,
             ):
                 st.session_state[mostrar_todas_chave] = True
-
-        if st.session_state.get(mostrar_todas_chave):
-            for memoria in itens[3:]:
-                render_card_memoria(memoria, categoria_nome)
-                with st.expander("Abrir história", expanded=False):
-                    render_detalhes_memoria(memoria)
 
 
 # ============================================================================
