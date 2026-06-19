@@ -4,6 +4,7 @@ import os
 import html
 import base64
 import mimetypes
+import json
 import re
 import unicodedata
 from datetime import datetime
@@ -1706,6 +1707,11 @@ PALAVRAS_IGNORADAS_PESSOAS = {
     "memórias", "primeiro", "primeira", "vida", "emprego", "fortaleza", "canoas",
     "cambara", "cambará", "sul", "alegre", "rio", "grande", "brasil", "portugal",
     "argentina", "uruguai", "paris", "lisboa",
+    "ela", "ele", "eles", "elas", "eu", "nos", "nós", "voce", "você", "voces", "vocês",
+    "meu", "minha", "meus", "minhas", "seu", "sua", "seus", "suas", "nosso", "nossa",
+    "sao", "são", "santa", "santo", "paulo", "cambará do sul", "canela", "porto",
+    "porto alegre", "rio grande do sul", "fotos", "videos", "vídeos", "foi", "fomos",
+    "era", "estava", "estavam", "tinha", "fizemos", "conhecemos", "visitamos",
 }
 
 PALAVRAS_IGNORADAS_EXIBICAO = [
@@ -1722,6 +1728,38 @@ def normalizar_nome_pessoa(valor: str) -> str:
     return texto
 
 
+def chave_config_sugestoes_pessoas(usuario_id: int) -> str:
+    return f"pessoas_sugestoes_estado_usuario_{usuario_id}"
+
+
+def carregar_estado_sugestoes_pessoas(usuario_id: int) -> dict:
+    estado_padrao = {"ignoradas": [], "aceitas": []}
+    try:
+        bruto = db.obter_config(chave_config_sugestoes_pessoas(usuario_id))
+        if not bruto:
+            return estado_padrao
+        estado = json.loads(bruto)
+        if not isinstance(estado, dict):
+            return estado_padrao
+        return {
+            "ignoradas": list(estado.get("ignoradas") or []),
+            "aceitas": list(estado.get("aceitas") or []),
+        }
+    except Exception as exc:
+        print("Erro ao carregar estado de sugestões de pessoas:", exc)
+        return estado_padrao
+
+
+def salvar_estado_sugestoes_pessoas(usuario_id: int, estado: dict):
+    try:
+        db.salvar_config(
+            chave_config_sugestoes_pessoas(usuario_id),
+            json.dumps(estado, ensure_ascii=False),
+        )
+    except Exception as exc:
+        print("Erro ao salvar estado de sugestões de pessoas:", exc)
+
+
 def textos_memoria_para_sugestao(memoria: dict) -> str:
     campos = [
         memoria.get("titulo"),
@@ -1735,7 +1773,7 @@ def textos_memoria_para_sugestao(memoria: dict) -> str:
     return " ".join(str(campo or "") for campo in campos)
 
 
-def extrair_pessoas_encontradas(memorias: list, contatos: list) -> list:
+def extrair_pessoas_encontradas(memorias: list, contatos: list, ignoradas_usuario: set = None) -> list:
     nomes_contatos = set()
     for contato in contatos:
         for campo in ("nome_completo", "nome"):
@@ -1744,6 +1782,7 @@ def extrair_pessoas_encontradas(memorias: list, contatos: list) -> list:
                 nomes_contatos.add(nome)
 
     ignoradas = {normalizar_nome_pessoa(item) for item in PALAVRAS_IGNORADAS_PESSOAS}
+    ignoradas_usuario = {normalizar_nome_pessoa(item) for item in (ignoradas_usuario or set())}
     contexto_pessoal = {
         "filha", "filho", "irma", "irmã", "irmao", "irmão", "mae", "mãe", "pai",
         "esposa", "marido", "sobrinha", "sobrinho", "prima", "primo", "amiga",
@@ -1755,87 +1794,88 @@ def extrair_pessoas_encontradas(memorias: list, contatos: list) -> list:
         "alegre do rio grande", "alice ela", "alice joao pessoa", "alice joão pessoa",
         "canyons gauchos", "canyons gaúchos",
     }
+    possessivos = {"meu", "minha", "meus", "minhas", "seu", "sua", "seus", "suas", "nosso", "nossa"}
     conectores = {"de", "da", "do", "das", "dos", "e"}
     sugestoes = {}
+
+    def candidato_valido(candidato: str) -> bool:
+        candidato_norm = normalizar_nome_pessoa(candidato)
+        palavras_nome = [p for p in candidato_norm.split() if p not in conectores]
+        if not candidato_norm or candidato_norm in ignoradas or candidato_norm in ignoradas_usuario:
+            return False
+        if candidato_norm in bloqueios_exatos:
+            return False
+        if candidato_norm in nomes_contatos or any(candidato_norm == nome.split()[0] for nome in nomes_contatos if nome):
+            return False
+        if any(parte in ignoradas or parte in contexto_pessoal for parte in palavras_nome):
+            return False
+        if len(palavras_nome) > 2:
+            return False
+        if len(palavras_nome) == 1 and len(palavras_nome[0]) < 3:
+            return False
+        return bool(re.match(r"^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]", candidato))
+
+    def registrar_candidato(candidato: str, memoria: dict, score: int, forte: bool = False):
+        candidato = re.sub(r"\s+", " ", candidato).strip()
+        if not candidato_valido(candidato):
+            return
+        chave = normalizar_nome_pessoa(candidato)
+        registro = sugestoes.setdefault(
+            chave,
+            {
+                "nome": candidato,
+                "memorias_ids": set(),
+                "historias": [],
+                "score": 0,
+                "forte": False,
+                "ocorrencias": 0,
+            },
+        )
+        registro["memorias_ids"].add(memoria.get("id"))
+        registro["historias"].append(memoria.get("titulo") or "História sem título")
+        registro["score"] += score
+        registro["forte"] = registro["forte"] or forte
+        registro["ocorrencias"] += 1
 
     for memoria in memorias:
         texto = textos_memoria_para_sugestao(memoria)
         tokens = re.findall(r"\b[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]?[a-záàâãéêíóôõúç]{2,}\b", texto)
-        candidatos_memoria = set()
 
         for indice, token in enumerate(tokens[:-1]):
             token_norm = normalizar_nome_pessoa(token)
             if token_norm not in contexto_pessoal:
                 continue
 
-            partes = []
-            posicao = indice + 1
-            while posicao < len(tokens) and len([p for p in partes if normalizar_nome_pessoa(p) not in conectores]) < 2:
-                palavra = tokens[posicao]
-                palavra_norm = normalizar_nome_pessoa(palavra)
-                if palavra_norm in conectores and partes:
-                    break
-                if not re.match(r"^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]", palavra):
-                    break
-                partes.append(palavra)
-                posicao += 1
+            nome = tokens[indice + 1]
+            if re.match(r"^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]", nome):
+                anterior = normalizar_nome_pessoa(tokens[indice - 1]) if indice > 0 else ""
+                score = 5
+                if anterior in possessivos:
+                    score += 5
+                registrar_candidato(nome, memoria, score, forte=True)
 
-            candidato = re.sub(r"\s+", " ", " ".join(partes)).strip()
-            candidato_norm = normalizar_nome_pessoa(candidato)
-            palavras_nome = [p for p in candidato_norm.split() if p not in conectores]
-
-            if not candidato_norm or candidato_norm in ignoradas or candidato_norm in bloqueios_exatos:
-                continue
-            if any(parte in ignoradas for parte in palavras_nome):
-                continue
-            if any(parte in contexto_pessoal for parte in palavras_nome):
-                continue
-            if candidato_norm in nomes_contatos or any(candidato_norm == nome.split()[0] for nome in nomes_contatos if nome):
-                continue
-            if len(palavras_nome) == 1 and len(palavras_nome[0]) < 3:
-                continue
-            if len(palavras_nome) > 2:
-                continue
-
-            candidatos_memoria.add(candidato)
-
-        candidatos_completos = {
-            normalizar_nome_pessoa(candidato)
-            for candidato in candidatos_memoria
-            if len(normalizar_nome_pessoa(candidato).split()) > 1
-        }
-
-        for candidato in candidatos_memoria:
-            chave = normalizar_nome_pessoa(candidato)
-            if len(chave.split()) == 1 and any(chave in completo.split() for completo in candidatos_completos):
-                continue
-            registro = sugestoes.setdefault(
-                chave,
-                {
-                    "nome": candidato,
-                    "memorias_ids": set(),
-                    "historias": [],
-                },
-            )
-            registro["memorias_ids"].add(memoria.get("id"))
-            registro["historias"].append(memoria.get("titulo") or "História sem título")
+        for candidato in re.findall(r"\b[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ][a-záàâãéêíóôõúç]{2,}\b", texto):
+            registrar_candidato(candidato, memoria, 2, forte=False)
 
     resultado = []
     for item in sugestoes.values():
         item["quantidade"] = len(item["memorias_ids"])
         item["historias"] = list(dict.fromkeys(item["historias"]))[:5]
-        resultado.append(item)
+        if item["forte"] or item["ocorrencias"] >= 2 or item["quantidade"] >= 2:
+            resultado.append(item)
 
-    return sorted(resultado, key=lambda sugestao: (-sugestao["quantidade"], sugestao["nome"]))[:3]
+    return sorted(resultado, key=lambda sugestao: (-sugestao["score"], -sugestao["quantidade"], sugestao["nome"]))[:3]
 
 
 def render_contatos():
-    plano = db.obter_plano_usuario(st.session_state.usuario_atual['id'])
-    contatos_atual = db.contar_contatos_usuario(st.session_state.usuario_atual['id'])
+    usuario_id = st.session_state.usuario_atual['id']
+    plano = db.obter_plano_usuario(usuario_id)
+    contatos_atual = db.contar_contatos_usuario(usuario_id)
     max_contatos = plano.get("max_contatos", 10) if plano else 10
-    prioridades_atual = db.contar_contatos_prioritarios(st.session_state.usuario_atual['id'])
+    prioridades_atual = db.contar_contatos_prioritarios(usuario_id)
     max_prioridades = plano.get("max_prioridades", 3) if plano else 3
-    contatos = db.listar_contatos_usuario(st.session_state.usuario_atual['id'])
+    contatos = db.listar_contatos_usuario(usuario_id)
+    estado_sugestoes = carregar_estado_sugestoes_pessoas(usuario_id)
 
     st.markdown(
         """
@@ -1861,9 +1901,6 @@ def render_contatos():
     contato_prefill_nome = st.session_state.get("contato_prefill_nome", "")
     contato_prefill_sobrenome = st.session_state.get("contato_prefill_sobrenome", "")
     contato_origem_sugestao = st.session_state.get("contato_prefill_origem") == "sugestao"
-    if contato_origem_sugestao:
-        st.session_state["contato_nome_cadastro"] = contato_prefill_nome
-        st.session_state["contato_sobrenome_cadastro"] = contato_prefill_sobrenome
 
     with st.expander("➕ Adicionar Pessoa Importante", expanded=bool(st.session_state.get("abrir_form_contato"))):
         with st.form("form_adicionar_contato", clear_on_submit=True):
@@ -1951,6 +1988,11 @@ def render_contatos():
                         if contato_origem_sugestao
                         else f"🔑 Chave de acesso: {chave_acesso}"
                     )
+                    if contato_origem_sugestao:
+                        aceitas = set(estado_sugestoes.get("aceitas") or [])
+                        aceitas.add(normalizar_nome_pessoa(f"{nome} {sobrenome}"))
+                        estado_sugestoes["aceitas"] = sorted(aceitas)
+                        salvar_estado_sugestoes_pessoas(usuario_id, estado_sugestoes)
                     st.session_state.pop("contato_prefill_nome", None)
                     st.session_state.pop("contato_prefill_sobrenome", None)
                     st.session_state.pop("contato_prefill_origem", None)
@@ -2020,7 +2062,8 @@ def render_contatos():
             st.info("Abra o bloco “Adicionar Pessoa Importante” acima para começar.")
         return
 
-    sugestoes_pessoas = extrair_pessoas_encontradas(memorias_usuario, contatos)
+    nomes_ocultos = set(estado_sugestoes.get("ignoradas") or []) | set(estado_sugestoes.get("aceitas") or [])
+    sugestoes_pessoas = extrair_pessoas_encontradas(memorias_usuario, contatos, nomes_ocultos)
     ranking = sorted(
         (
             (contato, presencas.get(contato["id"], 0))
@@ -2050,16 +2093,31 @@ def render_contatos():
                 nome_sugerido = sugestao["nome"]
                 partes_nome = nome_sugerido.split()
                 with colunas_sugestoes[indice]:
-                    if st.button(
-                        f"⭐ {nome_sugerido}",
-                        key=f"sugestao_chip_{normalizar_nome_pessoa(nome_sugerido).replace(' ', '_')}",
-                        help="Nome identificado nas suas histórias. Clique para adicionar como Pessoa Importante.",
-                    ):
-                        st.session_state.contato_prefill_nome = partes_nome[0] if partes_nome else nome_sugerido
-                        st.session_state.contato_prefill_sobrenome = " ".join(partes_nome[1:])
-                        st.session_state.contato_prefill_origem = "sugestao"
-                        st.session_state.abrir_form_contato = True
-                        st.rerun()
+                    chip_col, ignorar_col = st.columns([0.78, 0.22])
+                    with chip_col:
+                        if st.button(
+                            f"⭐ {nome_sugerido}",
+                            key=f"sugestao_chip_{normalizar_nome_pessoa(nome_sugerido).replace(' ', '_')}",
+                            help="Nome identificado nas suas histórias. Clique para adicionar como Pessoa Importante.",
+                        ):
+                            st.session_state.contato_prefill_nome = partes_nome[0] if partes_nome else nome_sugerido
+                            st.session_state.contato_prefill_sobrenome = " ".join(partes_nome[1:])
+                            st.session_state.contato_prefill_origem = "sugestao"
+                            st.session_state.contato_nome_cadastro = partes_nome[0] if partes_nome else nome_sugerido
+                            st.session_state.contato_sobrenome_cadastro = " ".join(partes_nome[1:])
+                            st.session_state.abrir_form_contato = True
+                            st.rerun()
+                    with ignorar_col:
+                        if st.button(
+                            "✕",
+                            key=f"ignorar_sugestao_{normalizar_nome_pessoa(nome_sugerido).replace(' ', '_')}",
+                            help=f"Ignorar {nome_sugerido}",
+                        ):
+                            ignoradas = set(estado_sugestoes.get("ignoradas") or [])
+                            ignoradas.add(normalizar_nome_pessoa(nome_sugerido))
+                            estado_sugestoes["ignoradas"] = sorted(ignoradas)
+                            salvar_estado_sugestoes_pessoas(usuario_id, estado_sugestoes)
+                            st.rerun()
 
     st.markdown('<div class="ae-people-grid-title">Todas as pessoas importantes</div>', unsafe_allow_html=True)
     for inicio in range(0, len(contatos), 3):

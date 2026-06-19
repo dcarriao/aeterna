@@ -2806,7 +2806,12 @@ class BancoDados:
     def salvar_config(self, chave: str, valor: str):
         conn = self.conectar()
         cursor = conn.cursor()
-        self.executar(cursor, 'INSERT OR REPLACE INTO configuracoes (chave, valor) VALUES (?, ?)', (chave, valor))
+        self.executar(cursor, 'SELECT chave FROM configuracoes WHERE chave = ?', (chave,))
+        existe = cursor.fetchone()
+        if existe:
+            self.executar(cursor, 'UPDATE configuracoes SET valor = ? WHERE chave = ?', (valor, chave))
+        else:
+            self.executar(cursor, 'INSERT INTO configuracoes (chave, valor) VALUES (?, ?)', (chave, valor))
         conn.commit()
         conn.close()
 
