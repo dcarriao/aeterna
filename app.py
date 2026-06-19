@@ -4,6 +4,8 @@ import os
 import html
 import base64
 import mimetypes
+import re
+import unicodedata
 from datetime import datetime
 import secrets
 from utils.banco import BancoDados
@@ -1694,6 +1696,125 @@ def render_fotos_visitante(contato_id=None, nome_pessoa=None):
 # ============================================================================
 # CONTATOS (COMPLETO)
 # ============================================================================
+
+PALAVRAS_IGNORADAS_PESSOAS = {
+    "familia", "família", "viagem", "viagens", "canyons", "canyon", "gauchos", "gaúchos",
+    "sao paulo", "são paulo", "joao pessoa", "joão pessoa", "gramado", "natal", "carnaval",
+    "segunda", "domingo", "janeiro", "fevereiro", "marco", "março", "abril", "maio",
+    "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro",
+    "historia", "história", "historias", "histórias", "memoria", "memória", "memorias",
+    "memórias", "primeiro", "primeira", "vida", "emprego", "fortaleza", "canoas",
+}
+
+PALAVRAS_IGNORADAS_EXIBICAO = [
+    "Família", "Viagem", "Canyons", "São Paulo", "João Pessoa", "Gramado", "Natal",
+    "Carnaval", "Segunda", "Domingo", "Janeiro", "Fevereiro", "Março", "Abril",
+    "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+]
+
+
+def normalizar_nome_pessoa(valor: str) -> str:
+    texto = unicodedata.normalize("NFD", str(valor or ""))
+    texto = "".join(ch for ch in texto if unicodedata.category(ch) != "Mn")
+    texto = re.sub(r"\s+", " ", texto.lower()).strip()
+    return texto
+
+
+def textos_memoria_para_sugestao(memoria: dict) -> str:
+    campos = [
+        memoria.get("titulo"),
+        memoria.get("conteudo"),
+        memoria.get("pessoas_relacionadas"),
+        memoria.get("local"),
+        memoria.get("resumo"),
+        memoria.get("descricao"),
+        memoria.get("transcricao"),
+    ]
+    return " ".join(str(campo or "") for campo in campos)
+
+
+def extrair_pessoas_encontradas(memorias: list, contatos: list) -> list:
+    nomes_contatos = set()
+    for contato in contatos:
+        for campo in ("nome_completo", "nome"):
+            nome = normalizar_nome_pessoa(contato.get(campo))
+            if nome:
+                nomes_contatos.add(nome)
+
+    ignoradas = {normalizar_nome_pessoa(item) for item in PALAVRAS_IGNORADAS_PESSOAS}
+    conectores = {"de", "da", "do", "das", "dos", "e"}
+    sugestoes = {}
+
+    for memoria in memorias:
+        texto = textos_memoria_para_sugestao(memoria)
+        tokens = re.findall(r"\b[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ][a-záàâãéêíóôõúç]{1,}(?:'[A-Za-z]+)?|\b(?:de|da|do|das|dos|e)\b", texto)
+        candidatos_memoria = set()
+
+        for indice, token in enumerate(tokens):
+            if normalizar_nome_pessoa(token) in conectores:
+                continue
+
+            partes = [token]
+            posicao = indice + 1
+            while posicao < len(tokens) and len([p for p in partes if normalizar_nome_pessoa(p) not in conectores]) < 3:
+                proximo = tokens[posicao]
+                proximo_norm = normalizar_nome_pessoa(proximo)
+                if proximo_norm in conectores:
+                    if posicao + 1 < len(tokens):
+                        partes.append(proximo)
+                        posicao += 1
+                        continue
+                    break
+                if not re.match(r"^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]", proximo):
+                    break
+                partes.append(proximo)
+                posicao += 1
+
+            candidato = re.sub(r"\s+", " ", " ".join(partes)).strip()
+            candidato_norm = normalizar_nome_pessoa(candidato)
+            palavras_nome = [p for p in candidato_norm.split() if p not in conectores]
+
+            if not candidato_norm or candidato_norm in ignoradas:
+                continue
+            if any(parte in ignoradas for parte in palavras_nome):
+                continue
+            if candidato_norm in nomes_contatos or any(candidato_norm == nome.split()[0] for nome in nomes_contatos if nome):
+                continue
+            if len(palavras_nome) == 1 and len(palavras_nome[0]) < 3:
+                continue
+
+            candidatos_memoria.add(candidato)
+
+        candidatos_completos = {
+            normalizar_nome_pessoa(candidato)
+            for candidato in candidatos_memoria
+            if len(normalizar_nome_pessoa(candidato).split()) > 1
+        }
+
+        for candidato in candidatos_memoria:
+            chave = normalizar_nome_pessoa(candidato)
+            if len(chave.split()) == 1 and any(chave in completo.split() for completo in candidatos_completos):
+                continue
+            registro = sugestoes.setdefault(
+                chave,
+                {
+                    "nome": candidato,
+                    "memorias_ids": set(),
+                    "historias": [],
+                },
+            )
+            registro["memorias_ids"].add(memoria.get("id"))
+            registro["historias"].append(memoria.get("titulo") or "História sem título")
+
+    resultado = []
+    for item in sugestoes.values():
+        item["quantidade"] = len(item["memorias_ids"])
+        item["historias"] = list(dict.fromkeys(item["historias"]))[:5]
+        resultado.append(item)
+
+    return sorted(resultado, key=lambda sugestao: (-sugestao["quantidade"], sugestao["nome"]))[:6]
+
+
 def render_contatos():
     plano = db.obter_plano_usuario(st.session_state.usuario_atual['id'])
     contatos_atual = db.contar_contatos_usuario(st.session_state.usuario_atual['id'])
@@ -1851,6 +1972,118 @@ def render_contatos():
             itens.append("🤝 pessoa importante")
         return "".join(f"<span>{html.escape(item)}</span>" for item in itens[:3])
 
+    def render_sugestoes_pessoas_encontradas():
+        sugestoes = extrair_pessoas_encontradas(memorias_usuario, contatos)
+
+        st.markdown(
+            """
+            <div class="ae-found-people-header">
+                <h3>🔎 Pessoas encontradas nas suas histórias</h3>
+                <p>Encontramos nomes que aparecem nas suas histórias e que talvez sejam pessoas importantes para você.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        if not sugestoes:
+            st.markdown(
+                """
+                <div class="ae-found-people-empty">
+                    Quando nomes aparecerem nas suas histórias, eles poderão aparecer aqui como sugestões.
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            return
+
+        for inicio in range(0, len(sugestoes), 3):
+            colunas_sugestoes = st.columns(3)
+            for indice, coluna in enumerate(colunas_sugestoes):
+                posicao = inicio + indice
+                if posicao >= len(sugestoes):
+                    continue
+
+                sugestao = sugestoes[posicao]
+                nome_sugerido = sugestao["nome"]
+                quantidade = sugestao["quantidade"]
+                inicial = html.escape(nome_sugerido[:1].upper() or "P")
+                chave_sugestao = re.sub(r"[^a-z0-9_]+", "_", normalizar_nome_pessoa(nome_sugerido))
+
+                with coluna:
+                    st.markdown(
+                        f"""
+                        <div class="ae-found-person-card">
+                            <div class="ae-important-avatar">{inicial}</div>
+                            <h3>{html.escape(nome_sugerido)}</h3>
+                            <strong>Possível pessoa encontrada</strong>
+                            <p>Aparece em {quantidade} {'história' if quantidade == 1 else 'histórias'}.</p>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+
+                    with st.expander(f"Ver histórias relacionadas a {nome_sugerido}", expanded=False):
+                        for titulo_historia in sugestao["historias"]:
+                            st.markdown(f"- {html.escape(titulo_historia)}")
+
+                    with st.expander(f"Adicionar {nome_sugerido} como pessoa importante", expanded=False):
+                        partes_nome = nome_sugerido.split()
+                        nome_padrao = partes_nome[0] if partes_nome else nome_sugerido
+                        sobrenome_padrao = " ".join(partes_nome[1:])
+
+                        with st.form(f"form_sugestao_pessoa_{chave_sugestao}", clear_on_submit=False):
+                            nome_form = st.text_input("Nome", value=nome_padrao, key=f"nome_sug_{chave_sugestao}")
+                            sobrenome_form = st.text_input("Sobrenome", value=sobrenome_padrao, key=f"sobrenome_sug_{chave_sugestao}")
+                            relacao_form = st.selectbox(
+                                "Relação",
+                                ["Outro", "Filha", "Filho", "Mãe", "Pai", "Irmã", "Irmão", "Cônjuge", "Amiga", "Amigo"],
+                                key=f"relacao_sug_{chave_sugestao}",
+                            )
+                            email_form = st.text_input("Email opcional", key=f"email_sug_{chave_sugestao}")
+                            telefone_form = st.text_input("Telefone opcional", key=f"telefone_sug_{chave_sugestao}")
+                            st.markdown("**Essa pessoa pode acessar a aEterna no futuro?**")
+                            acesso_futuro = st.radio(
+                                "Escolha com calma",
+                                [
+                                    "Sim, ela pode receber acesso quando eu quiser",
+                                    "Não, quero apenas registrar essa pessoa nas minhas histórias",
+                                    "Não tenho certeza",
+                                ],
+                                key=f"acesso_futuro_sug_{chave_sugestao}",
+                                label_visibility="collapsed",
+                            )
+                            st.caption(
+                                "Isso não envia convite, não cria login, não compartilha histórias e não muda permissões agora."
+                            )
+                            adicionar = st.form_submit_button("Adicionar como pessoa importante", type="primary")
+
+                            if adicionar:
+                                if contatos_atual >= max_contatos:
+                                    st.warning(f"Você atingiu o limite de {max_contatos} pessoas importantes do seu plano.")
+                                elif not nome_form.strip():
+                                    st.error("Informe pelo menos o nome.")
+                                else:
+                                    db.adicionar_contato(
+                                        usuario_id=st.session_state.usuario_atual["id"],
+                                        nome=nome_form.strip(),
+                                        sobrenome=sobrenome_form.strip(),
+                                        email=email_form.strip(),
+                                        telefone=telefone_form.strip(),
+                                        whatsapp="",
+                                        parentesco=relacao_form,
+                                        data_nascimento="",
+                                        is_prioridade=0,
+                                        prioridade_order=0,
+                                        acesso_central_luto=0,
+                                        chave_acesso="",
+                                    )
+                                    st.session_state.contato_salvo_msg = f"✅ {nome_form.strip()} adicionado como pessoa importante."
+                                    st.session_state.contato_chave_msg = (
+                                        "Nenhum acesso foi liberado automaticamente. "
+                                        f"Escolha registrada na tela: {acesso_futuro}."
+                                    )
+                                    st.rerun()
+
     if not contatos:
         st.markdown(
             """
@@ -1863,6 +2096,7 @@ def render_contatos():
         )
         if st.button("➕ Adicionar minha primeira pessoa", key="primeira_pessoa", use_container_width=False):
             st.info("Abra o bloco “Adicionar Pessoa Importante” acima para começar.")
+        render_sugestoes_pessoas_encontradas()
         return
 
     ranking = sorted(
@@ -1930,6 +2164,8 @@ def render_contatos():
                     if st.button(f"🗑️ Remover", key=f"del_contato_{contato['id']}"):
                         db.deletar_contato(contato['id'], st.session_state.usuario_atual['id'])
                         st.rerun()
+
+    render_sugestoes_pessoas_encontradas()
 
 
 # ============================================================================
