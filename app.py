@@ -1883,7 +1883,8 @@ def render_contatos():
     if contato_prefill_sobrenome and not st.session_state.get("contato_sobrenome_cadastro"):
         st.session_state.contato_sobrenome_cadastro = contato_prefill_sobrenome
 
-    with st.expander("➕ Adicionar Pessoa Importante", expanded=bool(st.session_state.get("abrir_form_contato"))):
+    if st.session_state.get("abrir_form_contato"):
+        st.markdown('<div class="ae-inline-person-form">', unsafe_allow_html=True)
         with st.form("form_adicionar_contato", clear_on_submit=True):
             st.markdown("**📝 Nome completo ***")
 
@@ -2019,6 +2020,7 @@ def render_contatos():
                     st.session_state.pop("contato_nome_cadastro", None)
                     st.session_state.pop("contato_sobrenome_cadastro", None)
                     st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
     try:
         memorias_usuario = db.listar_memorias_usuario(st.session_state.usuario_atual["id"])
@@ -2116,7 +2118,6 @@ def render_contatos():
             st.markdown(
                 f"""
                 <div class="ae-people-presentes-head">
-                    <span class="ae-people-info">ⓘ</span>
                     <strong>Pessoas mais presentes nas suas histórias</strong>
                     <div class="ae-people-ranking-chips">{top_html}</div>
                 </div>
@@ -2125,42 +2126,24 @@ def render_contatos():
             )
             if sugestoes_pessoas:
                 st.markdown('<div class="ae-suggestion-buttons-anchor"></div>', unsafe_allow_html=True)
-                sugestao_cols = st.columns([1, 1, 1, 1, 4], gap="small")
+                sugestao_cols = st.columns([1, 1, 1, 1, 3], gap="small")
                 for indice, sugestao in enumerate(sugestoes_pessoas[:4]):
                     nome_sugerido = sugestao.get("nome", "Pessoa")
                     nome_normalizado = sugestao.get("nome_normalizado") or normalizar_nome_pessoa(nome_sugerido)
                     with sugestao_cols[indice]:
-                        col_nome, col_ignorar = st.columns([0.78, 0.22], gap="small")
-                        with col_nome:
-                            if st.button(
-                                f"⭐ {nome_sugerido}",
-                                key=f"add_sugestao_{nome_normalizado}",
-                                help="Adicionar como Pessoa Importante",
-                                use_container_width=True,
-                            ):
-                                partes_nome = nome_sugerido.split()
-                                st.session_state.contato_prefill_nome = partes_nome[0] if partes_nome else nome_sugerido
-                                st.session_state.contato_prefill_sobrenome = " ".join(partes_nome[1:])
-                                st.session_state.contato_prefill_normalizado = nome_normalizado
-                                st.session_state.contato_prefill_origem = "sugestao"
-                                st.session_state.abrir_form_contato = True
-                                st.rerun()
-                        with col_ignorar:
-                            if st.button(
-                                "×",
-                                key=f"ignore_sugestao_{nome_normalizado}",
-                                help=f"Ignorar {nome_sugerido}",
-                                use_container_width=True,
-                            ):
-                                db.atualizar_status_pessoa_sugerida(
-                                    usuario_id,
-                                    nome_normalizado,
-                                    "ignorada",
-                                    nome_sugerido=nome_sugerido,
-                                    score=int(sugestao.get("score") or 0),
-                                    origem=sugestao.get("origem") or "",
-                                )
-                                st.rerun()
+                        if st.button(
+                            f"⭐ {nome_sugerido}",
+                            key=f"add_sugestao_{nome_normalizado}",
+                            help="Adicionar como Pessoa Importante",
+                            use_container_width=True,
+                        ):
+                            partes_nome = nome_sugerido.split()
+                            st.session_state.contato_prefill_nome = partes_nome[0] if partes_nome else nome_sugerido
+                            st.session_state.contato_prefill_sobrenome = " ".join(partes_nome[1:])
+                            st.session_state.contato_prefill_normalizado = nome_normalizado
+                            st.session_state.contato_prefill_origem = "sugestao"
+                            st.session_state.abrir_form_contato = True
+                            st.rerun()
             st.markdown(
                 '<p class="ae-people-suggestion-note">⭐ Sugestões encontradas automaticamente nas suas histórias. Clique no nome para adicionar.</p>',
                 unsafe_allow_html=True,

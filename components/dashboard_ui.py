@@ -814,7 +814,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
     background: rgba(255,255,255,0.82);
     border: 1px solid rgba(212,168,79,0.18);
     border-radius: 14px;
-    padding: 1.05rem 1.15rem 0.85rem;
+    padding: 1.05rem 1.15rem 0.95rem;
     margin: 0.9rem 0 1.05rem;
     box-shadow: 0 12px 30px rgba(43,23,71,0.055);
 }
@@ -846,14 +846,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-people-info {
-    position: absolute;
-    right: 1rem;
-    top: 1rem;
-    background: transparent !important;
-    border: 0 !important;
-    padding: 0 !important;
-    color: #6F6478;
-    font-size: 1rem;
+    display: none !important;
 }
 
 .ae-people-presentes div,
@@ -886,6 +879,15 @@ button[data-baseweb="tab"][aria-selected="true"] {
 
 .ae-people-suggestion-row {
     margin-top: 0.72rem;
+}
+
+.ae-inline-person-form {
+    background: rgba(255,255,255,0.86);
+    border: 1px solid rgba(212,168,79,0.22);
+    border-radius: 14px;
+    padding: 0.85rem 1rem 0.65rem;
+    margin: 0.55rem 0 0.9rem;
+    box-shadow: 0 10px 24px rgba(43,23,71,0.05);
 }
 
 .ae-suggestion-chip a {
