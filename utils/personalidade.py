@@ -11,7 +11,7 @@ PERGUNTAS_PERSONALIDADE = {
     "felicidade": "O que, na sua opinião, torna a vida verdadeiramente feliz?",
     "lembranca_feliz": "Qual é sua lembrança mais feliz com seus entes queridos?",
     "superacao": "Como você superou momentos difíceis na vida? O que aprendeu?",
-    "legado": "Qual legado você quer deixar para o mundo?",
+    "historia": "Que histórias e aprendizados você quer compartilhar com o mundo?",
     "futuro": "O que você deseja para o futuro de quem você ama?"
 }
 

@@ -3,7 +3,7 @@ import streamlit as st
 def render_landing():
     st.markdown("""
     <section class="ae-hero">
-        <div class="ae-title">Seu legado, suas mensagens e seus ensinamentos para quem você ama.</div>
+        <div class="ae-title">Suas histórias, seus momentos e seus aprendizados com quem você ama.</div>
         <div class="ae-subtitle">
             A aEterna ajuda você a preservar memórias, orientações, vídeos, documentos
             e mensagens importantes para que sua história continue presente.

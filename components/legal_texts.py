@@ -5,8 +5,8 @@ TERMOS_USO = """
 
 Bem-vindo à aEterna.
 
-A aEterna é uma plataforma destinada à preservação de memórias, histórias,
-vídeos, documentos, mensagens e legados digitais.
+A aEterna é uma plataforma destinada à organização e compartilhamento privado
+de memórias, histórias, vídeos, documentos e mensagens importantes.
 
 Ao utilizar a plataforma, você concorda com os seguintes termos:
 
@@ -47,7 +47,7 @@ Podemos coletar:
 Finalidades do tratamento:
 
 - Prestação dos serviços contratados
-- Preservação do legado digital
+- Organização de histórias, memórias e mensagens importantes
 - Comunicação com usuários
 - Segurança da plataforma
 - Cumprimento de obrigações legais

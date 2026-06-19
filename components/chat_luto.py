@@ -83,25 +83,25 @@ def render_chat_luto():
     st.markdown('<div class="ae-assistente-page">', unsafe_allow_html=True)
 
     if modo == "memorial":
-        nome_falecido = usuario.get("nome_falecido", "essa pessoa especial")
+        nome_pessoa = usuario.get("nome_falecido", "esta pessoa")
 
         st.markdown("## 💬 Converse com o Assistente de Histórias")
         st.info(
-            f"Explore histórias, valores e momentos compartilhados por {nome_falecido}. "
-            "O assistente usa apenas informações registradas, não inventa fatos "
-            "e não fala como se fosse a pessoa."
+            f"Posso ajudar você a explorar histórias, memórias, fotos, vídeos "
+            f"e aprendizados compartilhados por {nome_pessoa}. "
+            "Uso apenas informações registradas, não invento fatos e não falo como se fosse a pessoa."
         )
 
         st.markdown("""
                     ### 💬 Por onde começar?
 
-                    • Quais histórias {nome_falecido} compartilhou comigo?
+                    • Quais histórias {nome_pessoa} compartilhou comigo?
                     • Quais momentos importantes foram registrados?
                     • Quais fotos ou vídeos estão disponíveis?
                     • O que foi contado sobre família, viagens ou aprendizados?
                     • Existe alguma mensagem compartilhada comigo?
                     • Quais valores aparecem nessas histórias?
-                    """.format(nome_falecido=nome_falecido))
+                    """.format(nome_pessoa=nome_pessoa))
         if not usuario.get("usuario_logado_compartilhado"):
             st.markdown("""
                         ---
@@ -129,13 +129,13 @@ def render_chat_luto():
                 st.session_state.login_mode = "cadastro"
                 st.rerun()
     else:
-        st.markdown("## Assistente de Legado")
+        st.markdown("## Assistente de Histórias")
         st.markdown("""
-            Este espaço existe para ajudar a construir e preservar o seu legado digital.
+            Este espaço existe para ajudar você a registrar histórias, memórias, aprendizados e momentos importantes.
         
             Você pode conversar livremente sobre qualquer assunto que desejar.
         
-            Também posso sugerir temas importantes para registrar histórias, valores, aprendizados, conselhos e lembranças que poderão ajudar sua família e pessoas queridas no futuro.
+            Também posso sugerir temas importantes para organizar suas lembranças e compartilhar com pessoas queridas quando fizer sentido.
             """)
         st.markdown(
             """
@@ -362,7 +362,7 @@ def render_chat_luto():
                             del st.session_state["sugestoes_" + chave_base]
                             del st.session_state["texto_memoria_" + chave_base]
 
-                            st.success("Memória salva no legado.")
+                            st.success("Memória salva na sua história.")
                             st.rerun()
 
 
@@ -491,7 +491,7 @@ def _obter_nome_referencia() -> str:
             or "essa pessoa especial"
         )
 
-    return usuario.get("nome_completo") or "seu legado"
+    return usuario.get("nome_completo") or "sua história"
 
 
 def _inicializar_chat():
@@ -538,7 +538,7 @@ def _inicializar_chat():
             st.session_state.historico_assistente.append({
                 "tipo": "bot",
                 "texto": (
-                    "Olá. Este é o seu Assistente de Legado.\n\n"
-                    "Estou aqui para ajudar a preservar histórias, valores, aprendizados e lembranças importantes da sua vida."
+                    "Olá. Este é o seu Assistente de Histórias.\n\n"
+                    "Estou aqui para ajudar você a registrar histórias, valores, aprendizados e lembranças importantes da sua vida."
                 )
             })

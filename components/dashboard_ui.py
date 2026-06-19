@@ -268,7 +268,10 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-home-card,
-.ae-memory-card {
+.ae-memory-card,
+.ae-activity-card,
+.ae-shared-card,
+.ae-mini-card {
     background: rgba(255,255,255,0.96);
     border-radius: 22px;
     padding: 1.15rem 1.25rem;
@@ -278,7 +281,9 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-home-card h2,
-.ae-memory-card h3 {
+.ae-memory-card h3,
+.ae-activity-card h3,
+.ae-shared-card h3 {
     color: #2B1747;
     margin: 0.28rem 0 0.4rem;
 }
@@ -305,6 +310,62 @@ button[data-baseweb="tab"][aria-selected="true"] {
     color: #7A6D84 !important;
 }
 
+.ae-mini-card {
+    padding: 0.85rem 1rem;
+    border-radius: 18px;
+}
+
+.ae-mini-card strong {
+    color: #2B1747;
+    display: block;
+    margin-bottom: 0.2rem;
+}
+
+.ae-mini-card span {
+    color: #6f6478;
+    font-size: 0.86rem;
+}
+
+.ae-activity-card,
+.ae-shared-card {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.ae-activity-icon,
+.ae-avatar {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(212,168,79,0.24), rgba(43,23,71,0.08));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+}
+
+.ae-activity-card p,
+.ae-shared-card p,
+.ae-shared-card span {
+    color: #5F536B;
+    margin: 0;
+    line-height: 1.45;
+}
+
+.ae-shared-card span {
+    display: inline-block;
+    margin-top: 0.45rem;
+    color: #B77A46;
+    font-weight: 900;
+}
+
+.ae-memory-card {
+    padding: 0.9rem 1rem;
+    margin-top: 0.55rem;
+}
+
 .footer-aeterna {
     text-align: center;
     color: #8a7b95;
@@ -323,8 +384,37 @@ button[data-baseweb="tab"][aria-selected="true"] {
         grid-template-columns: 1fr;
     }
 
-    .ae-dashboard-hero {
+    .ae-dashboard-hero,
+    .ae-home-hero {
         padding: 1.25rem;
+        border-radius: 22px;
+    }
+
+    .ae-home-hero h1 {
+        font-size: 1.55rem;
+    }
+
+    .ae-home-card,
+    .ae-activity-card,
+    .ae-shared-card {
+        padding: 0.95rem;
+        border-radius: 18px;
+    }
+
+    .ae-activity-card,
+    .ae-shared-card {
+        gap: 0.75rem;
+    }
+
+    [data-testid="stSidebar"] .ae-sidebar-brand {
+        margin-bottom: 0.35rem;
+        padding-bottom: 0.35rem;
+    }
+
+    [data-testid="stSidebar"] div.stButton > button {
+        min-height: 2.35rem !important;
+        padding: 0.35rem 0.55rem !important;
+        font-size: 0.9rem !important;
     }
 }
 </style>
