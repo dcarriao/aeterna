@@ -12,9 +12,14 @@ def aplicar_css_dashboard():
 }
 
 .block-container {
-    padding-top: 0.65rem !important;
+    padding-top: 1.35rem !important;
     padding-bottom: 0.65rem !important;
-    max-width: 1200px !important;
+    max-width: 1280px !important;
+    width: calc(100vw - 280px) !important;
+    margin-left: clamp(2.25rem, 4vw, 4.75rem) !important;
+    margin-right: auto !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
 }
 
 /* Sidebar premium */
@@ -873,6 +878,15 @@ div[data-testid="stPopover"] button {
 }
 
 @media (max-width: 1100px) {
+    .block-container {
+        width: auto !important;
+        max-width: 100% !important;
+        margin-left: 1rem !important;
+        margin-right: 1rem !important;
+        padding-left: 0.35rem !important;
+        padding-right: 0.35rem !important;
+    }
+
     .ae-dashboard-grid {
         grid-template-columns: repeat(2, 1fr);
     }
