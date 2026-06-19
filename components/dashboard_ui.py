@@ -783,8 +783,8 @@ div[data-testid="stPopover"] {
     border-radius: 16px;
     padding: 0.55rem;
     box-shadow: 0 12px 30px rgba(43,23,71,0.06);
-    height: 172px;
-    min-height: 172px;
+    height: 196px;
+    min-height: 196px;
     margin-bottom: 0.35rem;
     overflow: hidden;
 }
@@ -794,7 +794,7 @@ div[data-testid="stPopover"] {
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
-    margin-bottom: 0.36rem;
+    margin-bottom: 0.48rem;
 }
 
 .ae-collection-head h3 {
@@ -814,7 +814,7 @@ div[data-testid="stPopover"] {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.34rem;
-    height: 134px;
+    height: 146px;
     align-items: stretch;
 }
 
@@ -823,8 +823,8 @@ div[data-testid="stPopover"] {
     border: 1px solid rgba(212,168,79,0.20);
     border-radius: 10px;
     overflow: hidden;
-    height: 134px;
-    min-height: 134px;
+    height: 146px;
+    min-height: 146px;
     box-shadow: 0 8px 18px rgba(43,23,71,0.06);
 }
 
@@ -834,7 +834,7 @@ div[data-testid="stPopover"] {
 }
 
 .ae-collection-mini-media {
-    height: 62px;
+    height: 68px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -871,7 +871,7 @@ div[data-testid="stPopover"] {
 }
 
 .ae-collection-mini-body {
-    padding: 0.42rem 0.44rem;
+    padding: 0.46rem 0.46rem;
 }
 
 .ae-collection-mini-body strong {
@@ -918,7 +918,7 @@ div[data-testid="stPopover"] {
     text-align: center;
     color: #8a7b95;
     font-size: 0.76rem;
-    padding: 0.75rem 0 0;
+    padding: 0.45rem 0 0;
 }
 
 @media (max-width: 1100px) {
