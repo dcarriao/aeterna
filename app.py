@@ -1863,6 +1863,14 @@ def render_contatos():
         )
     with acao_col:
         if st.button("＋ Adicionar Pessoa", key="abrir_adicionar_pessoa_topo", type="primary", use_container_width=True):
+            st.session_state.pop("contato_prefill_nome", None)
+            st.session_state.pop("contato_prefill_sobrenome", None)
+            st.session_state.pop("contato_prefill_normalizado", None)
+            st.session_state.pop("contato_prefill_origem", None)
+            st.session_state.pop("contato_nome_cadastro", None)
+            st.session_state.pop("contato_sobrenome_cadastro", None)
+            st.session_state.pop("contato_email_cadastro", None)
+            st.session_state.pop("contato_whatsapp_cadastro", None)
             st.session_state.abrir_form_contato = True
             st.rerun()
 
@@ -1878,10 +1886,11 @@ def render_contatos():
     contato_prefill_nome = st.session_state.get("contato_prefill_nome", "")
     contato_prefill_sobrenome = st.session_state.get("contato_prefill_sobrenome", "")
     contato_origem_sugestao = st.session_state.get("contato_prefill_origem") == "sugestao"
-    if contato_prefill_nome and not st.session_state.get("contato_nome_cadastro"):
+    if st.session_state.pop("contato_aplicar_prefill", False):
         st.session_state.contato_nome_cadastro = contato_prefill_nome
-    if contato_prefill_sobrenome and not st.session_state.get("contato_sobrenome_cadastro"):
         st.session_state.contato_sobrenome_cadastro = contato_prefill_sobrenome
+        st.session_state.contato_email_cadastro = ""
+        st.session_state.contato_whatsapp_cadastro = ""
 
     if st.session_state.get("abrir_form_contato"):
         st.markdown('<div class="ae-inline-person-form">', unsafe_allow_html=True)
@@ -1898,9 +1907,9 @@ def render_contatos():
 
             col_c1, col_c2 = st.columns(2)
             with col_c1:
-                email = st.text_input("email", placeholder="E-mail", label_visibility="collapsed")
+                email = st.text_input("email", placeholder="E-mail", label_visibility="collapsed", key="contato_email_cadastro")
             with col_c2:
-                whatsapp = st.text_input("whatsapp", placeholder="WhatsApp", label_visibility="collapsed")
+                whatsapp = st.text_input("whatsapp", placeholder="WhatsApp", label_visibility="collapsed", key="contato_whatsapp_cadastro")
 
             if contato_origem_sugestao:
                 st.caption("Sugestão encontrada nas histórias. E-mail e WhatsApp são opcionais; nenhum acesso será liberado agora.")
@@ -2019,6 +2028,8 @@ def render_contatos():
                     st.session_state.pop("abrir_form_contato", None)
                     st.session_state.pop("contato_nome_cadastro", None)
                     st.session_state.pop("contato_sobrenome_cadastro", None)
+                    st.session_state.pop("contato_email_cadastro", None)
+                    st.session_state.pop("contato_whatsapp_cadastro", None)
                     st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -2100,6 +2111,22 @@ def render_contatos():
         print("Erro ao sincronizar sugestões de pessoas:", exc)
         sugestoes_pessoas = sugestoes_detectadas[:4]
 
+    def abrir_formulario_pessoa_sugerida(
+            nome_sugerido: str,
+            nome_normalizado: str,
+    ):
+        partes_nome = str(nome_sugerido or "Pessoa").split()
+        st.session_state.contato_prefill_nome = partes_nome[0] if partes_nome else str(nome_sugerido or "Pessoa")
+        st.session_state.contato_prefill_sobrenome = " ".join(partes_nome[1:])
+        st.session_state.contato_prefill_normalizado = nome_normalizado
+        st.session_state.contato_prefill_origem = "sugestao"
+        st.session_state.contato_aplicar_prefill = True
+        st.session_state.abrir_form_contato = True
+        st.session_state.pop("contato_nome_cadastro", None)
+        st.session_state.pop("contato_sobrenome_cadastro", None)
+        st.session_state.pop("contato_email_cadastro", None)
+        st.session_state.pop("contato_whatsapp_cadastro", None)
+
     ranking = sorted(
         (
             (contato, presencas.get(contato["id"], 0))
@@ -2132,47 +2159,17 @@ def render_contatos():
                     nome_sugerido = sugestao.get("nome", "Pessoa")
                     nome_normalizado = sugestao.get("nome_normalizado") or normalizar_nome_pessoa(nome_sugerido)
                     with chips_cols[indice + 2]:
-                        if st.button(
+                        st.button(
                             f"⭐ {nome_sugerido}",
                             key=f"add_sugestao_{nome_normalizado}",
                             help="Adicionar como Pessoa Importante",
                             use_container_width=True,
-                        ):
-                            partes_nome = nome_sugerido.split()
-                            nome_contato = partes_nome[0] if partes_nome else nome_sugerido
-                            sobrenome_contato = " ".join(partes_nome[1:])
-                            db.adicionar_contato(
-                                usuario_id=usuario_id,
-                                nome=nome_contato,
-                                sobrenome=sobrenome_contato,
-                                email="",
-                                telefone="",
-                                whatsapp="",
-                                parentesco="",
-                                data_nascimento="",
-                                is_prioridade=0,
-                                prioridade_order=0,
-                                acesso_central_luto=0,
-                                chave_acesso="",
-                            )
-                            db.atualizar_status_pessoa_sugerida(
-                                usuario_id,
+                            on_click=abrir_formulario_pessoa_sugerida,
+                            args=(
+                                nome_sugerido,
                                 nome_normalizado,
-                                "aceita",
-                                nome_sugerido=nome_sugerido,
-                                score=int(sugestao.get("score") or 0),
-                                origem=sugestao.get("origem") or "",
-                            )
-                            st.session_state.contato_salvo_msg = f"✅ {nome_sugerido} adicionado como pessoa importante."
-                            st.session_state.contato_chave_msg = "Nenhum acesso foi liberado automaticamente."
-                            st.session_state.pop("contato_prefill_nome", None)
-                            st.session_state.pop("contato_prefill_sobrenome", None)
-                            st.session_state.pop("contato_prefill_normalizado", None)
-                            st.session_state.pop("contato_prefill_origem", None)
-                            st.session_state.pop("abrir_form_contato", None)
-                            st.session_state.pop("contato_nome_cadastro", None)
-                            st.session_state.pop("contato_sobrenome_cadastro", None)
-                            st.rerun()
+                            ),
+                        )
             st.markdown(
                 '<p class="ae-people-suggestion-note">⭐ Sugestões encontradas automaticamente nas suas histórias. Clique no nome para adicionar.</p>',
                 unsafe_allow_html=True,
