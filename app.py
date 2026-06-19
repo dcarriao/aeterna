@@ -6,7 +6,6 @@ import base64
 import mimetypes
 import re
 import unicodedata
-from urllib.parse import quote, unquote
 from datetime import datetime
 import secrets
 from utils.banco import BancoDados
@@ -2099,40 +2098,6 @@ def render_contatos():
         print("Erro ao sincronizar sugestões de pessoas:", exc)
         sugestoes_pessoas = sugestoes_detectadas[:4]
 
-    acao_sugestao = st.query_params.get("pessoa_sugerida_acao")
-    nome_sugestao_query = st.query_params.get("pessoa_sugerida")
-    if acao_sugestao and nome_sugestao_query:
-        nome_sugestao_normalizado = normalizar_nome_pessoa(unquote(str(nome_sugestao_query)))
-        sugestao_alvo = next(
-            (
-                sugestao
-                for sugestao in sugestoes_pessoas
-                if (sugestao.get("nome_normalizado") or normalizar_nome_pessoa(sugestao.get("nome", "")))
-                == nome_sugestao_normalizado
-            ),
-            None,
-        )
-        if sugestao_alvo:
-            nome_sugerido = sugestao_alvo.get("nome", "Pessoa")
-            if acao_sugestao == "adicionar":
-                partes_nome = nome_sugerido.split()
-                st.session_state.contato_prefill_nome = partes_nome[0] if partes_nome else nome_sugerido
-                st.session_state.contato_prefill_sobrenome = " ".join(partes_nome[1:])
-                st.session_state.contato_prefill_normalizado = nome_sugestao_normalizado
-                st.session_state.contato_prefill_origem = "sugestao"
-                st.session_state.abrir_form_contato = True
-            elif acao_sugestao == "ignorar":
-                db.atualizar_status_pessoa_sugerida(
-                    usuario_id,
-                    nome_sugestao_normalizado,
-                    "ignorada",
-                    nome_sugerido=nome_sugerido,
-                    score=int(sugestao_alvo.get("score") or 0),
-                    origem=sugestao_alvo.get("origem") or "",
-                )
-        st.query_params.clear()
-        st.rerun()
-
     ranking = sorted(
         (
             (contato, presencas.get(contato["id"], 0))
@@ -2147,29 +2112,59 @@ def render_contatos():
             f"<span class='ae-person-chip'>👥 {html.escape(contato.get('nome') or contato.get('nome_completo') or 'Pessoa')} • {total} histórias</span>"
             for contato, total in ranking[:3]
         )
-        sugestoes_html = ""
-        for sugestao in sugestoes_pessoas:
-            nome_sugerido = sugestao.get("nome", "Pessoa")
-            nome_normalizado = sugestao.get("nome_normalizado") or normalizar_nome_pessoa(nome_sugerido)
-            nome_url = quote(nome_normalizado)
-            sugestoes_html += (
-                "<span class='ae-suggestion-chip'>"
-                f"<a href='?pessoa_sugerida_acao=adicionar&pessoa_sugerida={nome_url}'>⭐ {html.escape(nome_sugerido)}</a>"
-                f"<a class='ae-chip-x' href='?pessoa_sugerida_acao=ignorar&pessoa_sugerida={nome_url}' title='Ignorar {html.escape(nome_sugerido)}'>×</a>"
-                "</span>"
+        with st.container(key="ae_people_presentes_panel"):
+            st.markdown(
+                f"""
+                <div class="ae-people-presentes-head">
+                    <span class="ae-people-info">ⓘ</span>
+                    <strong>Pessoas mais presentes nas suas histórias</strong>
+                    <div class="ae-people-ranking-chips">{top_html}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
             )
-        st.markdown(
-            f"""
-            <div class="ae-people-presentes">
-                <span class="ae-people-info">ⓘ</span>
-                <strong>Pessoas mais presentes nas suas histórias</strong>
-                <div class="ae-people-ranking-chips">{top_html}</div>
-                <div class="ae-people-suggestion-row">{sugestoes_html}</div>
-                <p>⭐ Sugestões encontradas automaticamente nas suas histórias. Clique no nome para adicionar.</p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+            if sugestoes_pessoas:
+                st.markdown('<div class="ae-suggestion-buttons-anchor"></div>', unsafe_allow_html=True)
+                sugestao_cols = st.columns([1, 1, 1, 1, 4], gap="small")
+                for indice, sugestao in enumerate(sugestoes_pessoas[:4]):
+                    nome_sugerido = sugestao.get("nome", "Pessoa")
+                    nome_normalizado = sugestao.get("nome_normalizado") or normalizar_nome_pessoa(nome_sugerido)
+                    with sugestao_cols[indice]:
+                        col_nome, col_ignorar = st.columns([0.78, 0.22], gap="small")
+                        with col_nome:
+                            if st.button(
+                                f"⭐ {nome_sugerido}",
+                                key=f"add_sugestao_{nome_normalizado}",
+                                help="Adicionar como Pessoa Importante",
+                                use_container_width=True,
+                            ):
+                                partes_nome = nome_sugerido.split()
+                                st.session_state.contato_prefill_nome = partes_nome[0] if partes_nome else nome_sugerido
+                                st.session_state.contato_prefill_sobrenome = " ".join(partes_nome[1:])
+                                st.session_state.contato_prefill_normalizado = nome_normalizado
+                                st.session_state.contato_prefill_origem = "sugestao"
+                                st.session_state.abrir_form_contato = True
+                                st.rerun()
+                        with col_ignorar:
+                            if st.button(
+                                "×",
+                                key=f"ignore_sugestao_{nome_normalizado}",
+                                help=f"Ignorar {nome_sugerido}",
+                                use_container_width=True,
+                            ):
+                                db.atualizar_status_pessoa_sugerida(
+                                    usuario_id,
+                                    nome_normalizado,
+                                    "ignorada",
+                                    nome_sugerido=nome_sugerido,
+                                    score=int(sugestao.get("score") or 0),
+                                    origem=sugestao.get("origem") or "",
+                                )
+                                st.rerun()
+            st.markdown(
+                '<p class="ae-people-suggestion-note">⭐ Sugestões encontradas automaticamente nas suas histórias. Clique no nome para adicionar.</p>',
+                unsafe_allow_html=True,
+            )
 
     st.markdown(
         '<div class="ae-people-grid-heading"><div>Sua rede de pessoas</div><span>Ver todas ›</span></div>',
