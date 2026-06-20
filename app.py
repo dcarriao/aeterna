@@ -2072,30 +2072,37 @@ def render_perfil_pessoa_vivo(contato: dict, contatos: list, usuario_id: int):
         st.session_state.pop("perfil_pessoa_tab", None)
         st.rerun()
 
-    st.markdown(
-        dedent(f"""
-        <div class="ae-person-profile-hero">
-            <div class="ae-person-profile-photo">
-                {f'<img src="{html.escape(foto_src)}" alt="{html.escape(nome_exibido)}">' if foto_src else f'<div>{inicial}</div>'}
-            </div>
-            <div class="ae-person-profile-main">
-                <h1>{html.escape(primeiro_nome)} <span>✹</span></h1>
-                <p>{html.escape(texto_limpo(contato.get("observacoes"), "Pessoa importante dentro da sua história."))}</p>
-                <div class="ae-person-profile-facts">
-                    {f'<span>🗓️ {html.escape(nascimento)}</span>' if nascimento else ''}
-                    {f'<span>📍 {html.escape(texto_limpo(contato.get("local")))}</span>' if texto_limpo(contato.get("local")) else ''}
-                    <span>♡ {html.escape(relacao)}</span>
-                </div>
-                <div class="ae-person-profile-chips">{chips_html()}<span class="ae-person-profile-chip ae-plus">＋</span></div>
-            </div>
-            <div class="ae-person-profile-actions">
-                <button>✎ Editar perfil</button>
-                <button>⋮</button>
-            </div>
-        </div>
-        """).strip(),
-        unsafe_allow_html=True,
-    )
+    with st.container(key="ae_person_profile_hero"):
+        foto_col, dados_col, acoes_col = st.columns([0.15, 0.62, 0.23], vertical_alignment="top")
+        with foto_col:
+            if foto_src:
+                st.markdown(
+                    f'<div class="ae-person-profile-photo"><img src="{html.escape(foto_src)}" alt="{html.escape(nome_exibido)}"></div>',
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.markdown(
+                    f'<div class="ae-person-profile-photo"><div>{inicial}</div></div>',
+                    unsafe_allow_html=True,
+                )
+        with dados_col:
+            fatos_html = "".join([
+                f'<span>🗓️ {html.escape(nascimento)}</span>' if nascimento else "",
+                f'<span>📍 {html.escape(texto_limpo(contato.get("local")))}</span>' if texto_limpo(contato.get("local")) else "",
+                f'<span>♡ {html.escape(relacao)}</span>',
+            ])
+            st.markdown(
+                f'<div class="ae-person-profile-main"><h1>{html.escape(primeiro_nome)} <span>✹</span></h1>'
+                f'<p>{html.escape(texto_limpo(contato.get("observacoes"), "Pessoa importante dentro da sua história."))}</p>'
+                f'<div class="ae-person-profile-facts">{fatos_html}</div>'
+                f'<div class="ae-person-profile-chips">{chips_html()}<span class="ae-person-profile-chip ae-plus">＋</span></div></div>',
+                unsafe_allow_html=True,
+            )
+        with acoes_col:
+            st.markdown(
+                '<div class="ae-person-profile-actions"><span>✎ Editar perfil</span><span>⋮</span></div>',
+                unsafe_allow_html=True,
+            )
 
     abas = [
         ("visao", "▦ Visão Geral"),

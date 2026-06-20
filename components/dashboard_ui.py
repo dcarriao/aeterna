@@ -2072,11 +2072,7 @@ div[data-testid="stPopover"] {
     display: block;
 }
 
-.ae-person-profile-hero {
-    display: grid;
-    grid-template-columns: 168px minmax(0, 1fr) auto;
-    gap: 2.1rem;
-    align-items: start;
+.st-key-ae_person_profile_hero {
     margin: 0.8rem 0 1.55rem;
 }
 
@@ -2170,7 +2166,10 @@ div[data-testid="stPopover"] {
     align-items: center;
 }
 
-.ae-person-profile-actions button {
+.ae-person-profile-actions span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     min-height: 42px;
     border-radius: 10px;
     border: 1px solid rgba(43,23,71,0.28);
@@ -2180,7 +2179,23 @@ div[data-testid="stPopover"] {
     padding: 0 1rem;
 }
 
-.st-key-ae_person_profile_tabs [data-testid="stButton"] button {
+.st-key-voltar_lista_pessoas [data-testid="stButton"] button {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: #21104B !important;
+    font-weight: 800 !important;
+    padding: 0 !important;
+    min-height: 28px !important;
+    justify-content: flex-start !important;
+}
+
+.st-key-perfil_pessoa_tab_visao [data-testid="stButton"] button,
+.st-key-perfil_pessoa_tab_historias [data-testid="stButton"] button,
+.st-key-perfil_pessoa_tab_linha [data-testid="stButton"] button,
+.st-key-perfil_pessoa_tab_midia [data-testid="stButton"] button,
+.st-key-perfil_pessoa_tab_contribuicoes [data-testid="stButton"] button,
+.st-key-perfil_pessoa_tab_destaques [data-testid="stButton"] button {
     min-height: 34px !important;
     background: transparent !important;
     border: 0 !important;
@@ -2193,12 +2208,22 @@ div[data-testid="stPopover"] {
     justify-content: flex-start !important;
 }
 
-.st-key-ae_person_profile_tabs [data-testid="stButton"] button:hover {
+.st-key-perfil_pessoa_tab_visao [data-testid="stButton"] button:hover,
+.st-key-perfil_pessoa_tab_historias [data-testid="stButton"] button:hover,
+.st-key-perfil_pessoa_tab_linha [data-testid="stButton"] button:hover,
+.st-key-perfil_pessoa_tab_midia [data-testid="stButton"] button:hover,
+.st-key-perfil_pessoa_tab_contribuicoes [data-testid="stButton"] button:hover,
+.st-key-perfil_pessoa_tab_destaques [data-testid="stButton"] button:hover {
     background: rgba(104,72,164,0.06) !important;
     color: #6848A4 !important;
 }
 
-.st-key-ae_person_profile_tabs [data-testid="stButton"] button p {
+.st-key-perfil_pessoa_tab_visao [data-testid="stButton"] button p,
+.st-key-perfil_pessoa_tab_historias [data-testid="stButton"] button p,
+.st-key-perfil_pessoa_tab_linha [data-testid="stButton"] button p,
+.st-key-perfil_pessoa_tab_midia [data-testid="stButton"] button p,
+.st-key-perfil_pessoa_tab_contribuicoes [data-testid="stButton"] button p,
+.st-key-perfil_pessoa_tab_destaques [data-testid="stButton"] button p {
     white-space: nowrap !important;
 }
 
