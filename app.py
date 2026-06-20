@@ -4067,6 +4067,176 @@ def render_inicio(
         st.rerun()
 
 
+def render_explorar_historia_compartilhada(
+        grupo: dict,
+        memoria: dict,
+        imagem_local_para_data_uri,
+        data_curta,
+):
+    acesso = grupo.get("acesso") or {}
+    memorias = grupo.get("memorias") or []
+    nome_pessoa = acesso.get("nome_completo") or acesso.get("nome") or "Pessoa"
+    memoria_id = memoria.get("id")
+    titulo = memoria.get("titulo") or "História sem título"
+    conteudo = memoria.get("conteudo") or "Esta história ainda não possui descrição registrada."
+    data_evento = str(memoria.get("data_evento") or memoria.get("data_criacao") or "")[:10]
+    local = memoria.get("local") or "Local não informado"
+    categoria = memoria.get("categoria") or "História"
+    pessoas_texto = memoria.get("pessoas_relacionadas") or ""
+    pessoas = [p.strip() for p in re.split(r"[,;]", pessoas_texto) if p.strip()]
+    if not pessoas and nome_pessoa:
+        pessoas = [nome_pessoa]
+
+    try:
+        fotos_por_memoria = db.listar_fotos_por_memorias_usuario(acesso.get("usuario_id")) or {}
+    except Exception as exc:
+        print("Erro ao carregar fotos da história explorada:", exc)
+        fotos_por_memoria = {}
+    try:
+        videos_por_memoria = db.listar_videos_por_memorias_usuario(acesso.get("usuario_id")) or {}
+    except Exception as exc:
+        print("Erro ao carregar vídeos da história explorada:", exc)
+        videos_por_memoria = {}
+    contribuicoes = carregar_contribuicoes_aprovadas_memorias(acesso.get("usuario_id")).get(memoria_id, [])
+
+    fotos_memoria = fotos_por_memoria.get(memoria_id, [])
+    videos_memoria = videos_por_memoria.get(memoria_id, [])
+    capa = ""
+    if fotos_memoria:
+        capa = imagem_local_para_data_uri(fotos_memoria[0].get("caminho") or fotos_memoria[0].get("caminho_arquivo") or "")
+    capa_html = f'<img src="{html.escape(capa, quote=True)}" alt="Imagem da história">' if capa else '<div>📖</div>'
+
+    def texto_curto(valor: str, limite: int = 150) -> str:
+        texto = re.sub(r"\s+", " ", str(valor or "")).strip()
+        return texto if len(texto) <= limite else texto[:limite].rstrip() + "..."
+
+    def story_thumb(mem: dict) -> str:
+        fotos = fotos_por_memoria.get(mem.get("id"), [])
+        if fotos:
+            src = imagem_local_para_data_uri(fotos[0].get("caminho") or fotos[0].get("caminho_arquivo") or "")
+            if src:
+                return f'<img src="{html.escape(src, quote=True)}" alt="História relacionada">'
+        return '<span>📖</span>'
+
+    pessoas_norm = {normalizar_nome_pessoa(p) for p in pessoas if p}
+    relacionadas = []
+    for outra in memorias:
+        if outra.get("id") == memoria_id:
+            continue
+        pontos = 0
+        texto_outra = normalizar_nome_pessoa(" ".join([
+            outra.get("titulo") or "",
+            outra.get("conteudo") or "",
+            outra.get("pessoas_relacionadas") or "",
+        ]))
+        if any(p and p in texto_outra for p in pessoas_norm):
+            pontos += 5
+        if outra.get("categoria") and outra.get("categoria") == memoria.get("categoria"):
+            pontos += 3
+        if outra.get("local") and memoria.get("local") and outra.get("local") == memoria.get("local"):
+            pontos += 2
+        if pontos:
+            relacionadas.append((pontos, outra))
+    relacionadas = [item[1] for item in sorted(relacionadas, key=lambda item: item[0], reverse=True)[:3]]
+
+    if st.button("← Voltar para explorar", key="voltar_lista_explorar_compartilhada", use_container_width=False):
+        st.session_state.pop("historia_compartilhada_explorada_id", None)
+        st.rerun()
+
+    header_cols = st.columns([0.74, 0.26], vertical_alignment="center")
+    with header_cols[0]:
+        st.markdown(
+            f'<div class="ae-explore-title"><h1>{html.escape(titulo)}</h1><p>{html.escape(texto_curto(conteudo, 86))}</p></div>',
+            unsafe_allow_html=True,
+        )
+    with header_cols[1]:
+        st.markdown('<div class="ae-explore-open-full">↗ Abrir história completa</div>', unsafe_allow_html=True)
+
+    main_cols = st.columns([0.72, 0.28], gap="medium")
+    with main_cols[0]:
+        st.markdown(
+            '<div class="ae-explore-main-card">'
+            f'<div class="ae-explore-meta"><span>🗓️ {html.escape(data_evento or "Data não informada")}</span><span>📍 {html.escape(local)}</span></div>'
+            f'<div class="ae-explore-story-grid"><div class="ae-explore-cover">{capa_html}</div>'
+            f'<div class="ae-explore-story-text"><p>{html.escape(conteudo)}</p>'
+            f'<blockquote>A vida é feita de escolhas e de amor.<br>Escolha sempre o que te aproxima de quem importa.</blockquote></div></div>'
+            '<div class="ae-explore-sources">'
+            f'<span>Fontes desta história:</span><b>{html.escape(categoria)}</b><b>{len(fotos_memoria)} fotos</b><b>{len(contribuicoes)} contribuições</b>'
+            f'<em>Criada por: {html.escape(nome_pessoa)}</em><em>Última atualização: {html.escape(str(memoria.get("data_criacao") or "")[:10])}</em>'
+            '</div></div>',
+            unsafe_allow_html=True,
+        )
+    with main_cols[1]:
+        perguntas = [
+            "Quem estava presente?",
+            "Por que este momento foi importante?",
+            f"Quais histórias envolvem {html.escape(pessoas[0]) if pessoas else 'esta pessoa'}?",
+            "Existe outra memória parecida?",
+        ]
+        perguntas_html = "".join(f'<div class="ae-explore-question">💬 {pergunta}</div>' for pergunta in perguntas)
+        resposta = (
+            f"Nesta história aparecem {', '.join(pessoas[:4])}. "
+            f"O contexto registrado indica: {texto_curto(conteudo, 120)}"
+        )
+        st.markdown(
+            '<div class="ae-explore-side-card"><h3>Explorar esta história</h3>'
+            '<p>Pergunte sobre o que já foi registrado. O explorador não inventa fatos.</p>'
+            f'{perguntas_html}'
+            f'<div class="ae-explore-answer"><strong>Resposta baseada nas histórias</strong><p>{html.escape(resposta)}</p>'
+            f'<b>Fontes usadas:</b><ul><li>{html.escape(titulo)}</li><li>{html.escape(categoria)}</li></ul></div></div>',
+            unsafe_allow_html=True,
+        )
+
+    pessoas_cards = []
+    for pessoa in pessoas[:4]:
+        inicial = html.escape(pessoa[:1].upper())
+        pessoas_cards.append(
+            f'<div class="ae-explore-person"><div>{inicial}</div><strong>{html.escape(pessoa)}</strong><span>pessoa relacionada</span><button>Ver perfil</button></div>'
+        )
+    pessoas_cards.append(f'<div class="ae-explore-person is-more"><div>👥</div><strong>Ver todas as pessoas</strong><span>{len(pessoas)} pessoas</span></div>')
+    st.markdown(
+        '<div class="ae-explore-section"><h3>Pessoas relacionadas</h3>'
+        f'<div class="ae-explore-people-grid">{"".join(pessoas_cards)}</div></div>',
+        unsafe_allow_html=True,
+    )
+
+    lower_cols = st.columns([0.52, 0.48], gap="medium")
+    with lower_cols[0]:
+        itens = []
+        if fotos_memoria:
+            for foto in fotos_memoria[:2]:
+                itens.append(("Foto da história", foto.get("titulo") or "Foto registrada", foto.get("descricao") or "Mídia vinculada a esta memória."))
+        for contrib in contribuicoes[:3]:
+            itens.append(("Contribuição", contrib.get("contribuidor_nome") or "Pessoa convidada", contrib.get("texto") or contrib.get("arquivo_nome") or "Contribuição registrada."))
+        if not itens:
+            itens.append(("Registro principal", data_evento or "Data não informada", texto_curto(conteudo, 120)))
+        linhas = "".join(
+            f'<div class="ae-explore-contrib"><span></span><strong>{html.escape(a)}</strong><p>{html.escape(texto_curto(b, 48))}</p><em>{html.escape(texto_curto(c, 90))}</em><button>Ver detalhes</button></div>'
+            for a, b, c in itens[:3]
+        )
+        st.markdown(
+            '<div class="ae-explore-section"><h3>Contribuições e momentos registrados</h3>'
+            f'<div class="ae-explore-timeline">{linhas}</div></div>',
+            unsafe_allow_html=True,
+        )
+    with lower_cols[1]:
+        cards = []
+        for rel in relacionadas:
+            cards.append(
+                f'<div class="ae-explore-related-card"><div class="ae-explore-related-cover">{story_thumb(rel)}</div>'
+                f'<strong>{html.escape(rel.get("titulo") or "História sem título")}</strong>'
+                f'<span>{html.escape(rel.get("categoria") or "mesma história")}</span>'
+                f'<em>{html.escape(str(rel.get("data_evento") or rel.get("data_criacao") or "")[:10])}</em></div>'
+            )
+        if not cards:
+            cards.append('<div class="ae-explore-related-empty">Nenhuma história relacionada encontrada.</div>')
+        st.markdown(
+            '<div class="ae-explore-section"><div class="ae-explore-section-head"><h3>Histórias relacionadas</h3><span>Ver todas</span></div>'
+            f'<div class="ae-explore-related-grid">{"".join(cards)}</div></div>',
+            unsafe_allow_html=True,
+        )
+
+
 def render_historias_compartilhadas_lista(historias_compartilhadas: list):
     st.markdown(
         """
@@ -4126,12 +4296,26 @@ def render_historias_compartilhadas_lista(historias_compartilhadas: list):
     for acesso in historias_compartilhadas:
         memorias = db.listar_memorias_por_contato(acesso.get("contato_id"))
         fotos = db.listar_fotos_por_contato(acesso.get("contato_id"))
+        videos = db.listar_videos_por_contato(acesso.get("contato_id"))
         grupos.append({
             "acesso": acesso,
             "memorias": memorias,
             "fotos": fotos,
+            "videos": videos,
             "total": len(memorias),
         })
+
+    historia_explorada_id = st.session_state.get("historia_compartilhada_explorada_id")
+    if historia_explorada_id:
+        for grupo in grupos:
+            memoria_encontrada = next(
+                (memoria for memoria in grupo["memorias"] if str(memoria.get("id")) == str(historia_explorada_id)),
+                None,
+            )
+            if memoria_encontrada:
+                render_explorar_historia_compartilhada(grupo, memoria_encontrada, imagem_local_para_data_uri, data_curta)
+                return
+        st.session_state.pop("historia_compartilhada_explorada_id", None)
 
     filtro_usuario_id = st.session_state.get("compartilhadas_filtro_usuario_id")
     grupos_filtrados = [
@@ -4262,15 +4446,18 @@ def render_historias_compartilhadas_lista(historias_compartilhadas: list):
                             else '<span>📖</span>'
                         )
                         st.markdown(
-                            f"""
-                            <div class="ae-shared-story-mini">
-                                <div class="ae-shared-story-cover">{media_html}</div>
-                                <strong>{html.escape(memoria.get('titulo') or 'História sem título')}</strong>
-                                <span>{html.escape(data_curta(memoria.get('data_criacao')))}</span>
-                            </div>
-                            """,
+                            f'<div class="ae-shared-story-mini"><div class="ae-shared-story-cover">{media_html}</div>'
+                            f'<strong>{html.escape(memoria.get("titulo") or "História sem título")}</strong>'
+                            f'<span>{html.escape(data_curta(memoria.get("data_criacao")))}</span></div>',
                             unsafe_allow_html=True,
                         )
+                        if st.button(
+                            "Explorar",
+                            key=f"explorar_memoria_compartilhada_{acesso.get('usuario_id')}_{memoria.get('id')}",
+                            use_container_width=True,
+                        ):
+                            st.session_state.historia_compartilhada_explorada_id = memoria.get("id")
+                            st.rerun()
                     else:
                         st.markdown(
                             """
