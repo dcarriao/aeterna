@@ -1,9 +1,11 @@
 # utils/banco.py
 import os
+import re
 import sqlite3
 import psycopg2
 import hashlib
 import secrets
+import unicodedata
 import streamlit as st
 from typing import List, Dict, Optional
 
@@ -29,6 +31,149 @@ class BancoDados:
             self._migrar_documentos()
         else:
             print("USANDO POSTGRES:", self.usa_postgres)
+
+    TITULOS_GENERICOS_MEMORIA = {
+        "historia",
+        "história",
+        "nova historia",
+        "nova história",
+        "memoria registrada",
+        "memória registrada",
+        "memoria registrada via assistente",
+        "memória registrada via assistente",
+        "memoria registrada com o curador",
+        "memória registrada com o curador",
+        "historia sem titulo",
+        "história sem título",
+        "memoria sem titulo",
+        "memória sem título",
+    }
+
+    PALAVRAS_CONTEXTO_NARRATIVO = {
+        "familia": "Família",
+        "família": "Família",
+        "pai": "Família",
+        "mae": "Família",
+        "mãe": "Família",
+        "pais": "Família",
+        "filha": "Família",
+        "filho": "Família",
+        "bia": "Família",
+        "alice": "Família",
+        "almoco": "Almoço em Família",
+        "almoço": "Almoço em Família",
+        "jantar": "Jantar em Família",
+        "aniversario": "Aniversário",
+        "aniversário": "Aniversário",
+        "natal": "Natal em Família",
+        "viagem": "Viagem",
+        "gramado": "Viagem para Gramado",
+        "canyon": "Viagem aos Canyons",
+        "canyons": "Viagem aos Canyons",
+        "infancia": "Infância",
+        "infância": "Infância",
+        "trabalho": "Trabalho",
+        "emprego": "Primeiro Emprego",
+        "formatura": "Formatura",
+    }
+
+    STOPWORDS_CONTINUIDADE = {
+        "a", "o", "as", "os", "um", "uma", "uns", "umas", "de", "da", "do", "das", "dos",
+        "e", "em", "no", "na", "nos", "nas", "com", "para", "por", "que", "eu", "meu",
+        "minha", "meus", "minhas", "foi", "fomos", "era", "estava", "sobre", "antes",
+        "depois", "tambem", "também", "muito", "mais",
+    }
+
+    def _normalizar_texto_narrativo(self, valor: str) -> str:
+        texto = unicodedata.normalize("NFD", str(valor or ""))
+        texto = "".join(ch for ch in texto if unicodedata.category(ch) != "Mn")
+        return re.sub(r"\s+", " ", texto.lower()).strip()
+
+    def _titulo_generico(self, titulo: str) -> bool:
+        normalizado = self._normalizar_texto_narrativo(titulo)
+        return not normalizado or normalizado in self.TITULOS_GENERICOS_MEMORIA
+
+    def _tokens_narrativos(self, *partes: str) -> set:
+        texto = self._normalizar_texto_narrativo(" ".join(str(parte or "") for parte in partes))
+        tokens = {
+            token
+            for token in re.findall(r"[a-zA-ZÀ-ÿ]{3,}", texto)
+            if token not in self.STOPWORDS_CONTINUIDADE
+        }
+        return tokens
+
+    def _gerar_titulo_narrativo(self, conteudo: str, categoria: str = "", pessoas_relacionadas: str = "") -> str:
+        texto_norm = self._normalizar_texto_narrativo(" ".join([conteudo or "", categoria or "", pessoas_relacionadas or ""]))
+        if "almo" in texto_norm and any(
+                p in texto_norm for p in ("familia", "família", "pai", "mae", "mãe", "pais", "filha", "filho")
+        ):
+            return "Almoço em Família"
+        for chave, titulo in self.PALAVRAS_CONTEXTO_NARRATIVO.items():
+            if self._normalizar_texto_narrativo(chave) in texto_norm:
+                if titulo == "Aniversário":
+                    nomes = re.findall(r"\b[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ][^\W\d_]{2,}\b", conteudo or "", flags=re.UNICODE)
+                    if nomes:
+                        return f"Aniversário de {nomes[0]}"
+                return titulo
+        nomes = re.findall(r"\b[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ][^\W\d_]{2,}\b", conteudo or "", flags=re.UNICODE)
+        if nomes:
+            return f"História com {nomes[0]}"
+        categoria_limpa = (categoria or "").strip()
+        if categoria_limpa and categoria_limpa.lower() != "livre":
+            return categoria_limpa.title()
+        return "Lembrança da Vida"
+
+    def _score_continuidade_memoria(self, memoria: Dict, conteudo: str, categoria: str, pessoas_relacionadas: str) -> int:
+        score = 0
+        categoria_atual = self._normalizar_texto_narrativo(categoria)
+        categoria_existente = self._normalizar_texto_narrativo(memoria.get("categoria"))
+        if categoria_atual and categoria_existente and categoria_atual == categoria_existente:
+            score += 25
+
+        pessoas_novas = self._tokens_narrativos(pessoas_relacionadas)
+        pessoas_existentes = self._tokens_narrativos(memoria.get("pessoas_relacionadas"))
+        if pessoas_novas and pessoas_existentes:
+            intersecao = pessoas_novas & pessoas_existentes
+            if intersecao:
+                score += min(30, 12 * len(intersecao))
+
+        tokens_novos = self._tokens_narrativos(conteudo, categoria, pessoas_relacionadas)
+        tokens_existentes = self._tokens_narrativos(
+            memoria.get("titulo"),
+            memoria.get("conteudo"),
+            memoria.get("categoria"),
+            memoria.get("pessoas_relacionadas"),
+        )
+        if tokens_novos and tokens_existentes:
+            intersecao = tokens_novos & tokens_existentes
+            uniao = tokens_novos | tokens_existentes
+            similaridade = len(intersecao) / max(1, len(uniao))
+            if similaridade >= 0.28:
+                score += 30
+            elif similaridade >= 0.16:
+                score += 18
+            elif similaridade >= 0.08:
+                score += 10
+
+        contexto_chaves = {"familia", "pai", "mae", "pais", "filha", "filho", "bia", "alice", "almoco", "natal", "viagem"}
+        if (tokens_novos & contexto_chaves) and (tokens_existentes & contexto_chaves):
+            score += 25
+
+        return score
+
+    def _encontrar_memoria_para_continuar(self, usuario_id: int, conteudo: str, categoria: str, pessoas_relacionadas: str) -> Optional[Dict]:
+        memorias = self.listar_memorias_usuario(usuario_id)[:20]
+        melhor = None
+        melhor_score = 0
+        for memoria in memorias:
+            score = self._score_continuidade_memoria(memoria, conteudo, categoria, pessoas_relacionadas)
+            if score > melhor_score:
+                melhor = memoria
+                melhor_score = score
+        if melhor and melhor_score >= 70:
+            melhor["score_continuidade"] = melhor_score
+            return melhor
+        return None
 
     def conectar(self):
         if self.usa_postgres:
@@ -2073,7 +2218,7 @@ class BancoDados:
             self,
             usuario_id: int,
             conteudo: str,
-            titulo: str = "Memória registrada com o Curador",
+            titulo: str = "",
             categoria: str = "livre",
             origem: str = "curador",
             local: str = None,
@@ -2088,10 +2233,70 @@ class BancoDados:
         if visibilidade == "seletivo" and not contatos_ids:
             raise ValueError("Selecione pelo menos um contato.")
 
+        categoria = (categoria or "livre").strip().lower()
+        conteudo = conteudo or ""
+        pessoas_relacionadas = pessoas_relacionadas or None
+        if self._titulo_generico(titulo):
+            titulo = self._gerar_titulo_narrativo(conteudo, categoria, pessoas_relacionadas or "")
+
+        memoria_continuar = self._encontrar_memoria_para_continuar(
+            usuario_id,
+            conteudo,
+            categoria,
+            pessoas_relacionadas or "",
+        )
+
         conn = self.conectar()
         cursor = conn.cursor()
 
         try:
+            if memoria_continuar:
+                memoria_id = memoria_continuar["id"]
+                conteudo_existente = memoria_continuar.get("conteudo") or ""
+                conteudo_atualizado = (
+                    f"{conteudo_existente.rstrip()}\n\n---\n\n{conteudo.strip()}"
+                    if conteudo_existente.strip()
+                    else conteudo.strip()
+                )
+                titulo_final = memoria_continuar.get("titulo") or titulo
+                if self._titulo_generico(titulo_final):
+                    titulo_final = titulo
+                pessoas_final = memoria_continuar.get("pessoas_relacionadas") or pessoas_relacionadas
+
+                self.executar(cursor, """
+                    UPDATE memorias
+                    SET conteudo = %s,
+                        titulo = %s,
+                        categoria = %s,
+                        local = COALESCE(local, %s),
+                        data_evento = COALESCE(data_evento, %s),
+                        pessoas_relacionadas = COALESCE(pessoas_relacionadas, %s)
+                    WHERE id = %s AND usuario_id = %s
+                """, (
+                    conteudo_atualizado,
+                    titulo_final,
+                    categoria or memoria_continuar.get("categoria") or "livre",
+                    local,
+                    data_evento,
+                    pessoas_final,
+                    memoria_id,
+                    usuario_id,
+                ))
+
+                if visibilidade == "seletivo":
+                    for contato_id in contatos_ids or []:
+                        cursor.execute("""
+                            INSERT INTO conteudo_permissoes (
+                                tipo_conteudo, conteudo_id, contato_id
+                            )
+                            SELECT 'memoria', %s, c.id
+                            FROM contatos c
+                            WHERE c.id = %s AND c.usuario_id = %s
+                            ON CONFLICT DO NOTHING
+                        """, (memoria_id, contato_id, usuario_id))
+                conn.commit()
+                return memoria_id
+
             self.executar(cursor, """
                 INSERT INTO memorias (
                     usuario_id,

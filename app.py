@@ -765,22 +765,23 @@ def render_minha_historia():
                     render_acesso_historia(memoria, key_contexto)
 
     def nome_categoria(categoria: str) -> str:
-        categoria_normalizada = (categoria or "livre").lower()
+        categoria_normalizada = normalizar_categoria_colecao(categoria)
         return {
             "livre": "Histórias da Vida",
             "outras histórias": "Histórias da Vida",
             "outros": "Histórias da Vida",
+            "familia": "Família",
+            "viagens": "Viagens",
+            "infancia": "Infância",
         }.get(categoria_normalizada, (categoria or "Histórias da Vida").title())
 
     def icone_categoria(categoria: str) -> str:
-        categoria_normalizada = (categoria or "").lower()
+        categoria_normalizada = normalizar_categoria_colecao(categoria)
         return {
-            "família": "❤️",
             "familia": "❤️",
             "viagens": "✈️",
             "carreira": "💼",
             "estudos": "🎓",
-            "infância": "👶",
             "infancia": "👶",
             "conquista": "🏆",
             "conquistas": "🏆",
@@ -788,6 +789,25 @@ def render_minha_historia():
             "valores": "🌟",
             "livre": "📚",
         }.get(categoria_normalizada, "📚")
+
+    def normalizar_categoria_colecao(categoria: str) -> str:
+        texto = unicodedata.normalize("NFD", str(categoria or "livre").strip().lower())
+        texto = "".join(ch for ch in texto if unicodedata.category(ch) != "Mn")
+        texto = re.sub(r"\s+", " ", texto)
+        mapa = {
+            "familia": "familia",
+            "família": "familia",
+            "viagem": "viagens",
+            "viagens": "viagens",
+            "infancia": "infancia",
+            "infância": "infancia",
+            "historia": "livre",
+            "historias": "livre",
+            "histórias": "livre",
+            "outras historias": "livre",
+            "outras histórias": "livre",
+        }
+        return mapa.get(texto, texto or "livre")
 
     st.markdown('<div class="ae-story-section-title">Continue sua história</div>', unsafe_allow_html=True)
     render_prateleira(
@@ -799,7 +819,7 @@ def render_minha_historia():
 
     grupos = {}
     for memoria in memorias:
-        categoria = memoria.get("categoria") or "livre"
+        categoria = normalizar_categoria_colecao(memoria.get("categoria") or "livre")
         grupos.setdefault(categoria, []).append(memoria)
 
     st.markdown('<div class="ae-story-section-title ae-story-section-title-collections">Coleções</div>', unsafe_allow_html=True)

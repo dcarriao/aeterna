@@ -300,7 +300,7 @@ def render_chat_luto():
                             memoria_id = db.salvar_memoria(
                                 usuario_id=usuario["id"],
                                 conteudo=st.session_state["texto_memoria_" + chave_base],
-                                titulo=titulo or "Memória registrada com o Curador",
+                                titulo=titulo or "",
                                 categoria=categoria or "livre",
                                 origem="curador",
                                 local=local or None,

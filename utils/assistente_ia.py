@@ -28,7 +28,7 @@ class AssistenteLuto:
 
         if not api_key:
             return {
-                "titulo": "Memória registrada com o Curador",
+                "titulo": "",
                 "categoria": "livre",
                 "local": "",
                 "data_evento": "",
@@ -74,7 +74,7 @@ class AssistenteLuto:
             dados = json.loads(raw)
 
             return {
-                "titulo": dados.get("titulo") or "Memória registrada com o Curador",
+                "titulo": dados.get("titulo") or "",
                 "categoria": dados.get("categoria") or "livre",
                 "local": dados.get("local") or "",
                 "data_evento": dados.get("data_evento") or "",
@@ -84,7 +84,7 @@ class AssistenteLuto:
         except Exception as e:
             print("Erro ao sugerir metadados da memória:", e)
             return {
-                "titulo": "Memória registrada com o Curador",
+                "titulo": "",
                 "categoria": "livre",
                 "local": "",
                 "data_evento": "",
