@@ -6,7 +6,6 @@ import base64
 import mimetypes
 import re
 import unicodedata
-from textwrap import dedent
 from datetime import datetime
 import secrets
 from utils.banco import BancoDados
@@ -2014,16 +2013,17 @@ def render_perfil_pessoa_vivo(contato: dict, contatos: list, usuario_id: int):
         pessoas = texto_limpo(memoria.get("pessoas_relacionadas"))
         qtd_pessoas = len([p for p in re.split(r"[,;]", pessoas) if p.strip()]) if pessoas else 1
         classe = "ae-person-story-card ae-person-story-card-compact" if compacto else "ae-person-story-card"
-        return f"""
-        <div class="{classe}">
-            <div class="ae-person-story-media">{memoria_thumb(memoria)}</div>
-            <div class="ae-person-story-body">
-                <strong>{titulo}</strong>
-                <span>Atualizada em {html.escape(data) if data else "data não informada"}</span>
-                <em>👥 {qtd_pessoas}</em>
-            </div>
-        </div>
-        """
+        data_html = html.escape(data) if data else "data não informada"
+        return (
+            f'<div class="{classe}">'
+            f'<div class="ae-person-story-media">{memoria_thumb(memoria)}</div>'
+            f'<div class="ae-person-story-body">'
+            f'<strong>{titulo}</strong>'
+            f'<span>Atualizada em {data_html}</span>'
+            f'<em>👥 {qtd_pessoas}</em>'
+            f'</div>'
+            f'</div>'
+        )
 
     def montar_eventos() -> list:
         eventos = []
@@ -2132,17 +2132,15 @@ def render_perfil_pessoa_vivo(contato: dict, contatos: list, usuario_id: int):
         for evento in itens:
             imagem = f'<img src="{html.escape(evento["imagem"])}" alt="{html.escape(evento["titulo"])}">' if evento.get("imagem") else ""
             html_eventos.append(
-                f"""
-                <div class="ae-person-timeline-item">
-                    <div class="ae-person-timeline-icon">{html.escape(evento.get("icone") or "•")}</div>
-                    <div>
-                        <strong>{html.escape(str(evento.get("ano") or ""))}</strong>
-                        <h4>{html.escape(evento.get("titulo") or "")}</h4>
-                        <p>{html.escape(evento.get("descricao") or "")}</p>
-                    </div>
-                    {imagem}
-                </div>
-                """
+                f'<div class="ae-person-timeline-item">'
+                f'<div class="ae-person-timeline-icon">{html.escape(evento.get("icone") or "•")}</div>'
+                f'<div>'
+                f'<strong>{html.escape(str(evento.get("ano") or ""))}</strong>'
+                f'<h4>{html.escape(evento.get("titulo") or "")}</h4>'
+                f'<p>{html.escape(evento.get("descricao") or "")}</p>'
+                f'</div>'
+                f'{imagem}'
+                f'</div>'
             )
         st.markdown("".join(html_eventos), unsafe_allow_html=True)
 
@@ -2180,13 +2178,11 @@ def render_perfil_pessoa_vivo(contato: dict, contatos: list, usuario_id: int):
             data = data_curta(item.get("criado_em"))
             texto = html.escape(resumo(item.get("texto") or item.get("arquivo_nome") or "Contribuição enviada.", 78))
             linhas.append(
-                f"""
-                <div class="ae-person-contrib-row">
-                    <div>{html.escape((nome or "P")[:1].upper())}</div>
-                    <p><strong>{nome}</strong><br>{texto}</p>
-                    <span>{html.escape(data)}</span>
-                </div>
-                """
+                f'<div class="ae-person-contrib-row">'
+                f'<div>{html.escape((nome or "P")[:1].upper())}</div>'
+                f'<p><strong>{nome}</strong><br>{texto}</p>'
+                f'<span>{html.escape(data)}</span>'
+                f'</div>'
             )
         st.markdown("".join(linhas), unsafe_allow_html=True)
 
