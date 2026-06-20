@@ -1859,6 +1859,424 @@ def extrair_pessoas_encontradas(memorias: list, contatos: list, ignoradas_usuari
     return sorted(resultado, key=lambda sugestao: (-sugestao["score"], -sugestao["quantidade"], sugestao["nome"]))[:8]
 
 
+def render_perfil_pessoa_vivo(contato: dict, contatos: list, usuario_id: int):
+    def texto_limpo(valor, padrao: str = "") -> str:
+        return str(valor or padrao or "").strip()
+
+    def data_curta(valor) -> str:
+        if not valor:
+            return ""
+        texto = str(valor)[:10]
+        for formato in ("%Y-%m-%d", "%d/%m/%Y"):
+            try:
+                return datetime.strptime(texto, formato).strftime("%d/%m/%Y")
+            except ValueError:
+                continue
+        return texto
+
+    def ano_de(valor) -> str:
+        if not valor:
+            return ""
+        match = re.search(r"(19|20)\d{2}", str(valor)[:10])
+        return match.group(0) if match else ""
+
+    def normalizar(valor: str) -> str:
+        return normalizar_nome_pessoa(valor)
+
+    def imagem_src(caminho: str) -> str:
+        caminho = texto_limpo(caminho)
+        if not caminho:
+            return ""
+        if caminho.startswith(("http://", "https://", "data:")):
+            return caminho
+        if os.path.exists(caminho):
+            tipo, _ = mimetypes.guess_type(caminho)
+            tipo = tipo or "image/jpeg"
+            try:
+                with open(caminho, "rb") as arquivo:
+                    return f"data:{tipo};base64,{base64.b64encode(arquivo.read()).decode('utf-8')}"
+            except Exception as exc:
+                print("Erro ao preparar imagem do perfil vivo:", exc)
+        return ""
+
+    def resumo(texto: str, limite: int = 120) -> str:
+        texto = re.sub(r"\s+", " ", texto_limpo(texto))
+        return texto if len(texto) <= limite else texto[:limite].rstrip() + "..."
+
+    nome_exibido = (
+        texto_limpo(contato.get("nome_completo"))
+        or f"{texto_limpo(contato.get('nome'))} {texto_limpo(contato.get('sobrenome'))}".strip()
+        or "Pessoa importante"
+    )
+    primeiro_nome = texto_limpo(contato.get("nome")) or nome_exibido.split()[0]
+    relacao = texto_limpo(contato.get("parentesco"), "Pessoa importante")
+    nascimento = data_curta(contato.get("data_nascimento"))
+    foto_src = imagem_src(contato.get("foto_perfil") or contato.get("foto") or "")
+    inicial = html.escape(nome_exibido[:1].upper() or "P")
+
+    termos_busca = {
+        normalizar(nome_exibido),
+        normalizar(primeiro_nome),
+        normalizar(f"{texto_limpo(contato.get('nome'))} {texto_limpo(contato.get('sobrenome'))}".strip()),
+    }
+    termos_busca = {termo for termo in termos_busca if len(termo) >= 3}
+
+    try:
+        memorias = db.listar_memorias_usuario(usuario_id) or []
+    except Exception as exc:
+        print("Erro ao carregar histórias do perfil da pessoa:", exc)
+        memorias = []
+
+    def memoria_tem_pessoa(memoria: dict) -> bool:
+        texto = normalizar(" ".join([
+            texto_limpo(memoria.get("titulo")),
+            texto_limpo(memoria.get("conteudo")),
+            texto_limpo(memoria.get("pessoas_relacionadas")),
+        ]))
+        return any(termo and termo in texto for termo in termos_busca)
+
+    memorias_relacionadas = [memoria for memoria in memorias if memoria_tem_pessoa(memoria)]
+    ids_memorias = {memoria.get("id") for memoria in memorias_relacionadas if memoria.get("id")}
+
+    try:
+        fotos_por_memoria = db.listar_fotos_por_memorias_usuario(usuario_id) or {}
+    except Exception as exc:
+        print("Erro ao carregar fotos do perfil da pessoa:", exc)
+        fotos_por_memoria = {}
+
+    try:
+        videos_por_memoria = db.listar_videos_por_memorias_usuario(usuario_id) or {}
+    except Exception as exc:
+        print("Erro ao carregar vídeos do perfil da pessoa:", exc)
+        videos_por_memoria = {}
+
+    contribuicoes_por_memoria = carregar_contribuicoes_aprovadas_memorias(usuario_id)
+    nome_norm = normalizar(nome_exibido)
+    email_norm = texto_limpo(contato.get("email")).lower()
+    contribuicoes_relacionadas = []
+    for memoria_id, contribuicoes in contribuicoes_por_memoria.items():
+        for contribuicao in contribuicoes:
+            contrib_nome_norm = normalizar(contribuicao.get("contribuidor_nome") or "")
+            contrib_email_norm = texto_limpo(contribuicao.get("contribuidor_email")).lower()
+            mesma_pessoa = (
+                (nome_norm and (nome_norm in contrib_nome_norm or contrib_nome_norm in nome_norm))
+                or (email_norm and email_norm == contrib_email_norm)
+            )
+            if mesma_pessoa or memoria_id in ids_memorias:
+                item = dict(contribuicao)
+                item["memoria_id"] = memoria_id
+                contribuicoes_relacionadas.append(item)
+
+    categorias = []
+    for memoria in memorias_relacionadas:
+        categoria = texto_limpo(memoria.get("categoria"))
+        if categoria and categoria not in categorias:
+            categorias.append(categoria)
+    tags = [("❤️", relacao)] if relacao else []
+    mapa_categorias = {
+        "familia": "❤️",
+        "viagens": "✈️",
+        "viagem": "✈️",
+        "trabalho": "💼",
+        "fe": "✝️",
+        "historias da vida": "📖",
+    }
+    for categoria in categorias[:4]:
+        tags.append((mapa_categorias.get(normalizar(categoria), "🏷️"), categoria))
+
+    def chips_html() -> str:
+        if not tags:
+            return '<span class="ae-person-profile-chip">🏷️ Pessoa importante</span>'
+        return "".join(
+            f'<span class="ae-person-profile-chip">{icone} {html.escape(label)}</span>'
+            for icone, label in tags[:5]
+        )
+
+    def memoria_thumb(memoria: dict) -> str:
+        for foto in fotos_por_memoria.get(memoria.get("id"), []):
+            src = imagem_src(foto.get("caminho"))
+            if src:
+                alt = html.escape(foto.get("titulo") or memoria.get("titulo") or "História")
+                return f'<img src="{html.escape(src)}" alt="{alt}">'
+        return '<div class="ae-person-story-fallback">📖</div>'
+
+    def avatar_html(pessoa: dict, classe: str = "ae-person-profile-avatar") -> str:
+        nome = texto_limpo(pessoa.get("nome_completo")) or texto_limpo(pessoa.get("nome")) or "Pessoa"
+        src = imagem_src(pessoa.get("foto_perfil") or "")
+        if src:
+            return f'<img class="{classe}" src="{html.escape(src)}" alt="{html.escape(nome)}">'
+        return f'<div class="{classe}">{html.escape(nome[:1].upper() or "P")}</div>'
+
+    def story_card_html(memoria: dict, compacto: bool = False) -> str:
+        titulo = html.escape(texto_limpo(memoria.get("titulo"), "História sem título"))
+        data = data_curta(memoria.get("data_evento") or memoria.get("data_criacao"))
+        pessoas = texto_limpo(memoria.get("pessoas_relacionadas"))
+        qtd_pessoas = len([p for p in re.split(r"[,;]", pessoas) if p.strip()]) if pessoas else 1
+        classe = "ae-person-story-card ae-person-story-card-compact" if compacto else "ae-person-story-card"
+        return f"""
+        <div class="{classe}">
+            <div class="ae-person-story-media">{memoria_thumb(memoria)}</div>
+            <div class="ae-person-story-body">
+                <strong>{titulo}</strong>
+                <span>Atualizada em {html.escape(data) if data else "data não informada"}</span>
+                <em>👥 {qtd_pessoas}</em>
+            </div>
+        </div>
+        """
+
+    def montar_eventos() -> list:
+        eventos = []
+        if nascimento:
+            eventos.append({
+                "ano": ano_de(contato.get("data_nascimento")) or nascimento[-4:],
+                "titulo": "Nascimento",
+                "descricao": f"{nome_exibido} nasceu em {nascimento}.",
+                "icone": "👤",
+                "imagem": foto_src,
+            })
+        for memoria in memorias_relacionadas[:6]:
+            data_evento = memoria.get("data_evento") or memoria.get("data_criacao")
+            fotos_memoria = fotos_por_memoria.get(memoria.get("id")) or []
+            eventos.append({
+                "ano": ano_de(data_evento) or "História",
+                "titulo": texto_limpo(memoria.get("titulo"), "Aparição em história"),
+                "descricao": resumo(memoria.get("conteudo"), 96),
+                "icone": "📖",
+                "imagem": imagem_src(fotos_memoria[0].get("caminho", "")) if fotos_memoria else "",
+            })
+        for contribuicao in contribuicoes_relacionadas[:3]:
+            eventos.append({
+                "ano": ano_de(contribuicao.get("criado_em")) or "Agora",
+                "titulo": "Contribuição",
+                "descricao": resumo(contribuicao.get("texto") or "Contribuição enviada para uma história.", 96),
+                "icone": "🤝",
+                "imagem": imagem_src(contribuicao.get("arquivo_url") or ""),
+            })
+        return eventos[:8]
+
+    eventos = montar_eventos()
+    relacoes_familia = {
+        "mae", "mãe", "pai", "filho(a)", "filha", "filho", "conjuge", "cônjuge",
+        "irmao(a)", "irmão(ã)", "irma", "irmã", "irmao", "irmão", "avo", "avó", "avô",
+        "neto(a)", "neto", "neta",
+    }
+    familiares = [
+        pessoa for pessoa in contatos
+        if pessoa.get("id") != contato.get("id")
+        and normalizar(texto_limpo(pessoa.get("parentesco"))) in {normalizar(r) for r in relacoes_familia}
+    ][:5]
+
+    if st.button("← Voltar para Pessoas", key="voltar_lista_pessoas", use_container_width=False):
+        st.session_state.pop("perfil_pessoa_id", None)
+        st.session_state.pop("perfil_pessoa_tab", None)
+        st.rerun()
+
+    st.markdown(
+        f"""
+        <div class="ae-person-profile-hero">
+            <div class="ae-person-profile-photo">
+                {f'<img src="{html.escape(foto_src)}" alt="{html.escape(nome_exibido)}">' if foto_src else f'<div>{inicial}</div>'}
+            </div>
+            <div class="ae-person-profile-main">
+                <h1>{html.escape(primeiro_nome)} <span>✹</span></h1>
+                <p>{html.escape(texto_limpo(contato.get("observacoes"), "Pessoa importante dentro da sua história."))}</p>
+                <div class="ae-person-profile-facts">
+                    {f'<span>🗓️ {html.escape(nascimento)}</span>' if nascimento else ''}
+                    {f'<span>📍 {html.escape(texto_limpo(contato.get("local")))}</span>' if texto_limpo(contato.get("local")) else ''}
+                    <span>♡ {html.escape(relacao)}</span>
+                </div>
+                <div class="ae-person-profile-chips">{chips_html()}<span class="ae-person-profile-chip ae-plus">＋</span></div>
+            </div>
+            <div class="ae-person-profile-actions">
+                <button>✎ Editar perfil</button>
+                <button>⋮</button>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    abas = [
+        ("visao", "▦ Visão Geral"),
+        ("historias", "📖 Histórias"),
+        ("linha", "☷ Linha do Tempo"),
+        ("midia", "▧ Fotos e Vídeos"),
+        ("contribuicoes", "♙ Contribuições"),
+        ("destaques", "♕ Momentos em Destaque"),
+    ]
+    aba_atual = st.session_state.get("perfil_pessoa_tab", "visao")
+    aba_cols = st.columns(len(abas))
+    for indice, (chave, label) in enumerate(abas):
+        with aba_cols[indice]:
+            if st.button(label, key=f"perfil_pessoa_tab_{chave}", use_container_width=True):
+                st.session_state.perfil_pessoa_tab = chave
+                st.rerun()
+    st.markdown(f"<div class='ae-person-profile-tabs-marker is-{html.escape(aba_atual)}'></div>", unsafe_allow_html=True)
+
+    def render_linha_tempo(limitado: bool = False):
+        itens = eventos[:3] if limitado else eventos
+        if not itens:
+            st.markdown("<div class='ae-person-empty-card'>Ainda não há eventos reais ligados a esta pessoa.</div>", unsafe_allow_html=True)
+            return
+        html_eventos = []
+        for evento in itens:
+            imagem = f'<img src="{html.escape(evento["imagem"])}" alt="{html.escape(evento["titulo"])}">' if evento.get("imagem") else ""
+            html_eventos.append(
+                f"""
+                <div class="ae-person-timeline-item">
+                    <div class="ae-person-timeline-icon">{html.escape(evento.get("icone") or "•")}</div>
+                    <div>
+                        <strong>{html.escape(str(evento.get("ano") or ""))}</strong>
+                        <h4>{html.escape(evento.get("titulo") or "")}</h4>
+                        <p>{html.escape(evento.get("descricao") or "")}</p>
+                    </div>
+                    {imagem}
+                </div>
+                """
+            )
+        st.markdown("".join(html_eventos), unsafe_allow_html=True)
+
+    def render_familia():
+        if not familiares:
+            st.markdown("<div class='ae-person-empty-card'>Nenhuma relação familiar cadastrada ainda.</div>", unsafe_allow_html=True)
+            return
+        cols = st.columns(min(5, len(familiares)))
+        for idx, pessoa in enumerate(familiares):
+            nome = texto_limpo(pessoa.get("nome")) or texto_limpo(pessoa.get("nome_completo"), "Pessoa")
+            with cols[idx]:
+                st.markdown(
+                    f"""
+                    <div class="ae-person-family-avatar">
+                        {avatar_html(pessoa, "ae-person-family-photo")}
+                        <strong>{html.escape(nome)}</strong>
+                        <span>{html.escape(texto_limpo(pessoa.get("parentesco"), "Relação"))}</span>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+                if st.button("Abrir", key=f"abrir_familiar_{pessoa.get('id')}", use_container_width=True):
+                    st.session_state.perfil_pessoa_id = pessoa.get("id")
+                    st.session_state.perfil_pessoa_tab = "visao"
+                    st.rerun()
+
+    def render_contribuicoes_lista(limitado: bool = False):
+        itens = contribuicoes_relacionadas[:4] if limitado else contribuicoes_relacionadas
+        if not itens:
+            st.markdown("<div class='ae-person-empty-card'>Ainda não há contribuições reais associadas a esta pessoa.</div>", unsafe_allow_html=True)
+            return
+        linhas = []
+        for item in itens:
+            nome = html.escape(texto_limpo(item.get("contribuidor_nome"), nome_exibido))
+            data = data_curta(item.get("criado_em"))
+            texto = html.escape(resumo(item.get("texto") or item.get("arquivo_nome") or "Contribuição enviada.", 78))
+            linhas.append(
+                f"""
+                <div class="ae-person-contrib-row">
+                    <div>{html.escape((nome or "P")[:1].upper())}</div>
+                    <p><strong>{nome}</strong><br>{texto}</p>
+                    <span>{html.escape(data)}</span>
+                </div>
+                """
+            )
+        st.markdown("".join(linhas), unsafe_allow_html=True)
+
+    def render_historias_grid(limitado: bool = False):
+        itens = memorias_relacionadas[:3] if limitado else memorias_relacionadas
+        if not itens:
+            st.markdown("<div class='ae-person-empty-card'>Nenhuma história real encontrada para esta pessoa.</div>", unsafe_allow_html=True)
+            return
+        st.markdown(
+            f"<div class='ae-person-stories-grid'>{''.join(story_card_html(memoria, compacto=limitado) for memoria in itens)}</div>",
+            unsafe_allow_html=True,
+        )
+
+    def render_midia():
+        fotos = []
+        videos = []
+        for memoria_id in ids_memorias:
+            fotos.extend(fotos_por_memoria.get(memoria_id, []))
+            videos.extend(videos_por_memoria.get(memoria_id, []))
+        filtro = st.radio(
+            "Filtrar mídia",
+            ["Todos", "Fotos", "Vídeos"],
+            horizontal=True,
+            key=f"perfil_midia_filtro_{contato.get('id')}",
+            label_visibility="collapsed",
+        )
+        cards = []
+        if filtro in ("Todos", "Fotos"):
+            for foto in fotos:
+                src = imagem_src(foto.get("caminho"))
+                if src:
+                    cards.append(f"<div class='ae-person-media-card'><img src='{html.escape(src)}'><strong>{html.escape(texto_limpo(foto.get('titulo'), 'Foto'))}</strong></div>")
+        if filtro in ("Todos", "Vídeos"):
+            for video in videos:
+                cards.append(f"<div class='ae-person-media-card ae-video'><div>▶</div><strong>{html.escape(texto_limpo(video.get('titulo'), 'Vídeo'))}</strong></div>")
+        if not cards:
+            st.markdown("<div class='ae-person-empty-card'>Nenhuma foto ou vídeo associado a esta pessoa.</div>", unsafe_allow_html=True)
+            return
+        st.markdown(f"<div class='ae-person-media-grid'>{''.join(cards)}</div>", unsafe_allow_html=True)
+
+    aba_atual = st.session_state.get("perfil_pessoa_tab", "visao")
+    if aba_atual == "visao":
+        col_sobre, col_linha, col_lateral = st.columns([0.22, 0.43, 0.35])
+        with col_sobre:
+            st.markdown(
+                f"""
+                <div class="ae-person-panel ae-person-about-panel">
+                    <h3>Sobre {html.escape(primeiro_nome)}</h3>
+                    <p>{html.escape(texto_limpo(contato.get("observacoes"), "Nenhuma descrição adicionada ainda."))}</p>
+                    <div class="ae-person-added-by">
+                        <span>{html.escape(st.session_state.usuario_atual.get("nome", "Você")[:1].upper())}</span>
+                        <div>Adicionado por você<br>{html.escape(data_curta(contato.get("criado_em")) or "data não informada")}</div>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with col_linha:
+            st.markdown("<div class='ae-person-panel'><div class='ae-person-panel-title'><h3>Linha do Tempo</h3><span>Ver tudo</span></div>", unsafe_allow_html=True)
+            render_linha_tempo(limitado=True)
+            st.markdown("</div>", unsafe_allow_html=True)
+        with col_lateral:
+            st.markdown("<div class='ae-person-panel'><div class='ae-person-panel-title'><h3>Família</h3><span>Ver árvore completa</span></div>", unsafe_allow_html=True)
+            render_familia()
+            st.markdown("</div>", unsafe_allow_html=True)
+            st.markdown("<div class='ae-person-panel ae-person-side-panel'><div class='ae-person-panel-title'><h3>Contribuições recentes</h3><span>Ver todas</span></div>", unsafe_allow_html=True)
+            render_contribuicoes_lista(limitado=True)
+            st.markdown("</div>", unsafe_allow_html=True)
+
+        col_hist, col_dest = st.columns([0.62, 0.38])
+        with col_hist:
+            st.markdown(f"<div class='ae-person-panel'><div class='ae-person-panel-title'><h3>Histórias de {html.escape(primeiro_nome)}</h3><span>Ver todas</span></div>", unsafe_allow_html=True)
+            render_historias_grid(limitado=True)
+            st.markdown("</div>", unsafe_allow_html=True)
+        with col_dest:
+            st.markdown("<div class='ae-person-panel'><div class='ae-person-panel-title'><h3>Momentos em destaque</h3><span>Ver todos</span></div>", unsafe_allow_html=True)
+            render_historias_grid(limitado=True)
+            st.markdown("</div>", unsafe_allow_html=True)
+    elif aba_atual == "historias":
+        st.markdown(f"<div class='ae-person-panel'><h3>Histórias de {html.escape(primeiro_nome)}</h3>", unsafe_allow_html=True)
+        render_historias_grid()
+        st.markdown("</div>", unsafe_allow_html=True)
+    elif aba_atual == "linha":
+        st.markdown("<div class='ae-person-panel'><h3>Linha do Tempo</h3>", unsafe_allow_html=True)
+        render_linha_tempo()
+        st.markdown("</div>", unsafe_allow_html=True)
+    elif aba_atual == "midia":
+        st.markdown("<div class='ae-person-panel'><h3>Fotos e Vídeos</h3>", unsafe_allow_html=True)
+        render_midia()
+        st.markdown("</div>", unsafe_allow_html=True)
+    elif aba_atual == "contribuicoes":
+        st.markdown("<div class='ae-person-panel'><h3>Contribuições</h3>", unsafe_allow_html=True)
+        render_contribuicoes_lista()
+        st.markdown("</div>", unsafe_allow_html=True)
+    else:
+        st.markdown("<div class='ae-person-panel'><h3>Momentos em Destaque</h3>", unsafe_allow_html=True)
+        render_historias_grid()
+        st.markdown("</div>", unsafe_allow_html=True)
+
+
 def render_contatos():
     usuario_id = st.session_state.usuario_atual['id']
     plano = db.obter_plano_usuario(usuario_id)
@@ -1867,6 +2285,17 @@ def render_contatos():
     prioridades_atual = db.contar_contatos_prioritarios(usuario_id)
     max_prioridades = plano.get("max_prioridades", 3) if plano else 3
     contatos = db.listar_contatos_usuario(usuario_id)
+
+    perfil_pessoa_id = st.session_state.get("perfil_pessoa_id")
+    if perfil_pessoa_id:
+        contato_perfil = next(
+            (contato for contato in contatos if str(contato.get("id")) == str(perfil_pessoa_id)),
+            None,
+        )
+        if contato_perfil:
+            render_perfil_pessoa_vivo(contato_perfil, contatos, usuario_id)
+            return
+        st.session_state.pop("perfil_pessoa_id", None)
 
     cab_col, acao_col = st.columns([0.72, 0.28], vertical_alignment="center")
     with cab_col:
@@ -2234,6 +2663,10 @@ def render_contatos():
                     """,
                     unsafe_allow_html=True,
                 )
+                if st.button("Ver perfil", key=f"abrir_perfil_pessoa_{contato.get('id')}", use_container_width=True):
+                    st.session_state.perfil_pessoa_id = contato.get("id")
+                    st.session_state.perfil_pessoa_tab = "visao"
+                    st.rerun()
     try:
         convites = db.listar_convites_pessoas(usuario_id, limite=4)
     except Exception as exc:

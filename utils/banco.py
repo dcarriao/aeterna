@@ -1250,9 +1250,27 @@ class BancoDados:
     def listar_contatos_usuario(self, usuario_id: int) -> List[Dict]:
         conn = self.conectar()
         cursor = conn.cursor()
-        self.executar(cursor,'''
+        colunas_extra = []
+        try:
+            self.executar(cursor, """
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_name = 'contatos'
+            """)
+            colunas_extra = [r[0] for r in cursor.fetchall()]
+        except Exception:
+            colunas_extra = []
+
+        tem_foto_perfil = "foto_perfil" in colunas_extra
+        tem_data_criacao = "data_criacao" in colunas_extra
+        select_foto = ", foto_perfil" if tem_foto_perfil else ", NULL AS foto_perfil"
+        select_data = ", data_criacao" if tem_data_criacao else ", NULL AS data_criacao"
+
+        self.executar(cursor, f'''
             SELECT id, nome, sobrenome, email, telefone, whatsapp, parentesco, 
                    data_nascimento, datas_especiais, is_prioridade, prioridade_order, acesso_central_luto, chave_acesso
+                   {select_foto}
+                   {select_data}
             FROM contatos WHERE usuario_id = ? ORDER BY prioridade_order, nome
         ''', (usuario_id,))
         rows = cursor.fetchall()
@@ -1271,7 +1289,9 @@ class BancoDados:
             "is_prioridade": r[9] or 0,
             "prioridade_order": r[10] or 0,
             "acesso_central_luto": r[11] or 0,
-            "chave_acesso": r[12] or ""
+            "chave_acesso": r[12] or "",
+            "foto_perfil": r[13] or "",
+            "criado_em": r[14] or "",
         } for r in rows]
 
     def listar_memorias_por_contato(self, contato_id: int) -> List[Dict]:
