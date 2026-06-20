@@ -3849,61 +3849,239 @@ def render_novidades(
         historias_compartilhadas: list,
         contribuicoes_pendentes: int,
 ):
-    st.markdown("## 🔔 Novidades")
-    total_historias = sum(
-        int((historia.get("novidades") or {}).get("total", 0) or 0)
-        for historia in historias_compartilhadas
+    st.markdown(
+        """
+        <div class="ae-news-hero">
+            <div>
+                <h1>🔔 Novidades</h1>
+                <p>Acompanhe tudo o que aconteceu nas histórias que importam para você.</p>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
-    if not total_historias and not contribuicoes_pendentes:
-        st.info("Sem novidades por enquanto. Quando alguém compartilhar um novo momento, ele aparecerá aqui.")
-        return
+    filtro = st.session_state.get("novidades_filtro", "todas")
+    filtro_cols = st.columns([0.9, 1.35, 1.65, 1.25, 4], gap="small")
+    for indice, (chave, rotulo) in enumerate([
+        ("todas", "▦ Todas"),
+        ("minhas", "📖 Minhas histórias"),
+        ("compartilhadas", "♡ Compartilhadas comigo"),
+        ("contribuicoes", "☆ Contribuições"),
+    ]):
+        with filtro_cols[indice]:
+            if st.button(
+                rotulo,
+                key=f"novidades_filtro_{chave}",
+                type="primary" if filtro == chave else "secondary",
+                use_container_width=True,
+            ):
+                st.session_state.novidades_filtro = chave
+                st.rerun()
 
-    if total_historias:
-        for historia in historias_compartilhadas:
-            novidades = historia.get("novidades") or {}
-            if int(novidades.get("total", 0) or 0):
-                nome = historia.get("nome_completo") or historia.get("nome") or "Pessoa"
-                detalhes = formatar_novidades_historia(novidades)
-                st.markdown(
-                    f"""
-                    <div class="ae-activity-card">
-                        <div class="ae-activity-icon">📖</div>
-                        <div>
-                            <div class="ae-card-label">Histórias compartilhadas</div>
-                            <h3>{html.escape(nome)} adicionou novos momentos</h3>
-                            <p>{html.escape(detalhes)}</p>
-                        </div>
+    def inicial_nome(nome: str) -> str:
+        partes = [parte for parte in str(nome or "Pessoa").split() if parte]
+        if len(partes) >= 2:
+            return (partes[0][:1] + partes[-1][:1]).upper()
+        return (partes[0][:2] if partes else "P").upper()
+
+    def imagem_src(caminho: str) -> str:
+        try:
+            if not caminho:
+                return ""
+            if caminho.startswith(("http://", "https://")):
+                return caminho
+            if not os.path.exists(caminho):
+                return ""
+            mime_type = mimetypes.guess_type(caminho)[0] or "image/jpeg"
+            with open(caminho, "rb") as arquivo:
+                encoded = base64.b64encode(arquivo.read()).decode("ascii")
+            return f"data:{mime_type};base64,{encoded}"
+        except Exception as exc:
+            print("Erro ao preparar imagem de novidade:", exc)
+            return ""
+
+    def texto_relativo(valor) -> str:
+        if not valor:
+            return "recentemente"
+        try:
+            data = datetime.fromisoformat(str(valor).replace("Z", "+00:00")) if isinstance(valor, str) else valor
+            agora = datetime.now(data.tzinfo) if getattr(data, "tzinfo", None) else datetime.now()
+            delta = agora - data
+            if delta.days <= 0:
+                horas = max(1, int(delta.total_seconds() // 3600))
+                return f"há {horas} hora" if horas == 1 else f"há {horas} horas"
+            return "há 1 dia" if delta.days == 1 else f"há {delta.days} dias"
+        except Exception:
+            return str(valor)[:10]
+
+    def grupo_data(valor) -> str:
+        try:
+            data = datetime.fromisoformat(str(valor).replace("Z", "+00:00")) if isinstance(valor, str) else valor
+            hoje = (datetime.now(data.tzinfo).date() if getattr(data, "tzinfo", None) else datetime.now().date())
+            dias = (hoje - data.date()).days
+            if dias <= 0:
+                return "Hoje"
+            if dias == 1:
+                return "Ontem"
+            if dias <= 7:
+                return "Esta semana"
+            return "Semana passada"
+        except Exception:
+            return "Recentes"
+
+    eventos = []
+    totais = {"historias": 0, "lembrancas": 0, "comentarios": 0, "convites": int(contribuicoes_pendentes or 0), "mencoes": 0}
+    atividades_por_pessoa = {}
+    destaques = []
+
+    for historia in historias_compartilhadas:
+        nome = historia.get("nome_completo") or historia.get("nome") or "Pessoa"
+        novidades = historia.get("novidades") or {}
+        total = int(novidades.get("total", 0) or 0)
+        if not total:
+            continue
+        memorias = db.listar_memorias_por_contato(historia.get("contato_id"))
+        fotos = db.listar_fotos_por_contato(historia.get("contato_id"))
+        memoria = memorias[0] if memorias else {}
+        titulo = memoria.get("titulo") or "história compartilhada"
+        data_evento = memoria.get("data_criacao")
+        fotos_count = int(novidades.get("fotos", 0) or 0)
+        texto = (
+            f"{nome} adicionou {fotos_count} {'nova foto' if fotos_count == 1 else 'novas fotos'} em"
+            if fotos_count
+            else f"{nome} compartilhou uma nova história"
+        )
+        eventos.append({
+            "tipo": "foto" if fotos_count else "historia",
+            "origem": "compartilhadas",
+            "pessoa": nome,
+            "titulo": titulo,
+            "texto": texto,
+            "tempo": texto_relativo(data_evento),
+            "grupo": grupo_data(data_evento),
+            "data": data_evento or datetime.now(),
+            "trecho": memoria.get("conteudo") or "",
+            "fotos": fotos[:4],
+            "historia": historia,
+        })
+        totais["historias"] += total
+        totais["lembrancas"] += int(novidades.get("memorias", 0) or 0)
+        atividades_por_pessoa[nome] = atividades_por_pessoa.get(nome, 0) + total
+        if memoria:
+            destaques.append({"titulo": titulo, "motivo": "Atualizada hoje", "foto": fotos[0] if fotos else {}})
+
+    try:
+        contribuicoes = db.listar_contribuicoes_pendentes(st.session_state.usuario_atual["id"])
+    except Exception as exc:
+        print("Erro ao listar contribuições para novidades:", exc)
+        contribuicoes = []
+
+    for contribuicao in contribuicoes:
+        nome = contribuicao.get("contribuidor_nome") or "Pessoa convidada"
+        titulo = contribuicao.get("memoria_titulo") or "história"
+        criado_em = contribuicao.get("criado_em")
+        eventos.append({
+            "tipo": "convite",
+            "origem": "contribuicoes",
+            "pessoa": nome,
+            "titulo": titulo,
+            "texto": f"{nome} enviou uma contribuição em",
+            "tempo": texto_relativo(criado_em),
+            "grupo": grupo_data(criado_em),
+            "data": criado_em or datetime.now(),
+            "trecho": contribuicao.get("texto") or "Contribuição aguardando aprovação.",
+            "fotos": [],
+            "contribuicao": contribuicao,
+        })
+        atividades_por_pessoa[nome] = atividades_por_pessoa.get(nome, 0) + 1
+
+    if filtro == "compartilhadas":
+        eventos = [evento for evento in eventos if evento["origem"] == "compartilhadas"]
+    elif filtro == "contribuicoes":
+        eventos = [evento for evento in eventos if evento["origem"] == "contribuicoes"]
+    elif filtro == "minhas":
+        eventos = []
+
+    eventos.sort(key=lambda item: str(item.get("data") or ""), reverse=True)
+    main_col, side_col = st.columns([0.68, 0.32], gap="large")
+
+    with main_col:
+        if not eventos:
+            st.markdown(
+                '<div class="ae-news-empty"><strong>Sem novidades por enquanto.</strong><span>Quando algo importante acontecer nas suas histórias, aparecerá aqui.</span></div>',
+                unsafe_allow_html=True,
+            )
+        grupo_atual = None
+        for indice, evento in enumerate(eventos[:12]):
+            if evento["grupo"] != grupo_atual:
+                grupo_atual = evento["grupo"]
+                st.markdown(f'<h3 class="ae-news-date">{html.escape(grupo_atual)}</h3>', unsafe_allow_html=True)
+            fotos_html = ""
+            for foto in evento.get("fotos", [])[:3]:
+                src = imagem_src(foto.get("caminho") or foto.get("caminho_arquivo") or "")
+                if src:
+                    fotos_html += f'<img src="{html.escape(src, quote=True)}" alt="Miniatura">'
+            if len(evento.get("fotos", [])) > 3:
+                fotos_html += f'<span class="ae-news-more">+{len(evento.get("fotos", [])) - 3}</span>'
+            midia_html = f'<div class="ae-news-media">{fotos_html}</div>' if fotos_html else ""
+            trecho_html = f'<div class="ae-news-quote">{html.escape(evento.get("trecho") or "")[:160]}</div>' if evento.get("trecho") else ""
+            icone = {"foto": "🖼️", "historia": "📖", "convite": "👥"}.get(evento["tipo"], "⭐")
+            st.markdown(
+                f"""
+                <div class="ae-news-event">
+                    <div class="ae-news-timeline-icon">{icone}</div>
+                    <div class="ae-news-avatar">{html.escape(inicial_nome(evento['pessoa']))}</div>
+                    <div class="ae-news-event-body">
+                        <h3>{html.escape(evento['texto'])} <strong>“{html.escape(evento['titulo'])}”</strong></h3>
+                        <span>{html.escape(evento['tempo'])}</span>
+                        {trecho_html}
+                        {midia_html}
                     </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-                if st.button(
-                    "Ver história",
-                    key=f"novidade_historia_{historia['usuario_id']}",
-                    use_container_width=True,
-                ):
-                    selecionar_historia_compartilhada(historia)
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            if evento["origem"] == "compartilhadas":
+                if st.button("Explorar história", key=f"news_open_shared_{indice}_{evento['historia']['usuario_id']}", use_container_width=False):
+                    selecionar_historia_compartilhada(evento["historia"])
                     st.session_state.pagina_atual = "historias_compartilhadas"
                     st.rerun()
+            elif evento["origem"] == "contribuicoes":
+                if st.button("Avaliar contribuição", key=f"news_open_contrib_{evento['contribuicao']['id']}", use_container_width=False):
+                    navegar_para("contribuicoes")
+                    st.rerun()
 
-    if contribuicoes_pendentes:
-        st.markdown(
-            f"""
-            <div class="ae-activity-card">
-                <div class="ae-activity-icon">🤝</div>
-                <div>
-                    <div class="ae-card-label">Contribuições</div>
-                    <h3>Há lembranças aguardando sua revisão</h3>
-                    <p>{contribuicoes_pendentes} {'contribuição enviada por uma pessoa convidada' if contribuicoes_pendentes == 1 else 'contribuições enviadas por pessoas convidadas'}.</p>
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
+        if len(eventos) > 12:
+            st.button("Carregar mais novidades ↓", key="news_load_more", use_container_width=True)
+
+    with side_col:
+        resumo_html = "".join(
+            f'<div class="ae-news-summary-row"><span>{icone}</span><p>{label}</p><strong>{valor}</strong></div>'
+            for icone, label, valor in (
+                ("🖼️", "Histórias atualizadas", totais["historias"]),
+                ("✏️", "Lembranças escritas", totais["lembrancas"]),
+                ("💬", "Comentários", totais["comentarios"]),
+                ("👥", "Convites / Participações", totais["convites"]),
+                ("⭐", "Menções", totais["mencoes"]),
+            )
         )
-        if st.button("Avaliar", use_container_width=True):
-            navegar_para("contribuicoes")
-            st.rerun()
+        st.markdown(f'<div class="ae-news-side-card"><h3>Resumo rápido</h3>{resumo_html}</div>', unsafe_allow_html=True)
+
+        ranking_html = "".join(
+            f'<div class="ae-news-person-row"><div class="ae-news-person-avatar">{html.escape(inicial_nome(nome))}</div><div><strong>{html.escape(nome)}</strong><span>{total} atividades</span></div></div>'
+            for nome, total in sorted(atividades_por_pessoa.items(), key=lambda item: item[1], reverse=True)[:5]
+        ) or '<div class="ae-news-muted">Sem atividades por pessoa ainda.</div>'
+        st.markdown(f'<div class="ae-news-side-card"><h3>Atividades por pessoa</h3>{ranking_html}<b>Ver todas as pessoas ›</b></div>', unsafe_allow_html=True)
+
+        destaques_html = ""
+        for destaque in destaques[:5]:
+            src = imagem_src((destaque.get("foto") or {}).get("caminho") or (destaque.get("foto") or {}).get("caminho_arquivo") or "")
+            thumb = f'<img src="{html.escape(src, quote=True)}" alt="Destaque">' if src else "<span>📖</span>"
+            destaques_html += f'<div class="ae-news-highlight-row"><div>{thumb}</div><p><strong>{html.escape(destaque["titulo"])}</strong><span>{html.escape(destaque["motivo"])}</span></p></div>'
+        destaques_html = destaques_html or '<div class="ae-news-muted">Sem histórias em destaque ainda.</div>'
+        st.markdown(f'<div class="ae-news-side-card"><h3>Histórias em destaque</h3>{destaques_html}<b>Ver todas as histórias ›</b></div>', unsafe_allow_html=True)
+        st.markdown('<div class="ae-news-brand-card"><div>♡</div><p>“Cada novidade é um novo capítulo da nossa história juntos.”</p><strong>aEterna</strong></div>', unsafe_allow_html=True)
 
 
 # ============================================================================
