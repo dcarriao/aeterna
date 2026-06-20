@@ -2180,6 +2180,28 @@ div[data-testid="stPopover"] {
     padding: 0 1rem;
 }
 
+.st-key-ae_person_profile_tabs [data-testid="stButton"] button {
+    min-height: 34px !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    color: #21104B !important;
+    font-size: 0.82rem !important;
+    font-weight: 850 !important;
+    padding: 0.25rem 0.2rem 0.55rem !important;
+    justify-content: flex-start !important;
+}
+
+.st-key-ae_person_profile_tabs [data-testid="stButton"] button:hover {
+    background: rgba(104,72,164,0.06) !important;
+    color: #6848A4 !important;
+}
+
+.st-key-ae_person_profile_tabs [data-testid="stButton"] button p {
+    white-space: nowrap !important;
+}
+
 .ae-person-profile-tabs-marker {
     height: 1px;
     background: rgba(104,72,164,0.14);
@@ -2194,6 +2216,46 @@ div[data-testid="stPopover"] {
     padding: 1rem;
     box-shadow: 0 12px 34px rgba(43,23,71,0.055);
     margin-bottom: 0.9rem;
+}
+
+.st-key-ae_person_panel_sobre,
+.st-key-ae_person_panel_linha,
+.st-key-ae_person_panel_familia,
+.st-key-ae_person_panel_contribs,
+.st-key-ae_person_panel_historias,
+.st-key-ae_person_panel_destaques {
+    background: rgba(255,255,255,0.74);
+    border: 1px solid rgba(212,168,79,0.17);
+    border-radius: 14px;
+    padding: 1rem;
+    box-shadow: 0 12px 34px rgba(43,23,71,0.055);
+    margin-bottom: 0.9rem;
+}
+
+.st-key-ae_person_panel_sobre {
+    min-height: 420px;
+}
+
+.st-key-ae_person_panel_contribs {
+    margin-top: 0.85rem;
+}
+
+.st-key-ae_person_panel_sobre h3,
+.st-key-ae_person_panel_linha h3,
+.st-key-ae_person_panel_familia h3,
+.st-key-ae_person_panel_contribs h3,
+.st-key-ae_person_panel_historias h3,
+.st-key-ae_person_panel_destaques h3 {
+    margin: 0 0 0.7rem !important;
+    color: #21104B !important;
+    font-size: 1.02rem !important;
+    font-weight: 950 !important;
+}
+
+.st-key-ae_person_panel_sobre p {
+    color: #2B1747;
+    line-height: 1.72;
+    font-size: 0.92rem;
 }
 
 .ae-person-panel h3,
@@ -2328,6 +2390,18 @@ div[data-testid="stPopover"] {
     display: block;
     color: #514A6B;
     font-size: 0.68rem;
+}
+
+[class*="st-key-abrir_familiar_"] [data-testid="stButton"] button {
+    min-height: 26px !important;
+    background: transparent !important;
+    border: 1px solid rgba(104,72,164,0.18) !important;
+    color: #21104B !important;
+    border-radius: 8px !important;
+    font-size: 0.68rem !important;
+    font-weight: 850 !important;
+    padding: 0.08rem 0.35rem !important;
+    box-shadow: none !important;
 }
 
 .ae-person-contrib-row {

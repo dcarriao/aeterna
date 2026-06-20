@@ -6,6 +6,7 @@ import base64
 import mimetypes
 import re
 import unicodedata
+from textwrap import dedent
 from datetime import datetime
 import secrets
 from utils.banco import BancoDados
@@ -2072,7 +2073,7 @@ def render_perfil_pessoa_vivo(contato: dict, contatos: list, usuario_id: int):
         st.rerun()
 
     st.markdown(
-        f"""
+        dedent(f"""
         <div class="ae-person-profile-hero">
             <div class="ae-person-profile-photo">
                 {f'<img src="{html.escape(foto_src)}" alt="{html.escape(nome_exibido)}">' if foto_src else f'<div>{inicial}</div>'}
@@ -2092,7 +2093,7 @@ def render_perfil_pessoa_vivo(contato: dict, contatos: list, usuario_id: int):
                 <button>⋮</button>
             </div>
         </div>
-        """,
+        """).strip(),
         unsafe_allow_html=True,
     )
 
@@ -2105,12 +2106,14 @@ def render_perfil_pessoa_vivo(contato: dict, contatos: list, usuario_id: int):
         ("destaques", "♕ Momentos em Destaque"),
     ]
     aba_atual = st.session_state.get("perfil_pessoa_tab", "visao")
-    aba_cols = st.columns(len(abas))
-    for indice, (chave, label) in enumerate(abas):
-        with aba_cols[indice]:
-            if st.button(label, key=f"perfil_pessoa_tab_{chave}", use_container_width=True):
-                st.session_state.perfil_pessoa_tab = chave
-                st.rerun()
+    with st.container(key="ae_person_profile_tabs"):
+        aba_cols = st.columns(len(abas))
+        for indice, (chave, label) in enumerate(abas):
+            with aba_cols[indice]:
+                texto_aba = f"● {label}" if chave == aba_atual else label
+                if st.button(texto_aba, key=f"perfil_pessoa_tab_{chave}", use_container_width=True):
+                    st.session_state.perfil_pessoa_tab = chave
+                    st.rerun()
     st.markdown(f"<div class='ae-person-profile-tabs-marker is-{html.escape(aba_atual)}'></div>", unsafe_allow_html=True)
 
     def render_linha_tempo(limitado: bool = False):
@@ -2221,40 +2224,39 @@ def render_perfil_pessoa_vivo(contato: dict, contatos: list, usuario_id: int):
     if aba_atual == "visao":
         col_sobre, col_linha, col_lateral = st.columns([0.22, 0.43, 0.35])
         with col_sobre:
-            st.markdown(
-                f"""
-                <div class="ae-person-panel ae-person-about-panel">
+            with st.container(key="ae_person_panel_sobre"):
+                st.markdown(
+                    f"""
                     <h3>Sobre {html.escape(primeiro_nome)}</h3>
                     <p>{html.escape(texto_limpo(contato.get("observacoes"), "Nenhuma descrição adicionada ainda."))}</p>
                     <div class="ae-person-added-by">
                         <span>{html.escape(st.session_state.usuario_atual.get("nome", "Você")[:1].upper())}</span>
                         <div>Adicionado por você<br>{html.escape(data_curta(contato.get("criado_em")) or "data não informada")}</div>
                     </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+                    """,
+                    unsafe_allow_html=True,
+                )
         with col_linha:
-            st.markdown("<div class='ae-person-panel'><div class='ae-person-panel-title'><h3>Linha do Tempo</h3><span>Ver tudo</span></div>", unsafe_allow_html=True)
-            render_linha_tempo(limitado=True)
-            st.markdown("</div>", unsafe_allow_html=True)
+            with st.container(key="ae_person_panel_linha"):
+                st.markdown("<div class='ae-person-panel-title'><h3>Linha do Tempo</h3><span>Ver tudo</span></div>", unsafe_allow_html=True)
+                render_linha_tempo(limitado=True)
         with col_lateral:
-            st.markdown("<div class='ae-person-panel'><div class='ae-person-panel-title'><h3>Família</h3><span>Ver árvore completa</span></div>", unsafe_allow_html=True)
-            render_familia()
-            st.markdown("</div>", unsafe_allow_html=True)
-            st.markdown("<div class='ae-person-panel ae-person-side-panel'><div class='ae-person-panel-title'><h3>Contribuições recentes</h3><span>Ver todas</span></div>", unsafe_allow_html=True)
-            render_contribuicoes_lista(limitado=True)
-            st.markdown("</div>", unsafe_allow_html=True)
+            with st.container(key="ae_person_panel_familia"):
+                st.markdown("<div class='ae-person-panel-title'><h3>Família</h3><span>Ver árvore completa</span></div>", unsafe_allow_html=True)
+                render_familia()
+            with st.container(key="ae_person_panel_contribs"):
+                st.markdown("<div class='ae-person-panel-title'><h3>Contribuições recentes</h3><span>Ver todas</span></div>", unsafe_allow_html=True)
+                render_contribuicoes_lista(limitado=True)
 
         col_hist, col_dest = st.columns([0.62, 0.38])
         with col_hist:
-            st.markdown(f"<div class='ae-person-panel'><div class='ae-person-panel-title'><h3>Histórias de {html.escape(primeiro_nome)}</h3><span>Ver todas</span></div>", unsafe_allow_html=True)
-            render_historias_grid(limitado=True)
-            st.markdown("</div>", unsafe_allow_html=True)
+            with st.container(key="ae_person_panel_historias"):
+                st.markdown(f"<div class='ae-person-panel-title'><h3>Histórias de {html.escape(primeiro_nome)}</h3><span>Ver todas</span></div>", unsafe_allow_html=True)
+                render_historias_grid(limitado=True)
         with col_dest:
-            st.markdown("<div class='ae-person-panel'><div class='ae-person-panel-title'><h3>Momentos em destaque</h3><span>Ver todos</span></div>", unsafe_allow_html=True)
-            render_historias_grid(limitado=True)
-            st.markdown("</div>", unsafe_allow_html=True)
+            with st.container(key="ae_person_panel_destaques"):
+                st.markdown("<div class='ae-person-panel-title'><h3>Momentos em destaque</h3><span>Ver todos</span></div>", unsafe_allow_html=True)
+                render_historias_grid(limitado=True)
     elif aba_atual == "historias":
         st.markdown(f"<div class='ae-person-panel'><h3>Histórias de {html.escape(primeiro_nome)}</h3>", unsafe_allow_html=True)
         render_historias_grid()
