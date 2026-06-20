@@ -3610,37 +3610,237 @@ def render_inicio(
 
 
 def render_historias_compartilhadas_lista(historias_compartilhadas: list):
-    st.markdown("## 👥 Histórias compartilhadas comigo")
+    st.markdown(
+        """
+        <div class="ae-shared-hero">
+            <div>
+                <h1>🤝 Compartilhadas Comigo</h1>
+                <p>Histórias que pessoas importantes decidiram compartilhar com você.</p>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
     if not historias_compartilhadas:
-        st.info("Nenhuma história foi compartilhada com você ainda.")
+        st.markdown(
+            """
+            <div class="ae-shared-empty">
+                <strong>Nenhuma história foi compartilhada com você ainda.</strong>
+                <span>Quando uma pessoa importante liberar histórias para você, elas aparecerão aqui.</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
         return
 
-    for historia in historias_compartilhadas:
-        nome = historia.get("nome_completo") or historia.get("nome") or "Pessoa"
-        novidades = historia.get("novidades") or {}
-        total_historias = contar_historias_compartilhadas(historia)
-        resumo = resumo_novidades(novidades)
-        with st.container():
+    def data_curta(valor) -> str:
+        if not valor:
+            return "Atualizada recentemente"
+        texto = str(valor)
+        if " " in texto:
+            texto = texto.split(" ", 1)[0]
+        return f"Atualizada em {texto[:10]}"
+
+    def inicial_nome(nome: str) -> str:
+        partes = [parte for parte in str(nome or "Pessoa").split() if parte]
+        if len(partes) >= 2:
+            return (partes[0][:1] + partes[-1][:1]).upper()
+        return (partes[0][:2] if partes else "P").upper()
+
+    def imagem_local_para_data_uri(caminho: str) -> str:
+        try:
+            if not caminho:
+                return ""
+            if caminho.startswith(("http://", "https://")):
+                return caminho
+            if not os.path.exists(caminho):
+                return ""
+            mime_type = mimetypes.guess_type(caminho)[0] or "image/jpeg"
+            with open(caminho, "rb") as arquivo:
+                encoded = base64.b64encode(arquivo.read()).decode("ascii")
+            return f"data:{mime_type};base64,{encoded}"
+        except Exception as exc:
+            print("Erro ao preparar imagem compartilhada:", exc)
+            return ""
+
+    grupos = []
+    for acesso in historias_compartilhadas:
+        memorias = db.listar_memorias_por_contato(acesso.get("contato_id"))
+        fotos = db.listar_fotos_por_contato(acesso.get("contato_id"))
+        grupos.append({
+            "acesso": acesso,
+            "memorias": memorias,
+            "fotos": fotos,
+            "total": len(memorias),
+        })
+
+    filtro_usuario_id = st.session_state.get("compartilhadas_filtro_usuario_id")
+    grupos_filtrados = [
+        grupo for grupo in grupos
+        if not filtro_usuario_id or grupo["acesso"].get("usuario_id") == filtro_usuario_id
+    ]
+
+    header_col, news_col = st.columns([0.62, 0.38], gap="large")
+
+    with header_col:
+        with st.container(key="ae_shared_people_panel"):
+            st.markdown("<h3>Pessoas que compartilham comigo</h3>", unsafe_allow_html=True)
+            pessoa_cols = st.columns([1, 1, 1, 1, 1, 0.34], gap="small")
+            for indice, grupo in enumerate(grupos[:5]):
+                acesso = grupo["acesso"]
+                nome = acesso.get("nome_completo") or acesso.get("nome") or "Pessoa"
+                total = grupo["total"]
+                selecionada = acesso.get("usuario_id") == filtro_usuario_id
+                with pessoa_cols[indice]:
+                    st.markdown(
+                        f"""
+                        <div class="ae-shared-person-pill {'is-active' if selecionada else ''}">
+                            <div class="ae-shared-person-avatar">{html.escape(inicial_nome(nome))}</div>
+                            <strong>{html.escape(nome.split()[0] if nome else 'Pessoa')}</strong>
+                            <span>{total} {'história' if total == 1 else 'histórias'}</span>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                    if st.button(
+                        "Selecionar",
+                        key=f"filtrar_compartilhada_{acesso.get('usuario_id')}",
+                        use_container_width=True,
+                    ):
+                        st.session_state.compartilhadas_filtro_usuario_id = acesso.get("usuario_id")
+                        st.rerun()
+            with pessoa_cols[-1]:
+                if filtro_usuario_id:
+                    if st.button("Todas", key="limpar_filtro_compartilhadas", use_container_width=True):
+                        st.session_state.pop("compartilhadas_filtro_usuario_id", None)
+                        st.rerun()
+
+    with news_col:
+        itens_novidade = []
+        for grupo in grupos:
+            acesso = grupo["acesso"]
+            nome = acesso.get("nome_completo") or acesso.get("nome") or "Pessoa"
+            novidades = acesso.get("novidades") or {}
+            resumo = resumo_novidades(novidades)
+            if resumo and resumo != "Tudo visto":
+                itens_novidade.append((nome, resumo))
+        if not itens_novidade:
+            itens_novidade = [
+                (
+                    grupo["acesso"].get("nome_completo") or grupo["acesso"].get("nome") or "Pessoa",
+                    f"{grupo['total']} histórias disponíveis",
+                )
+                for grupo in grupos[:4]
+            ]
+        novidades_html = "".join(
+            f"""
+            <div class="ae-shared-news-item">
+                <div class="ae-shared-news-icon">📖</div>
+                <p><strong>{html.escape(nome)}</strong> · {html.escape(texto)}</p>
+            </div>
+            """
+            for nome, texto in itens_novidade[:4]
+        )
+        st.markdown(
+            f"""
+            <div class="ae-shared-news-panel">
+                <h3>Novidades nas histórias compartilhadas</h3>
+                {novidades_html}
+                <strong>Ver todas as novidades ›</strong>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    if filtro_usuario_id:
+        st.markdown(
+            '<div class="ae-shared-filter-note">Filtro ativo. Mostrando histórias da pessoa selecionada.</div>',
+            unsafe_allow_html=True,
+        )
+
+    st.markdown(
+        '<h2 class="ae-shared-section-title">Histórias compartilhadas por essas pessoas</h2>',
+        unsafe_allow_html=True,
+    )
+
+    for grupo in grupos_filtrados:
+        acesso = grupo["acesso"]
+        memorias = grupo["memorias"]
+        fotos = grupo["fotos"]
+        nome = acesso.get("nome_completo") or acesso.get("nome") or "Pessoa"
+        total_historias = grupo["total"]
+        desde = "data não informada"
+        if memorias:
+            desde = str(memorias[-1].get("data_criacao") or "")[:10] or desde
+
+        row_cols = st.columns([0.27, 0.52, 0.21], gap="small")
+        with row_cols[0]:
             st.markdown(
                 f"""
-                <div class="ae-shared-card">
-                    <div class="ae-avatar">👤</div>
-                    <div class="ae-shared-content">
-                        <div class="ae-card-label">História compartilhada</div>
+                <div class="ae-shared-owner">
+                    <div class="ae-shared-owner-avatar">{html.escape(inicial_nome(nome))}</div>
+                    <div>
                         <h3>{html.escape(nome)}</h3>
-                        <p>{total_historias} {'história compartilhada' if total_historias == 1 else 'histórias compartilhadas'}</p>
-                        <span>{html.escape(resumo)}</span>
+                        <p>Compartilha com você desde {html.escape(desde)}</p>
+                        <span>👥 {total_historias} {'história' if total_historias == 1 else 'histórias'}</span>
                     </div>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
+
+        with row_cols[1]:
+            story_cols = st.columns(3, gap="small")
+            for indice in range(3):
+                memoria = memorias[indice] if indice < len(memorias) else None
+                with story_cols[indice]:
+                    if memoria:
+                        foto = fotos[indice] if indice < len(fotos) else None
+                        img_src = imagem_local_para_data_uri((foto or {}).get("caminho") or (foto or {}).get("caminho_arquivo") or "")
+                        media_html = (
+                            f'<img src="{html.escape(img_src, quote=True)}" alt="Capa da história">'
+                            if img_src
+                            else '<span>📖</span>'
+                        )
+                        st.markdown(
+                            f"""
+                            <div class="ae-shared-story-mini">
+                                <div class="ae-shared-story-cover">{media_html}</div>
+                                <strong>{html.escape(memoria.get('titulo') or 'História sem título')}</strong>
+                                <span>{html.escape(data_curta(memoria.get('data_criacao')))}</span>
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+                    else:
+                        st.markdown(
+                            """
+                            <div class="ae-shared-story-mini is-empty">
+                                <div class="ae-shared-story-cover"><span>📖</span></div>
+                                <strong>Próxima história</strong>
+                                <span>Aguardando compartilhamento</span>
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+
+        with row_cols[2]:
+            st.markdown(
+                f"""
+                <div class="ae-shared-open-card">
+                    <div>📖</div>
+                    <strong>Ver todas as {total_historias} histórias de {html.escape(nome.split()[0] if nome else 'Pessoa')}</strong>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
             if st.button(
-                "Explorar histórias",
-                key=f"abrir_historia_compartilhada_{historia['usuario_id']}",
+                "Explorar história",
+                key=f"abrir_historia_compartilhada_{acesso['usuario_id']}",
                 use_container_width=True,
             ):
-                selecionar_historia_compartilhada(historia)
+                selecionar_historia_compartilhada(acesso)
                 st.session_state.pagina_atual = "historias_compartilhadas"
                 st.rerun()
 
