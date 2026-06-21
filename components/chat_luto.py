@@ -77,22 +77,22 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
     }
     .ae-curador-hero h1 {
         color: #21104a;
-        font-size: 2.1rem;
+        font-size: 1.72rem;
         line-height: 1.02;
         margin: 0;
         font-weight: 900;
     }
     .ae-curador-hero p {
         color: #6d6380;
-        margin: 0.22rem 0 0;
-        font-size: 1rem;
+        margin: 0.14rem 0 0;
+        font-size: 0.92rem;
     }
     .ae-curador-steps {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 0.6rem;
-        margin: 0.95rem 0 1rem;
-        padding: 0.32rem;
+        margin: 0.7rem 0 0.8rem;
+        padding: 0.24rem;
         border: 1px solid rgba(233, 222, 198, 0.95);
         border-radius: 16px;
         background: rgba(255,255,255,0.72);
@@ -104,11 +104,11 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         align-items: center;
         justify-content: center;
         gap: 0.4rem;
-        padding: 0.55rem 0.65rem;
+        padding: 0.42rem 0.55rem;
         color: #47507a;
         font-weight: 700;
         text-align: center;
-        font-size: 0.95rem;
+        font-size: 0.88rem;
     }
     .ae-curador-step.is-active {
         background: linear-gradient(180deg, rgba(255,250,241,.95), rgba(255,248,232,.92));
@@ -120,13 +120,13 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         border: 1px solid rgba(233, 222, 198, 0.96);
         border-radius: 20px;
         box-shadow: 0 18px 40px rgba(64, 45, 19, 0.08);
-        padding: 1.1rem 1.15rem;
+        padding: 0.82rem 0.9rem;
         height: 100%;
     }
     .ae-curador-card h3 {
         color: #21104a;
-        margin: 0 0 0.65rem;
-        font-size: 1.05rem;
+        margin: 0 0 0.45rem;
+        font-size: 0.92rem;
         font-weight: 900;
     }
     .ae-curador-drop {
@@ -134,23 +134,23 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         border-radius: 14px;
         background: linear-gradient(180deg, rgba(255,251,244,.9), rgba(255,255,255,.95));
         padding: 0.7rem 0.75rem;
-        min-height: 112px;
+        min-height: 94px;
     }
     .ae-curador-preview-frame {
         border: 1px solid rgba(233, 222, 198, 0.96);
         border-radius: 16px;
         background: linear-gradient(180deg, #f9f3e7, #fffdfa);
-        padding: 0.78rem;
+        padding: 0.62rem;
     }
     .ae-curador-preview-media {
-        height: 180px;
+        height: 148px;
         border-radius: 14px;
         display: flex;
         align-items: center;
         justify-content: center;
         background: radial-gradient(circle at top, rgba(255, 218, 153, .55), rgba(219, 205, 180, .28) 55%, rgba(250, 246, 239, .9));
         overflow: hidden;
-        margin-bottom: 0.75rem;
+        margin-bottom: 0.48rem;
         position: relative;
     }
     .ae-curador-preview-media .ae-badge {
@@ -171,44 +171,46 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
     }
     .ae-curador-hint {
         border-top: 1px solid rgba(233, 222, 198, 0.9);
-        margin-top: 0.8rem;
-        padding-top: 0.75rem;
+        margin-top: 0.55rem;
+        padding-top: 0.55rem;
         color: #6d6380;
-        font-size: 0.88rem;
+        font-size: 0.82rem;
     }
     .ae-curador-tip {
         border: 1px solid rgba(233, 222, 198, 0.96);
         border-radius: 14px;
-        padding: 0.75rem 0.85rem;
+        padding: 0.58rem 0.68rem;
         color: #6d6380;
         background: rgba(255,255,255,.72);
-        font-size: 0.9rem;
+        font-size: 0.84rem;
     }
     .ae-curador-how {
-        margin-top: 1rem;
+        margin-top: 0.78rem;
         background: rgba(255,255,255,.92);
         border: 1px solid rgba(233, 222, 198, 0.96);
         border-radius: 20px;
         box-shadow: 0 18px 40px rgba(64, 45, 19, 0.06);
-        padding: 1rem 1.05rem;
+        padding: 0.78rem 0.82rem;
     }
     .ae-curador-how h3 {
         color: #21104a;
-        margin: 0 0 0.8rem;
-        font-size: 1.08rem;
+        margin: 0 0 0.58rem;
+        font-size: 0.96rem;
         font-weight: 900;
     }
     .ae-curador-how-grid {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 0.7rem;
+        gap: 0.55rem;
     }
     .ae-curador-how-item {
         border: 1px solid rgba(233, 222, 198, 0.96);
         border-radius: 16px;
         background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(250,247,241,.96));
-        padding: 0.85rem;
-        min-height: 126px;
+        padding: 0.65rem;
+        min-height: 102px;
+        font-size: 0.86rem;
+        line-height: 1.42;
     }
     .ae-curador-how-item strong {
         display: block;
@@ -216,16 +218,35 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         margin-bottom: 0.28rem;
     }
     .ae-curador-response {
-        margin-top: 0.8rem;
+        margin-top: 0.6rem;
         border: 1px solid rgba(192, 177, 230, 0.82);
         border-radius: 14px;
         background: linear-gradient(180deg, rgba(248,244,255,.98), rgba(241,236,252,.92));
-        padding: 0.85rem;
+        padding: 0.7rem;
     }
     .ae-curador-response strong {
         color: #21104a;
         display: block;
-        margin-bottom: 0.35rem;
+        margin-bottom: 0.24rem;
+    }
+    div[data-testid="stButton"] > button[kind="primary"] {
+        background: linear-gradient(135deg, #d5a03c, #b77a46 72%, #8f5a35) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 12px !important;
+        font-weight: 800 !important;
+        min-height: 2.55rem !important;
+    }
+    div[data-testid="stButton"] > button[kind="secondary"] {
+        border-radius: 12px !important;
+    }
+    [data-testid="stButton"][key^="curador_pergunta_pronta_"] button {
+        background: linear-gradient(180deg, rgba(249,245,255,.98), rgba(244,238,252,.98)) !important;
+        color: #5c3d87 !important;
+        border: 1px solid rgba(193, 177, 231, 0.92) !important;
+        box-shadow: none !important;
+        min-height: 2.55rem !important;
+        font-weight: 700 !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -298,7 +319,7 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         conteudo = st.text_area(
             "Conte esta história",
             key="curador_memoria_conteudo",
-            height=180,
+            height=150,
             placeholder="Escreva o que aconteceu, onde, com quem, detalhes marcantes...",
             max_chars=5000,
         )
@@ -358,11 +379,11 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
                 unsafe_allow_html=True,
             )
         st.markdown(
-            f"<div style='display:flex;justify-content:flex-end;margin:.35rem 0 .15rem;'><span style='background:rgba(43,23,71,.74);color:white;border-radius:999px;padding:.2rem .48rem;font-size:.76rem;font-weight:800;'>{max(media_total, 1)}/3</span></div>",
+            f"<div style='display:flex;justify-content:flex-end;margin:.22rem 0 .08rem;'><span style='background:rgba(43,23,71,.74);color:white;border-radius:999px;padding:.2rem .48rem;font-size:.76rem;font-weight:800;'>{max(media_total, 1)}/3</span></div>",
             unsafe_allow_html=True,
         )
-        st.markdown(f"<div style='color:#21104a;font-weight:900;font-size:1.15rem;margin-bottom:.35rem;'>{html.escape(preview_titulo)}</div>", unsafe_allow_html=True)
-        st.markdown(f"<div style='color:#6d6380;line-height:1.45;font-size:.92rem;'>{html.escape(preview_texto)}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='color:#21104a;font-weight:900;font-size:1rem;margin-bottom:.22rem;'>{html.escape(preview_titulo)}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='color:#6d6380;line-height:1.38;font-size:.86rem;'>{html.escape(preview_texto)}</div>", unsafe_allow_html=True)
         st.markdown(
             "<div class='ae-curador-hint'>"
             f"<div style='margin-bottom:.3rem;'>🗓️ {html.escape(preview_data)}</div>"
@@ -391,7 +412,7 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         st.markdown('<div class="ae-curador-card">', unsafe_allow_html=True)
         st.markdown("### Explorar depois de salvar")
         st.markdown(
-            "<div style='color:#6d6380;line-height:1.48;font-size:.95rem;margin-bottom:.8rem;'>Depois de salvar sua memória, o Curador pode ajudar você a aprofundar e enriquecer os detalhes.</div>",
+            "<div style='color:#6d6380;line-height:1.42;font-size:.89rem;margin-bottom:.58rem;'>Depois de salvar sua memória, o Curador pode ajudar você a aprofundar e enriquecer os detalhes.</div>",
             unsafe_allow_html=True,
         )
         memoria_salva = st.session_state.get("curador_memoria_salva")
