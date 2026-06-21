@@ -32,6 +32,490 @@ def _safe_text(value: str) -> str:
     return html.escape(str(value or "")).replace("\n", "<br>")
 
 
+def _curador_normalizar_data(valor: str) -> str | None:
+    texto = str(valor or "").strip()
+    if not texto:
+        return None
+    for formato in ("%d/%m/%Y", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(texto, formato).strftime("%Y-%m-%d")
+        except Exception:
+            continue
+    return None
+
+
+def _curador_preview_data(valor: str) -> str:
+    texto = str(valor or "").strip()
+    if not texto:
+        return datetime.now().strftime("%d/%m/%Y") + " (aprox.)"
+    data_normalizada = _curador_normalizar_data(texto)
+    if data_normalizada:
+        try:
+            return datetime.strptime(data_normalizada, "%Y-%m-%d").strftime("%d/%m/%Y") + " (aprox.)"
+        except Exception:
+            return texto
+    return texto
+
+
+def _curador_trecho(texto: str, limite: int = 180) -> str:
+    base = "Exemplo de como sua memória será exibida após salvar. Este é um trecho do texto que você escreveu."
+    valor = " ".join(str(texto or "").split()).strip()
+    if not valor:
+        return base
+    return valor if len(valor) <= limite else valor[:limite].rstrip() + "..."
+
+
+def _curador_nome_arquivo(upload) -> str:
+    return getattr(upload, "name", "") if upload else ""
+
+
+def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referencia: str):
+    st.markdown("""
+    <style>
+    .ae-curador-shell {
+        color: #21104a;
+    }
+    .ae-curador-hero h1 {
+        color: #21104a;
+        font-size: 2.1rem;
+        line-height: 1.02;
+        margin: 0;
+        font-weight: 900;
+    }
+    .ae-curador-hero p {
+        color: #6d6380;
+        margin: 0.22rem 0 0;
+        font-size: 1rem;
+    }
+    .ae-curador-steps {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.6rem;
+        margin: 0.95rem 0 1rem;
+        padding: 0.32rem;
+        border: 1px solid rgba(233, 222, 198, 0.95);
+        border-radius: 16px;
+        background: rgba(255,255,255,0.72);
+    }
+    .ae-curador-step {
+        border-radius: 13px;
+        min-height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        padding: 0.55rem 0.65rem;
+        color: #47507a;
+        font-weight: 700;
+        text-align: center;
+        font-size: 0.95rem;
+    }
+    .ae-curador-step.is-active {
+        background: linear-gradient(180deg, rgba(255,250,241,.95), rgba(255,248,232,.92));
+        border: 1px solid rgba(234, 181, 77, 0.55);
+        color: #b36e16;
+    }
+    .ae-curador-card {
+        background: rgba(255,255,255,.94);
+        border: 1px solid rgba(233, 222, 198, 0.96);
+        border-radius: 20px;
+        box-shadow: 0 18px 40px rgba(64, 45, 19, 0.08);
+        padding: 1.1rem 1.15rem;
+        height: 100%;
+    }
+    .ae-curador-card h3 {
+        color: #21104a;
+        margin: 0 0 0.65rem;
+        font-size: 1.05rem;
+        font-weight: 900;
+    }
+    .ae-curador-drop {
+        border: 1.4px dashed rgba(234, 181, 77, 0.66);
+        border-radius: 14px;
+        background: linear-gradient(180deg, rgba(255,251,244,.9), rgba(255,255,255,.95));
+        padding: 0.7rem 0.75rem;
+        min-height: 112px;
+    }
+    .ae-curador-preview-frame {
+        border: 1px solid rgba(233, 222, 198, 0.96);
+        border-radius: 16px;
+        background: linear-gradient(180deg, #f9f3e7, #fffdfa);
+        padding: 0.78rem;
+    }
+    .ae-curador-preview-media {
+        height: 180px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at top, rgba(255, 218, 153, .55), rgba(219, 205, 180, .28) 55%, rgba(250, 246, 239, .9));
+        overflow: hidden;
+        margin-bottom: 0.75rem;
+        position: relative;
+    }
+    .ae-curador-preview-media .ae-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(43, 23, 71, 0.74);
+        color: white;
+        border-radius: 999px;
+        padding: 0.2rem 0.48rem;
+        font-size: 0.76rem;
+        font-weight: 800;
+    }
+    .ae-curador-preview-media img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .ae-curador-hint {
+        border-top: 1px solid rgba(233, 222, 198, 0.9);
+        margin-top: 0.8rem;
+        padding-top: 0.75rem;
+        color: #6d6380;
+        font-size: 0.88rem;
+    }
+    .ae-curador-tip {
+        border: 1px solid rgba(233, 222, 198, 0.96);
+        border-radius: 14px;
+        padding: 0.75rem 0.85rem;
+        color: #6d6380;
+        background: rgba(255,255,255,.72);
+        font-size: 0.9rem;
+    }
+    .ae-curador-how {
+        margin-top: 1rem;
+        background: rgba(255,255,255,.92);
+        border: 1px solid rgba(233, 222, 198, 0.96);
+        border-radius: 20px;
+        box-shadow: 0 18px 40px rgba(64, 45, 19, 0.06);
+        padding: 1rem 1.05rem;
+    }
+    .ae-curador-how h3 {
+        color: #21104a;
+        margin: 0 0 0.8rem;
+        font-size: 1.08rem;
+        font-weight: 900;
+    }
+    .ae-curador-how-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.7rem;
+    }
+    .ae-curador-how-item {
+        border: 1px solid rgba(233, 222, 198, 0.96);
+        border-radius: 16px;
+        background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(250,247,241,.96));
+        padding: 0.85rem;
+        min-height: 126px;
+    }
+    .ae-curador-how-item strong {
+        display: block;
+        color: #21104a;
+        margin-bottom: 0.28rem;
+    }
+    .ae-curador-response {
+        margin-top: 0.8rem;
+        border: 1px solid rgba(192, 177, 230, 0.82);
+        border-radius: 14px;
+        background: linear-gradient(180deg, rgba(248,244,255,.98), rgba(241,236,252,.92));
+        padding: 0.85rem;
+    }
+    .ae-curador-response strong {
+        color: #21104a;
+        display: block;
+        margin-bottom: 0.35rem;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    usuario_id = usuario.get("id")
+    contatos = []
+    try:
+        contatos = db.listar_contatos_usuario(usuario_id)
+    except Exception as exc:
+        print("Erro ao listar contatos do curador:", exc)
+
+    nomes_contatos = [c.get("nome_completo") for c in contatos if c.get("nome_completo")]
+    colecoes = [
+        ("livre", "Selecione uma coleção"),
+        ("familia", "Família"),
+        ("viagens", "Viagens"),
+        ("infancia", "Infância"),
+        ("carreira", "Carreira"),
+        ("valores", "Valores"),
+        ("amor", "Amor"),
+        ("conquista", "Conquistas"),
+    ]
+    mapa_colecoes = {valor: rotulo for valor, rotulo in colecoes}
+
+    st.markdown('<div class="ae-curador-shell">', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="ae-curador-hero">'
+        '<h1>Curador de Histórias</h1>'
+        '<p>Registre primeiro. O Curador ajuda depois.</p>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        '<div class="ae-curador-steps">'
+        '<div class="ae-curador-step is-active">1. Adicionar mídia (opcional)</div>'
+        '<div class="ae-curador-step">2. Escrever contexto</div>'
+        '<div class="ae-curador-step">3. Salvar memória</div>'
+        '<div class="ae-curador-step">4. Explorar com o Curador</div>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+    col_form, col_preview, col_explore = st.columns([1.35, 0.92, 0.78], gap="medium")
+
+    with col_form:
+        st.markdown('<div class="ae-curador-card">', unsafe_allow_html=True)
+        st.markdown("### Nova memória")
+        st.caption("Mídia (opcional)")
+        media_cols = st.columns(2, gap="small")
+        with media_cols[0]:
+            foto_memoria = st.file_uploader(
+                "Adicionar foto",
+                type=["png", "jpg", "jpeg", "webp"],
+                key="curador_memoria_foto",
+                help="JPG, PNG até 10MB",
+            )
+        with media_cols[1]:
+            video_memoria = st.file_uploader(
+                "Adicionar vídeo",
+                type=["mp4", "mov", "avi", "mkv"],
+                key="curador_memoria_video",
+                help="MP4 até 50MB",
+            )
+
+        titulo = st.text_input(
+            "Título da memória",
+            key="curador_memoria_titulo",
+            placeholder="Dê um título para esta memória",
+        )
+        conteudo = st.text_area(
+            "Conte esta história",
+            key="curador_memoria_conteudo",
+            height=180,
+            placeholder="Escreva o que aconteceu, onde, com quem, detalhes marcantes...",
+            max_chars=5000,
+        )
+        meta_col1, meta_col2 = st.columns(2, gap="small")
+        with meta_col1:
+            data_aproximada = st.text_input(
+                "Data aproximada",
+                key="curador_memoria_data",
+                placeholder="DD/MM/AAAA ou período",
+            )
+        with meta_col2:
+            pessoas_relacionadas = st.multiselect(
+                "Pessoas relacionadas (opcional)",
+                options=nomes_contatos,
+                key="curador_memoria_pessoas",
+                placeholder="Digite nomes e selecione",
+            )
+
+        colecao_valor = st.selectbox(
+            "Coleção (opcional)",
+            options=[item[0] for item in colecoes],
+            format_func=lambda valor: mapa_colecoes.get(valor, valor),
+            key="curador_memoria_colecao",
+        )
+
+        rodape_col1, rodape_col2 = st.columns([0.65, 0.35], gap="small")
+        with rodape_col1:
+            st.markdown(
+                "<div class='ae-curador-tip'><strong style='display:block;color:#b07a1d;margin-bottom:.2rem;'>Você pode salvar só com texto.</strong>Foto e vídeo são opcionais.</div>",
+                unsafe_allow_html=True,
+            )
+        with rodape_col2:
+            salvar_memoria = st.button(
+                "Salvar memória",
+                key="curador_salvar_memoria_primeiro",
+                type="primary",
+                use_container_width=True,
+            )
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    preview_titulo = titulo.strip() or "Título da memória aparecerá aqui"
+    preview_texto = _curador_trecho(conteudo)
+    preview_data = _curador_preview_data(data_aproximada)
+    preview_pessoas = ", ".join(pessoas_relacionadas) if pessoas_relacionadas else "Alice, Darlan e Bia"
+    preview_colecao = mapa_colecoes.get(colecao_valor, "Viagens em Família")
+    media_total = int(bool(foto_memoria)) + int(bool(video_memoria))
+
+    with col_preview:
+        st.markdown('<div class="ae-curador-card">', unsafe_allow_html=True)
+        st.markdown("### Prévia da memória")
+        st.markdown('<div class="ae-curador-preview-frame">', unsafe_allow_html=True)
+        if foto_memoria:
+            st.image(foto_memoria, use_container_width=True)
+        else:
+            st.markdown(
+                "<div class='ae-curador-preview-media'><div style='font-size:3rem;color:#a48b62;'>◌</div></div>",
+                unsafe_allow_html=True,
+            )
+        st.markdown(
+            f"<div style='display:flex;justify-content:flex-end;margin:.35rem 0 .15rem;'><span style='background:rgba(43,23,71,.74);color:white;border-radius:999px;padding:.2rem .48rem;font-size:.76rem;font-weight:800;'>{max(media_total, 1)}/3</span></div>",
+            unsafe_allow_html=True,
+        )
+        st.markdown(f"<div style='color:#21104a;font-weight:900;font-size:1.15rem;margin-bottom:.35rem;'>{html.escape(preview_titulo)}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='color:#6d6380;line-height:1.45;font-size:.92rem;'>{html.escape(preview_texto)}</div>", unsafe_allow_html=True)
+        st.markdown(
+            "<div class='ae-curador-hint'>"
+            f"<div style='margin-bottom:.3rem;'>🗓️ {html.escape(preview_data)}</div>"
+            f"<div style='margin-bottom:.3rem;'>👥 {html.escape(preview_pessoas)}</div>"
+            f"<div>🗂️ {html.escape(preview_colecao)}</div>"
+            "</div>",
+            unsafe_allow_html=True,
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown(
+            "<div class='ae-curador-tip' style='margin-top:.75rem;'>A prévia é atualizada conforme você preenche os campos.</div>",
+            unsafe_allow_html=True,
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    perguntas_curador = [
+        "Quem estava com você?",
+        "O que tornou esse momento especial?",
+        "Existe outra foto desse dia?",
+        "Como você se sentiu?",
+        "O que aprendeu nesse momento?",
+        "Há uma história relacionada?",
+    ]
+
+    with col_explore:
+        st.markdown('<div class="ae-curador-card">', unsafe_allow_html=True)
+        st.markdown("### Explorar depois de salvar")
+        st.markdown(
+            "<div style='color:#6d6380;line-height:1.48;font-size:.95rem;margin-bottom:.8rem;'>Depois de salvar sua memória, o Curador pode ajudar você a aprofundar e enriquecer os detalhes.</div>",
+            unsafe_allow_html=True,
+        )
+        memoria_salva = st.session_state.get("curador_memoria_salva")
+        for indice, pergunta in enumerate(perguntas_curador):
+            if st.button(
+                pergunta,
+                key=f"curador_pergunta_pronta_{indice}",
+                use_container_width=True,
+                disabled=not memoria_salva,
+            ):
+                try:
+                    contexto = (
+                        f"Memória já registrada.\n"
+                        f"Título: {memoria_salva.get('titulo') or ''}\n"
+                        f"Texto: {memoria_salva.get('conteudo') or ''}\n"
+                        f"Data: {memoria_salva.get('data_evento') or ''}\n"
+                        f"Pessoas: {memoria_salva.get('pessoas_relacionadas') or ''}\n"
+                        f"Categoria: {memoria_salva.get('categoria') or ''}\n"
+                        f"Pergunta: {pergunta}\n"
+                        "Responda em até 4 linhas, sem inventar fatos, com foco em aprofundar a memória."
+                    )
+                    resposta = st.session_state.assistente_obj.conversar(contexto)
+                except Exception as exc:
+                    print("Erro ao explorar memória com o curador:", exc)
+                    resposta = "Não foi possível gerar a sugestão agora. Tente novamente em alguns instantes."
+                st.session_state["curador_exploracao"] = {
+                    "pergunta": pergunta,
+                    "resposta": resposta,
+                }
+                st.rerun()
+        exploracao = st.session_state.get("curador_exploracao")
+        if exploracao:
+            st.markdown(
+                "<div class='ae-curador-response'>"
+                f"<strong>{html.escape(exploracao.get('pergunta') or 'Resposta baseada na memória')}</strong>"
+                f"<div style='color:#3b3150;line-height:1.48;font-size:.92rem;'>{_safe_text(exploracao.get('resposta') or '')}</div>"
+                "</div>",
+                unsafe_allow_html=True,
+            )
+        st.markdown(
+            "<div class='ae-curador-tip' style='margin-top:.8rem;'>O Curador não substitui a memória. Ele ajuda a aprofundar o que você registrou.</div>",
+            unsafe_allow_html=True,
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    if salvar_memoria:
+        if not conteudo.strip():
+            st.warning("Escreva a história antes de salvar.")
+        else:
+            try:
+                memoria_id = db.salvar_memoria(
+                    usuario_id=usuario_id,
+                    conteudo=conteudo.strip(),
+                    titulo=titulo.strip(),
+                    categoria=colecao_valor or "livre",
+                    origem="curador",
+                    data_evento=_curador_normalizar_data(data_aproximada),
+                    pessoas_relacionadas=", ".join(pessoas_relacionadas) if pessoas_relacionadas else None,
+                    visibilidade="contatos",
+                    contatos_ids=[],
+                )
+
+                if foto_memoria:
+                    upload_foto = storage.upload_streamlit_file(
+                        bucket="fotos",
+                        arquivo=foto_memoria,
+                        usuario_id=usuario_id,
+                        pasta="memorias",
+                    )
+                    foto_id = db.adicionar_foto_com_acesso(
+                        usuario_id=usuario_id,
+                        titulo=titulo.strip() or "Foto da memória",
+                        descricao=conteudo.strip()[:300],
+                        categoria=colecao_valor or "livre",
+                        caminho_arquivo=upload_foto["url"],
+                        contatos_ids=[],
+                        visibilidade="contatos",
+                    )
+                    db.associar_foto_memoria(memoria_id=memoria_id, foto_id=foto_id)
+
+                if video_memoria:
+                    upload_video = storage.upload_streamlit_file(
+                        bucket="videos",
+                        arquivo=video_memoria,
+                        usuario_id=usuario_id,
+                        pasta="memorias",
+                    )
+                    video_id = db.adicionar_video_com_acesso(
+                        usuario_id=usuario_id,
+                        titulo=titulo.strip() or "Vídeo da memória",
+                        destinatario=", ".join(pessoas_relacionadas),
+                        caminho_arquivo=upload_video["url"],
+                        contatos_ids=[],
+                        categoria=colecao_valor or "livre",
+                        visibilidade="contatos",
+                    )
+                    db.associar_video_memoria(memoria_id=memoria_id, video_id=video_id)
+
+                st.session_state["curador_memoria_salva"] = {
+                    "id": memoria_id,
+                    "titulo": preview_titulo,
+                    "conteudo": conteudo.strip(),
+                    "data_evento": _curador_normalizar_data(data_aproximada) or data_aproximada,
+                    "pessoas_relacionadas": ", ".join(pessoas_relacionadas),
+                    "categoria": colecao_valor or "livre",
+                }
+                st.session_state.pop("curador_exploracao", None)
+                st.success("Memória salva. Agora o Curador pode ajudar a aprofundar essa história.")
+            except Exception as exc:
+                print("Erro ao salvar memória no curador:", exc)
+                st.error("Não foi possível salvar a memória agora. Tente novamente em alguns instantes.")
+
+    st.markdown(
+        "<div class='ae-curador-how'><h3>Como funciona</h3><div class='ae-curador-how-grid'>"
+        "<div class='ae-curador-how-item'><strong>1. Registrar</strong>Adicione mídia, se quiser, e escreva o contexto da sua memória.</div>"
+        "<div class='ae-curador-how-item'><strong>2. Salvar</strong>Salve sua memória com segurança. Você pode editar depois.</div>"
+        "<div class='ae-curador-how-item'><strong>3. Receber sugestões</strong>O Curador oferece perguntas que ajudam a trazer mais detalhes.</div>"
+        "<div class='ae-curador-how-item'><strong>4. Aprofundar a história</strong>Você decide o que responder e transforma lembranças em legado.</div>"
+        "</div></div>",
+        unsafe_allow_html=True,
+    )
+    st.markdown("</div>", unsafe_allow_html=True)
+
+
 def render_chat_luto():
     _inicializar_chat()
     db = BancoDados()
@@ -129,40 +613,8 @@ def render_chat_luto():
                 st.session_state.login_mode = "cadastro"
                 st.rerun()
     else:
-        st.markdown("## Curador de Histórias")
-        st.markdown("""
-            Este espaço ajuda você a lembrar, organizar e registrar histórias, memórias, aprendizados e momentos importantes.
-        
-            O Curador faz perguntas simples, como um entrevistador cuidadoso.
-        
-            Ele não inventa fatos e não escreve a história sozinho: você conduz o que será registrado.
-            """)
-        st.markdown(
-            """
-
-            ### 💡 Perguntas para começar
-    
-            • Minha infância
-    
-            • Minha família
-    
-            • Como conheci meu amor
-    
-            • Meus filhos
-    
-            • Minha carreira
-    
-            • Meus maiores aprendizados
-    
-            • Sonhos realizados
-    
-            • Momentos difíceis que superei
-    
-            • Conselhos para o futuro
-    
-            • Histórias engraçadas
-            """
-            )
+        _render_curador_memoria_primeiro(db, usuario, nome_referencia)
+        return
 
     if st.session_state.get("ultimo_erro_openai"):
         st.error("Não foi possível continuar agora. Tente novamente em alguns instantes.")
