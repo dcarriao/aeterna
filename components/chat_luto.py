@@ -173,11 +173,12 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         font-weight: 900;
     }
     .ae-curador-how-grid {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 0.45rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0;
     }
     .ae-curador-how-item {
+        flex: 1;
         border: 1px solid rgba(233, 222, 198, 0.96);
         border-radius: 16px;
         background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(250,247,241,.96));
@@ -190,6 +191,22 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         display: block;
         color: #21104a;
         margin-bottom: 0.28rem;
+    }
+    .ae-curador-how-icon {
+        font-size: 1.4rem;
+        display: block;
+        margin-bottom: 0.3rem;
+    }
+    .ae-curador-how-arrow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 0.28rem;
+        padding-top: 0.6rem;
+        color: #b07a1d;
+        font-size: 0.9rem;
+        font-weight: 700;
+        flex-shrink: 0;
     }
     .ae-curador-question-shell {
         display: grid;
@@ -307,10 +324,10 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
     )
     st.markdown(
         '<div class="ae-curador-steps">'
-        '<div class="ae-curador-step is-active">1. Adicionar mídia (opcional)</div>'
-        '<div class="ae-curador-step">2. Escrever contexto</div>'
-        '<div class="ae-curador-step">3. Salvar memória</div>'
-        '<div class="ae-curador-step">4. Explorar com o Curador</div>'
+        '<div class="ae-curador-step is-active">🖼️ 1. Adicionar mídia (opcional)</div>'
+        '<div class="ae-curador-step">✏️ 2. Escrever contexto</div>'
+        '<div class="ae-curador-step">✅ 3. Salvar memória</div>'
+        '<div class="ae-curador-step">💬 4. Explorar com o Curador</div>'
         '</div>',
         unsafe_allow_html=True,
     )
@@ -421,12 +438,12 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         )
 
     perguntas_curador = [
-        "Quem estava com você?",
-        "O que tornou esse momento especial?",
-        "Existe outra foto desse dia?",
-        "Como você se sentiu?",
-        "O que aprendeu nesse momento?",
-        "Há uma história relacionada?",
+        ("👤", "Quem estava com você?"),
+        ("⭐", "O que tornou esse momento especial?"),
+        ("📷", "Existe outra foto desse dia?"),
+        ("💜", "Como você se sentiu?"),
+        ("🌱", "O que aprendeu nesse momento?"),
+        ("🔗", "Há uma história relacionada?"),
     ]
 
     with col_explore:
@@ -438,16 +455,16 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         memoria_salva = st.session_state.get("curador_memoria_salva")
         if not memoria_salva:
             st.markdown("<div class='ae-curador-question-shell'>", unsafe_allow_html=True)
-            for pergunta in perguntas_curador:
+            for icone, pergunta in perguntas_curador:
                 st.markdown(
-                    f"<div class='ae-curador-question-pill'>{html.escape(pergunta)}</div>",
+                    f"<div class='ae-curador-question-pill'>{icone} {html.escape(pergunta)}</div>",
                     unsafe_allow_html=True,
                 )
             st.markdown("</div>", unsafe_allow_html=True)
         else:
-            for indice, pergunta in enumerate(perguntas_curador):
+            for indice, (icone, pergunta) in enumerate(perguntas_curador):
                 if st.button(
-                    pergunta,
+                    f"{icone} {pergunta}",
                     key=f"curador_pergunta_pronta_{indice}",
                     use_container_width=True,
                 ):
@@ -554,10 +571,13 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
 
     st.markdown(
         "<div class='ae-curador-how'><h3>Como funciona</h3><div class='ae-curador-how-grid'>"
-        "<div class='ae-curador-how-item'><strong>1. Registrar</strong>Adicione mídia, se quiser, e escreva o contexto da sua memória.</div>"
-        "<div class='ae-curador-how-item'><strong>2. Salvar</strong>Salve sua memória com segurança. Você pode editar depois.</div>"
-        "<div class='ae-curador-how-item'><strong>3. Receber sugestões</strong>O Curador oferece perguntas que ajudam a trazer mais detalhes.</div>"
-        "<div class='ae-curador-how-item'><strong>4. Aprofundar a história</strong>Você decide o que responder e transforma lembranças em legado.</div>"
+        "<div class='ae-curador-how-item'><span class='ae-curador-how-icon'>🖼️</span><strong>1. Registrar</strong>Adicione mídia (se tiver) e escreva o contexto da sua memória.</div>"
+        "<div class='ae-curador-how-arrow'>→</div>"
+        "<div class='ae-curador-how-item'><span class='ae-curador-how-icon'>☁️</span><strong>2. Salvar</strong>Salve sua memória com segurança. Você pode editar depois.</div>"
+        "<div class='ae-curador-how-arrow'>→</div>"
+        "<div class='ae-curador-how-item'><span class='ae-curador-how-icon'>💬</span><strong>3. Receber sugestões</strong>O Curador oferece perguntas que ajudam a trazer mais detalhes.</div>"
+        "<div class='ae-curador-how-arrow'>→</div>"
+        "<div class='ae-curador-how-item'><span class='ae-curador-how-icon'>💛</span><strong>4. Aprofundar a história</strong>Você decide o que responder e transforma lembranças em legado.</div>"
         "</div></div>",
         unsafe_allow_html=True,
     )
