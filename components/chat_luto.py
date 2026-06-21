@@ -516,6 +516,14 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
     st.markdown("</div>", unsafe_allow_html=True)
 
 
+def render_curador_memoria_primeiro():
+    _inicializar_chat()
+    db = BancoDados()
+    usuario = st.session_state.get("usuario_atual") or {}
+    nome_referencia = _obter_nome_referencia()
+    _render_curador_memoria_primeiro(db, usuario, nome_referencia)
+
+
 def render_chat_luto():
     _inicializar_chat()
     db = BancoDados()

@@ -12,7 +12,7 @@ from utils.banco import BancoDados
 from utils.usuarios import GerenciadorUsuarios
 from utils.upload_video import GerenciadorVideos
 from styles.theme import aplicar_tema
-from components.chat_luto import render_chat_luto
+from components.chat_luto import render_chat_luto, render_curador_memoria_primeiro
 from components.login_compacto import render_login_compacto
 from components.dashboard_ui import (
     aplicar_css_dashboard,
@@ -1232,7 +1232,11 @@ def render_aprendizados_visitante(memorias: list, preferencias: dict):
 # ============================================================================
 
 def render_assistente():
-    render_chat_luto()
+    usuario = st.session_state.get("usuario_atual") or {}
+    if usuario.get("tipo") == "visitante":
+        render_chat_luto()
+        return
+    render_curador_memoria_primeiro()
 
 
 # ============================================================================
