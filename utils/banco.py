@@ -2076,6 +2076,65 @@ class BancoDados:
             cursor.close()
             conn.close()
 
+    def listar_contribuicoes_usuario(
+            self,
+            usuario_dono_id: int,
+            limite: int = 80,
+    ) -> List[Dict]:
+        if not usuario_dono_id:
+            return []
+
+        conn = self.conectar()
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute("""
+                SELECT
+                    c.id,
+                    c.usuario_contribuidor_nome,
+                    c.usuario_contribuidor_email,
+                    c.tipo_conteudo,
+                    c.conteudo_id,
+                    c.tipo_contribuicao,
+                    c.texto,
+                    c.arquivo_url,
+                    c.arquivo_nome,
+                    c.arquivo_tipo,
+                    c.criado_em,
+                    c.avaliado_em,
+                    c.status,
+                    m.titulo
+                FROM contribuicoes c
+                JOIN memorias m
+                  ON c.tipo_conteudo = 'memoria'
+                 AND m.id = c.conteudo_id
+                 AND m.usuario_id = c.usuario_dono_id
+                WHERE c.usuario_dono_id = %s
+                ORDER BY COALESCE(c.avaliado_em, c.criado_em) DESC
+                LIMIT %s
+            """, (usuario_dono_id, limite))
+
+            rows = cursor.fetchall()
+            return [{
+                "id": row[0],
+                "contribuidor_nome": row[1] or row[2] or "Pessoa convidada",
+                "contribuidor_email": row[2] or "",
+                "tipo_conteudo": row[3],
+                "conteudo_id": row[4],
+                "tipo_contribuicao": row[5],
+                "texto": row[6] or "",
+                "arquivo_url": row[7],
+                "arquivo_nome": row[8] or "",
+                "arquivo_tipo": row[9] or "",
+                "criado_em": row[10],
+                "avaliado_em": row[11],
+                "status": row[12] or "pendente",
+                "memoria_titulo": row[13] or "História sem título",
+            } for row in rows]
+        finally:
+            cursor.close()
+            conn.close()
+
     def avaliar_contribuicao(
             self,
             contribuicao_id: int,

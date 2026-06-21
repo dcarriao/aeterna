@@ -3629,94 +3629,157 @@ def render_visao_historia_compartilhada(
 
 
 def render_contribuicoes_pendentes(usuario_dono_id: int):
-    st.markdown("## 🤝 Contribuições pendentes")
-    st.caption(
-        "Lembranças enviadas por pessoas autorizadas. "
-        "A memória original não será alterada."
+    def formatar_data(valor) -> str:
+        if not valor:
+            return ""
+        if hasattr(valor, "strftime"):
+            return valor.strftime("%d/%m/%Y")
+        return str(valor)[:10]
+
+    def iniciais(nome: str) -> str:
+        partes = [p for p in str(nome or "Pessoa").split() if p]
+        if len(partes) >= 2:
+            return (partes[0][:1] + partes[-1][:1]).upper()
+        return (partes[0][:1] if partes else "P").upper()
+
+    def texto_curto(valor: str, limite: int = 150) -> str:
+        texto = re.sub(r"\s+", " ", str(valor or "")).strip()
+        return texto if len(texto) <= limite else texto[:limite].rstrip() + "..."
+
+    def tipo_label(contribuicao: dict) -> str:
+        arquivo_tipo = contribuicao.get("arquivo_tipo") or ""
+        texto = bool(contribuicao.get("texto"))
+        if arquivo_tipo.startswith("image/") and texto:
+            return "Texto + foto"
+        if arquivo_tipo.startswith("video/") and texto:
+            return "Texto + vídeo"
+        if arquivo_tipo.startswith("image/"):
+            return "Foto"
+        if arquivo_tipo.startswith("video/"):
+            return "Vídeo"
+        return "Texto"
+
+    pendentes = db.listar_contribuicoes_pendentes(usuario_dono_id)
+    listar_todas = getattr(db, "listar_contribuicoes_usuario", None)
+    todas = listar_todas(usuario_dono_id) if callable(listar_todas) else pendentes
+    aprovadas = [c for c in todas if c.get("status") == "aprovado"]
+    rejeitadas = [c for c in todas if c.get("status") == "rejeitado"]
+    pessoas = {c.get("contribuidor_email") or c.get("contribuidor_nome") for c in todas if c.get("contribuidor_nome") or c.get("contribuidor_email")}
+
+    st.markdown(
+        '<div class="ae-contrib-hero"><div><h1>✦ Contribuições</h1>'
+        '<p>Lembranças, fotos e vídeos enviados por pessoas importantes para enriquecer suas histórias.</p></div>'
+        '<span>↗ Ver histórico completo</span></div>',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        '<div class="ae-contrib-summary"><h3>Resumo das contribuições</h3><div class="ae-contrib-summary-grid">'
+        f'<div class="is-pending"><strong>{len(pendentes)}</strong><span>Aguardando aprovação</span></div>'
+        f'<div class="is-approved"><strong>{len(aprovadas)}</strong><span>Aprovadas</span></div>'
+        f'<div class="is-rejected"><strong>{len(rejeitadas)}</strong><span>Rejeitadas</span></div>'
+        f'<div class="is-people"><strong>{len(pessoas)}</strong><span>Pessoas contribuíram</span></div>'
+        '</div></div>',
+        unsafe_allow_html=True,
     )
 
-    contribuicoes = db.listar_contribuicoes_pendentes(usuario_dono_id)
-    if not contribuicoes:
-        st.info("Nenhuma contribuição aguardando aprovação.")
-        return
+    main_col, side_col = st.columns([0.64, 0.36], gap="medium")
 
-    for contribuicao in contribuicoes:
-        nome = contribuicao.get("contribuidor_nome") or "Pessoa convidada"
-        titulo = contribuicao.get("memoria_titulo") or "História sem título"
-        criado_em = contribuicao.get("criado_em")
-        data_texto = (
-            criado_em.strftime("%d/%m/%Y às %H:%M")
-            if hasattr(criado_em, "strftime")
-            else str(criado_em or "")
+    with main_col:
+        st.markdown(
+            '<div class="ae-contrib-section-title"><h2>Aguardando sua aprovação</h2>'
+            '<p>Nada entra na sua história sem sua autorização.</p></div>',
+            unsafe_allow_html=True,
+        )
+        if not pendentes:
+            st.markdown(
+                '<div class="ae-contrib-empty"><strong>Nenhuma contribuição aguardando aprovação.</strong>'
+                '<span>Quando alguém enviar uma lembrança, foto ou vídeo para enriquecer suas histórias, ela aparecerá aqui.</span></div>',
+                unsafe_allow_html=True,
+            )
+
+    with side_col:
+        fluxo = [
+            ("1", "Receber", "Contato envia texto, foto ou vídeo."),
+            ("2", "Revisar", "Você vê o conteúdo antes de publicar."),
+            ("3", "Aprovar", "A contribuição entra na história."),
+            ("4", "Rejeitar", "Nada aparece para visitantes."),
+        ]
+        fluxo_html = "".join(
+            f'<div class="ae-contrib-flow-row"><span>{n}</span><p><strong>{html.escape(titulo)}</strong>{html.escape(desc)}</p></div>'
+            for n, titulo, desc in fluxo
+        )
+        contagem = {}
+        for c in todas:
+            nome = c.get("contribuidor_nome") or "Pessoa convidada"
+            contagem[nome] = contagem.get(nome, 0) + 1
+        recentes_html = "".join(
+            f'<div class="ae-contrib-person-row"><div>{html.escape(iniciais(nome))}</div><p><strong>{html.escape(nome)}</strong>{qtd} {"contribuição" if qtd == 1 else "contribuições"}</p><button>Ver perfil</button></div>'
+            for nome, qtd in list(sorted(contagem.items(), key=lambda item: item[1], reverse=True))[:3]
+        ) or '<div class="ae-contrib-empty-small">Nenhum contribuidor recente.</div>'
+        st.markdown(
+            f'<div class="ae-contrib-side-card"><h3>Fluxo de aprovação</h3>{fluxo_html}</div>'
+            f'<div class="ae-contrib-side-card"><h3>Contribuidores recentes</h3>{recentes_html}</div>',
+            unsafe_allow_html=True,
         )
 
-        with st.container():
-            st.markdown(f"**{nome} enviou uma lembrança para:**")
-            st.markdown(f"### {titulo}")
-            if data_texto:
-                st.caption(data_texto)
-            if contribuicao.get("texto"):
-                st.markdown(contribuicao["texto"])
+    for contribuicao in pendentes:
+        nome = contribuicao.get("contribuidor_nome") or "Pessoa convidada"
+        titulo = contribuicao.get("memoria_titulo") or "História sem título"
+        texto = texto_curto(contribuicao.get("texto") or contribuicao.get("arquivo_nome") or "Contribuição enviada.")
+        media_chips = ""
+        arquivo_tipo = contribuicao.get("arquivo_tipo") or ""
+        if arquivo_tipo.startswith("image/"):
+            media_chips = '<span></span><span class="is-green"></span>'
+        elif arquivo_tipo.startswith("video/"):
+            media_chips = '<span class="is-blue"></span><span></span>'
+        else:
+            media_chips = '<span></span>'
 
-            arquivo_url = contribuicao.get("arquivo_url")
-            arquivo_tipo = contribuicao.get("arquivo_tipo", "")
-            if arquivo_url:
-                if arquivo_tipo.startswith("image/"):
-                    exibir_foto_segura(
-                        arquivo_url,
-                        caption=contribuicao.get("arquivo_nome", ""),
-                    )
-                elif arquivo_tipo.startswith("video/"):
-                    exibir_video_seguro(
-                        arquivo_url,
-                        legenda=contribuicao.get("arquivo_nome", ""),
-                    )
+        st.markdown(
+            '<div class="ae-contrib-card">'
+            f'<div class="ae-contrib-avatar">{html.escape(iniciais(nome))}</div>'
+            f'<div class="ae-contrib-card-body"><div class="ae-contrib-card-head"><div><strong>{html.escape(nome)}</strong><p>{html.escape(tipo_label(contribuicao))} enviada em {html.escape(formatar_data(contribuicao.get("criado_em")))}</p></div><em>{html.escape(tipo_label(contribuicao))}</em></div>'
+            f'<span>Para a história</span><h3>{html.escape(titulo)}</h3>'
+            f'<div class="ae-contrib-message"><strong>Eu lembro desse dia</strong><p>{html.escape(texto)}</p></div>'
+            f'<small>Mídias enviadas</small><div class="ae-contrib-media-row">{media_chips}</div></div></div>',
+            unsafe_allow_html=True,
+        )
+        col_ver, col_space, col_rejeitar, col_aprovar = st.columns([0.18, 0.46, 0.18, 0.18])
+        with col_ver:
+            st.button("Ver história", key=f"ver_historia_contribuicao_{contribuicao['id']}", use_container_width=True)
+        with col_rejeitar:
+            if st.button("Rejeitar", key=f"rejeitar_contribuicao_{contribuicao['id']}", use_container_width=True):
+                try:
+                    rejeitado = db.avaliar_contribuicao(contribuicao["id"], usuario_dono_id, "rejeitado")
+                except Exception as exc:
+                    print("Erro ao rejeitar contribuição:", exc)
+                    st.error("Não foi possível rejeitar esta contribuição agora.")
+                else:
+                    st.success("Contribuição rejeitada.") if rejeitado else st.warning("Esta contribuição não está mais pendente.")
+                    st.rerun()
+        with col_aprovar:
+            if st.button("Aprovar", key=f"aprovar_contribuicao_{contribuicao['id']}", type="primary", use_container_width=True):
+                try:
+                    aprovado = db.avaliar_contribuicao(contribuicao["id"], usuario_dono_id, "aprovado")
+                except Exception as exc:
+                    print("Erro ao aprovar contribuição:", exc)
+                    st.error("Não foi possível aprovar esta contribuição agora.")
+                else:
+                    st.success("Contribuição aprovada.") if aprovado else st.warning("Esta contribuição não está mais pendente.")
+                    st.rerun()
 
-            col_aprovar, col_rejeitar = st.columns(2)
-            with col_aprovar:
-                if st.button(
-                    "✅ Aprovar",
-                    key=f"aprovar_contribuicao_{contribuicao['id']}",
-                    type="primary",
-                    use_container_width=True,
-                ):
-                    try:
-                        aprovado = db.avaliar_contribuicao(
-                            contribuicao["id"],
-                            usuario_dono_id,
-                            "aprovado",
-                        )
-                    except Exception as exc:
-                        print("Erro ao aprovar contribuição:", exc)
-                        st.error("Não foi possível aprovar esta contribuição agora.")
-                    else:
-                        if aprovado:
-                            st.success("Contribuição aprovada.")
-                            st.rerun()
-                        else:
-                            st.warning("Esta contribuição não está mais pendente.")
-
-            with col_rejeitar:
-                if st.button(
-                    "Rejeitar",
-                    key=f"rejeitar_contribuicao_{contribuicao['id']}",
-                    use_container_width=True,
-                ):
-                    try:
-                        rejeitado = db.avaliar_contribuicao(
-                            contribuicao["id"],
-                            usuario_dono_id,
-                            "rejeitado",
-                        )
-                    except Exception as exc:
-                        print("Erro ao rejeitar contribuição:", exc)
-                        st.error("Não foi possível rejeitar esta contribuição agora.")
-                    else:
-                        if rejeitado:
-                            st.success("Contribuição rejeitada.")
-                            st.rerun()
-                        else:
-                            st.warning("Esta contribuição não está mais pendente.")
+    st.markdown('<h2 class="ae-contrib-approved-title">Aprovadas recentemente</h2>', unsafe_allow_html=True)
+    aprovadas_html = ""
+    for c in aprovadas[:3]:
+        aprovadas_html += (
+            '<div class="ae-contrib-approved-card">'
+            f'<div>{html.escape(iniciais(c.get("contribuidor_nome")))}</div>'
+            f'<p><strong>{html.escape(c.get("contribuidor_nome") or "Pessoa convidada")}</strong>{html.escape(c.get("memoria_titulo") or "História sem título")}</p>'
+            '<span>Aprovada</span></div>'
+        )
+    if not aprovadas_html:
+        aprovadas_html = '<div class="ae-contrib-empty-small">Nenhuma contribuição aprovada recentemente.</div>'
+    st.markdown(f'<div class="ae-contrib-approved-grid">{aprovadas_html}</div>', unsafe_allow_html=True)
 
 
 def navegar_para(pagina: str):
