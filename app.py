@@ -3669,20 +3669,20 @@ def render_contribuicoes_pendentes(usuario_dono_id: int):
     pessoas = {c.get("contribuidor_email") or c.get("contribuidor_nome") for c in todas if c.get("contribuidor_nome") or c.get("contribuidor_email")}
 
     st.markdown(
-        '<div class="ae-contrib-hero" style="display:flex;align-items:flex-start;justify-content:space-between;gap:1.25rem;margin:1.2rem 0 1rem;">'
-        '<div><h1 style="color:#21104a;font-size:2.35rem;line-height:1;margin:0 0 .35rem;font-weight:900;">✦ Contribuições</h1>'
-        '<p style="color:#6d6380;font-size:1.02rem;margin:0;">Lembranças, fotos e vídeos enviados por pessoas importantes para enriquecer suas histórias.</p></div>'
-        '<span style="border:1.5px solid rgba(104,79,176,.55);border-radius:12px;color:#21104a;font-weight:900;padding:.75rem 1.2rem;background:rgba(255,255,255,.55);white-space:nowrap;">↗ Ver histórico completo</span></div>',
+        '<div class="ae-contrib-hero" style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin:.55rem 0 .65rem;">'
+        '<div><h1 style="color:#21104a;font-size:2.05rem;line-height:1;margin:0 0 .22rem;font-weight:900;">✦ Contribuições</h1>'
+        '<p style="color:#6d6380;font-size:.92rem;margin:0;">Lembranças, fotos e vídeos enviados por pessoas importantes para enriquecer suas histórias.</p></div>'
+        '<span style="border:1.5px solid rgba(104,79,176,.55);border-radius:11px;color:#21104a;font-weight:900;padding:.58rem 1rem;background:rgba(255,255,255,.55);white-space:nowrap;">↗ Ver histórico completo</span></div>',
         unsafe_allow_html=True,
     )
     st.markdown(
-        f'<div class="ae-contrib-summary" style="{CARD}padding:1.05rem 1.25rem 1.15rem;margin-bottom:1rem;">'
-        '<h3 style="color:#21104a;margin:0 0 .8rem;font-size:1.25rem;font-weight:900;">Resumo das contribuições</h3>'
-        '<div class="ae-contrib-summary-grid" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem;">'
-        f'<div style="display:flex;align-items:center;justify-content:center;gap:1rem;border-radius:13px;min-height:42px;font-weight:900;border:1.5px solid #daa742;background:rgba(255,248,231,.72);"><strong style="color:#21104a;font-size:1.35rem;">{len(pendentes)}</strong><span style="color:#21104a;font-size:.92rem;">Aguardando aprovação</span></div>'
-        f'<div style="display:flex;align-items:center;justify-content:center;gap:1rem;border-radius:13px;min-height:42px;font-weight:900;border:1.5px solid #48a36d;background:rgba(236,252,242,.72);"><strong style="color:#21104a;font-size:1.35rem;">{len(aprovadas)}</strong><span style="color:#21104a;font-size:.92rem;">Aprovadas</span></div>'
-        f'<div style="display:flex;align-items:center;justify-content:center;gap:1rem;border-radius:13px;min-height:42px;font-weight:900;border:1.5px solid #e98b8b;background:rgba(255,240,240,.72);"><strong style="color:#21104a;font-size:1.35rem;">{len(rejeitadas)}</strong><span style="color:#21104a;font-size:.92rem;">Rejeitadas</span></div>'
-        f'<div style="display:flex;align-items:center;justify-content:center;gap:1rem;border-radius:13px;min-height:42px;font-weight:900;border:1.5px solid #9b86d5;background:rgba(247,243,255,.72);"><strong style="color:#21104a;font-size:1.35rem;">{len(pessoas)}</strong><span style="color:#21104a;font-size:.92rem;">Pessoas contribuíram</span></div>'
+        f'<div class="ae-contrib-summary" style="{CARD}padding:.8rem 1rem .9rem;margin-bottom:.7rem;">'
+        '<h3 style="color:#21104a;margin:0 0 .55rem;font-size:1.08rem;font-weight:900;">Resumo das contribuições</h3>'
+        '<div class="ae-contrib-summary-grid" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.7rem;">'
+        f'<div style="display:flex;align-items:center;justify-content:center;gap:.7rem;border-radius:11px;min-height:34px;font-weight:900;border:1.5px solid #daa742;background:rgba(255,248,231,.72);"><strong style="color:#21104a;font-size:1.12rem;">{len(pendentes)}</strong><span style="color:#21104a;font-size:.82rem;">Aguardando aprovação</span></div>'
+        f'<div style="display:flex;align-items:center;justify-content:center;gap:.7rem;border-radius:11px;min-height:34px;font-weight:900;border:1.5px solid #48a36d;background:rgba(236,252,242,.72);"><strong style="color:#21104a;font-size:1.12rem;">{len(aprovadas)}</strong><span style="color:#21104a;font-size:.82rem;">Aprovadas</span></div>'
+        f'<div style="display:flex;align-items:center;justify-content:center;gap:.7rem;border-radius:11px;min-height:34px;font-weight:900;border:1.5px solid #e98b8b;background:rgba(255,240,240,.72);"><strong style="color:#21104a;font-size:1.12rem;">{len(rejeitadas)}</strong><span style="color:#21104a;font-size:.82rem;">Rejeitadas</span></div>'
+        f'<div style="display:flex;align-items:center;justify-content:center;gap:.7rem;border-radius:11px;min-height:34px;font-weight:900;border:1.5px solid #9b86d5;background:rgba(247,243,255,.72);"><strong style="color:#21104a;font-size:1.12rem;">{len(pessoas)}</strong><span style="color:#21104a;font-size:.82rem;">Pessoas contribuíram</span></div>'
         '</div></div>',
         unsafe_allow_html=True,
     )
@@ -3691,14 +3691,14 @@ def render_contribuicoes_pendentes(usuario_dono_id: int):
 
     with main_col:
         st.markdown(
-            '<div class="ae-contrib-section-title" style="margin:.25rem 0 .55rem;"><h2 style="color:#21104a;font-size:1.45rem;margin:0;font-weight:900;">Aguardando sua aprovação</h2>'
-            '<p style="color:#6d6380;margin:.15rem 0 0;">Nada entra na sua história sem sua autorização.</p></div>',
+            '<div class="ae-contrib-section-title" style="margin:.15rem 0 .35rem;"><h2 style="color:#21104a;font-size:1.22rem;margin:0;font-weight:900;">Aguardando sua aprovação</h2>'
+            '<p style="color:#6d6380;margin:.08rem 0 0;font-size:.9rem;">Nada entra na sua história sem sua autorização.</p></div>',
             unsafe_allow_html=True,
         )
         if not pendentes:
             st.markdown(
-                '<div class="ae-contrib-empty" style="border:1px dashed rgba(104,79,176,.28);background:rgba(255,255,255,.55);border-radius:14px;color:#6d6380;padding:1rem;">'
-                '<strong style="color:#21104a;display:block;margin-bottom:.25rem;">Nenhuma contribuição aguardando aprovação.</strong>'
+                '<div class="ae-contrib-empty" style="border:1px dashed rgba(104,79,176,.28);background:rgba(255,255,255,.55);border-radius:14px;color:#6d6380;padding:.75rem .9rem;font-size:.9rem;">'
+                '<strong style="color:#21104a;display:block;margin-bottom:.18rem;">Nenhuma contribuição aguardando aprovação.</strong>'
                 '<span>Quando alguém enviar uma lembrança, foto ou vídeo para enriquecer suas histórias, ela aparecerá aqui.</span></div>',
                 unsafe_allow_html=True,
             )
@@ -3711,9 +3711,9 @@ def render_contribuicoes_pendentes(usuario_dono_id: int):
             ("4", "Rejeitar", "Nada aparece para visitantes."),
         ]
         fluxo_html = "".join(
-            f'<div class="ae-contrib-flow-row" style="display:grid;grid-template-columns:38px 1fr;gap:.7rem;align-items:center;margin:.75rem 0;">'
-            f'<span style="width:34px;height:34px;border-radius:999px;display:grid;place-items:center;background:#dfa93d;color:white;font-weight:900;">{n}</span>'
-            f'<p style="color:#6d6380;margin:0;line-height:1.25;"><strong style="display:block;color:#21104a;">{html.escape(titulo)}</strong>{html.escape(desc)}</p></div>'
+            f'<div class="ae-contrib-flow-row" style="display:grid;grid-template-columns:32px 1fr;gap:.55rem;align-items:center;margin:.48rem 0;">'
+            f'<span style="width:28px;height:28px;border-radius:999px;display:grid;place-items:center;background:#dfa93d;color:white;font-weight:900;font-size:.86rem;">{n}</span>'
+            f'<p style="color:#6d6380;margin:0;line-height:1.18;font-size:.88rem;"><strong style="display:block;color:#21104a;">{html.escape(titulo)}</strong>{html.escape(desc)}</p></div>'
             for n, titulo, desc in fluxo
         )
         contagem = {}
@@ -3726,10 +3726,10 @@ def render_contribuicoes_pendentes(usuario_dono_id: int):
             f'<p style="margin:0;color:#6d6380;line-height:1.25;"><strong style="display:block;color:#21104a;">{html.escape(nome)}</strong>{qtd} {"contribuição" if qtd == 1 else "contribuições"}</p>'
             '<button style="border:1px solid rgba(218,167,66,.42);border-radius:9px;background:rgba(255,248,231,.75);color:#21104a;font-weight:800;padding:.45rem .7rem;">Ver perfil</button></div>'
             for nome, qtd in list(sorted(contagem.items(), key=lambda item: item[1], reverse=True))[:3]
-        ) or '<div class="ae-contrib-empty-small" style="border:1px dashed rgba(104,79,176,.28);background:rgba(255,255,255,.55);border-radius:14px;color:#6d6380;padding:1rem;">Nenhum contribuidor recente.</div>'
+        ) or '<div class="ae-contrib-empty-small" style="border:1px dashed rgba(104,79,176,.28);background:rgba(255,255,255,.55);border-radius:14px;color:#6d6380;padding:.75rem .9rem;font-size:.9rem;">Nenhum contribuidor recente.</div>'
         st.markdown(
-            f'<div class="ae-contrib-side-card" style="{CARD}padding:1rem 1.15rem;margin:0 0 .75rem;"><h3 style="color:#21104a;margin:0 0 .8rem;font-size:1.25rem;font-weight:900;">Fluxo de aprovação</h3>{fluxo_html}</div>'
-            f'<div class="ae-contrib-side-card" style="{CARD}padding:1rem 1.15rem;margin:0 0 .75rem;"><h3 style="color:#21104a;margin:0 0 .8rem;font-size:1.25rem;font-weight:900;">Contribuidores recentes</h3>{recentes_html}</div>',
+            f'<div class="ae-contrib-side-card" style="{CARD}padding:.75rem .9rem;margin:0 0 .55rem;"><h3 style="color:#21104a;margin:0 0 .45rem;font-size:1.08rem;font-weight:900;">Fluxo de aprovação</h3>{fluxo_html}</div>'
+            f'<div class="ae-contrib-side-card" style="{CARD}padding:.75rem .9rem;margin:0 0 .55rem;"><h3 style="color:#21104a;margin:0 0 .45rem;font-size:1.08rem;font-weight:900;">Contribuidores recentes</h3>{recentes_html}</div>',
             unsafe_allow_html=True,
         )
 
