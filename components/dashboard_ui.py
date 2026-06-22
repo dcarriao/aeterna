@@ -1680,6 +1680,14 @@ button[data-baseweb="tab"][aria-selected="true"] {
     font-weight: 800;
 }
 
+div[data-testid="stPopover"] {
+    width: 100% !important;
+    display: block !important;
+    margin-top: 0.12rem;
+    position: relative;
+    z-index: 3;
+}
+
 div[data-testid="stPopover"] button {
     width: 100% !important;
     min-height: 1.72rem;
@@ -1693,18 +1701,14 @@ div[data-testid="stPopover"] button {
     transition: all 0.15s ease;
     justify-content: center;
     text-align: center;
+    display: flex !important;
+    align-items: center;
 }
 
 div[data-testid="stPopover"] button:hover {
     border-color: #d4af37;
     background: rgba(212,168,79,0.10);
     color: #2B1747;
-}
-
-div[data-testid="stPopover"] {
-    margin-top: 0.12rem;
-    position: relative;
-    z-index: 3;
 }
 
 .st-key-minha_historia_contar_historia, .st-key-minha-historia-contar-historia {
@@ -1728,30 +1732,35 @@ div[data-testid="stPopover"] {
     margin-top: 0.7rem;
 }
 [class*="st-key-ver_todas_"] button, [class*="st-key-ver-todas-"] button {
-    background: transparent !important;
-    color: #2B1747 !important;
-    border: none !important;
+    background: rgba(255,255,255,0.72) !important;
+    color: #5F536B !important;
+    border: 1px solid rgba(212,168,79,0.35) !important;
     font-size: 0.66rem !important;
-    font-weight: 850 !important;
-    padding: 0 !important;
-    min-height: 0 !important;
+    font-weight: 600 !important;
+    padding: 0.14rem 0.48rem !important;
+    min-height: 1.52rem !important;
     height: auto !important;
     margin: 0 !important;
     white-space: nowrap !important;
     text-decoration: none !important;
     cursor: pointer !important;
     box-shadow: none !important;
+    border-radius: 8px !important;
+    display: flex !important;
+    align-items: center;
+    transition: all 0.15s ease;
 }
 [class*="st-key-ver_todas_"] button:hover, [class*="st-key-ver-todas-"] button:hover {
-    color: #5A2BB5 !important;
-    background: transparent !important;
-    text-decoration: underline !important;
+    border-color: #d4af37 !important;
+    background: rgba(212,168,79,0.10) !important;
+    color: #2B1747 !important;
+    text-decoration: none !important;
 }
 [class*="st-key-ver_todas_"], [class*="st-key-ver-todas-"] {
     display: flex;
     justify-content: flex-end;
-    margin-top: -1.2rem;
-    margin-bottom: 0.35rem;
+    margin-top: 0.15rem;
+    margin-bottom: 0;
 }
 .st-key-filtro_voltar button, .st-key-filtro-voltar button {
     background: transparent !important;
@@ -1775,11 +1784,11 @@ div[data-testid="stPopover"] {
     background: rgba(255,255,255,0.52);
     border: 1px solid rgba(212,168,79,0.22);
     border-radius: 16px;
-    padding: 0.55rem 0.55rem 1.6rem;
+    padding: 0.55rem;
     box-shadow: 0 12px 30px rgba(43,23,71,0.06);
-    height: 228px;
-    min-height: 228px;
-    margin-bottom: 0;
+    height: 214px;
+    min-height: 214px;
+    margin-bottom: 0.35rem;
     overflow: hidden;
 }
 
