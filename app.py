@@ -644,6 +644,7 @@ def render_minha_historia():
             else ""
         )
         card_html = (
+            '<div class="ae-card-wrapper">'
             '<div class="ae-story-card">'
             f"{media_card_memoria(memoria)}"
             '<div class="ae-story-body">'
@@ -652,6 +653,7 @@ def render_minha_historia():
             f'<span class="ae-story-date">{data_evento_segura}</span>'
             f"<p>{resumo_seguro}</p>"
             f'<div class="ae-story-indicators">{indicadores_memoria(memoria)}</div>'
+            "</div>"
             "</div>"
             "</div>"
         )

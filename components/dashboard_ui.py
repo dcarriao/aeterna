@@ -1552,10 +1552,16 @@ button[data-baseweb="tab"][aria-selected="true"] {
     margin: 1.25rem 0 0.42rem;
 }
 
+.ae-card-wrapper {
+    height: 232px;
+}
+
 .ae-story-card {
     height: 232px;
+    max-height: 232px;
+    min-height: 232px;
     width: 100%;
-    overflow: hidden;
+    overflow: hidden !important;
     display: flex;
     flex-direction: column;
     background: rgba(255,255,255,0.98);
@@ -1563,15 +1569,19 @@ button[data-baseweb="tab"][aria-selected="true"] {
     border-radius: 16px;
     margin: 0.18rem 0 0;
     box-shadow: 0 12px 28px rgba(43,23,71,0.08);
+    flex-shrink: 0;
 }
 
 .ae-story-media {
     height: 86px;
+    max-height: 86px;
+    min-height: 86px;
     width: 100%;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
     background:
         radial-gradient(circle at 72% 18%, rgba(212,168,79,0.26), transparent 32%),
         linear-gradient(135deg, rgba(43,23,71,0.94), rgba(85,54,110,0.86));
@@ -1626,10 +1636,14 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-story-body {
+    height: 146px;
+    max-height: 146px;
     min-height: 146px;
     padding: 0.58rem 0.76rem 0.55rem;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+    flex-shrink: 0;
 }
 
 .ae-story-card h3 {
@@ -1678,6 +1692,10 @@ button[data-baseweb="tab"][aria-selected="true"] {
     padding: 0.1rem 0.32rem;
     font-size: 0.6rem;
     font-weight: 800;
+}
+
+[class*="st-key-_ler_"] {
+    display: flex;
 }
 
 [class*="st-key-_ler_"] button {
