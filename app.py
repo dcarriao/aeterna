@@ -586,20 +586,20 @@ def render_minha_historia():
         fotos = fotos_por_memoria.get(memoria["id"], [])
         videos = videos_por_memoria.get(memoria["id"], [])
 
-        estilo = "height:86px;max-height:86px;min-height:86px;overflow:hidden;"
+        estilo = "height:86px;max-height:86px;min-height:86px;overflow:hidden;position:relative;"
 
+        imagem_extra = ""
         if fotos:
             caminho_foto = (fotos[0].get("caminho") or "").strip()
             imagem_src = caminho_foto if caminho_foto.startswith(("http://", "https://")) else imagem_local_para_data_uri(caminho_foto)
             if imagem_src:
                 imagem_segura = html.escape(imagem_src, quote=True)
-                return (
-                    f'<div class="{classe_base} {classe_base}-photo" style="{estilo}">'
-                    f'<img src="{imagem_segura}" alt="Miniatura da história">'
-                    "</div>"
+                imagem_extra = (
+                    f'<img src="{imagem_segura}" alt="" '
+                    'style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;">'
                 )
 
-        if videos:
+        if videos and not imagem_extra:
             return (
                 f'<div class="{classe_base} {classe_base}-video" style="{estilo}">'
                 "<span>🎥</span>"
@@ -611,6 +611,7 @@ def render_minha_historia():
             f'<div class="{classe_base} {classe_base}-fallback" style="{estilo}">'
             "<span>📖</span>"
             "<strong>História</strong>"
+            f"{imagem_extra}"
             "</div>"
         )
 

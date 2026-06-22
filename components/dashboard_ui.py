@@ -1552,10 +1552,6 @@ button[data-baseweb="tab"][aria-selected="true"] {
     margin: 1.25rem 0 0.42rem;
 }
 
-.ae-card-wrapper {
-    height: 232px;
-}
-
 .ae-story-card {
     height: 232px;
     max-height: 232px;
@@ -1593,25 +1589,6 @@ button[data-baseweb="tab"][aria-selected="true"] {
     height: 100%;
     object-fit: cover;
     display: block;
-}
-
-.ae-story-media-photo {
-    display: block;
-    overflow: hidden;
-    background:
-        radial-gradient(circle at 80% 20%, rgba(212,168,79,0.30), transparent 34%),
-        linear-gradient(135deg, #F7F3EA, #EFE3C8);
-}
-
-.ae-story-media-photo img {
-    width: 100%;
-    height: 100%;
-    min-height: 86px;
-    object-fit: cover;
-    display: block;
-    background:
-        radial-gradient(circle at 80% 20%, rgba(212,168,79,0.30), transparent 34%),
-        linear-gradient(135deg, #F7F3EA, #EFE3C8);
 }
 
 .ae-story-media-photo-fallback {
