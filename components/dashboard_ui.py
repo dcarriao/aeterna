@@ -1680,35 +1680,28 @@ button[data-baseweb="tab"][aria-selected="true"] {
     font-weight: 800;
 }
 
-div[data-testid="stPopover"] {
-    width: 100% !important;
-    display: block !important;
-    margin-top: 0.12rem;
-    position: relative;
-    z-index: 3;
-}
-
-div[data-testid="stPopover"] button {
+[class*="st-key-_ler_"] button {
     width: 100% !important;
     min-height: 1.72rem;
     padding: 0.14rem 0.48rem;
-    border-color: rgba(212,168,79,0.35);
-    color: #5F536B;
-    background: rgba(255,255,255,0.72);
+    border-radius: 8px !important;
     font-size: 0.72rem;
-    border-radius: 8px;
-    font-weight: 600;
+    font-weight: 700 !important;
+    background: linear-gradient(135deg, #f8dc92, #d4af37 62%, #b77a46) !important;
+    color: #2B1747 !important;
+    border: none !important;
     transition: all 0.15s ease;
     justify-content: center;
-    text-align: center;
-    display: flex !important;
     align-items: center;
+    display: flex !important;
+    margin: 0.12rem 0 0 0 !important;
+    box-shadow: none !important;
+    cursor: pointer;
 }
 
-div[data-testid="stPopover"] button:hover {
-    border-color: #d4af37;
-    background: rgba(212,168,79,0.10);
-    color: #2B1747;
+[class*="st-key-_ler_"] button:hover {
+    opacity: 0.9;
+    box-shadow: 0 2px 8px rgba(212,168,79,0.35) !important;
 }
 
 .st-key-minha_historia_contar_historia, .st-key-minha-historia-contar-historia {

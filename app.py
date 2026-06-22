@@ -743,8 +743,11 @@ def render_minha_historia():
                 )
 
     def render_acesso_historia(memoria: dict, key_contexto: str):
-        with st.popover("Ler história", use_container_width=True):
-            render_detalhes_memoria(memoria, key_contexto)
+        btn_key = f"_ler_{key_contexto}"
+        show_key = f"_show_{key_contexto}"
+        if st.button("📖 Ler história", key=btn_key, use_container_width=True):
+            st.session_state[show_key] = not st.session_state.get(show_key, False)
+            st.rerun()
 
     def render_prateleira(
             itens: list,
@@ -752,6 +755,8 @@ def render_minha_historia():
             contexto: str,
             quantidade_colunas: int = 4,
     ):
+        expanded_key = None
+        expanded_mem = None
         for inicio in range(0, len(itens), quantidade_colunas):
             colunas = st.columns(quantidade_colunas)
             for indice, coluna in enumerate(colunas):
@@ -763,6 +768,11 @@ def render_minha_historia():
                 with coluna:
                     render_card_memoria(memoria, categoria_nome)
                     render_acesso_historia(memoria, key_contexto)
+                    show_key = f"_show_{key_contexto}"
+                    if st.session_state.get(show_key, False):
+                        expanded_key = key_contexto
+                        expanded_mem = memoria
+        return expanded_key, expanded_mem
 
     def nome_categoria(categoria: str) -> str:
         categoria_normalizada = normalizar_categoria_colecao(categoria)
@@ -824,16 +834,18 @@ def render_minha_historia():
             f'<div class="ae-story-section-title">{icone_categoria(filtro_cat)} {categoria_nome_filtro}</div>',
             unsafe_allow_html=True,
         )
-        render_prateleira(grupos[filtro_cat], categoria_nome_filtro, contexto="filtro", quantidade_colunas=4)
+        exp_key_filtro, exp_mem_filtro = render_prateleira(grupos[filtro_cat], categoria_nome_filtro, contexto="filtro", quantidade_colunas=4)
+        expanded_key, expanded_memoria = exp_key_filtro, exp_mem_filtro
     else:
         # ── Vista normal: Continue + Coleções ─────────────────────────
         st.markdown('<div class="ae-story-section-title">Continue sua história</div>', unsafe_allow_html=True)
-        render_prateleira(
+        exp_key_cont, exp_mem_cont = render_prateleira(
             memorias[:4],
             "Continue",
             contexto="continue",
             quantidade_colunas=4,
         )
+        expanded_key, expanded_memoria = exp_key_cont, exp_mem_cont
         st.markdown('<div class="ae-story-section-title ae-story-section-title-collections">Coleções</div>', unsafe_allow_html=True)
         grupos_ordenados = sorted(
             grupos.items(),
@@ -852,6 +864,14 @@ def render_minha_historia():
                     if st.button("Ver todas ›", key=f"ver_todas_{categoria}", use_container_width=False):
                         st.session_state["_ae_filtro_categoria"] = categoria
                         st.rerun()
+
+    if expanded_memoria and expanded_key:
+        st.divider()
+        render_detalhes_memoria(expanded_memoria, expanded_key)
+        close_key = f"_close_{expanded_key}"
+        if st.button("✕ Fechar", key=close_key):
+            st.session_state[f"_show_{expanded_key}"] = False
+            st.rerun()
 
 
 # ============================================================================
