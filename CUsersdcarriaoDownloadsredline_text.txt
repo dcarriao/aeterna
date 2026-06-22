@@ -1,0 +1,546 @@
+=== PAGE 1 ===
+REDLINE SPECIFICATION OFICIAL — SPRINT B
+aEterna
+REGRA GLOBAL DE LAYOUT
+Viewport de referência:
+Largura: 1448px
+Altura: 1086px
+A tela inteira deve caber dentro desta viewport desktop.
+Não aumentar fontes.
+Não aumentar margens.
+Não aumentar espaçamentos.
+Não aumentar alturas.
+A tela não deve exigir múltiplos scrolls para visualizar:
+Banner
+Cards de Status
+Cards de Planos
+Footer
+Todos os elementos devem permanecer visíveis dentro do primeiro viewport desktop.
+APP_ROOT
+Elemento: APP_ROOT
+Tipo: Container Principal
+Altura: 1086px
+Largura: 1448px
+Cor de fundo:
+• 
+• 
+• 
+• 
+1
+
+=== PAGE 2 ===
+F8F5EE
+Profundidade: z-index 0
+Encapsula:
+SIDEBAR
+MAIN_CONTENT
+SIDEBAR
+Elemento: SIDEBAR
+Tipo: Container
+Altura: 1086px
+Largura: 220px
+Cor de fundo:
+Gradiente:
+1E0B55
+→
+14053F
+Cor da borda: nenhuma
+Profundidade: z-index 10
+Encapsulado em: APP_ROOT
+Padding:
+Top: 24px
+Left: 16px
+Right: 16px
+Bottom: 24px
+• 
+• 
+2
+
+=== PAGE 3 ===
+Gap vertical: 20px
+Encapsula:
+LOGO
+MENU_CONTAINER
+PLAN_STATUS_CARD
+PROFILE_CONTAINER
+LOGO
+Elemento: LOGO
+Tipo: Imagem
+Altura: 72px
+Largura: 170px
+Posição:
+Top: 24px
+Left: 24px
+Encapsulado em: SIDEBAR
+Comportamento: Nenhum
+MENU_CONTAINER
+Elemento: MENU_CONTAINER
+Tipo: Container
+Altura: 360px
+Largura: 188px
+Gap: 16px
+Encapsulado em: SIDEBAR
+• 
+• 
+• 
+• 
+3
+
+=== PAGE 4 ===
+Encapsula:
+MENU_ITEM
+MENU_ITEM
+Elemento: MENU_ITEM
+Altura: 48px
+Largura: 188px
+Radius: 12px
+Cor de fundo: Transparente
+Cor do texto:
+FFFFFF
+Fonte: Inter
+Peso: 500
+Tamanho: 15px
+Comportamento: Navegação
+MENU_ITEM_ACTIVE
+Elemento: MENU_ITEM_ACTIVE
+Altura: 48px
+Largura: 188px
+Radius: 12px
+Cor de fundo:
+E3B12D
+Cor texto:
+• 
+4
+
+=== PAGE 5 ===
+FFFFFF
+Fonte: Inter
+Peso: 600
+Tamanho: 15px
+PLAN_STATUS_CARD
+Elemento: PLAN_STATUS_CARD
+Tipo: Container
+Altura: 190px
+Largura: 188px
+Cor fundo:
+23105D
+Cor borda:
+4A3297
+Borda: 1px
+Radius: 16px
+Padding: 16px
+Encapsulado em: SIDEBAR
+MAIN_CONTENT
+Elemento: MAIN_CONTENT
+Tipo: Container
+Altura: 1086px
+Largura: 1228px
+5
+
+=== PAGE 6 ===
+Padding: 24px
+Gap Vertical: 20px
+Encapsulado em: APP_ROOT
+Encapsula:
+HERO_CONTAINER
+STATUS_CONTAINER
+PRICING_CONTAINER
+SECURITY_CONTAINER
+HERO_CONTAINER
+Elemento: HERO_CONTAINER
+Tipo: Container
+Altura: 118px
+Largura: 1140px
+Cor fundo:
+FFFFFF
+Cor borda:
+E8DCC6
+Borda: 1px
+Radius: 20px
+Padding: 24px
+Encapsulado em: MAIN_CONTENT
+Encapsula:
+HERO_ICON
+HERO_TEXT_BLOCK
+HERO_BUTTON
+HERO_TREE
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+6
+
+=== PAGE 7 ===
+HERO_ICON
+Elemento: HERO_ICON
+Tipo: Ícone
+Altura: 56px
+Largura: 56px
+Cor fundo:
+F8F5EE
+Cor ícone:
+24125A
+Encapsulado em: HERO_CONTAINER
+HERO_TITLE
+Elemento: HERO_TITLE
+Texto: Preserve tudo para sua família
+Fonte: Inter
+Peso: 700
+Tamanho: 28px
+Line Height: 34px
+Cor:
+24125A
+Margem superior: 0
+Margem inferior: 6px
+IMPORTANTE:
+7
+
+=== PAGE 8 ===
+O título deve permanecer visualmente alinhado ao topo do banner .
+Nunca centralizado verticalmente.
+HERO_SUBTITLE
+Fonte: Inter
+Peso: 400
+Tamanho: 16px
+Line Height: 22px
+Cor:
+555555
+HERO_BUTTON
+Altura: 48px
+Largura: 190px
+Cor fundo:
+5A2BB5
+Cor texto:
+FFFFFF
+Radius: 12px
+Fonte: Inter
+Peso: 600
+Tamanho: 15px
+Comportamento: Abrir página de planos
+8
+
+=== PAGE 9 ===
+HERO_TREE
+Altura: 86px
+Largura: 260px
+Posição: Extrema direita do banner
+Comportamento: Nenhum
+STATUS_CONTAINER
+Elemento: STATUS_CONTAINER
+Tipo: Container
+Altura: 330px
+Largura: 1140px
+Gap: 24px
+Encapsulado em: MAIN_CONTENT
+Encapsula:
+FREE_USAGE_CARD
+LIMIT_CARD
+IMPORTANTE:
+OS DOIS CARDS DEVEM POSSUIR EXATAMENTE A MESMA ALTURA.
+FREE_USAGE_CARD
+Altura: 330px
+Largura: 430px
+Cor fundo:
+FFFFFF
+Cor borda:
+• 
+• 
+9
+
+=== PAGE 10 ===
+E8DCC6
+Borda: 1px
+Radius: 20px
+Padding: 24px
+Fonte: Inter
+LIMIT_CARD
+Altura: 330px
+Largura: 686px
+Cor fundo:
+FFFFFF
+Cor borda:
+E8DCC6
+Borda: 1px
+Radius: 20px
+Padding: 24px
+Encapsula:
+LIMIT_CARD_INNER
+IMPORTANTE:
+Mesma altura do FREE_USAGE_CARD.
+LIMIT_CARD_INNER
+Altura: 206px
+Largura: 100%
+• 
+10
+
+=== PAGE 11 ===
+Cor fundo:
+F3EDF8
+Radius: 16px
+Padding: 24px
+Encapsula:
+LOCK_ICON
+LIMIT_TITLE
+LIMIT_TEXT
+LIMIT_BUTTON
+LIMIT_TITLE
+Fonte: Inter
+Peso: 700
+Tamanho: 18px
+Cor:
+24125A
+LIMIT_TEXT
+Fonte: Inter
+Peso: 400
+Tamanho: 14px
+Cor:
+555555
+• 
+• 
+• 
+• 
+11
+
+=== PAGE 12 ===
+LIMIT_BUTTON
+Altura: 44px
+Largura: 200px
+Cor fundo:
+5A2BB5
+Cor texto:
+FFFFFF
+Radius: 12px
+Fonte: Inter
+Peso: 600
+Tamanho: 15px
+Comportamento: Abrir página de planos
+PRICING_CONTAINER
+Elemento: PRICING_CONTAINER
+Tipo: Container Pai
+Altura: 430px
+Largura: 1140px
+Cor fundo:
+FFFFFF
+Cor borda:
+E8DCC6
+Borda: 1px
+12
+
+=== PAGE 13 ===
+Radius: 20px
+Padding: 18px
+Encapsulado em: MAIN_CONTENT
+Encapsula:
+PRICING_HEADER
+PLANS_ROW
+IMPORTANTE:
+ESTE CONTAINER É OBRIGATÓRIO.
+OS CARDS NÃO PODEM FICAR SOLTOS.
+PRICING_HEADER
+Altura: 48px
+Largura: 100%
+Encapsula:
+Título
+Subtítulo
+PRICING_TITLE
+Fonte: Inter
+Peso: 700
+Tamanho: 18px
+Cor:
+24125A
+PRICING_SUBTITLE
+Fonte: Inter
+• 
+• 
+• 
+• 
+13
+
+=== PAGE 14 ===
+Peso: 400
+Tamanho: 14px
+Cor:
+666666
+PLANS_ROW
+Altura: 355px
+Largura: 100%
+Gap: 18px
+Display: Horizontal
+Encapsula:
+PLAN_FREE
+PLAN_FAMILY
+PLAN_LEGACY
+PLAN_FREE
+Altura: 355px
+Largura: 340px
+Cor fundo:
+FFFFFF
+Cor borda:
+E8DCC6
+Borda: 1px
+Radius: 16px
+Padding: 20px
+• 
+• 
+• 
+14
+
+=== PAGE 15 ===
+Fonte: Inter
+PLAN_FAMILY
+Altura: 385px
+Largura: 360px
+Cor fundo:
+FFFFFF
+Cor borda:
+8D5AE8
+Borda: 2px
+Radius: 16px
+Padding: 20px
+Fonte: Inter
+IMPORTANTE:
+Este card é apenas levemente maior .
+Não aumentar além destas dimensões.
+BADGE_MOST_POPULAR
+Altura: 30px
+Largura: 115px
+Cor fundo:
+D9A328
+Cor texto:
+15
+
+=== PAGE 16 ===
+FFFFFF
+Radius: 999px
+Fonte: Inter
+Peso: 600
+Tamanho: 13px
+PLAN_LEGACY
+Altura: 355px
+Largura: 340px
+Cor fundo:
+FFFFFF
+Cor borda:
+E8DCC6
+Borda: 1px
+Radius: 16px
+Padding: 20px
+Fonte: Inter
+PLAN_TITLE
+Fonte: Inter
+Peso: 700
+Tamanho: 16px
+Cor:
+16
+
+=== PAGE 17 ===
+24125A
+PLAN_DESCRIPTION
+Fonte: Inter
+Peso: 400
+Tamanho: 13px
+Cor:
+666666
+PLAN_PRICE
+Fonte: Inter
+Peso: 700
+Tamanho: 24px
+Cor:
+24125A
+IMPORTANTE:
+Não ultrapassar 24px.
+PLAN_FEATURE
+Fonte: Inter
+Peso: 400
+Tamanho: 13px
+Cor:
+17
+
+=== PAGE 18 ===
+555555
+FAMILY_BUTTON
+Altura: 44px
+Largura: 100%
+Cor fundo:
+5A2BB5
+Cor texto:
+FFFFFF
+Radius: 12px
+Fonte: Inter
+Peso: 600
+Tamanho: 14px
+Comportamento: Abrir assinatura Familiar
+LEGACY_BUTTON
+Altura: 44px
+Largura: 100%
+Cor fundo:
+D9A328
+Cor texto:
+FFFFFF
+Radius: 12px
+18
+
+=== PAGE 19 ===
+Fonte: Inter
+Peso: 600
+Tamanho: 14px
+Comportamento: Abrir assinatura Legado
+SECURITY_CONTAINER
+Elemento: SECURITY_CONTAINER
+Tipo: Container
+Altura: 72px
+Largura: 1140px
+Cor fundo:
+FFFFFF
+Cor borda:
+E8DCC6
+Borda: 1px
+Radius: 16px
+Padding: 24px
+Encapsulado em: MAIN_CONTENT
+Encapsula:
+SECURITY_ICON
+SECURITY_TEXT
+SECURITY_LINK
+SECURITY_TEXT
+Fonte: Inter
+• 
+• 
+• 
+19
+
+=== PAGE 20 ===
+Peso: 400
+Tamanho: 14px
+Cor:
+555555
+SECURITY_LINK
+Fonte: Inter
+Peso: 600
+Tamanho: 14px
+Cor:
+5A2BB5
+Comportamento: Abrir página de segurança
+REGRA FINAL
+A implementação deve reproduzir:
+Mesma hierarquia visual.
+Mesma proporção entre containers.
+Mesma escala tipográfica.
+Mesma altura relativa dos cards.
+Mesmo espaçamento vertical.
+Mesmo agrupamento visual.
+É proibido aumentar fontes, gaps, paddings ou alturas além dos valores definidos neste documento.
+Se a implementação exigir mais de um viewport desktop para visualizar os componentes principais, a
+implementação está incorreta.
+1. 
+2. 
+3. 
+4. 
+5. 
+6. 
+20
+

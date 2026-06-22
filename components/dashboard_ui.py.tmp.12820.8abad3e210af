@@ -3276,9 +3276,9 @@ div[data-testid="stPopover"] {
 /* CTA Banner — card compacto, fundo claro (usado em Início e Planos) */
 .ae-cta-banner {
     background: #FFFFFF;
-    border: 1px solid #E8DCC6;
+    border: 1px solid #E7DCC7;
     border-radius: 20px;
-    padding: 1.5rem;
+    padding: 1.25rem 1.5rem;
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -3311,43 +3311,42 @@ div[data-testid="stPopover"] {
     text-decoration: none !important;
     flex-shrink: 0;
 }
-/* Botão da banner na tela Planos — redline v2: 190×48px, #5A2BB5 */
+/* Botão da banner na tela Planos — roxo #5E2DAA */
 .ae-planos-banner-btn {
-    background: #5A2BB5;
+    background: #5E2DAA;
     color: #fff !important;
-    width: 190px;
-    min-width: 190px;
-    height: 48px;
+    padding: 0.9rem 1.6rem;
     border-radius: 12px;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 0.88rem;
     white-space: nowrap;
     cursor: pointer;
     flex-shrink: 0;
+    min-width: 200px;
     text-align: center;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.35rem;
 }
-.ae-planos-banner-btn:hover { background: #4b24a0; }
-/* Banner na tela Planos — redline v2: 28px/700, sub 16px/#555555 */
+.ae-planos-banner-btn:hover { background: #4e2490; }
+/* Banner na tela Planos: título maior conforme mockup */
 .ae-planos-banner .ae-cta-banner-title {
-    font-size: 1.75rem;
-    font-weight: 700;
+    font-size: 1.6rem;
+    font-weight: 800;
     color: #24125A;
 }
 .ae-planos-banner .ae-cta-banner-sub {
     font-size: 1rem;
-    color: #555555;
+    color: #6E6E6E;
 }
 
-/* LIMIT_CARD — redline: #FFFFFF, border #E8DCC6, radius 20px, padding 24px */
+/* Card de status unificado (Aproveitando + Bloqueio Suave) */
 .ae-status-card {
     background: #FFFFFF;
-    border: 1px solid #E8DCC6;
-    border-radius: 20px;
-    padding: 1.5rem;
+    border: 1px solid #E7DCC7;
+    border-radius: 16px;
+    padding: 1.2rem 1.4rem;
     height: 100%;
 }
 .ae-status-title {
@@ -3361,11 +3360,10 @@ div[data-testid="stPopover"] {
     font-size: 0.8rem;
     margin-bottom: 1rem;
 }
-/* LIMIT_CARD_INNER — redline: #F3EDF8, radius 16px */
 .ae-status-inner {
-    background: #F3EDF8;
-    border-radius: 16px;
-    padding: 1.5rem;
+    background: #F6F1FA;
+    border-radius: 12px;
+    padding: 1.2rem;
     text-align: center;
 }
 .ae-status-icon {
@@ -3375,46 +3373,41 @@ div[data-testid="stPopover"] {
 }
 .ae-status-inner-title {
     color: #24125A;
-    font-size: 1.125rem;
-    font-weight: 700;
+    font-size: 0.88rem;
+    font-weight: 800;
     margin-bottom: 0.5rem;
 }
 .ae-status-inner-desc {
-    color: #555555;
-    font-size: 0.875rem;
+    color: #6E6E6E;
+    font-size: 0.76rem;
     margin-bottom: 1rem;
     line-height: 1.5;
 }
-/* LIMIT_BUTTON — redline v2: 44×200px, #5A2BB5, radius 12px, centrado */
 .ae-status-inner-btn {
     display: block;
-    background: #5A2BB5;
+    background: #5E2DAA;
     color: #fff !important;
-    width: 200px;
-    height: 44px;
-    line-height: 44px;
-    padding: 0;
-    border-radius: 12px;
-    font-weight: 600;
+    padding: 0.7rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 700;
     font-size: 0.82rem;
     cursor: pointer;
     text-align: center;
     text-decoration: none !important;
-    margin: 0 auto;
 }
 
-/* FREE_PLAN_CARD — redline: #FFFFFF, border #E8DCC6, radius 20px, padding 24px */
+/* Tela de planos — card de uso atual */
 .ae-plano-uso-card {
-    background: #FFFFFF;
-    border: 1px solid #E8DCC6;
-    border-radius: 20px;
-    padding: 1.5rem;
+    background: rgba(255,255,255,0.85);
+    border: 1px solid rgba(212,168,79,0.22);
+    border-radius: 16px;
+    padding: 1.2rem 1.3rem;
     height: 100%;
 }
 .ae-plano-uso-title {
-    color: #24125A;
-    font-size: 1.06rem;
-    font-weight: 700;
+    color: #2B1747;
+    font-size: 0.9rem;
+    font-weight: 800;
     margin-bottom: 0.1rem;
 }
 .ae-plano-uso-sub {
@@ -3472,52 +3465,46 @@ div[data-testid="stPopover"] {
     margin: 0;
 }
 
-/* PLAN_FREE / PLAN_LEGACY — redline v2: #FFFFFF, border #E8DCC6, radius 16px, padding 20px */
+/* Tela de planos — cards de comparação */
 .ae-plan-card {
-    background: #FFFFFF;
-    border: 1px solid #E8DCC6;
-    border-radius: 16px;
-    padding: 1.25rem;
+    background: rgba(255,255,255,0.88);
+    border: 1px solid rgba(212,168,79,0.22);
+    border-radius: 18px;
+    padding: 1.4rem;
     height: 100%;
     position: relative;
 }
-/* PLAN_FAMILY — redline v2: border 2px #8D5AE8, radius 16px, padding 20px */
 .ae-plan-card-destaque {
-    border: 2px solid #8D5AE8;
-    box-shadow: 0 8px 32px rgba(141,90,232,0.18);
+    border: 2px solid #7A4BC3;
+    box-shadow: 0 8px 32px rgba(122,75,195,0.18);
 }
-/* BADGE_MOST_POPULAR — redline v2: 115×30px, #D9A328, text #FFFFFF, radius 999px, 13px */
 .ae-plan-badge {
-    background: #D9A328;
-    color: #FFFFFF;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    width: 115px;
-    height: 30px;
-    line-height: 30px;
-    padding: 0;
-    border-radius: 999px;
+    background: linear-gradient(135deg, #f8dc92, #d4af37);
+    color: #2B1747;
+    font-size: 0.62rem;
+    font-weight: 800;
+    padding: 0.18rem 0.7rem;
+    border-radius: 20px;
     display: inline-block;
     margin-bottom: 0.7rem;
     letter-spacing: 0.03em;
-    text-align: center;
 }
 .ae-plan-icon { font-size: 2rem; margin-bottom: 0.4rem; }
 .ae-plan-nome {
-    color: #24125A;
+    color: #2B1747;
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: 800;
     margin: 0 0 0.1rem 0;
 }
 .ae-plan-desc {
-    color: #666666;
-    font-size: 0.8125rem;
+    color: #6F6478;
+    font-size: 0.72rem;
     margin: 0 0 0.6rem 0;
 }
 .ae-plan-preco {
-    color: #24125A;
-    font-size: 1.5rem;
-    font-weight: 700;
+    color: #2B1747;
+    font-size: 1.6rem;
+    font-weight: 900;
     margin-bottom: 0.1rem;
 }
 .ae-plan-preco sup { font-size: 0.8rem; font-weight: 700; }
@@ -3534,8 +3521,8 @@ div[data-testid="stPopover"] {
 }
 .ae-plan-features { list-style: none; padding: 0; margin: 0 0 1.2rem 0; }
 .ae-plan-features li {
-    color: #555555;
-    font-size: 0.8125rem;
+    color: #2B1747;
+    font-size: 0.74rem;
     padding: 0.22rem 0;
     display: flex;
     align-items: flex-start;
@@ -3566,31 +3553,27 @@ div[data-testid="stPopover"] {
     margin-top: 0.5rem !important;
 }
 
-/* FAMILY_BUTTON — redline v2: 44px, 100%, #5A2BB5, #FFFFFF, radius 12px, 14px */
+/* Botão "Assinar Plano Familiar" — roxo escuro #24125A, texto branco */
 .st-key-plano_assinar_familiar div.stButton>button {
-    background: #5A2BB5 !important;
+    background: #24125A !important;
     color: #fff !important;
     border: none !important;
-    font-weight: 600 !important;
-    font-size: 0.875rem !important;
-    border-radius: 12px !important;
+    font-weight: 800 !important;
+    font-size: 0.82rem !important;
+    border-radius: 10px !important;
     width: 100% !important;
-    min-height: 44px !important;
-    height: 44px !important;
-    padding: 0 !important;
+    min-height: 52px !important;
 }
-/* LEGACY_BUTTON — redline v2: 44px, 100%, #D9A328, #FFFFFF, radius 12px, 14px */
+/* Botão "Assinar Plano Legado" — dourado #D9A328, texto escuro */
 .st-key-plano_assinar_legado div.stButton>button {
     background: #D9A328 !important;
-    color: #FFFFFF !important;
+    color: #24125A !important;
     border: none !important;
-    font-weight: 600 !important;
-    font-size: 0.875rem !important;
-    border-radius: 12px !important;
+    font-weight: 800 !important;
+    font-size: 0.82rem !important;
+    border-radius: 10px !important;
     width: 100% !important;
-    min-height: 44px !important;
-    height: 44px !important;
-    padding: 0 !important;
+    min-height: 52px !important;
 }
 
 /* "Plano atual" — botão desabilitado neutro/cinza (não verde) */
@@ -3605,83 +3588,16 @@ div[data-testid="stPopover"] {
     opacity: 1 !important;
 }
 
-/* Redline v2 — padding 20px, fontes compactas conforme spec */
-.ae-plan-card { padding: 1.25rem !important; }
-.ae-plan-icon { font-size: 1.75rem !important; margin-bottom: 0.3rem !important; }
-.ae-plan-nome { font-size: 1rem !important; }
-.ae-plan-preco { font-size: 1.5rem !important; margin-bottom: 0.1rem !important; }
-.ae-plan-preco-periodo { margin-bottom: 0.4rem !important; }
-.ae-plan-preco-anual { margin-bottom: 0.5rem !important; }
-.ae-plan-features { margin-bottom: 0.6rem !important; }
-.ae-plan-features li { padding: 0.12rem 0 !important; font-size: 0.8125rem !important; }
-.ae-plan-badge { margin-bottom: 0.4rem !important; }
-
-/* PRICING_CONTAINER — redline v2: OBRIGATÓRIO, classe real no div */
-.ae-pricing-container {
-    background: #FFFFFF;
-    border: 1px solid #E8DCC6;
-    border-radius: 20px;
-    padding: 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-.ae-plans-row {
-    display: flex;
-    gap: 18px;
-    align-items: flex-start;
-}
-.ae-plans-row .ae-plan-card {
-    flex: 1;
-    min-width: 0;
-}
-/* Botões HTML nativos dos planos */
-.ae-plan-btn {
-    display: block;
-    width: 100%;
-    height: 44px;
-    border-radius: 12px;
-    border: none;
-    font-weight: 600;
-    font-size: 0.875rem;
-    cursor: pointer;
-    margin-top: auto;
-}
-.ae-plan-btn-roxo  { background: #5A2BB5; color: #FFFFFF; }
-.ae-plan-btn-roxo:hover  { background: #4b24a0; }
-.ae-plan-btn-dourado { background: #D9A328; color: #FFFFFF; }
-.ae-plan-btn-dourado:hover { background: #c48f1e; }
-.ae-plan-btn-desabilitado {
-    background: rgba(43,23,71,0.07);
-    color: #9A8EA8;
-    border: 1px solid rgba(43,23,71,0.12);
-    cursor: default;
-}
-/* Mensagem "em breve" inline */
-.ae-planos-msg {
-    display: none;
-    background: #F3EDF8;
-    border: 1px solid #8D5AE8;
-    border-radius: 8px;
-    padding: 0.6rem 1rem;
-    color: #24125A;
-    font-size: 0.875rem;
-    margin-top: 10px;
-}
-/* HERO_CONTAINER — altura máxima 118px conforme redline v2 */
-.ae-planos-banner {
-    max-height: 118px !important;
-    overflow: hidden !important;
-}
-/* LOCK_ICON — redline v2: ícone menor para caber em 206px */
-.ae-status-icon {
-    font-size: 1.75rem !important;
-    margin-bottom: 0.4rem !important;
-}
-/* Gap entre seções = 20px conforme MAIN_CONTENT gap:20px do redline v2 */
-[data-testid="stMainBlockContainer"] > [data-testid="stVerticalBlock"] {
-    gap: 1.25rem !important;
-}
+/* Compacta cards de plano */
+.ae-plan-card { padding: 1rem !important; }
+.ae-plan-icon { font-size: 1.55rem !important; margin-bottom: 0.3rem !important; }
+.ae-plan-nome { font-size: 0.95rem !important; }
+.ae-plan-preco { font-size: 1.35rem !important; margin-bottom: 0.05rem !important; }
+.ae-plan-preco-periodo { margin-bottom: 0.5rem !important; }
+.ae-plan-preco-anual { margin-bottom: 0.65rem !important; }
+.ae-plan-features { margin-bottom: 0.75rem !important; }
+.ae-plan-features li { padding: 0.14rem 0 !important; font-size: 0.72rem !important; }
+.ae-plan-badge { margin-bottom: 0.45rem !important; }
 
 </style>
 """, unsafe_allow_html=True)

@@ -3605,83 +3605,16 @@ div[data-testid="stPopover"] {
     opacity: 1 !important;
 }
 
-/* Redline v2 — padding 20px, fontes compactas conforme spec */
-.ae-plan-card { padding: 1.25rem !important; }
-.ae-plan-icon { font-size: 1.75rem !important; margin-bottom: 0.3rem !important; }
-.ae-plan-nome { font-size: 1rem !important; }
-.ae-plan-preco { font-size: 1.5rem !important; margin-bottom: 0.1rem !important; }
-.ae-plan-preco-periodo { margin-bottom: 0.4rem !important; }
-.ae-plan-preco-anual { margin-bottom: 0.5rem !important; }
-.ae-plan-features { margin-bottom: 0.6rem !important; }
-.ae-plan-features li { padding: 0.12rem 0 !important; font-size: 0.8125rem !important; }
-.ae-plan-badge { margin-bottom: 0.4rem !important; }
-
-/* PRICING_CONTAINER — redline v2: OBRIGATÓRIO, classe real no div */
-.ae-pricing-container {
-    background: #FFFFFF;
-    border: 1px solid #E8DCC6;
-    border-radius: 20px;
-    padding: 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-.ae-plans-row {
-    display: flex;
-    gap: 18px;
-    align-items: flex-start;
-}
-.ae-plans-row .ae-plan-card {
-    flex: 1;
-    min-width: 0;
-}
-/* Botões HTML nativos dos planos */
-.ae-plan-btn {
-    display: block;
-    width: 100%;
-    height: 44px;
-    border-radius: 12px;
-    border: none;
-    font-weight: 600;
-    font-size: 0.875rem;
-    cursor: pointer;
-    margin-top: auto;
-}
-.ae-plan-btn-roxo  { background: #5A2BB5; color: #FFFFFF; }
-.ae-plan-btn-roxo:hover  { background: #4b24a0; }
-.ae-plan-btn-dourado { background: #D9A328; color: #FFFFFF; }
-.ae-plan-btn-dourado:hover { background: #c48f1e; }
-.ae-plan-btn-desabilitado {
-    background: rgba(43,23,71,0.07);
-    color: #9A8EA8;
-    border: 1px solid rgba(43,23,71,0.12);
-    cursor: default;
-}
-/* Mensagem "em breve" inline */
-.ae-planos-msg {
-    display: none;
-    background: #F3EDF8;
-    border: 1px solid #8D5AE8;
-    border-radius: 8px;
-    padding: 0.6rem 1rem;
-    color: #24125A;
-    font-size: 0.875rem;
-    margin-top: 10px;
-}
-/* HERO_CONTAINER — altura máxima 118px conforme redline v2 */
-.ae-planos-banner {
-    max-height: 118px !important;
-    overflow: hidden !important;
-}
-/* LOCK_ICON — redline v2: ícone menor para caber em 206px */
-.ae-status-icon {
-    font-size: 1.75rem !important;
-    margin-bottom: 0.4rem !important;
-}
-/* Gap entre seções = 20px conforme MAIN_CONTENT gap:20px do redline v2 */
-[data-testid="stMainBlockContainer"] > [data-testid="stVerticalBlock"] {
-    gap: 1.25rem !important;
-}
+/* Redline — padding 24px, sem compactação */
+.ae-plan-card { padding: 1.5rem !important; }
+.ae-plan-icon { font-size: 2rem !important; margin-bottom: 0.4rem !important; }
+.ae-plan-nome { font-size: 1.19rem !important; }
+.ae-plan-preco { font-size: 2.4rem !important; margin-bottom: 0.1rem !important; }
+.ae-plan-preco-periodo { margin-bottom: 0.5rem !important; }
+.ae-plan-preco-anual { margin-bottom: 0.65rem !important; }
+.ae-plan-features { margin-bottom: 0.75rem !important; }
+.ae-plan-features li { padding: 0.14rem 0 !important; font-size: 0.72rem !important; }
+.ae-plan-badge { margin-bottom: 0.45rem !important; }
 
 </style>
 """, unsafe_allow_html=True)
