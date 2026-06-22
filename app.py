@@ -2822,7 +2822,13 @@ def render_preferencias():
 # PLANOS
 # ============================================================================
 def render_planos():
-    # Métricas de uso do usuário
+    import base64 as _b64
+    try:
+        with open("assets/correcttree.png", "rb") as _f:
+            _tree_src = "data:image/png;base64," + _b64.b64encode(_f.read()).decode()
+    except Exception:
+        _tree_src = ""
+
     qtd_memorias = st.session_state.get("_ae_qtd_memorias", 0)
     qtd_cofre    = st.session_state.get("_ae_qtd_cofre",    0)
     qtd_contatos = st.session_state.get("_ae_qtd_contatos", 0)
@@ -2841,7 +2847,6 @@ def render_planos():
 
     st.markdown(f"""
 <style>
-/* ── PLANOS PAGE ─────────────────────────────────────────── */
 .ae-plans-page {{
     display: flex;
     flex-direction: column;
@@ -2851,8 +2856,6 @@ def render_planos():
     max-width: 1140px;
     box-sizing: border-box;
 }}
-
-/* HERO */
 .ae-hero-container {{
     height: 118px;
     background: #FFFFFF;
@@ -2922,14 +2925,10 @@ def render_planos():
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    font-size: 52px;
     align-self: center;
     flex-shrink: 0;
     overflow: hidden;
-    line-height: 1;
 }}
-
-/* STATUS */
 .ae-status-container {{
     height: 330px;
     display: flex;
@@ -3013,8 +3012,6 @@ def render_planos():
     color: #888888;
     text-align: center;
 }}
-
-/* LIMIT CARD */
 .ae-limit-card {{
     flex: 1;
     height: 330px;
@@ -3075,8 +3072,6 @@ def render_planos():
     transition: background 0.2s;
 }}
 .ae-limit-btn:hover {{ background: #4A22A4; }}
-
-/* PRICING */
 .ae-pricing-container {{
     height: 430px;
     background: #FFFFFF;
@@ -3116,8 +3111,6 @@ def render_planos():
     flex: 1;
     align-items: flex-start;
 }}
-
-/* Plan cards */
 .ae-plan-free, .ae-plan-legacy {{
     width: 340px;
     min-width: 340px;
@@ -3284,8 +3277,6 @@ def render_planos():
     transition: background 0.2s;
 }}
 .ae-plan-btn-legacy:hover {{ background: #B87A00; }}
-
-/* SECURITY */
 .ae-security-container {{
     height: 72px;
     background: #FFFFFF;
@@ -3319,152 +3310,107 @@ def render_planos():
 }}
 .ae-security-link:hover {{ text-decoration: underline; }}
 </style>
-
 <div class="ae-plans-page">
-
-  <!-- HERO -->
-  <div class="ae-hero-container">
-    <div class="ae-hero-icon">❤️</div>
-    <div class="ae-hero-text">
-      <p class="ae-hero-title">Preserve tudo para sua família</p>
-      <p class="ae-hero-subtitle">Suas histórias merecem durar para sempre.</p>
-    </div>
-    <button class="ae-hero-btn"
-      onclick="document.querySelector('.ae-pricing-container').scrollIntoView({{behavior:'smooth'}})">
-      Conhecer planos
-    </button>
-    <div class="ae-hero-tree">🌳</div>
-  </div>
-
-  <!-- STATUS -->
-  <div class="ae-status-container">
-
-    <!-- FREE_USAGE_CARD -->
-    <div class="ae-free-usage-card">
-      <div class="ae-fuc-header">
-        <span class="ae-fuc-title">Uso atual</span>
-        <span class="ae-fuc-badge">Plano Gratuito</span>
-      </div>
-      <p class="ae-fuc-subtitle">Acompanhe o que você já preservou.</p>
-
-      <div class="ae-fuc-metric">
-        <div class="ae-fuc-metric-row">
-          <span class="ae-fuc-metric-name">Memórias</span>
-          <span class="ae-fuc-metric-count">{qtd_memorias} / {lim_memorias}</span>
-        </div>
-        <div class="ae-bar-track">
-          <div class="ae-bar-fill{mem_danger}" style="width:{mem_pct}%"></div>
-        </div>
-      </div>
-
-      <div class="ae-fuc-metric">
-        <div class="ae-fuc-metric-row">
-          <span class="ae-fuc-metric-name">Fotos e vídeos</span>
-          <span class="ae-fuc-metric-count">{qtd_cofre} / {lim_medias}</span>
-        </div>
-        <div class="ae-bar-track">
-          <div class="ae-bar-fill{media_danger}" style="width:{media_pct}%"></div>
-        </div>
-      </div>
-
-      <div class="ae-fuc-metric">
-        <div class="ae-fuc-metric-row">
-          <span class="ae-fuc-metric-name">Contribuições</span>
-          <span class="ae-fuc-metric-count">{qtd_contatos} / {lim_contribs}</span>
-        </div>
-        <div class="ae-bar-track">
-          <div class="ae-bar-fill{contrib_danger}" style="width:{contrib_pct}%"></div>
-        </div>
-      </div>
-
-      <div class="ae-fuc-footer">
-        Faça upgrade para remover todos os limites
-      </div>
-    </div>
-
-    <!-- LIMIT_CARD -->
-    <div class="ae-limit-card">
-      <div class="ae-limit-card-inner">
-        <div class="ae-limit-lock">🔒</div>
-        <p class="ae-limit-title">Você chegou ao limite<br>do plano gratuito.</p>
-        <p class="ae-limit-text">Continue preservando as histórias<br>da sua família.</p>
-        <button class="ae-limit-btn"
-          onclick="document.querySelector('.ae-pricing-container').scrollIntoView({{behavior:'smooth'}})">
-          Ver planos
-        </button>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- PRICING -->
-  <div class="ae-pricing-container">
-    <div class="ae-pricing-header">
-      <p class="ae-pricing-title">Escolha o plano ideal para sua família</p>
-      <p class="ae-pricing-subtitle">Selecione o plano que melhor se adapta às suas necessidades</p>
-    </div>
-
-    <div class="ae-plans-row">
-
-      <!-- PLAN FREE -->
-      <div class="ae-plan-free">
-        <p class="ae-plan-name">Gratuito</p>
-        <p class="ae-plan-desc">Para começar a preservar sua história</p>
-        <p class="ae-plan-price ae-plan-price-free">Grátis</p>
-        <ul class="ae-plan-features">
-          <li><span class="ae-check-free">✓</span>Até 10 memórias</li>
-          <li><span class="ae-check-free">✓</span>Até 20 fotos e vídeos</li>
-          <li><span class="ae-check-free">✓</span>Até 5 contribuições</li>
-        </ul>
-        <button class="ae-plan-btn-current" disabled>Plano atual</button>
-      </div>
-
-      <!-- PLAN FAMILY -->
-      <div class="ae-plan-family">
-        <span class="ae-plan-badge">Mais Popular</span>
-        <p class="ae-plan-name">Familiar</p>
-        <p class="ae-plan-desc">Para preservar todas as memórias da família</p>
-        <p class="ae-plan-price">R$ 14,90<span style="font-size:14px;font-weight:400;color:#666">/mês</span></p>
-        <ul class="ae-plan-features">
-          <li><span class="ae-check-family">✓</span>Memórias ilimitadas</li>
-          <li><span class="ae-check-family">✓</span>Fotos e vídeos ilimitados</li>
-          <li><span class="ae-check-family">✓</span>Contribuições ilimitadas</li>
-          <li><span class="ae-check-family">✓</span>Colaboração familiar</li>
-          <li><span class="ae-check-family">✓</span>Curador de histórias</li>
-        </ul>
-        <button class="ae-plan-btn-family">Assinar Plano Familiar</button>
-      </div>
-
-      <!-- PLAN LEGACY -->
-      <div class="ae-plan-legacy">
-        <p class="ae-plan-name">Legado</p>
-        <p class="ae-plan-desc">Para preservar sua história para gerações</p>
-        <p class="ae-plan-price">R$ 29,90<span style="font-size:14px;font-weight:400;color:#666">/mês</span></p>
-        <ul class="ae-plan-features">
-          <li><span class="ae-check-legacy">✓</span>Memórias ilimitadas</li>
-          <li><span class="ae-check-legacy">✓</span>Armazenamento permanente</li>
-          <li><span class="ae-check-legacy">✓</span>Histórico completo</li>
-          <li><span class="ae-check-legacy">✓</span>Prioridade no suporte</li>
-        </ul>
-        <button class="ae-plan-btn-legacy">Assinar Plano Legado</button>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- SECURITY -->
-  <div class="ae-security-container">
-    <span class="ae-security-icon">🔒</span>
-    <span class="ae-security-text">
-      Seus dados são protegidos com criptografia de ponta. Cancele a qualquer momento, sem multa.
-    </span>
-    <a class="ae-security-link" href="#">Saiba mais sobre segurança</a>
-  </div>
-
+<div class="ae-hero-container">
+<div class="ae-hero-icon">❤️</div>
+<div class="ae-hero-text">
+<p class="ae-hero-title">Preserve tudo para sua família</p>
+<p class="ae-hero-subtitle">Suas histórias merecem durar para sempre.</p>
+</div>
+<button class="ae-hero-btn" onclick="document.querySelector('.ae-pricing-container').scrollIntoView({{behavior:'smooth'}})">Conhecer planos</button>
+<div class="ae-hero-tree"><img src="{_tree_src}" alt="árvore" style="height:86px;width:auto;object-fit:contain;display:block;"/></div>
+</div>
+<div class="ae-status-container">
+<div class="ae-free-usage-card">
+<div class="ae-fuc-header">
+<span class="ae-fuc-title">Uso atual</span>
+<span class="ae-fuc-badge">Plano Gratuito</span>
+</div>
+<p class="ae-fuc-subtitle">Acompanhe o que você já preservou.</p>
+<div class="ae-fuc-metric">
+<div class="ae-fuc-metric-row">
+<span class="ae-fuc-metric-name">Memórias</span>
+<span class="ae-fuc-metric-count">{qtd_memorias} / {lim_memorias}</span>
+</div>
+<div class="ae-bar-track"><div class="ae-bar-fill{mem_danger}" style="width:{mem_pct}%"></div></div>
+</div>
+<div class="ae-fuc-metric">
+<div class="ae-fuc-metric-row">
+<span class="ae-fuc-metric-name">Fotos e vídeos</span>
+<span class="ae-fuc-metric-count">{qtd_cofre} / {lim_medias}</span>
+</div>
+<div class="ae-bar-track"><div class="ae-bar-fill{media_danger}" style="width:{media_pct}%"></div></div>
+</div>
+<div class="ae-fuc-metric">
+<div class="ae-fuc-metric-row">
+<span class="ae-fuc-metric-name">Contribuições</span>
+<span class="ae-fuc-metric-count">{qtd_contatos} / {lim_contribs}</span>
+</div>
+<div class="ae-bar-track"><div class="ae-bar-fill{contrib_danger}" style="width:{contrib_pct}%"></div></div>
+</div>
+<div class="ae-fuc-footer">Faça upgrade para remover todos os limites</div>
+</div>
+<div class="ae-limit-card">
+<div class="ae-limit-card-inner">
+<div class="ae-limit-lock">🔒</div>
+<p class="ae-limit-title">Você chegou ao limite<br>do plano gratuito.</p>
+<p class="ae-limit-text">Continue preservando as histórias<br>da sua família.</p>
+<button class="ae-limit-btn" onclick="document.querySelector('.ae-pricing-container').scrollIntoView({{behavior:'smooth'}})">Ver planos</button>
+</div>
+</div>
+</div>
+<div class="ae-pricing-container">
+<div class="ae-pricing-header">
+<p class="ae-pricing-title">Escolha o plano ideal para sua família</p>
+<p class="ae-pricing-subtitle">Selecione o plano que melhor se adapta às suas necessidades</p>
+</div>
+<div class="ae-plans-row">
+<div class="ae-plan-free">
+<p class="ae-plan-name">Gratuito</p>
+<p class="ae-plan-desc">Para começar a preservar sua história</p>
+<p class="ae-plan-price ae-plan-price-free">Grátis</p>
+<ul class="ae-plan-features">
+<li><span class="ae-check-free">✓</span>Até 10 memórias</li>
+<li><span class="ae-check-free">✓</span>Até 20 fotos e vídeos</li>
+<li><span class="ae-check-free">✓</span>Até 5 contribuições</li>
+</ul>
+<button class="ae-plan-btn-current" disabled>Plano atual</button>
+</div>
+<div class="ae-plan-family">
+<span class="ae-plan-badge">Mais Popular</span>
+<p class="ae-plan-name">Familiar</p>
+<p class="ae-plan-desc">Para preservar todas as memórias da família</p>
+<p class="ae-plan-price">R$ 14,90<span style="font-size:14px;font-weight:400;color:#666">/mês</span></p>
+<ul class="ae-plan-features">
+<li><span class="ae-check-family">✓</span>Memórias ilimitadas</li>
+<li><span class="ae-check-family">✓</span>Fotos e vídeos ilimitados</li>
+<li><span class="ae-check-family">✓</span>Contribuições ilimitadas</li>
+<li><span class="ae-check-family">✓</span>Colaboração familiar</li>
+<li><span class="ae-check-family">✓</span>Curador de histórias</li>
+</ul>
+<button class="ae-plan-btn-family">Assinar Plano Familiar</button>
+</div>
+<div class="ae-plan-legacy">
+<p class="ae-plan-name">Legado</p>
+<p class="ae-plan-desc">Para preservar sua história para gerações</p>
+<p class="ae-plan-price">R$ 29,90<span style="font-size:14px;font-weight:400;color:#666">/mês</span></p>
+<ul class="ae-plan-features">
+<li><span class="ae-check-legacy">✓</span>Memórias ilimitadas</li>
+<li><span class="ae-check-legacy">✓</span>Armazenamento permanente</li>
+<li><span class="ae-check-legacy">✓</span>Histórico completo</li>
+<li><span class="ae-check-legacy">✓</span>Prioridade no suporte</li>
+</ul>
+<button class="ae-plan-btn-legacy">Assinar Plano Legado</button>
+</div>
+</div>
+</div>
+<div class="ae-security-container">
+<span class="ae-security-icon">🔒</span>
+<span class="ae-security-text">Seus dados são protegidos com criptografia de ponta. Cancele a qualquer momento, sem multa.</span>
+<a class="ae-security-link" href="#">Saiba mais sobre segurança</a>
+</div>
 </div>
 """, unsafe_allow_html=True)
-
-
 # ============================================================================
 # LEMBRANÇAS PROGRAMADAS (AGENDAMENTOS)
 # ============================================================================
@@ -4434,6 +4380,122 @@ def render_sidebar_principal(
             ):
                 navegar_para("admin")
                 st.rerun()
+
+        # ── PLAN_STATUS_CARD ─────────────────────────────────────────────
+        _psc_qtd_memorias = st.session_state.get("_ae_qtd_memorias", 0)
+        _psc_qtd_cofre    = st.session_state.get("_ae_qtd_cofre",    0)
+        _psc_qtd_contatos = st.session_state.get("_ae_qtd_contatos", 0)
+        _psc_lim_memorias = 10
+        _psc_lim_medias   = 20
+        _psc_lim_contribs = 5
+        _psc_mem_pct     = min(100, int(_psc_qtd_memorias / _psc_lim_memorias * 100)) if _psc_lim_memorias > 0 else 0
+        _psc_media_pct   = min(100, int(_psc_qtd_cofre    / _psc_lim_medias   * 100)) if _psc_lim_medias   > 0 else 0
+        _psc_contrib_pct = min(100, int(_psc_qtd_contatos / _psc_lim_contribs * 100)) if _psc_lim_contribs > 0 else 0
+        _psc_mem_danger     = " ae-psc-bar-danger" if _psc_mem_pct     >= 90 else ""
+        _psc_media_danger   = " ae-psc-bar-danger" if _psc_media_pct   >= 90 else ""
+        _psc_contrib_danger = " ae-psc-bar-danger" if _psc_contrib_pct >= 90 else ""
+        st.markdown("""<style>
+.ae-psc {
+    background: #23105D;
+    border: 1px solid #4A3297;
+    border-radius: 16px;
+    padding: 16px;
+    margin: 4px 0 0 0;
+    font-family: 'Inter', sans-serif;
+    box-sizing: border-box;
+}
+.ae-psc-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+.ae-psc-label {
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+.ae-psc-badge {
+    background: #4A3297;
+    color: #C8B8F0;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+}
+.ae-psc-metric {
+    margin-bottom: 9px;
+}
+.ae-psc-metric:last-child {
+    margin-bottom: 0;
+}
+.ae-psc-metric-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+.ae-psc-metric-name {
+    color: #B8A8E8;
+    font-size: 11px;
+    font-weight: 400;
+}
+.ae-psc-metric-count {
+    color: #FFFFFF;
+    font-size: 10px;
+    font-weight: 600;
+}
+.ae-psc-bar-track {
+    height: 4px;
+    background: #3D2680;
+    border-radius: 999px;
+    overflow: hidden;
+}
+.ae-psc-bar-fill {
+    height: 100%;
+    background: #E3B12D;
+    border-radius: 999px;
+}
+.ae-psc-bar-danger {
+    background: #E05858 !important;
+}
+.ae-psc-divider {
+    border: none;
+    border-top: 1px solid #4A3297;
+    margin: 12px 0 10px 0;
+}
+section[data-testid="stSidebar"] .ae-psc-btn-wrap > div > button,
+section[data-testid="stSidebar"] .ae-psc-btn-wrap > div > div > button {
+    background: #5A2BB5 !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 12px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    font-family: 'Inter', sans-serif !important;
+    height: 34px !important;
+    width: 100% !important;
+    margin-top: 0 !important;
+    padding: 0 8px !important;
+    cursor: pointer !important;
+    transition: background 0.2s !important;
+}
+section[data-testid="stSidebar"] .ae-psc-btn-wrap > div > button:hover,
+section[data-testid="stSidebar"] .ae-psc-btn-wrap > div > div > button:hover {
+    background: #4A22A4 !important;
+    border: none !important;
+    color: #FFFFFF !important;
+}
+</style>
+""", unsafe_allow_html=True)
+        st.markdown(f"""<div class="ae-psc"><div class="ae-psc-header"><span class="ae-psc-label">Seu Plano</span><span class="ae-psc-badge">Gratuito</span></div><div class="ae-psc-metric"><div class="ae-psc-metric-row"><span class="ae-psc-metric-name">Memórias</span><span class="ae-psc-metric-count">{_psc_qtd_memorias} / {_psc_lim_memorias}</span></div><div class="ae-psc-bar-track"><div class="ae-psc-bar-fill{_psc_mem_danger}" style="width:{_psc_mem_pct}%"></div></div></div><div class="ae-psc-metric"><div class="ae-psc-metric-row"><span class="ae-psc-metric-name">Fotos e vídeos</span><span class="ae-psc-metric-count">{_psc_qtd_cofre} / {_psc_lim_medias}</span></div><div class="ae-psc-bar-track"><div class="ae-psc-bar-fill{_psc_media_danger}" style="width:{_psc_media_pct}%"></div></div></div><div class="ae-psc-metric"><div class="ae-psc-metric-row"><span class="ae-psc-metric-name">Contribuições</span><span class="ae-psc-metric-count">{_psc_qtd_contatos} / {_psc_lim_contribs}</span></div><div class="ae-psc-bar-track"><div class="ae-psc-bar-fill{_psc_contrib_danger}" style="width:{_psc_contrib_pct}%"></div></div></div><hr class="ae-psc-divider"/></div>""", unsafe_allow_html=True)
+        st.markdown('<div class="ae-psc-btn-wrap">', unsafe_allow_html=True)
+        if st.button("Conhecer Premium", key="psc_conhecer_premium"):
+            st.session_state.pagina_atual = "planos"
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown('<div class="ae-sidebar-divider"></div>', unsafe_allow_html=True)
         primeiro_nome = str(nome_exibido or "Você").split()[0]
