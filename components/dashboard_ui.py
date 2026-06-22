@@ -909,6 +909,10 @@ button[data-baseweb="tab"][aria-selected="true"] {
     padding: 0.24rem 0.72rem !important;
     border-radius: 8px !important;
     font-size: 0.78rem !important;
+    background: linear-gradient(135deg, #f8dc92, #d4af37 62%, #b77a46) !important;
+    color: #2B1747 !important;
+    border: none !important;
+    font-weight: 700 !important;
 }
 
 .st-key-home_ver_minha_historia button,
@@ -1677,12 +1681,24 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 div[data-testid="stPopover"] button {
+    width: 100% !important;
     min-height: 1.72rem;
     padding: 0.14rem 0.48rem;
     border-color: rgba(212,168,79,0.35);
     color: #5F536B;
     background: rgba(255,255,255,0.72);
     font-size: 0.72rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.15s ease;
+    justify-content: center;
+    text-align: center;
+}
+
+div[data-testid="stPopover"] button:hover {
+    border-color: #d4af37;
+    background: rgba(212,168,79,0.10);
+    color: #2B1747;
 }
 
 div[data-testid="stPopover"] {
@@ -1702,9 +1718,10 @@ div[data-testid="stPopover"] {
     padding: 0.24rem 0.72rem !important;
     border-radius: 8px !important;
     font-size: 0.78rem !important;
-    background: #5A2BB5 !important;
-    color: #FFFFFF !important;
+    background: linear-gradient(135deg, #f8dc92, #d4af37 62%, #b77a46) !important;
+    color: #2B1747 !important;
     border: none !important;
+    font-weight: 700 !important;
 }
 
 .ae-story-section-title-collections {
@@ -1733,7 +1750,8 @@ div[data-testid="stPopover"] {
 [class*="st-key-ver_todas_"], [class*="st-key-ver-todas-"] {
     display: flex;
     justify-content: flex-end;
-    margin-top: -0.2rem;
+    margin-top: -1.2rem;
+    margin-bottom: 0.35rem;
 }
 .st-key-filtro_voltar button, .st-key-filtro-voltar button {
     background: transparent !important;
@@ -1757,11 +1775,11 @@ div[data-testid="stPopover"] {
     background: rgba(255,255,255,0.52);
     border: 1px solid rgba(212,168,79,0.22);
     border-radius: 16px;
-    padding: 0.55rem;
+    padding: 0.55rem 0.55rem 1.6rem;
     box-shadow: 0 12px 30px rgba(43,23,71,0.06);
-    height: 214px;
-    min-height: 214px;
-    margin-bottom: 0.35rem;
+    height: 228px;
+    min-height: 228px;
+    margin-bottom: 0;
     overflow: hidden;
 }
 

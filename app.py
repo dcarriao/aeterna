@@ -743,7 +743,7 @@ def render_minha_historia():
                 )
 
     def render_acesso_historia(memoria: dict, key_contexto: str):
-        with st.popover("Ler história", use_container_width=False):
+        with st.popover("Ler história", use_container_width=True):
             render_detalhes_memoria(memoria, key_contexto)
 
     def render_prateleira(
@@ -4671,7 +4671,7 @@ def render_inicio(
             unsafe_allow_html=True,
         )
     with col_top_action:
-        if st.button("+ Contar uma História", key="home_contar_historia", type="primary", use_container_width=True):
+        if st.button("+ Contar uma História", key="home_contar_historia", use_container_width=True):
             navegar_para("assistente")
             st.rerun()
 
