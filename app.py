@@ -2850,21 +2850,21 @@ def render_planos():
 .ae-plans-page {{
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 12px;
     font-family: 'Inter', sans-serif;
     width: 100%;
     max-width: 1140px;
     box-sizing: border-box;
 }}
 .ae-hero-container {{
-    height: 118px;
+    height: 100px;
     background: #FFFFFF;
     border: 1px solid #E8DCC6;
     border-radius: 20px;
-    padding: 24px;
+    padding: 14px 20px;
     display: flex;
-    align-items: flex-start;
-    gap: 20px;
+    align-items: center;
+    gap: 16px;
     box-sizing: border-box;
     position: relative;
     overflow: hidden;
@@ -2878,7 +2878,7 @@ def render_planos():
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 26px;
+    font-size: 20px;
     flex-shrink: 0;
 }}
 .ae-hero-text {{
@@ -2888,23 +2888,23 @@ def render_planos():
     padding-top: 2px;
 }}
 .ae-hero-title {{
-    font-size: 28px;
+    font-size: 20px;
     font-weight: 700;
     color: #24125A;
-    line-height: 34px;
-    margin: 0 0 6px 0;
+    line-height: 26px;
+    margin: 0 0 4px 0;
 }}
 .ae-hero-subtitle {{
-    font-size: 16px;
+    font-size: 13px;
     font-weight: 400;
     color: #555555;
-    line-height: 22px;
+    line-height: 18px;
     margin: 0;
 }}
 .ae-hero-btn {{
-    height: 48px;
-    width: 190px;
-    min-width: 190px;
+    height: 40px;
+    width: 170px;
+    min-width: 170px;
     background: #5A2BB5;
     color: #FFFFFF;
     border: none;
@@ -2919,9 +2919,9 @@ def render_planos():
 }}
 .ae-hero-btn:hover {{ background: #4A22A4; }}
 .ae-hero-tree {{
-    width: 260px;
-    height: 86px;
-    min-width: 260px;
+    width: 200px;
+    height: 72px;
+    min-width: 200px;
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -2930,7 +2930,7 @@ def render_planos():
     overflow: hidden;
 }}
 .ae-status-container {{
-    height: 330px;
+    height: 272px;
     display: flex;
     gap: 24px;
     box-sizing: border-box;
@@ -2938,7 +2938,7 @@ def render_planos():
 .ae-free-usage-card {{
     width: 430px;
     min-width: 430px;
-    height: 330px;
+    height: 272px;
     background: #FFFFFF;
     border: 1px solid #E8DCC6;
     border-radius: 20px;
@@ -2969,11 +2969,11 @@ def render_planos():
 .ae-fuc-subtitle {{
     font-size: 13px;
     color: #666666;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     font-weight: 400;
 }}
 .ae-fuc-metric {{
-    margin-bottom: 14px;
+    margin-bottom: 9px;
 }}
 .ae-fuc-metric-row {{
     display: flex;
@@ -3014,7 +3014,7 @@ def render_planos():
 }}
 .ae-limit-card {{
     flex: 1;
-    height: 330px;
+    height: 272px;
     background: #FFFFFF;
     border: 1px solid #E8DCC6;
     border-radius: 20px;
@@ -3025,11 +3025,11 @@ def render_planos():
     justify-content: center;
 }}
 .ae-limit-card-inner {{
-    height: 206px;
+    height: 152px;
     width: 100%;
     background: #F3EDF8;
     border-radius: 16px;
-    padding: 24px;
+    padding: 14px 20px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -3038,29 +3038,29 @@ def render_planos():
     text-align: center;
 }}
 .ae-limit-lock {{
-    font-size: 32px;
-    margin-bottom: 10px;
+    font-size: 26px;
+    margin-bottom: 6px;
     line-height: 1;
 }}
 .ae-limit-title {{
-    font-size: 18px;
+    font-size: 15px;
     font-weight: 700;
     color: #24125A;
     font-family: 'Inter', sans-serif;
-    margin: 0 0 8px 0;
+    margin: 0 0 5px 0;
     line-height: 1.3;
 }}
 .ae-limit-text {{
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 400;
     color: #555555;
     font-family: 'Inter', sans-serif;
-    margin: 0 0 16px 0;
-    line-height: 1.5;
+    margin: 0 0 10px 0;
+    line-height: 1.4;
 }}
 .ae-limit-btn {{
-    height: 44px;
-    width: 200px;
+    height: 36px;
+    width: 180px;
     background: #5A2BB5;
     color: #FFFFFF;
     border: none;
@@ -3073,48 +3073,49 @@ def render_planos():
 }}
 .ae-limit-btn:hover {{ background: #4A22A4; }}
 .ae-pricing-container {{
-    height: 430px;
+    height: 362px;
     background: #FFFFFF;
     border: 1px solid #E8DCC6;
     border-radius: 20px;
-    padding: 18px;
+    padding: 16px 18px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }}
 .ae-pricing-header {{
-    height: 48px;
+    height: 38px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     flex-shrink: 0;
 }}
 .ae-pricing-title {{
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
     color: #24125A;
     margin: 0 0 2px 0;
     font-family: 'Inter', sans-serif;
 }}
 .ae-pricing-subtitle {{
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 400;
     color: #666666;
     margin: 0;
     font-family: 'Inter', sans-serif;
 }}
 .ae-plans-row {{
-    height: 355px;
     display: flex;
-    gap: 18px;
+    gap: 14px;
     flex: 1;
-    align-items: flex-start;
+    align-items: stretch;
+    overflow: hidden;
 }}
 .ae-plan-free, .ae-plan-legacy {{
-    width: 340px;
-    min-width: 340px;
-    height: 355px;
+    flex: 1;
+    min-width: 0;
+    height: 100%;
     background: #FFFFFF;
     border: 1px solid #E8DCC6;
     border-radius: 16px;
@@ -3125,9 +3126,9 @@ def render_planos():
     font-family: 'Inter', sans-serif;
 }}
 .ae-plan-family {{
-    width: 360px;
-    min-width: 360px;
-    height: 385px;
+    flex: 1;
+    min-width: 0;
+    height: 100%;
     background: #FFFFFF;
     border: 2px solid #8D5AE8;
     border-radius: 16px;
@@ -3137,7 +3138,7 @@ def render_planos():
     flex-direction: column;
     font-family: 'Inter', sans-serif;
     position: relative;
-    margin-top: -15px;
+    margin-top: 0;
 }}
 .ae-plan-badge {{
     display: inline-flex;
@@ -3160,17 +3161,17 @@ def render_planos():
     margin: 0 0 2px 0;
 }}
 .ae-plan-desc {{
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 400;
     color: #666666;
-    margin: 0 0 10px 0;
-    line-height: 1.4;
+    margin: 0 0 6px 0;
+    line-height: 1.3;
 }}
 .ae-plan-price {{
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 700;
     color: #24125A;
-    margin: 0 0 12px 0;
+    margin: 0 0 8px 0;
     line-height: 1.2;
 }}
 .ae-plan-price-free {{
@@ -3185,12 +3186,12 @@ def render_planos():
 .ae-plan-features li {{
     display: flex;
     align-items: flex-start;
-    gap: 8px;
-    font-size: 13px;
+    gap: 6px;
+    font-size: 12px;
     font-weight: 400;
     color: #555555;
-    margin-bottom: 6px;
-    line-height: 1.4;
+    margin-bottom: 4px;
+    line-height: 1.3;
 }}
 .ae-check-free {{
     width: 18px;
@@ -3235,7 +3236,7 @@ def render_planos():
     margin-top: 1px;
 }}
 .ae-plan-btn-current {{
-    height: 44px;
+    height: 36px;
     width: 100%;
     background: #F0EBF8;
     color: #5A2BB5;
@@ -3248,7 +3249,7 @@ def render_planos():
     margin-top: 12px;
 }}
 .ae-plan-btn-family {{
-    height: 44px;
+    height: 36px;
     width: 100%;
     background: #5A2BB5;
     color: #FFFFFF;
@@ -3263,7 +3264,7 @@ def render_planos():
 }}
 .ae-plan-btn-family:hover {{ background: #4A22A4; }}
 .ae-plan-btn-legacy {{
-    height: 44px;
+    height: 36px;
     width: 100%;
     background: #D9A328;
     color: #FFFFFF;
@@ -3278,7 +3279,7 @@ def render_planos():
 }}
 .ae-plan-btn-legacy:hover {{ background: #B87A00; }}
 .ae-security-container {{
-    height: 72px;
+    height: 54px;
     background: #FFFFFF;
     border: 1px solid #E8DCC6;
     border-radius: 16px;
@@ -3318,7 +3319,7 @@ def render_planos():
 <p class="ae-hero-subtitle">Suas histórias merecem durar para sempre.</p>
 </div>
 <button class="ae-hero-btn" onclick="document.querySelector('.ae-pricing-container').scrollIntoView({{behavior:'smooth'}})">Conhecer planos</button>
-<div class="ae-hero-tree"><img src="{_tree_src}" alt="árvore" style="height:86px;width:auto;object-fit:contain;display:block;"/></div>
+<div class="ae-hero-tree"><img src="{_tree_src}" alt="árvore" style="height:72px;width:auto;object-fit:contain;display:block;"/></div>
 </div>
 <div class="ae-status-container">
 <div class="ae-free-usage-card">
@@ -4396,8 +4397,8 @@ def render_sidebar_principal(
         _psc_contrib_danger = " ae-psc-bar-danger" if _psc_contrib_pct >= 90 else ""
         st.markdown("""<style>
 .ae-psc {
-    background: #23105D;
-    border: 1px solid #4A3297;
+    background: #23105D !important;
+    border: 1.5px solid #6A4DBF !important;
     border-radius: 16px;
     padding: 16px;
     margin: 4px 0 0 0;
