@@ -1687,7 +1687,6 @@ div[data-testid="stPopover"] button {
 
 div[data-testid="stPopover"] {
     margin-top: 0.12rem;
-    margin-left: 0.6rem;
     position: relative;
     z-index: 3;
 }
@@ -1703,11 +1702,56 @@ div[data-testid="stPopover"] {
     padding: 0.24rem 0.72rem !important;
     border-radius: 8px !important;
     font-size: 0.78rem !important;
+    background: #5A2BB5 !important;
+    color: #FFFFFF !important;
+    border: none !important;
 }
 
 .ae-story-section-title-collections {
     margin-top: 0.7rem;
 }
+[class*="st-key-ver_todas_"] button {
+    background: transparent !important;
+    color: #2B1747 !important;
+    border: none !important;
+    font-size: 0.66rem !important;
+    font-weight: 850 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+}
+[class*="st-key-ver_todas_"] button:hover {
+    color: #5A2BB5 !important;
+    background: transparent !important;
+    text-decoration: underline !important;
+}
+[class*="st-key-ver_todas_"] {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: -0.2rem;
+}
+.st-key-filtro_voltar button {
+    background: transparent !important;
+    color: #5A2BB5 !important;
+    border: 1px solid rgba(90,43,181,0.3) !important;
+    border-radius: 8px !important;
+    font-size: 0.78rem !important;
+    font-weight: 700 !important;
+    padding: 0.2rem 0.6rem !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin-bottom: 0.4rem !important;
+    cursor: pointer !important;
+}
+.st-key-filtro_voltar button:hover {
+    background: rgba(90,43,181,0.06) !important;
+}
+
 
 .ae-collection-box {
     background: rgba(255,255,255,0.52);

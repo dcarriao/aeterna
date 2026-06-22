@@ -516,6 +516,7 @@ def render_editor_visibilidade(
 def render_minha_historia():
     memorias = db.listar_memorias_usuario(st.session_state.usuario_atual["id"])
     usuario_id = st.session_state.usuario_atual["id"]
+    filtro_cat = st.session_state.get("_ae_filtro_categoria")
 
     col_header, col_acao = st.columns([0.82, 0.18], vertical_alignment="center")
     with col_header:
@@ -694,7 +695,6 @@ def render_minha_historia():
                 '<div class="ae-collection-box">'
                 '<div class="ae-collection-head">'
                 f'<h3>{icone_categoria(categoria)} {titulo}</h3>'
-                '<span>Ver todas ›</span>'
                 "</div>"
                 '<div class="ae-collection-mini-grid">'
                 f"{mini_cards}"
@@ -809,34 +809,49 @@ def render_minha_historia():
         }
         return mapa.get(texto, texto or "livre")
 
-    st.markdown('<div class="ae-story-section-title">Continue sua história</div>', unsafe_allow_html=True)
-    render_prateleira(
-        memorias[:4],
-        "Continue",
-        contexto="continue",
-        quantidade_colunas=4,
-    )
-
     grupos = {}
     for memoria in memorias:
         categoria = normalizar_categoria_colecao(memoria.get("categoria") or "livre")
         grupos.setdefault(categoria, []).append(memoria)
 
-    st.markdown('<div class="ae-story-section-title ae-story-section-title-collections">Coleções</div>', unsafe_allow_html=True)
-    grupos_ordenados = sorted(
-        grupos.items(),
-        key=lambda item: len(item[1]),
-        reverse=True,
-    )
-    for inicio in range(0, len(grupos_ordenados), 3):
-        colunas_colecoes = st.columns(3)
-        for indice, coluna in enumerate(colunas_colecoes):
-            posicao = inicio + indice
-            if posicao >= len(grupos_ordenados):
-                continue
-            categoria, itens = grupos_ordenados[posicao]
-            with coluna:
-                render_colecao_box(categoria, itens)
+    if filtro_cat and filtro_cat in grupos:
+        # ── Vista filtrada por categoria ──────────────────────────────
+        categoria_nome_filtro = nome_categoria(filtro_cat)
+        if st.button("← Voltar às coleções", key="filtro_voltar"):
+            del st.session_state["_ae_filtro_categoria"]
+            st.rerun()
+        st.markdown(
+            f'<div class="ae-story-section-title">{icone_categoria(filtro_cat)} {categoria_nome_filtro}</div>',
+            unsafe_allow_html=True,
+        )
+        render_prateleira(grupos[filtro_cat], categoria_nome_filtro, contexto="filtro", quantidade_colunas=4)
+    else:
+        # ── Vista normal: Continue + Coleções ─────────────────────────
+        st.markdown('<div class="ae-story-section-title">Continue sua história</div>', unsafe_allow_html=True)
+        render_prateleira(
+            memorias[:4],
+            "Continue",
+            contexto="continue",
+            quantidade_colunas=4,
+        )
+        st.markdown('<div class="ae-story-section-title ae-story-section-title-collections">Coleções</div>', unsafe_allow_html=True)
+        grupos_ordenados = sorted(
+            grupos.items(),
+            key=lambda item: len(item[1]),
+            reverse=True,
+        )
+        for inicio in range(0, len(grupos_ordenados), 3):
+            colunas_colecoes = st.columns(3)
+            for indice, coluna in enumerate(colunas_colecoes):
+                posicao = inicio + indice
+                if posicao >= len(grupos_ordenados):
+                    continue
+                categoria, itens = grupos_ordenados[posicao]
+                with coluna:
+                    render_colecao_box(categoria, itens)
+                    if st.button("Ver todas ›", key=f"ver_todas_{categoria}", use_container_width=False):
+                        st.session_state["_ae_filtro_categoria"] = categoria
+                        st.rerun()
 
 
 # ============================================================================
