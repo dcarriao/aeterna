@@ -586,27 +586,29 @@ def render_minha_historia():
         fotos = fotos_por_memoria.get(memoria["id"], [])
         videos = videos_por_memoria.get(memoria["id"], [])
 
+        estilo = "height:86px;max-height:86px;min-height:86px;overflow:hidden;"
+
         if fotos:
             caminho_foto = (fotos[0].get("caminho") or "").strip()
             imagem_src = caminho_foto if caminho_foto.startswith(("http://", "https://")) else imagem_local_para_data_uri(caminho_foto)
             if imagem_src:
                 imagem_segura = html.escape(imagem_src, quote=True)
                 return (
-                    f'<div class="{classe_base} {classe_base}-photo">'
+                    f'<div class="{classe_base} {classe_base}-photo" style="{estilo}">'
                     f'<img src="{imagem_segura}" alt="Miniatura da história">'
                     "</div>"
                 )
 
         if videos:
             return (
-                f'<div class="{classe_base} {classe_base}-video">'
+                f'<div class="{classe_base} {classe_base}-video" style="{estilo}">'
                 "<span>🎥</span>"
                 "<strong>Vídeo</strong>"
                 "</div>"
             )
 
         return (
-            f'<div class="{classe_base} {classe_base}-fallback">'
+            f'<div class="{classe_base} {classe_base}-fallback" style="{estilo}">'
             "<span>📖</span>"
             "<strong>História</strong>"
             "</div>"
@@ -644,16 +646,14 @@ def render_minha_historia():
             else ""
         )
         card_html = (
-            '<div class="ae-card-wrapper">'
-            '<div class="ae-story-card">'
+            '<div class="ae-story-card" style="height:232px;max-height:232px;min-height:232px;overflow:hidden;">'
             f"{media_card_memoria(memoria)}"
-            '<div class="ae-story-body">'
+            '<div class="ae-story-body" style="height:146px;max-height:146px;min-height:146px;overflow:hidden;">'
             f"{categoria_html}"
             f"<h3>{titulo}</h3>"
             f'<span class="ae-story-date">{data_evento_segura}</span>'
             f"<p>{resumo_seguro}</p>"
             f'<div class="ae-story-indicators">{indicadores_memoria(memoria)}</div>'
-            "</div>"
             "</div>"
             "</div>"
         )
