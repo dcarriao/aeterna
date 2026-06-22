@@ -1691,12 +1691,12 @@ div[data-testid="stPopover"] {
     z-index: 3;
 }
 
-.st-key-minha_historia_contar_historia {
+.st-key-minha_historia_contar_historia, .st-key-minha-historia-contar-historia {
     display: flex;
     justify-content: flex-end;
 }
 
-.st-key-minha_historia_contar_historia button {
+.st-key-minha_historia_contar_historia button, .st-key-minha-historia-contar-historia button {
     width: 215px !important;
     min-height: 2.05rem !important;
     padding: 0.24rem 0.72rem !important;
@@ -1710,7 +1710,7 @@ div[data-testid="stPopover"] {
 .ae-story-section-title-collections {
     margin-top: 0.7rem;
 }
-[class*="st-key-ver_todas_"] button {
+[class*="st-key-ver_todas_"] button, [class*="st-key-ver-todas-"] button {
     background: transparent !important;
     color: #2B1747 !important;
     border: none !important;
@@ -1725,17 +1725,17 @@ div[data-testid="stPopover"] {
     cursor: pointer !important;
     box-shadow: none !important;
 }
-[class*="st-key-ver_todas_"] button:hover {
+[class*="st-key-ver_todas_"] button:hover, [class*="st-key-ver-todas-"] button:hover {
     color: #5A2BB5 !important;
     background: transparent !important;
     text-decoration: underline !important;
 }
-[class*="st-key-ver_todas_"] {
+[class*="st-key-ver_todas_"], [class*="st-key-ver-todas-"] {
     display: flex;
     justify-content: flex-end;
     margin-top: -0.2rem;
 }
-.st-key-filtro_voltar button {
+.st-key-filtro_voltar button, .st-key-filtro-voltar button {
     background: transparent !important;
     color: #5A2BB5 !important;
     border: 1px solid rgba(90,43,181,0.3) !important;
@@ -1748,7 +1748,7 @@ div[data-testid="stPopover"] {
     margin-bottom: 0.4rem !important;
     cursor: pointer !important;
 }
-.st-key-filtro_voltar button:hover {
+.st-key-filtro_voltar button:hover, .st-key-filtro-voltar button:hover {
     background: rgba(90,43,181,0.06) !important;
 }
 
