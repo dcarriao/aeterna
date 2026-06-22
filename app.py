@@ -28,30 +28,6 @@ from utils.media import exibir_foto_segura, exibir_video_seguro
 from utils.email_service import EmailService
 
 # ============================================================================
-# HELPERS VISUAIS
-# ============================================================================
-
-@st.cache_data
-def _cta_tree_img_html() -> str:
-    """Retorna <img> base64 do correcttree.png em 2× para qualidade (cacheado)."""
-    try:
-        import io as _io
-        img = Image.open("assets/correcttree.png").convert("RGBA")
-        w, h = img.size
-        img2x = img.resize((w * 2, h * 2), Image.LANCZOS)
-        buf = _io.BytesIO()
-        img2x.save(buf, format="PNG", optimize=True)
-        b64 = base64.b64encode(buf.getvalue()).decode()
-        return (
-            f'<img src="data:image/png;base64,{b64}" '
-            f'style="height:90px;width:auto;flex-shrink:0;object-fit:contain" alt="">'
-        )
-    except Exception as exc:
-        print("correcttree.png error:", exc)
-        return ""
-
-
-# ============================================================================
 # CONFIGURAÇÃO DA PÁGINA
 # ============================================================================
 
@@ -655,7 +631,7 @@ def render_minha_historia():
             f"<span>{html.escape(indicador)}</span>" for indicador in indicadores
         )
 
-    def card_memoria_html(memoria: dict, categoria: str, mostrar_categoria: bool = False) -> str:
+    def render_card_memoria(memoria: dict, categoria: str, mostrar_categoria: bool = False):
         data_evento = memoria.get("data_evento") or ""
         titulo = html.escape(memoria.get("titulo") or "História sem título")
         data_evento_segura = html.escape(str(data_evento))
@@ -666,8 +642,8 @@ def render_minha_historia():
             if mostrar_categoria
             else ""
         )
-        return (
-            '<div class="ae-story-card" style="height:232px;overflow:hidden">'
+        card_html = (
+            '<div class="ae-story-card">'
             f"{media_card_memoria(memoria)}"
             '<div class="ae-story-body">'
             f"{categoria_html}"
@@ -678,22 +654,17 @@ def render_minha_historia():
             "</div>"
             "</div>"
         )
-
-    def render_card_memoria(memoria: dict, categoria: str, mostrar_categoria: bool = False):
-        st.markdown(
-            card_memoria_html(memoria, categoria, mostrar_categoria),
-            unsafe_allow_html=True,
-        )
+        st.markdown(card_html, unsafe_allow_html=True)
 
     def mini_card_memoria_html(memoria: dict) -> str:
         titulo = html.escape(memoria.get("titulo") or "História sem título")
+        data_evento = html.escape(str(memoria.get("data_evento") or ""))
         return (
-            '<div style="overflow:hidden;height:110px;border-radius:10px;'
-            'background:rgba(255,255,255,0.95);border:1px solid rgba(212,168,79,0.20)">'
+            '<div class="ae-collection-mini-card">'
             f'{media_card_memoria(memoria, "ae-collection-mini-media")}'
-            '<div style="padding:0.25rem 0.4rem;overflow:hidden">'
-            f'<strong style="font-size:0.62rem;display:block;white-space:nowrap;'
-            f'overflow:hidden;text-overflow:ellipsis;color:#2B1747">{titulo}</strong>'
+            '<div class="ae-collection-mini-body">'
+            f"<strong>{titulo}</strong>"
+            f"<span>{data_evento}</span>"
             "</div>"
             "</div>"
         )
@@ -701,53 +672,37 @@ def render_minha_historia():
     def render_colecao_box(categoria: str, itens: list):
         categoria_nome = nome_categoria(categoria)
         titulo = html.escape(categoria_nome)
-        cat_key = categoria
-        mini_cards_itens = [mini_card_memoria_html(m) for m in itens[:3]]
+        mini_cards_itens = [
+            mini_card_memoria_html(memoria)
+            for memoria in itens[:3]
+        ]
         while len(mini_cards_itens) < 3:
             mini_cards_itens.append(
-                '<div style="overflow:hidden;height:110px;border-radius:10px;opacity:0.5;'
-                'background:rgba(255,255,255,0.95);border:1px dashed rgba(212,168,79,0.30);'
-                'display:flex;align-items:center;justify-content:center">'
-                '<span style="font-size:1.4rem">📖</span>'
+                '<div class="ae-collection-mini-card ae-collection-mini-card-empty">'
+                '<div class="ae-collection-mini-media ae-collection-mini-media-fallback">'
+                "<span>📖</span>"
+                "</div>"
+                '<div class="ae-collection-mini-body">'
+                "<strong>Próxima história</strong>"
+                "<span>Aguardando novo capítulo</span>"
+                "</div>"
                 "</div>"
             )
         mini_cards = "".join(mini_cards_itens)
-        # onclick clica no botão Streamlit escondido fora da tela
-        onclick_js = (
-            f"(function(){{"
-            f"var b=document.querySelector('.st-key-ver_todas_{cat_key} button');"
-            f"if(b)b.click();"
-            f"}})();"
-        )
         st.markdown(
-            '<div style="overflow:hidden;padding:0.65rem;border-radius:16px;'
-            'background:rgba(255,255,255,0.52);border:1px solid rgba(212,168,79,0.22);'
-            'box-shadow:0 12px 30px rgba(43,23,71,0.06)">'
-            '<div style="display:flex;align-items:center;justify-content:space-between;'
-            'gap:0.5rem;margin-bottom:0.5rem">'
-            f'<h3 style="margin:0;font-size:0.75rem;font-weight:800;color:#2B1747;'
-            f'white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'
-            f'{icone_categoria(categoria)} {titulo}</h3>'
-            f'<span onclick="{onclick_js}" '
-            f'style="cursor:pointer;color:#6F6478;font-size:0.68rem;font-weight:700;'
-            f'text-decoration:underline;white-space:nowrap;flex-shrink:0">Ver todas ›</span>'
-            "</div>"
-            '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.3rem">'
-            f"{mini_cards}"
-            "</div>"
-            "</div>",
+            (
+                '<div class="ae-collection-box">'
+                '<div class="ae-collection-head">'
+                f'<h3>{icone_categoria(categoria)} {titulo}</h3>'
+                '<span>Ver todas ›</span>'
+                "</div>"
+                '<div class="ae-collection-mini-grid">'
+                f"{mini_cards}"
+                "</div>"
+                "</div>"
+            ),
             unsafe_allow_html=True,
         )
-        # Botão escondido fora da tela — acionado pelo onclick acima
-        st.markdown(
-            f"<style>.st-key-ver_todas_{cat_key}"
-            "{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}"
-            "</style>",
-            unsafe_allow_html=True,
-        )
-        if st.button("Ver todas", key=f"ver_todas_{cat_key}"):
-            st.session_state["colecao_expandida"] = categoria
-            st.rerun()
 
     def render_detalhes_memoria(memoria: dict, key_contexto: str):
         if memoria.get("data_evento"):
@@ -798,25 +753,15 @@ def render_minha_historia():
             quantidade_colunas: int = 4,
     ):
         for inicio in range(0, len(itens), quantidade_colunas):
-            batch = itens[inicio:inicio + quantidade_colunas]
-            # Todos os cards em um único HTML grid → altura uniforme garantida
-            partes = [card_memoria_html(m, categoria_nome) for m in batch]
-            while len(partes) < quantidade_colunas:
-                partes.append(f'<div style="height:232px"></div>')
-            st.markdown(
-                f'<div style="display:grid;grid-template-columns:repeat({quantidade_colunas},1fr);gap:1rem;margin-bottom:0.25rem">'
-                + "".join(partes)
-                + "</div>",
-                unsafe_allow_html=True,
-            )
-            # Popovers numa row de colunas Streamlit — ficam todos na mesma altura
             colunas = st.columns(quantidade_colunas)
             for indice, coluna in enumerate(colunas):
-                if indice >= len(batch):
+                posicao = inicio + indice
+                if posicao >= len(itens):
                     continue
-                memoria = batch[indice]
-                key_contexto = f"{contexto}_{inicio + indice}_{memoria['id']}"
+                memoria = itens[posicao]
+                key_contexto = f"{contexto}_{posicao}_{memoria['id']}"
                 with coluna:
+                    render_card_memoria(memoria, categoria_nome)
                     render_acesso_historia(memoria, key_contexto)
 
     def nome_categoria(categoria: str) -> str:
@@ -892,42 +837,6 @@ def render_minha_historia():
             categoria, itens = grupos_ordenados[posicao]
             with coluna:
                 render_colecao_box(categoria, itens)
-
-    colecao_expandida = st.session_state.get("colecao_expandida")
-    if colecao_expandida and colecao_expandida in grupos:
-        itens_expandidos = grupos[colecao_expandida]
-        nome_exp = nome_categoria(colecao_expandida)
-        col_exp_titulo, col_exp_fechar = st.columns([0.85, 0.15], vertical_alignment="center")
-        with col_exp_titulo:
-            st.markdown(
-                f'<div class="ae-story-section-title">{icone_categoria(colecao_expandida)} {html.escape(nome_exp)}</div>',
-                unsafe_allow_html=True,
-            )
-        with col_exp_fechar:
-            st.markdown(
-                "<style>"
-                ".st-key-fechar_colecao_expandida div.stButton>button{"
-                "background:#F0EAE0!important;"
-                "background-image:none!important;"
-                "color:#5F536B!important;"
-                "border:1px solid rgba(111,100,120,.3)!important;"
-                "box-shadow:none!important;"
-                "font-size:.74rem!important;"
-                "font-weight:700!important;"
-                "border-radius:8px!important;"
-                "}"
-                "</style>",
-                unsafe_allow_html=True,
-            )
-            if st.button("✕ Fechar", key="fechar_colecao_expandida"):
-                del st.session_state["colecao_expandida"]
-                st.rerun()
-        render_prateleira(
-            itens_expandidos,
-            colecao_expandida,
-            contexto="colecao_expandida",
-            quantidade_colunas=4,
-        )
 
 
 # ============================================================================
@@ -2913,221 +2822,647 @@ def render_preferencias():
 # PLANOS
 # ============================================================================
 def render_planos():
-    LIMITE_MEMORIAS = 10
-    LIMITE_MIDIA = 20
-    LIMITE_CONTRIB = 5
+    # Métricas de uso do usuário
+    qtd_memorias = st.session_state.get("_ae_qtd_memorias", 0)
+    qtd_cofre    = st.session_state.get("_ae_qtd_cofre",    0)
+    qtd_contatos = st.session_state.get("_ae_qtd_contatos", 0)
 
-    usuario_id = (st.session_state.get("usuario_atual") or {}).get("id")
+    lim_memorias = 10
+    lim_medias   = 20
+    lim_contribs = 5
 
-    try:
-        qtd_memorias = len(db.listar_memorias_usuario(usuario_id)) if usuario_id else 0
-    except Exception:
-        qtd_memorias = 0
-    try:
-        qtd_fotos = len(db.listar_fotos_usuario(usuario_id)) if usuario_id else 0
-    except Exception:
-        qtd_fotos = 0
-    try:
-        qtd_videos = len(db.listar_videos_usuario(usuario_id)) if usuario_id else 0
-    except Exception:
-        qtd_videos = 0
-    try:
-        qtd_contribuicoes = len(db.listar_contribuicoes_usuario(usuario_id)) if usuario_id else 0
-    except Exception:
-        qtd_contribuicoes = 0
+    mem_pct     = min(100, int(qtd_memorias / lim_memorias * 100)) if lim_memorias > 0 else 0
+    media_pct   = min(100, int(qtd_cofre    / lim_medias   * 100)) if lim_medias   > 0 else 0
+    contrib_pct = min(100, int(qtd_contatos / lim_contribs * 100)) if lim_contribs > 0 else 0
 
-    qtd_midia = qtd_fotos + qtd_videos
-    limite_atingido = (
-        qtd_memorias >= LIMITE_MEMORIAS
-        or qtd_midia >= LIMITE_MIDIA
-        or qtd_contribuicoes >= LIMITE_CONTRIB
-    )
+    mem_danger     = " ae-bar-danger" if mem_pct     >= 90 else ""
+    media_danger   = " ae-bar-danger" if media_pct   >= 90 else ""
+    contrib_danger = " ae-bar-danger" if contrib_pct >= 90 else ""
 
-    # ── Banner superior — fundo branco, borda #E7DCC7, raio 20px, botão roxo #5E2DAA
-    _scroll_js = "window.scrollBy({top:700,behavior:'smooth'})"
-    st.markdown(
-        '<div class="ae-cta-banner ae-planos-banner">'
-        '<div class="ae-cta-banner-text">'
-        '<div class="ae-cta-banner-title">Preserve tudo para sua família</div>'
-        '<div class="ae-cta-banner-sub">Suas histórias merecem durar para sempre.</div>'
-        '</div>'
-        f'<span class="ae-planos-banner-btn" onclick="{_scroll_js}">👑 Conhecer planos</span>'
-        + _cta_tree_img_html() +
-        '</div>',
-        unsafe_allow_html=True,
-    )
+    st.markdown(f"""
+<style>
+/* ── PLANOS PAGE ─────────────────────────────────────────── */
+.ae-plans-page {{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    font-family: 'Inter', sans-serif;
+    width: 100%;
+    max-width: 1140px;
+    box-sizing: border-box;
+}}
 
-    # ── Linha 2: Seu plano (38.5%) + Status (61.5%) — proporção redline v2: 430px/686px
-    col_uso, col_status = st.columns([5, 8], gap="large")
+/* HERO */
+.ae-hero-container {{
+    height: 118px;
+    background: #FFFFFF;
+    border: 1px solid #E8DCC6;
+    border-radius: 20px;
+    padding: 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+}}
+.ae-hero-icon {{
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    background: #F8F5EE;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+}}
+.ae-hero-text {{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding-top: 2px;
+}}
+.ae-hero-title {{
+    font-size: 28px;
+    font-weight: 700;
+    color: #24125A;
+    line-height: 34px;
+    margin: 0 0 6px 0;
+}}
+.ae-hero-subtitle {{
+    font-size: 16px;
+    font-weight: 400;
+    color: #555555;
+    line-height: 22px;
+    margin: 0;
+}}
+.ae-hero-btn {{
+    height: 48px;
+    width: 190px;
+    min-width: 190px;
+    background: #5A2BB5;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    align-self: center;
+    flex-shrink: 0;
+    transition: background 0.2s;
+}}
+.ae-hero-btn:hover {{ background: #4A22A4; }}
+.ae-hero-tree {{
+    width: 260px;
+    height: 86px;
+    min-width: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    font-size: 52px;
+    align-self: center;
+    flex-shrink: 0;
+    overflow: hidden;
+    line-height: 1;
+}}
 
-    def _uso_bar(pct: int) -> str:
-        return (
-            f'<div style="height:5px;background:rgba(43,23,71,0.1);border-radius:3px;margin:3px 0 12px">'
-            f'<div style="height:100%;width:{pct}%;max-width:100%;'
-            f'background:linear-gradient(90deg,#D9A328,#E4B12D);border-radius:3px"></div>'
-            f'</div>'
-        )
+/* STATUS */
+.ae-status-container {{
+    height: 330px;
+    display: flex;
+    gap: 24px;
+    box-sizing: border-box;
+}}
+.ae-free-usage-card {{
+    width: 430px;
+    min-width: 430px;
+    height: 330px;
+    background: #FFFFFF;
+    border: 1px solid #E8DCC6;
+    border-radius: 20px;
+    padding: 24px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}}
+.ae-fuc-header {{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}}
+.ae-fuc-title {{
+    font-size: 16px;
+    font-weight: 700;
+    color: #24125A;
+}}
+.ae-fuc-badge {{
+    background: #F0EBF8;
+    color: #5A2BB5;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+}}
+.ae-fuc-subtitle {{
+    font-size: 13px;
+    color: #666666;
+    margin-bottom: 20px;
+    font-weight: 400;
+}}
+.ae-fuc-metric {{
+    margin-bottom: 14px;
+}}
+.ae-fuc-metric-row {{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}}
+.ae-fuc-metric-name {{
+    font-size: 13px;
+    color: #555555;
+    font-weight: 400;
+}}
+.ae-fuc-metric-count {{
+    font-size: 13px;
+    color: #24125A;
+    font-weight: 600;
+}}
+.ae-bar-track {{
+    height: 6px;
+    background: #EDE8F5;
+    border-radius: 999px;
+    overflow: hidden;
+}}
+.ae-bar-fill {{
+    height: 100%;
+    background: #5A2BB5;
+    border-radius: 999px;
+}}
+.ae-bar-danger {{
+    background: #E05858 !important;
+}}
+.ae-fuc-footer {{
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid #F0EBF8;
+    font-size: 12px;
+    color: #888888;
+    text-align: center;
+}}
 
-    with col_uso:
-        pct_mem = int(min(qtd_memorias / LIMITE_MEMORIAS, 1.0) * 100)
-        pct_mid = int(min(qtd_midia / LIMITE_MIDIA, 1.0) * 100)
-        pct_con = int(min(qtd_contribuicoes / LIMITE_CONTRIB, 1.0) * 100)
-        st.markdown(
-            '<div class="ae-plano-uso-card">'
-            '<div class="ae-plano-uso-title">Seu plano gratuito</div>'
-            '<div class="ae-plano-uso-sub">Aproveite ao máximo a aEterna.</div>'
-            f'<div class="ae-plano-uso-item"><span>📖 Memórias criadas</span>'
-            f'<span class="ae-plano-uso-nums">{qtd_memorias} de {LIMITE_MEMORIAS}</span></div>'
-            + _uso_bar(pct_mem) +
-            f'<div class="ae-plano-uso-item"><span>🖼️ Fotos e vídeos</span>'
-            f'<span class="ae-plano-uso-nums">{qtd_midia} de {LIMITE_MIDIA}</span></div>'
-            + _uso_bar(pct_mid) +
-            f'<div class="ae-plano-uso-item"><span>💬 Contribuições recebidas</span>'
-            f'<span class="ae-plano-uso-nums">{qtd_contribuicoes} de {LIMITE_CONTRIB}</span></div>'
-            + _uso_bar(pct_con) +
-            '<div style="color:#6E6E6E;font-size:0.7rem;margin-top:0.7rem;'
-            'border-top:1px solid rgba(43,23,71,0.08);padding-top:0.6rem;'
-            'display:flex;align-items:flex-start;gap:0.4rem">'
-            '<span style="color:#D9A328;flex-shrink:0">✨</span>'
-            '<span>Ao atingir o limite, novas memórias e mídias ficarão disponíveis no seu plano atual.</span>'
-            '</div>'
-            '</div>',
-            unsafe_allow_html=True,
-        )
+/* LIMIT CARD */
+.ae-limit-card {{
+    flex: 1;
+    height: 330px;
+    background: #FFFFFF;
+    border: 1px solid #E8DCC6;
+    border-radius: 20px;
+    padding: 24px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}}
+.ae-limit-card-inner {{
+    height: 206px;
+    width: 100%;
+    background: #F3EDF8;
+    border-radius: 16px;
+    padding: 24px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}}
+.ae-limit-lock {{
+    font-size: 32px;
+    margin-bottom: 10px;
+    line-height: 1;
+}}
+.ae-limit-title {{
+    font-size: 18px;
+    font-weight: 700;
+    color: #24125A;
+    font-family: 'Inter', sans-serif;
+    margin: 0 0 8px 0;
+    line-height: 1.3;
+}}
+.ae-limit-text {{
+    font-size: 14px;
+    font-weight: 400;
+    color: #555555;
+    font-family: 'Inter', sans-serif;
+    margin: 0 0 16px 0;
+    line-height: 1.5;
+}}
+.ae-limit-btn {{
+    height: 44px;
+    width: 200px;
+    background: #5A2BB5;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: background 0.2s;
+}}
+.ae-limit-btn:hover {{ background: #4A22A4; }}
 
-    with col_status:
-        # Card de status unificado: sempre mostra "aproveitando" + bloqueio suave
-        if limite_atingido:
-            _inner_title = "Você chegou ao limite do plano gratuito"
-            _inner_desc = (
-                "Para adicionar mais memórias, fotos, vídeos e receber "
-                "mais contribuições, faça upgrade do seu plano."
-            )
-        else:
-            _inner_title = "Você chegou ao limite do plano gratuito"
-            _inner_desc = (
-                "Para adicionar mais memórias, fotos, vídeos e receber "
-                "mais contribuições, faça upgrade do seu plano."
-            )
-        st.markdown(
-            '<div class="ae-status-card">'
-            '<div class="ae-status-title">Você está aproveitando a aEterna! 💜</div>'
-            '<div class="ae-status-sub">Continue preservando as histórias que importam.</div>'
-            '<div class="ae-status-inner">'
-            '<span class="ae-status-icon">🔒</span>'
-            f'<div class="ae-status-inner-title">{_inner_title}</div>'
-            f'<div class="ae-status-inner-desc">{_inner_desc}</div>'
-            f'<span class="ae-status-inner-btn" onclick="{_scroll_js}">👑 Ver planos</span>'
-            '</div>'
-            '</div>',
-            unsafe_allow_html=True,
-        )
+/* PRICING */
+.ae-pricing-container {{
+    height: 430px;
+    background: #FFFFFF;
+    border: 1px solid #E8DCC6;
+    border-radius: 20px;
+    padding: 18px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}}
+.ae-pricing-header {{
+    height: 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-bottom: 12px;
+    flex-shrink: 0;
+}}
+.ae-pricing-title {{
+    font-size: 18px;
+    font-weight: 700;
+    color: #24125A;
+    margin: 0 0 2px 0;
+    font-family: 'Inter', sans-serif;
+}}
+.ae-pricing-subtitle {{
+    font-size: 14px;
+    font-weight: 400;
+    color: #666666;
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+}}
+.ae-plans-row {{
+    height: 355px;
+    display: flex;
+    gap: 18px;
+    flex: 1;
+    align-items: flex-start;
+}}
 
-    # ── PRICING_CONTAINER — redline v2: div real, sem st.columns, sem st.button
-    _msg_js = "document.getElementById('ae-planos-msg').style.display='block'"
-    st.markdown(
-        '<div class="ae-pricing-container">'
+/* Plan cards */
+.ae-plan-free, .ae-plan-legacy {{
+    width: 340px;
+    min-width: 340px;
+    height: 355px;
+    background: #FFFFFF;
+    border: 1px solid #E8DCC6;
+    border-radius: 16px;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Inter', sans-serif;
+}}
+.ae-plan-family {{
+    width: 360px;
+    min-width: 360px;
+    height: 385px;
+    background: #FFFFFF;
+    border: 2px solid #8D5AE8;
+    border-radius: 16px;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Inter', sans-serif;
+    position: relative;
+    margin-top: -15px;
+}}
+.ae-plan-badge {{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+    width: 115px;
+    background: #D9A328;
+    color: #FFFFFF;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 999px;
+    margin-bottom: 8px;
+    font-family: 'Inter', sans-serif;
+}}
+.ae-plan-name {{
+    font-size: 16px;
+    font-weight: 700;
+    color: #24125A;
+    margin: 0 0 2px 0;
+}}
+.ae-plan-desc {{
+    font-size: 13px;
+    font-weight: 400;
+    color: #666666;
+    margin: 0 0 10px 0;
+    line-height: 1.4;
+}}
+.ae-plan-price {{
+    font-size: 24px;
+    font-weight: 700;
+    color: #24125A;
+    margin: 0 0 12px 0;
+    line-height: 1.2;
+}}
+.ae-plan-price-free {{
+    font-size: 20px;
+}}
+.ae-plan-features {{
+    list-style: none;
+    margin: 0 0 auto 0;
+    padding: 0;
+    flex: 1;
+}}
+.ae-plan-features li {{
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 400;
+    color: #555555;
+    margin-bottom: 6px;
+    line-height: 1.4;
+}}
+.ae-check-free {{
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    border-radius: 50%;
+    background: #E8F5E9;
+    color: #2E7D32;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+}}
+.ae-check-family {{
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    border-radius: 50%;
+    background: #EDE8F8;
+    color: #5A2BB5;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+}}
+.ae-check-legacy {{
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    border-radius: 50%;
+    background: #FDF5E0;
+    color: #B87A00;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+}}
+.ae-plan-btn-current {{
+    height: 44px;
+    width: 100%;
+    background: #F0EBF8;
+    color: #5A2BB5;
+    border: 1px solid #D0C0F0;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: default;
+    margin-top: 12px;
+}}
+.ae-plan-btn-family {{
+    height: 44px;
+    width: 100%;
+    background: #5A2BB5;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    margin-top: 12px;
+    transition: background 0.2s;
+}}
+.ae-plan-btn-family:hover {{ background: #4A22A4; }}
+.ae-plan-btn-legacy {{
+    height: 44px;
+    width: 100%;
+    background: #D9A328;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    margin-top: 12px;
+    transition: background 0.2s;
+}}
+.ae-plan-btn-legacy:hover {{ background: #B87A00; }}
 
-        # PRICING_HEADER
-        '<div>'
-        '<div style="color:#24125A;font-size:1.125rem;font-weight:700;margin:0 0 4px 0">'
-        'Escolha o plano ideal para sua família</div>'
-        '<div style="color:#666666;font-size:0.875rem;margin:0">'
-        'Mais recursos para preservar cada detalhe da sua história.</div>'
-        '</div>'
+/* SECURITY */
+.ae-security-container {{
+    height: 72px;
+    background: #FFFFFF;
+    border: 1px solid #E8DCC6;
+    border-radius: 16px;
+    padding: 0 24px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}}
+.ae-security-icon {{
+    font-size: 22px;
+    flex-shrink: 0;
+}}
+.ae-security-text {{
+    font-size: 14px;
+    font-weight: 400;
+    color: #555555;
+    font-family: 'Inter', sans-serif;
+    flex: 1;
+}}
+.ae-security-link {{
+    font-size: 14px;
+    font-weight: 600;
+    color: #5A2BB5;
+    font-family: 'Inter', sans-serif;
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+}}
+.ae-security-link:hover {{ text-decoration: underline; }}
+</style>
 
-        # PLANS_ROW — flex horizontal, gap 18px
-        '<div class="ae-plans-row">'
+<div class="ae-plans-page">
 
-        # ── PLAN_FREE
-        '<div class="ae-plan-card">'
-        '<div class="ae-plan-icon">🎁</div>'
-        '<div class="ae-plan-nome">Gratuito</div>'
-        '<div class="ae-plan-desc">Para começar sua jornada</div>'
-        '<div class="ae-plan-preco"><sup>R$</sup> 0'
-        '<span style="font-size:0.75rem;font-weight:400;color:#666666"> /mês</span></div>'
-        '<ul class="ae-plan-features">'
-        '<li>Até 10 memórias</li>'
-        '<li>Até 20 fotos e vídeos</li>'
-        '<li>Até 5 contribuições</li>'
-        '<li>Pessoas relacionadas</li>'
-        '<li>Curador de histórias com IA</li>'
-        '</ul>'
-        '<button class="ae-plan-btn ae-plan-btn-desabilitado" disabled>Plano atual</button>'
-        '</div>'
+  <!-- HERO -->
+  <div class="ae-hero-container">
+    <div class="ae-hero-icon">❤️</div>
+    <div class="ae-hero-text">
+      <p class="ae-hero-title">Preserve tudo para sua família</p>
+      <p class="ae-hero-subtitle">Suas histórias merecem durar para sempre.</p>
+    </div>
+    <button class="ae-hero-btn"
+      onclick="document.querySelector('.ae-pricing-container').scrollIntoView({{behavior:'smooth'}})">
+      Conhecer planos
+    </button>
+    <div class="ae-hero-tree">🌳</div>
+  </div>
 
-        # ── PLAN_FAMILY
-        '<div class="ae-plan-card ae-plan-card-destaque">'
-        '<div class="ae-plan-badge">Mais escolhido</div>'
-        '<div class="ae-plan-icon">👨‍👩‍👧</div>'
-        '<div class="ae-plan-nome">Familiar</div>'
-        '<div class="ae-plan-desc">Para famílias conectadas</div>'
-        '<div class="ae-plan-preco"><sup>R$</sup> 19,90'
-        '<span style="font-size:0.75rem;font-weight:400;color:#666666"> /mês</span></div>'
-        '<div class="ae-plan-preco-anual">ou R$ 199,00 /ano</div>'
-        '<ul class="ae-plan-features">'
-        '<li>Memórias ilimitadas</li>'
-        '<li>Fotos e vídeos ilimitados</li>'
-        '<li>Contribuições ilimitadas</li>'
-        '<li>Colaboração familiar</li>'
-        '<li>Curador de histórias com IA</li>'
-        '<li>Suporte prioritário</li>'
-        '</ul>'
-        f'<button class="ae-plan-btn ae-plan-btn-roxo" onclick="{_msg_js}">'
-        '👑 Assinar Plano Familiar</button>'
-        '</div>'
+  <!-- STATUS -->
+  <div class="ae-status-container">
 
-        # ── PLAN_LEGACY
-        '<div class="ae-plan-card">'
-        '<div class="ae-plan-icon">👑</div>'
-        '<div class="ae-plan-nome">Legado</div>'
-        '<div class="ae-plan-desc">Para quem pensa no futuro</div>'
-        '<div class="ae-plan-preco"><sup>R$</sup> 39,90'
-        '<span style="font-size:0.75rem;font-weight:400;color:#666666"> /mês</span></div>'
-        '<div class="ae-plan-preco-anual">ou R$ 399,00 /ano</div>'
-        '<ul class="ae-plan-features">'
-        '<li>Memórias ilimitadas</li>'
-        '<li>Fotos e vídeos ilimitados</li>'
-        '<li>Contribuições ilimitadas</li>'
-        '<li>Armazenamento permanente</li>'
-        '<li>Prioridade no suporte</li>'
-        '<li>Histórico completo da família</li>'
-        '<li>Exportação de legado</li>'
-        '</ul>'
-        f'<button class="ae-plan-btn ae-plan-btn-dourado" onclick="{_msg_js}">'
-        '👑 Assinar Plano Legado</button>'
-        '</div>'
+    <!-- FREE_USAGE_CARD -->
+    <div class="ae-free-usage-card">
+      <div class="ae-fuc-header">
+        <span class="ae-fuc-title">Uso atual</span>
+        <span class="ae-fuc-badge">Plano Gratuito</span>
+      </div>
+      <p class="ae-fuc-subtitle">Acompanhe o que você já preservou.</p>
 
-        '</div>'  # end PLANS_ROW
+      <div class="ae-fuc-metric">
+        <div class="ae-fuc-metric-row">
+          <span class="ae-fuc-metric-name">Memórias</span>
+          <span class="ae-fuc-metric-count">{qtd_memorias} / {lim_memorias}</span>
+        </div>
+        <div class="ae-bar-track">
+          <div class="ae-bar-fill{mem_danger}" style="width:{mem_pct}%"></div>
+        </div>
+      </div>
 
-        # Mensagem "em breve" oculta
-        '<div id="ae-planos-msg" class="ae-planos-msg">'
-        '💜 Em breve! Entre em contato conosco para mais informações.'
-        '</div>'
+      <div class="ae-fuc-metric">
+        <div class="ae-fuc-metric-row">
+          <span class="ae-fuc-metric-name">Fotos e vídeos</span>
+          <span class="ae-fuc-metric-count">{qtd_cofre} / {lim_medias}</span>
+        </div>
+        <div class="ae-bar-track">
+          <div class="ae-bar-fill{media_danger}" style="width:{media_pct}%"></div>
+        </div>
+      </div>
 
-        '</div>',  # end PRICING_CONTAINER
-        unsafe_allow_html=True,
-    )
+      <div class="ae-fuc-metric">
+        <div class="ae-fuc-metric-row">
+          <span class="ae-fuc-metric-name">Contribuições</span>
+          <span class="ae-fuc-metric-count">{qtd_contatos} / {lim_contribs}</span>
+        </div>
+        <div class="ae-bar-track">
+          <div class="ae-bar-fill{contrib_danger}" style="width:{contrib_pct}%"></div>
+        </div>
+      </div>
 
-    # ── SECURITY_CONTAINER — redline v2: 72px, radius 16px, padding 1rem 1.5rem
-    st.markdown(
-        '<div style="display:flex;align-items:center;justify-content:space-between;'
-        'padding:1rem 1.5rem;background:#FFFFFF;border-radius:16px;'
-        'border:1px solid #E8DCC6;">'
-        '<div style="display:flex;align-items:center;gap:0.8rem">'
-        '<span style="font-size:1.5rem">🛡️</span>'
-        '<div>'
-        '<div style="color:#24125A;font-size:0.875rem;font-weight:700">Seus dados sempre seguros</div>'
-        '<div style="color:#555555;font-size:0.875rem">'
-        'Na aEterna, suas memórias e da sua família estão protegidas com segurança e privacidade.'
-        '</div>'
-        '</div>'
-        '</div>'
-        '<span style="color:#5A2BB5;font-size:0.875rem;font-weight:600;'
-        'white-space:nowrap;cursor:pointer">Saiba mais sobre segurança ›</span>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
+      <div class="ae-fuc-footer">
+        Faça upgrade para remover todos os limites
+      </div>
+    </div>
+
+    <!-- LIMIT_CARD -->
+    <div class="ae-limit-card">
+      <div class="ae-limit-card-inner">
+        <div class="ae-limit-lock">🔒</div>
+        <p class="ae-limit-title">Você chegou ao limite<br>do plano gratuito.</p>
+        <p class="ae-limit-text">Continue preservando as histórias<br>da sua família.</p>
+        <button class="ae-limit-btn"
+          onclick="document.querySelector('.ae-pricing-container').scrollIntoView({{behavior:'smooth'}})">
+          Ver planos
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PRICING -->
+  <div class="ae-pricing-container">
+    <div class="ae-pricing-header">
+      <p class="ae-pricing-title">Escolha o plano ideal para sua família</p>
+      <p class="ae-pricing-subtitle">Selecione o plano que melhor se adapta às suas necessidades</p>
+    </div>
+
+    <div class="ae-plans-row">
+
+      <!-- PLAN FREE -->
+      <div class="ae-plan-free">
+        <p class="ae-plan-name">Gratuito</p>
+        <p class="ae-plan-desc">Para começar a preservar sua história</p>
+        <p class="ae-plan-price ae-plan-price-free">Grátis</p>
+        <ul class="ae-plan-features">
+          <li><span class="ae-check-free">✓</span>Até 10 memórias</li>
+          <li><span class="ae-check-free">✓</span>Até 20 fotos e vídeos</li>
+          <li><span class="ae-check-free">✓</span>Até 5 contribuições</li>
+        </ul>
+        <button class="ae-plan-btn-current" disabled>Plano atual</button>
+      </div>
+
+      <!-- PLAN FAMILY -->
+      <div class="ae-plan-family">
+        <span class="ae-plan-badge">Mais Popular</span>
+        <p class="ae-plan-name">Familiar</p>
+        <p class="ae-plan-desc">Para preservar todas as memórias da família</p>
+        <p class="ae-plan-price">R$ 14,90<span style="font-size:14px;font-weight:400;color:#666">/mês</span></p>
+        <ul class="ae-plan-features">
+          <li><span class="ae-check-family">✓</span>Memórias ilimitadas</li>
+          <li><span class="ae-check-family">✓</span>Fotos e vídeos ilimitados</li>
+          <li><span class="ae-check-family">✓</span>Contribuições ilimitadas</li>
+          <li><span class="ae-check-family">✓</span>Colaboração familiar</li>
+          <li><span class="ae-check-family">✓</span>Curador de histórias</li>
+        </ul>
+        <button class="ae-plan-btn-family">Assinar Plano Familiar</button>
+      </div>
+
+      <!-- PLAN LEGACY -->
+      <div class="ae-plan-legacy">
+        <p class="ae-plan-name">Legado</p>
+        <p class="ae-plan-desc">Para preservar sua história para gerações</p>
+        <p class="ae-plan-price">R$ 29,90<span style="font-size:14px;font-weight:400;color:#666">/mês</span></p>
+        <ul class="ae-plan-features">
+          <li><span class="ae-check-legacy">✓</span>Memórias ilimitadas</li>
+          <li><span class="ae-check-legacy">✓</span>Armazenamento permanente</li>
+          <li><span class="ae-check-legacy">✓</span>Histórico completo</li>
+          <li><span class="ae-check-legacy">✓</span>Prioridade no suporte</li>
+        </ul>
+        <button class="ae-plan-btn-legacy">Assinar Plano Legado</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SECURITY -->
+  <div class="ae-security-container">
+    <span class="ae-security-icon">🔒</span>
+    <span class="ae-security-text">
+      Seus dados são protegidos com criptografia de ponta. Cancele a qualquer momento, sem multa.
+    </span>
+    <a class="ae-security-link" href="#">Saiba mais sobre segurança</a>
+  </div>
+
+</div>
+""", unsafe_allow_html=True)
 
 
 # ============================================================================
@@ -4051,10 +4386,6 @@ def render_sidebar_principal(
         historias_compartilhadas: list,
         contribuicoes_pendentes: int,
         is_admin: bool = False,
-        qtd_memorias: int = 0,
-        qtd_fotos: int = 0,
-        qtd_videos: int = 0,
-        qtd_contribuicoes: int = 0,
 ):
     with st.sidebar:
         _botao_sidebar("🏠 Início", "inicio")
@@ -4104,54 +4435,6 @@ def render_sidebar_principal(
                 navegar_para("admin")
                 st.rerun()
 
-        # Card de plano — entre nav e perfil (igual ao mockup)
-        LIMITE_MEM = 10
-        LIMITE_MID = 20
-        LIMITE_CON = 5
-        qtd_midia = qtd_fotos + qtd_videos
-        pct_mem = int(min(qtd_memorias / LIMITE_MEM, 1.0) * 100)
-        pct_mid = int(min(qtd_midia / LIMITE_MID, 1.0) * 100)
-        pct_con = int(min(qtd_contribuicoes / LIMITE_CON, 1.0) * 100)
-
-        def _barra(pct):
-            return (
-                f'<div style="height:2px;background:rgba(255,255,255,0.15);border-radius:2px;margin:1px 0 5px">'
-                f'<div style="height:100%;width:{pct}%;max-width:100%;background:linear-gradient(90deg,#f8dc92,#d4af37);border-radius:2px"></div>'
-                f'</div>'
-            )
-
-        st.markdown(
-            '<div class="ae-plano-sidebar">'
-            '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.55rem">'
-            '<span style="font-size:1.1rem">🎁</span>'
-            '<div><div class="ae-plano-sidebar-label">Plano atual</div>'
-            '<div class="ae-plano-sidebar-nome">Gratuito</div></div>'
-            '</div>'
-            f'<div class="ae-plano-sidebar-item"><span>Memórias</span>'
-            f'<span class="ae-plano-sidebar-nums">{qtd_memorias} / {LIMITE_MEM}</span></div>'
-            + _barra(pct_mem) +
-            f'<div class="ae-plano-sidebar-item"><span>Fotos e vídeos</span>'
-            f'<span class="ae-plano-sidebar-nums">{qtd_midia} / {LIMITE_MID}</span></div>'
-            + _barra(pct_mid) +
-            f'<div class="ae-plano-sidebar-item"><span>Contribuições</span>'
-            f'<span class="ae-plano-sidebar-nums">{qtd_contribuicoes} / {LIMITE_CON}</span></div>'
-            + _barra(pct_con) +
-            '</div>',
-            unsafe_allow_html=True,
-        )
-        # Botão dourado "Conhecer Premium"
-        st.markdown(
-            '<style>.st-key-sidebar_conhecer_premium div.stButton>button{'
-            'background:linear-gradient(135deg,#f8dc92,#d4af37 62%,#b77a46)!important;'
-            'color:#2B1747!important;border:none!important;font-weight:800!important;'
-            'font-size:0.72rem!important;border-radius:8px!important;width:100%!important}'
-            '</style>',
-            unsafe_allow_html=True,
-        )
-        if st.button("👑 Conhecer Premium", key="sidebar_conhecer_premium", use_container_width=True):
-            st.session_state["pagina_atual"] = "planos"
-            st.rerun()
-
         st.markdown('<div class="ae-sidebar-divider"></div>', unsafe_allow_html=True)
         primeiro_nome = str(nome_exibido or "Você").split()[0]
         with st.expander(f"👤 {primeiro_nome}", expanded=False):
@@ -4175,39 +4458,6 @@ def render_inicio(
         qtd_pessoas: int = 0,
 ):
     primeiro_nome = str(nome_exibido or "Olá").split()[0]
-
-    # CTA Banner — onclick busca botão por seletor de classe E por texto (fallback)
-    _cta_onclick = (
-        "(function(){"
-        "var b=document.querySelector('.st-key-cta_conhecer_planos button');"
-        "if(!b){var all=document.querySelectorAll('button');"
-        "for(var i=0;i<all.length;i++)"
-        "{if((all[i].innerText||'').indexOf('Conhecer planos')>=0){b=all[i];break;}}}"
-        "if(b)b.click();"
-        "})()"
-    )
-    st.markdown(
-        '<div class="ae-cta-banner">'
-        '<span style="font-size:1.4rem;flex-shrink:0">💜</span>'
-        '<div class="ae-cta-banner-text">'
-        '<div class="ae-cta-banner-title">Preserve tudo para sua família</div>'
-        '<div class="ae-cta-banner-sub">Suas histórias merecem durar para sempre.</div>'
-        '</div>'
-        f'<span class="ae-cta-banner-btn" onclick="{_cta_onclick}">👑 Conhecer planos</span>'
-        + _cta_tree_img_html() +
-        '</div>',
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        '<style>.st-key-cta_conhecer_planos'
-        '{opacity:0!important;pointer-events:none!important;'
-        'position:fixed!important;top:-9999px!important;'
-        'left:-9999px!important;width:0!important;height:0!important}</style>',
-        unsafe_allow_html=True,
-    )
-    if st.button("Conhecer planos", key="cta_conhecer_planos"):
-        st.session_state["pagina_atual"] = "planos"
-        st.rerun()
 
     try:
         memorias = db.listar_memorias_usuario(usuario_id)
@@ -5156,8 +5406,6 @@ def main():
                 qtd_contatos=0,
                 qtd_cofre=0,
                 qtd_memorias=len(memorias_visitante),
-                qtd_fotos=0,
-                qtd_contribuicoes=0,
                 is_admin=False,
                 fazer_logout=fazer_logout
             )
@@ -5304,19 +5552,13 @@ def main():
             print("Erro ao contar memórias:", exc)
             qtd_memorias = 0
 
-        try:
-            qtd_fotos = len(db.listar_fotos_usuario(usuario_logado["id"]))
-        except Exception as exc:
-            print("Erro ao contar fotos:", exc)
-            qtd_fotos = 0
-
-        try:
-            qtd_contribuicoes = len(db.listar_contribuicoes_usuario(usuario_logado["id"]))
-        except Exception as exc:
-            print("Erro ao contar contribuições:", exc)
-            qtd_contribuicoes = 0
-
         qtd_cofre = 0
+
+        # Armazena métricas em session_state para uso em render_planos()
+        st.session_state["_ae_qtd_memorias"] = qtd_memorias
+        st.session_state["_ae_qtd_cofre"]    = qtd_cofre
+        st.session_state["_ae_qtd_contatos"] = qtd_contatos
+        st.session_state["_ae_qtd_videos"]   = qtd_videos
 
         render_sidebar_premium(
             nome_exibido=nome_exibido,
@@ -5324,8 +5566,6 @@ def main():
             qtd_contatos=qtd_contatos,
             qtd_cofre=qtd_cofre,
             qtd_memorias=qtd_memorias,
-            qtd_fotos=qtd_fotos,
-            qtd_contribuicoes=qtd_contribuicoes,
             is_admin=is_admin,
             fazer_logout=fazer_logout
         )
@@ -5335,10 +5575,6 @@ def main():
             historias_compartilhadas,
             contribuicoes_pendentes,
             is_admin=is_admin,
-            qtd_memorias=qtd_memorias,
-            qtd_fotos=qtd_fotos,
-            qtd_videos=qtd_videos,
-            qtd_contribuicoes=qtd_contribuicoes,
         )
 
         if st.session_state.modo_visualizacao == "historia_compartilhada":

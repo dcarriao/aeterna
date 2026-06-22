@@ -50,22 +50,6 @@ header,
     width: 200px !important;
     padding-left: 0.6rem !important;
     padding-right: 0.6rem !important;
-    padding-top: 0 !important;
-    margin-top: 0 !important;
-}
-
-/* Streamlit 1.x coloca padding-top alto no conteúdo interno — remove */
-[data-testid="stSidebar"] > div:first-child > div,
-[data-testid="stSidebar"] > div > div,
-[data-testid="stSidebarContent"],
-[data-testid="stSidebarUserContent"] {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
-}
-
-/* Reduz espaço entre botões do sidebar */
-[data-testid="stSidebar"] div.stButton {
-    margin-bottom: -0.1rem;
 }
 
 [data-testid="stSidebar"] * {
@@ -1018,7 +1002,9 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-plan-card {
-    background: #FFFFFF;
+    background:
+        radial-gradient(circle at 80% 18%, rgba(212,168,79,0.18), transparent 32%),
+        rgba(255,255,255,0.97);
 }
 
 .ae-small {
@@ -1701,7 +1687,7 @@ div[data-testid="stPopover"] button {
 
 div[data-testid="stPopover"] {
     margin-top: 0.12rem;
-    margin-left: 0;
+    margin-left: 0.6rem;
     position: relative;
     z-index: 3;
 }
@@ -1717,9 +1703,6 @@ div[data-testid="stPopover"] {
     padding: 0.24rem 0.72rem !important;
     border-radius: 8px !important;
     font-size: 0.78rem !important;
-    background: linear-gradient(135deg, #f8dc92, #d4af37 62%, #b77a46) !important;
-    color: #1b0f2e !important;
-    border: 0 !important;
 }
 
 .ae-story-section-title-collections {
@@ -1732,7 +1715,9 @@ div[data-testid="stPopover"] {
     border-radius: 16px;
     padding: 0.55rem;
     box-shadow: 0 12px 30px rgba(43,23,71,0.06);
-    margin-bottom: 0.1rem;
+    height: 214px;
+    min-height: 214px;
+    margin-bottom: 0.35rem;
     overflow: hidden;
 }
 
@@ -1750,6 +1735,12 @@ div[data-testid="stPopover"] {
     margin: 0;
 }
 
+.ae-collection-head span {
+    color: #2B1747;
+    font-size: 0.66rem;
+    font-weight: 850;
+    white-space: nowrap;
+}
 
 .ae-collection-mini-grid {
     display: grid;
@@ -3233,456 +3224,6 @@ div[data-testid="stPopover"] {
     }
 }
 
-/* =====================================================================
-   SPRINT B — MONETIZAÇÃO
-   ===================================================================== */
-
-/* Sidebar — card de plano */
-.ae-plano-sidebar {
-    background: rgba(43,23,71,0.55);
-    border: 1px solid rgba(212,175,55,0.25);
-    border-radius: 12px;
-    padding: 0.55rem 0.7rem;
-    margin: 0.35rem 0 0.3rem 0;
-}
-.ae-plano-sidebar-label {
-    color: rgba(255,255,255,0.55);
-    font-size: 0.58rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    margin-bottom: 0.05rem;
-}
-.ae-plano-sidebar-nome {
-    color: #f8dc92;
-    font-size: 0.85rem;
-    font-weight: 800;
-    margin-bottom: 0.4rem;
-}
-.ae-plano-sidebar-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: rgba(255,255,255,0.82);
-    font-size: 0.62rem;
-    margin-bottom: 0.06rem;
-}
-.ae-plano-sidebar-nums {
-    color: rgba(255,255,255,0.55);
-    font-size: 0.6rem;
-    font-weight: 600;
-}
-
-/* CTA Banner — card compacto, fundo claro (usado em Início e Planos) */
-.ae-cta-banner {
-    background: #FFFFFF;
-    border: 1px solid #E8DCC6;
-    border-radius: 20px;
-    padding: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.2rem;
-    position: relative;
-    overflow: hidden;
-}
-.ae-cta-banner-text { flex: 1; }
-.ae-cta-banner-title {
-    color: #24125A;
-    font-size: 1.05rem;
-    font-weight: 800;
-    margin: 0 0 0.15rem 0;
-}
-.ae-cta-banner-sub {
-    color: #6E6E6E;
-    font-size: 0.8rem;
-    margin: 0;
-}
-/* Botão da banner no Início (estilo escuro-dourado) */
-.ae-cta-banner-btn {
-    background: #24125A;
-    color: #f8dc92 !important;
-    padding: 0.5rem 1.2rem;
-    border-radius: 10px;
-    font-weight: 700;
-    font-size: 0.78rem;
-    white-space: nowrap;
-    cursor: pointer;
-    text-decoration: none !important;
-    flex-shrink: 0;
-}
-/* Botão da banner na tela Planos — redline v2: 190×48px, #5A2BB5 */
-.ae-planos-banner-btn {
-    background: #5A2BB5;
-    color: #fff !important;
-    width: 190px;
-    min-width: 190px;
-    height: 48px;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 0.88rem;
-    white-space: nowrap;
-    cursor: pointer;
-    flex-shrink: 0;
-    text-align: center;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.35rem;
-}
-.ae-planos-banner-btn:hover { background: #4b24a0; }
-/* Banner na tela Planos — redline v2: 28px/700, sub 16px/#555555 */
-.ae-planos-banner .ae-cta-banner-title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: #24125A;
-}
-.ae-planos-banner .ae-cta-banner-sub {
-    font-size: 1rem;
-    color: #555555;
-}
-
-/* LIMIT_CARD — redline: #FFFFFF, border #E8DCC6, radius 20px, padding 24px */
-.ae-status-card {
-    background: #FFFFFF;
-    border: 1px solid #E8DCC6;
-    border-radius: 20px;
-    padding: 1.5rem;
-    height: 100%;
-}
-.ae-status-title {
-    color: #24125A;
-    font-size: 1rem;
-    font-weight: 800;
-    margin-bottom: 0.2rem;
-}
-.ae-status-sub {
-    color: #6E6E6E;
-    font-size: 0.8rem;
-    margin-bottom: 1rem;
-}
-/* LIMIT_CARD_INNER — redline: #F3EDF8, radius 16px */
-.ae-status-inner {
-    background: #F3EDF8;
-    border-radius: 16px;
-    padding: 1.5rem;
-    text-align: center;
-}
-.ae-status-icon {
-    font-size: 2.8rem;
-    margin-bottom: 0.6rem;
-    display: block;
-}
-.ae-status-inner-title {
-    color: #24125A;
-    font-size: 1.125rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-}
-.ae-status-inner-desc {
-    color: #555555;
-    font-size: 0.875rem;
-    margin-bottom: 1rem;
-    line-height: 1.5;
-}
-/* LIMIT_BUTTON — redline v2: 44×200px, #5A2BB5, radius 12px, centrado */
-.ae-status-inner-btn {
-    display: block;
-    background: #5A2BB5;
-    color: #fff !important;
-    width: 200px;
-    height: 44px;
-    line-height: 44px;
-    padding: 0;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 0.82rem;
-    cursor: pointer;
-    text-align: center;
-    text-decoration: none !important;
-    margin: 0 auto;
-}
-
-/* FREE_PLAN_CARD — redline: #FFFFFF, border #E8DCC6, radius 20px, padding 24px */
-.ae-plano-uso-card {
-    background: #FFFFFF;
-    border: 1px solid #E8DCC6;
-    border-radius: 20px;
-    padding: 1.5rem;
-    height: 100%;
-}
-.ae-plano-uso-title {
-    color: #24125A;
-    font-size: 1.06rem;
-    font-weight: 700;
-    margin-bottom: 0.1rem;
-}
-.ae-plano-uso-sub {
-    color: #6F6478;
-    font-size: 0.72rem;
-    margin-bottom: 1rem;
-}
-.ae-plano-uso-item {
-    display: flex;
-    justify-content: space-between;
-    color: #2B1747;
-    font-size: 0.74rem;
-    font-weight: 600;
-    margin-bottom: 0.18rem;
-}
-.ae-plano-uso-nums { color: #6F6478; font-weight: 500; }
-
-/* Card de limite atingido */
-.ae-limite-card {
-    background: #f5f0fb;
-    border: 1px solid rgba(109,62,113,0.18);
-    border-radius: 16px;
-    padding: 1.2rem 1.3rem;
-    text-align: center;
-}
-.ae-limite-icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
-.ae-limite-card h3 {
-    color: #2B1747;
-    font-size: 0.9rem;
-    font-weight: 800;
-    margin: 0 0 0.4rem 0;
-}
-.ae-limite-card p {
-    color: #6F6478;
-    font-size: 0.76rem;
-    margin: 0 0 0.9rem 0;
-}
-
-/* Card "aproveitando" */
-.ae-aproveitando-card {
-    background: linear-gradient(135deg, #f5f0fb, #ece5f5);
-    border: 1px solid rgba(109,62,113,0.18);
-    border-radius: 16px;
-    padding: 1.2rem 1.3rem;
-}
-.ae-aproveitando-card h3 {
-    color: #2B1747;
-    font-size: 0.9rem;
-    font-weight: 800;
-    margin: 0 0 0.2rem 0;
-}
-.ae-aproveitando-card p {
-    color: #6F6478;
-    font-size: 0.76rem;
-    margin: 0;
-}
-
-/* PLAN_FREE / PLAN_LEGACY — redline v2: #FFFFFF, border #E8DCC6, radius 16px, padding 20px */
-.ae-plan-card {
-    background: #FFFFFF;
-    border: 1px solid #E8DCC6;
-    border-radius: 16px;
-    padding: 1.25rem;
-    height: 100%;
-    position: relative;
-}
-/* PLAN_FAMILY — redline v2: border 2px #8D5AE8, radius 16px, padding 20px */
-.ae-plan-card-destaque {
-    border: 2px solid #8D5AE8;
-    box-shadow: 0 8px 32px rgba(141,90,232,0.18);
-}
-/* BADGE_MOST_POPULAR — redline v2: 115×30px, #D9A328, text #FFFFFF, radius 999px, 13px */
-.ae-plan-badge {
-    background: #D9A328;
-    color: #FFFFFF;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    width: 115px;
-    height: 30px;
-    line-height: 30px;
-    padding: 0;
-    border-radius: 999px;
-    display: inline-block;
-    margin-bottom: 0.7rem;
-    letter-spacing: 0.03em;
-    text-align: center;
-}
-.ae-plan-icon { font-size: 2rem; margin-bottom: 0.4rem; }
-.ae-plan-nome {
-    color: #24125A;
-    font-size: 1rem;
-    font-weight: 700;
-    margin: 0 0 0.1rem 0;
-}
-.ae-plan-desc {
-    color: #666666;
-    font-size: 0.8125rem;
-    margin: 0 0 0.6rem 0;
-}
-.ae-plan-preco {
-    color: #24125A;
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 0.1rem;
-}
-.ae-plan-preco sup { font-size: 0.8rem; font-weight: 700; }
-.ae-plan-preco-periodo {
-    color: #6F6478;
-    font-size: 0.7rem;
-    margin-bottom: 0.8rem;
-}
-.ae-plan-preco-anual {
-    color: #6D3E71;
-    font-size: 0.68rem;
-    margin-bottom: 1rem;
-    font-weight: 600;
-}
-.ae-plan-features { list-style: none; padding: 0; margin: 0 0 1.2rem 0; }
-.ae-plan-features li {
-    color: #555555;
-    font-size: 0.8125rem;
-    padding: 0.22rem 0;
-    display: flex;
-    align-items: flex-start;
-    gap: 0.45rem;
-}
-.ae-plan-features li::before {
-    content: "✓";
-    color: #6D3E71;
-    font-weight: 800;
-    flex-shrink: 0;
-}
-.ae-plan-card-destaque .ae-plan-features li::before { color: #d4af37; }
-.ae-plan-divider {
-    border: none;
-    border-top: 1px solid rgba(212,168,79,0.18);
-    margin: 0.8rem 0;
-}
-
-/* Botão "Conhecer Premium" na sidebar */
-.st-key-sidebar_conhecer_premium div.stButton>button {
-    background: linear-gradient(135deg, #f8dc92, #d4af37 62%, #b77a46) !important;
-    color: #2B1747 !important;
-    border: none !important;
-    font-weight: 800 !important;
-    font-size: 0.72rem !important;
-    border-radius: 8px !important;
-    width: 100% !important;
-    margin-top: 0.5rem !important;
-}
-
-/* FAMILY_BUTTON — redline v2: 44px, 100%, #5A2BB5, #FFFFFF, radius 12px, 14px */
-.st-key-plano_assinar_familiar div.stButton>button {
-    background: #5A2BB5 !important;
-    color: #fff !important;
-    border: none !important;
-    font-weight: 600 !important;
-    font-size: 0.875rem !important;
-    border-radius: 12px !important;
-    width: 100% !important;
-    min-height: 44px !important;
-    height: 44px !important;
-    padding: 0 !important;
-}
-/* LEGACY_BUTTON — redline v2: 44px, 100%, #D9A328, #FFFFFF, radius 12px, 14px */
-.st-key-plano_assinar_legado div.stButton>button {
-    background: #D9A328 !important;
-    color: #FFFFFF !important;
-    border: none !important;
-    font-weight: 600 !important;
-    font-size: 0.875rem !important;
-    border-radius: 12px !important;
-    width: 100% !important;
-    min-height: 44px !important;
-    height: 44px !important;
-    padding: 0 !important;
-}
-
-/* "Plano atual" — botão desabilitado neutro/cinza (não verde) */
-.st-key-plano_gratuito_btn div.stButton>button,
-.st-key-plano_gratuito_btn div.stButton>button:disabled,
-.st-key-plano_gratuito_btn div.stButton>button[disabled] {
-    background: rgba(43,23,71,0.07) !important;
-    color: #9A8EA8 !important;
-    border: 1px solid rgba(43,23,71,0.12) !important;
-    font-weight: 600 !important;
-    cursor: default !important;
-    opacity: 1 !important;
-}
-
-/* Redline v2 — padding 20px, fontes compactas conforme spec */
-.ae-plan-card { padding: 1.25rem !important; }
-.ae-plan-icon { font-size: 1.75rem !important; margin-bottom: 0.3rem !important; }
-.ae-plan-nome { font-size: 1rem !important; }
-.ae-plan-preco { font-size: 1.5rem !important; margin-bottom: 0.1rem !important; }
-.ae-plan-preco-periodo { margin-bottom: 0.4rem !important; }
-.ae-plan-preco-anual { margin-bottom: 0.5rem !important; }
-.ae-plan-features { margin-bottom: 0.6rem !important; }
-.ae-plan-features li { padding: 0.12rem 0 !important; font-size: 0.8125rem !important; }
-.ae-plan-badge { margin-bottom: 0.4rem !important; }
-
-/* PRICING_CONTAINER — redline v2: OBRIGATÓRIO, classe real no div */
-.ae-pricing-container {
-    background: #FFFFFF;
-    border: 1px solid #E8DCC6;
-    border-radius: 20px;
-    padding: 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-.ae-plans-row {
-    display: flex;
-    gap: 18px;
-    align-items: flex-start;
-}
-.ae-plans-row .ae-plan-card {
-    flex: 1;
-    min-width: 0;
-}
-/* Botões HTML nativos dos planos */
-.ae-plan-btn {
-    display: block;
-    width: 100%;
-    height: 44px;
-    border-radius: 12px;
-    border: none;
-    font-weight: 600;
-    font-size: 0.875rem;
-    cursor: pointer;
-    margin-top: auto;
-}
-.ae-plan-btn-roxo  { background: #5A2BB5; color: #FFFFFF; }
-.ae-plan-btn-roxo:hover  { background: #4b24a0; }
-.ae-plan-btn-dourado { background: #D9A328; color: #FFFFFF; }
-.ae-plan-btn-dourado:hover { background: #c48f1e; }
-.ae-plan-btn-desabilitado {
-    background: rgba(43,23,71,0.07);
-    color: #9A8EA8;
-    border: 1px solid rgba(43,23,71,0.12);
-    cursor: default;
-}
-/* Mensagem "em breve" inline */
-.ae-planos-msg {
-    display: none;
-    background: #F3EDF8;
-    border: 1px solid #8D5AE8;
-    border-radius: 8px;
-    padding: 0.6rem 1rem;
-    color: #24125A;
-    font-size: 0.875rem;
-    margin-top: 10px;
-}
-/* HERO_CONTAINER — altura máxima 118px conforme redline v2 */
-.ae-planos-banner {
-    max-height: 118px !important;
-    overflow: hidden !important;
-}
-/* LOCK_ICON — redline v2: ícone menor para caber em 206px */
-.ae-status-icon {
-    font-size: 1.75rem !important;
-    margin-bottom: 0.4rem !important;
-}
-/* Gap entre seções = 20px conforme MAIN_CONTENT gap:20px do redline v2 */
-[data-testid="stMainBlockContainer"] > [data-testid="stVerticalBlock"] {
-    gap: 1.25rem !important;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -3693,24 +3234,10 @@ def render_sidebar_premium(
     qtd_contatos,
     qtd_cofre=0,
     qtd_memorias=0,
-    qtd_fotos=0,
-    qtd_contribuicoes=0,
     is_admin=False,
     fazer_logout=None,
 ):
     with st.sidebar:
-        # Remove o padding-top alto que o Streamlit injeta no sidebar via JS inline
-        st.markdown(
-            '<img src="#" alt="" style="position:fixed;width:0;height:0;opacity:0" '
-            'onerror="'
-            "var _s=document.querySelector('[data-testid=stSidebar]>div');"
-            "if(_s){_s.style.setProperty('padding-top','0','important');"
-            "_s.style.setProperty('margin-top','0','important');}"
-            "var _c=document.querySelector('[data-testid=stSidebarUserContent]');"
-            "if(_c){_c.style.setProperty('padding-top','0','important');}"
-            '">',
-            unsafe_allow_html=True,
-        )
         with st.sidebar:
             st.markdown(
                 '<div class="ae-sidebar-brand">',
@@ -3738,18 +3265,176 @@ def render_sidebar_premium(
 
         if usuario.get("tipo") == "visitante":
             nome_falecido = usuario.get("nome_falecido", "essa pessoa")
+
             st.markdown(f"### Histórias de {nome_falecido}")
+
             st.markdown("🔎 Explorar História")
+
             if qtd_videos > 0:
                 st.markdown(f"🎥 Vídeos compartilhados: **{qtd_videos}**")
+
             if qtd_memorias > 0:
                 st.markdown(f"💬 Histórias disponíveis: **{qtd_memorias}**")
+
             if qtd_cofre > 0:
                 st.markdown(f"🔒 Itens liberados: **{qtd_cofre}**")
+
             st.markdown("---")
             return
 
-        return
+        # ── PLAN_STATUS_CARD ─────────────────────────────────────────────
+        lim_memorias = 10
+        lim_medias   = 20
+        lim_contribs = 5
+
+        mem_pct     = min(100, int(qtd_memorias / lim_memorias * 100)) if lim_memorias > 0 else 0
+        media_pct   = min(100, int(qtd_cofre    / lim_medias   * 100)) if lim_medias   > 0 else 0
+        contrib_pct = min(100, int(qtd_contatos / lim_contribs * 100)) if lim_contribs > 0 else 0
+
+        mem_danger     = " ae-psc-bar-danger" if mem_pct     >= 90 else ""
+        media_danger   = " ae-psc-bar-danger" if media_pct   >= 90 else ""
+        contrib_danger = " ae-psc-bar-danger" if contrib_pct >= 90 else ""
+
+        st.markdown("""
+<style>
+.ae-psc {
+    background: #23105D;
+    border: 1px solid #4A3297;
+    border-radius: 16px;
+    padding: 16px;
+    margin: 4px 0 0 0;
+    font-family: 'Inter', sans-serif;
+    box-sizing: border-box;
+}
+.ae-psc-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+.ae-psc-label {
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+.ae-psc-badge {
+    background: #4A3297;
+    color: #C8B8F0;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+}
+.ae-psc-metric {
+    margin-bottom: 9px;
+}
+.ae-psc-metric:last-child {
+    margin-bottom: 0;
+}
+.ae-psc-metric-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+.ae-psc-metric-name {
+    color: #B8A8E8;
+    font-size: 11px;
+    font-weight: 400;
+}
+.ae-psc-metric-count {
+    color: #FFFFFF;
+    font-size: 10px;
+    font-weight: 600;
+}
+.ae-psc-bar-track {
+    height: 4px;
+    background: #3D2680;
+    border-radius: 999px;
+    overflow: hidden;
+}
+.ae-psc-bar-fill {
+    height: 100%;
+    background: #E3B12D;
+    border-radius: 999px;
+}
+.ae-psc-bar-danger {
+    background: #E05858 !important;
+}
+.ae-psc-divider {
+    border: none;
+    border-top: 1px solid #4A3297;
+    margin: 12px 0 10px 0;
+}
+section[data-testid="stSidebar"] .ae-psc-btn-wrap > div > button,
+section[data-testid="stSidebar"] .ae-psc-btn-wrap > div > div > button {
+    background: #5A2BB5 !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 12px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    font-family: 'Inter', sans-serif !important;
+    height: 34px !important;
+    width: 100% !important;
+    margin-top: 0 !important;
+    padding: 0 8px !important;
+    cursor: pointer !important;
+    transition: background 0.2s !important;
+}
+section[data-testid="stSidebar"] .ae-psc-btn-wrap > div > button:hover,
+section[data-testid="stSidebar"] .ae-psc-btn-wrap > div > div > button:hover {
+    background: #4A22A4 !important;
+    border: none !important;
+    color: #FFFFFF !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+        st.markdown(f"""
+<div class="ae-psc">
+    <div class="ae-psc-header">
+        <span class="ae-psc-label">Seu Plano</span>
+        <span class="ae-psc-badge">Gratuito</span>
+    </div>
+    <div class="ae-psc-metric">
+        <div class="ae-psc-metric-row">
+            <span class="ae-psc-metric-name">Memórias</span>
+            <span class="ae-psc-metric-count">{qtd_memorias} / {lim_memorias}</span>
+        </div>
+        <div class="ae-psc-bar-track">
+            <div class="ae-psc-bar-fill{mem_danger}" style="width:{mem_pct}%"></div>
+        </div>
+    </div>
+    <div class="ae-psc-metric">
+        <div class="ae-psc-metric-row">
+            <span class="ae-psc-metric-name">Fotos e vídeos</span>
+            <span class="ae-psc-metric-count">{qtd_cofre} / {lim_medias}</span>
+        </div>
+        <div class="ae-psc-bar-track">
+            <div class="ae-psc-bar-fill{media_danger}" style="width:{media_pct}%"></div>
+        </div>
+    </div>
+    <div class="ae-psc-metric">
+        <div class="ae-psc-metric-row">
+            <span class="ae-psc-metric-name">Contribuições</span>
+            <span class="ae-psc-metric-count">{qtd_contatos} / {lim_contribs}</span>
+        </div>
+        <div class="ae-psc-bar-track">
+            <div class="ae-psc-bar-fill{contrib_danger}" style="width:{contrib_pct}%"></div>
+        </div>
+    </div>
+    <hr class="ae-psc-divider"/>
+</div>
+""", unsafe_allow_html=True)
+
+        st.markdown('<div class="ae-psc-btn-wrap">', unsafe_allow_html=True)
+        if st.button("Conhecer Premium", key="psc_conhecer_premium"):
+            st.session_state.pagina_atual = "planos"
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
 
 def render_painel_inicial(nome_exibido, qtd_videos, qtd_contatos, qtd_cofre=0, qtd_memorias=0):
