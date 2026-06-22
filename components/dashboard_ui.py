@@ -1595,6 +1595,25 @@ button[data-baseweb="tab"][aria-selected="true"] {
     display: block;
 }
 
+.ae-story-media-photo {
+    display: block;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 80% 20%, rgba(212,168,79,0.30), transparent 34%),
+        linear-gradient(135deg, #F7F3EA, #EFE3C8);
+}
+
+.ae-story-media-photo img {
+    width: 100%;
+    height: 100%;
+    min-height: 86px;
+    object-fit: cover;
+    display: block;
+    background:
+        radial-gradient(circle at 80% 20%, rgba(212,168,79,0.30), transparent 34%),
+        linear-gradient(135deg, #F7F3EA, #EFE3C8);
+}
+
 .ae-story-media-photo-fallback {
     display: none;
     text-align: center;
