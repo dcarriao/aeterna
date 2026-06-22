@@ -1687,7 +1687,7 @@ div[data-testid="stPopover"] button {
 
 div[data-testid="stPopover"] {
     margin-top: 0.12rem;
-    margin-left: 0.6rem;
+    margin-left: 0;
     position: relative;
     z-index: 3;
 }
@@ -1703,6 +1703,9 @@ div[data-testid="stPopover"] {
     padding: 0.24rem 0.72rem !important;
     border-radius: 8px !important;
     font-size: 0.78rem !important;
+    background: linear-gradient(135deg, #f8dc92, #d4af37 62%, #b77a46) !important;
+    color: #1b0f2e !important;
+    border: 0 !important;
 }
 
 .ae-story-section-title-collections {
@@ -1715,9 +1718,7 @@ div[data-testid="stPopover"] {
     border-radius: 16px;
     padding: 0.55rem;
     box-shadow: 0 12px 30px rgba(43,23,71,0.06);
-    height: 214px;
-    min-height: 214px;
-    margin-bottom: 0.35rem;
+    margin-bottom: 0.1rem;
     overflow: hidden;
 }
 
@@ -1735,12 +1736,6 @@ div[data-testid="stPopover"] {
     margin: 0;
 }
 
-.ae-collection-head span {
-    color: #2B1747;
-    font-size: 0.66rem;
-    font-weight: 850;
-    white-space: nowrap;
-}
 
 .ae-collection-mini-grid {
     display: grid;

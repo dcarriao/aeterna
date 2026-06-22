@@ -631,7 +631,7 @@ def render_minha_historia():
             f"<span>{html.escape(indicador)}</span>" for indicador in indicadores
         )
 
-    def render_card_memoria(memoria: dict, categoria: str, mostrar_categoria: bool = False):
+    def card_memoria_html(memoria: dict, categoria: str, mostrar_categoria: bool = False) -> str:
         data_evento = memoria.get("data_evento") or ""
         titulo = html.escape(memoria.get("titulo") or "História sem título")
         data_evento_segura = html.escape(str(data_evento))
@@ -642,8 +642,8 @@ def render_minha_historia():
             if mostrar_categoria
             else ""
         )
-        card_html = (
-            '<div class="ae-story-card">'
+        return (
+            '<div class="ae-story-card" style="height:232px;overflow:hidden">'
             f"{media_card_memoria(memoria)}"
             '<div class="ae-story-body">'
             f"{categoria_html}"
@@ -654,17 +654,22 @@ def render_minha_historia():
             "</div>"
             "</div>"
         )
-        st.markdown(card_html, unsafe_allow_html=True)
+
+    def render_card_memoria(memoria: dict, categoria: str, mostrar_categoria: bool = False):
+        st.markdown(
+            card_memoria_html(memoria, categoria, mostrar_categoria),
+            unsafe_allow_html=True,
+        )
 
     def mini_card_memoria_html(memoria: dict) -> str:
         titulo = html.escape(memoria.get("titulo") or "História sem título")
-        data_evento = html.escape(str(memoria.get("data_evento") or ""))
         return (
-            '<div class="ae-collection-mini-card">'
+            '<div style="overflow:hidden;height:110px;border-radius:10px;'
+            'background:rgba(255,255,255,0.95);border:1px solid rgba(212,168,79,0.20)">'
             f'{media_card_memoria(memoria, "ae-collection-mini-media")}'
-            '<div class="ae-collection-mini-body">'
-            f"<strong>{titulo}</strong>"
-            f"<span>{data_evento}</span>"
+            '<div style="padding:0.25rem 0.4rem;overflow:hidden">'
+            f'<strong style="font-size:0.62rem;display:block;white-space:nowrap;'
+            f'overflow:hidden;text-overflow:ellipsis;color:#2B1747">{titulo}</strong>'
             "</div>"
             "</div>"
         )
@@ -672,37 +677,53 @@ def render_minha_historia():
     def render_colecao_box(categoria: str, itens: list):
         categoria_nome = nome_categoria(categoria)
         titulo = html.escape(categoria_nome)
-        mini_cards_itens = [
-            mini_card_memoria_html(memoria)
-            for memoria in itens[:3]
-        ]
+        cat_key = categoria
+        mini_cards_itens = [mini_card_memoria_html(m) for m in itens[:3]]
         while len(mini_cards_itens) < 3:
             mini_cards_itens.append(
-                '<div class="ae-collection-mini-card ae-collection-mini-card-empty">'
-                '<div class="ae-collection-mini-media ae-collection-mini-media-fallback">'
-                "<span>📖</span>"
-                "</div>"
-                '<div class="ae-collection-mini-body">'
-                "<strong>Próxima história</strong>"
-                "<span>Aguardando novo capítulo</span>"
-                "</div>"
+                '<div style="overflow:hidden;height:110px;border-radius:10px;opacity:0.5;'
+                'background:rgba(255,255,255,0.95);border:1px dashed rgba(212,168,79,0.30);'
+                'display:flex;align-items:center;justify-content:center">'
+                '<span style="font-size:1.4rem">📖</span>'
                 "</div>"
             )
         mini_cards = "".join(mini_cards_itens)
+        # onclick clica no botão Streamlit escondido fora da tela
+        onclick_js = (
+            f"(function(){{"
+            f"var b=document.querySelector('.st-key-ver_todas_{cat_key} button');"
+            f"if(b)b.click();"
+            f"}})();"
+        )
         st.markdown(
-            (
-                '<div class="ae-collection-box">'
-                '<div class="ae-collection-head">'
-                f'<h3>{icone_categoria(categoria)} {titulo}</h3>'
-                '<span>Ver todas ›</span>'
-                "</div>"
-                '<div class="ae-collection-mini-grid">'
-                f"{mini_cards}"
-                "</div>"
-                "</div>"
-            ),
+            '<div style="overflow:hidden;padding:0.65rem;border-radius:16px;'
+            'background:rgba(255,255,255,0.52);border:1px solid rgba(212,168,79,0.22);'
+            'box-shadow:0 12px 30px rgba(43,23,71,0.06)">'
+            '<div style="display:flex;align-items:center;justify-content:space-between;'
+            'gap:0.5rem;margin-bottom:0.5rem">'
+            f'<h3 style="margin:0;font-size:0.75rem;font-weight:800;color:#2B1747;'
+            f'white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'
+            f'{icone_categoria(categoria)} {titulo}</h3>'
+            f'<span onclick="{onclick_js}" '
+            f'style="cursor:pointer;color:#6F6478;font-size:0.68rem;font-weight:700;'
+            f'text-decoration:underline;white-space:nowrap;flex-shrink:0">Ver todas ›</span>'
+            "</div>"
+            '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.3rem">'
+            f"{mini_cards}"
+            "</div>"
+            "</div>",
             unsafe_allow_html=True,
         )
+        # Botão escondido fora da tela — acionado pelo onclick acima
+        st.markdown(
+            f"<style>.st-key-ver_todas_{cat_key}"
+            "{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}"
+            "</style>",
+            unsafe_allow_html=True,
+        )
+        if st.button("Ver todas", key=f"ver_todas_{cat_key}"):
+            st.session_state["colecao_expandida"] = categoria
+            st.rerun()
 
     def render_detalhes_memoria(memoria: dict, key_contexto: str):
         if memoria.get("data_evento"):
@@ -753,15 +774,25 @@ def render_minha_historia():
             quantidade_colunas: int = 4,
     ):
         for inicio in range(0, len(itens), quantidade_colunas):
+            batch = itens[inicio:inicio + quantidade_colunas]
+            # Todos os cards em um único HTML grid → altura uniforme garantida
+            partes = [card_memoria_html(m, categoria_nome) for m in batch]
+            while len(partes) < quantidade_colunas:
+                partes.append(f'<div style="height:232px"></div>')
+            st.markdown(
+                f'<div style="display:grid;grid-template-columns:repeat({quantidade_colunas},1fr);gap:1rem;margin-bottom:0.25rem">'
+                + "".join(partes)
+                + "</div>",
+                unsafe_allow_html=True,
+            )
+            # Popovers numa row de colunas Streamlit — ficam todos na mesma altura
             colunas = st.columns(quantidade_colunas)
             for indice, coluna in enumerate(colunas):
-                posicao = inicio + indice
-                if posicao >= len(itens):
+                if indice >= len(batch):
                     continue
-                memoria = itens[posicao]
-                key_contexto = f"{contexto}_{posicao}_{memoria['id']}"
+                memoria = batch[indice]
+                key_contexto = f"{contexto}_{inicio + indice}_{memoria['id']}"
                 with coluna:
-                    render_card_memoria(memoria, categoria_nome)
                     render_acesso_historia(memoria, key_contexto)
 
     def nome_categoria(categoria: str) -> str:
@@ -837,6 +868,42 @@ def render_minha_historia():
             categoria, itens = grupos_ordenados[posicao]
             with coluna:
                 render_colecao_box(categoria, itens)
+
+    colecao_expandida = st.session_state.get("colecao_expandida")
+    if colecao_expandida and colecao_expandida in grupos:
+        itens_expandidos = grupos[colecao_expandida]
+        nome_exp = nome_categoria(colecao_expandida)
+        col_exp_titulo, col_exp_fechar = st.columns([0.85, 0.15], vertical_alignment="center")
+        with col_exp_titulo:
+            st.markdown(
+                f'<div class="ae-story-section-title">{icone_categoria(colecao_expandida)} {html.escape(nome_exp)}</div>',
+                unsafe_allow_html=True,
+            )
+        with col_exp_fechar:
+            st.markdown(
+                "<style>"
+                ".st-key-fechar_colecao_expandida div.stButton>button{"
+                "background:#F0EAE0!important;"
+                "background-image:none!important;"
+                "color:#5F536B!important;"
+                "border:1px solid rgba(111,100,120,.3)!important;"
+                "box-shadow:none!important;"
+                "font-size:.74rem!important;"
+                "font-weight:700!important;"
+                "border-radius:8px!important;"
+                "}"
+                "</style>",
+                unsafe_allow_html=True,
+            )
+            if st.button("✕ Fechar", key="fechar_colecao_expandida"):
+                del st.session_state["colecao_expandida"]
+                st.rerun()
+        render_prateleira(
+            itens_expandidos,
+            colecao_expandida,
+            contexto="colecao_expandida",
+            quantidade_colunas=4,
+        )
 
 
 # ============================================================================
