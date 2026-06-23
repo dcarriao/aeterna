@@ -771,14 +771,6 @@ def render_minha_historia():
                 '.ae-story-card{display:flex!important;flex-direction:column!important;height:270px!important;max-height:270px!important;min-height:270px!important;}'
                 '.ae-story-media{height:86px!important;max-height:86px!important;min-height:86px!important;flex-shrink:0!important;}'
                 '.ae-story-body{height:146px!important;max-height:146px!important;min-height:146px!important;flex-shrink:0!important;}'
-                '.ae-card-read-btn-row{margin-top:-0.35rem!important;margin-bottom:0.5rem!important;}'
-                '.ae-card-read-btn-row .stButton>button{'
-                'width:100%!important;min-height:1.72rem!important;padding:0.14rem 0.48rem!important;border-radius:8px!important;'
-                'font-size:0.72rem!important;font-weight:700!important;white-space:nowrap!important;'
-                'background:linear-gradient(135deg,#f8dc92,#d4af37 62%,#b77a46)!important;color:#2B1747!important;border:none!important;'
-                'justify-content:center!important;align-items:center!important;cursor:pointer!important;'
-                'box-sizing:border-box!important;line-height:1.2!important;margin:0 auto!important;display:flex!important;'
-                '}'
                 '</style>'
                 + f'<div class="ae-card-grid-row" style="display:grid;grid-template-columns:repeat({quantidade_colunas},1fr);gap:0.5rem;">{cells}</div>',
                 unsafe_allow_html=True,
@@ -789,11 +781,9 @@ def render_minha_historia():
                     key_ctx = btn_keys[col_idx]
                     show_key = f"_show_{key_ctx}"
                     with col:
-                        st.markdown('<div class="ae-card-read-btn-row">', unsafe_allow_html=True)
-                        if st.button("📖 Ler história", key=f"btn_{key_ctx}"):
+                        if st.button("📖 Ler história", key=f"_ler_{key_ctx}"):
                             st.session_state[show_key] = True
                             st.rerun()
-                        st.markdown('</div>', unsafe_allow_html=True)
         return expanded_key, expanded_mem
 
     def nome_categoria(categoria: str) -> str:
@@ -869,22 +859,6 @@ def render_minha_historia():
         )
         expanded_key, expanded_memoria = exp_key_cont, exp_mem_cont
         st.markdown('<div class="ae-story-section-title ae-story-section-title-collections">Coleções</div>', unsafe_allow_html=True)
-        st.markdown(
-            '<style>'
-            '.st-key-colecao_btn_ [data-testid="stFormSubmitBtn"], '
-            '.ae-collection-box + div button, '
-            '[data-testid="stHorizontalBlock"] .stButton>button{'
-            'font-size:0.66rem!important;font-weight:600!important;padding:0.14rem 0.48rem!important;'
-            'min-height:1.52rem!important;border-radius:8px!important;white-space:nowrap!important;'
-            'background:rgba(255,255,255,0.72)!important;color:#5F536B!important;'
-            'border:1px solid rgba(212,168,79,0.35)!important;cursor:pointer!important;'
-            '}'
-            '.ae-collection-box + div .stButton>button:hover{'
-            'border-color:#d4af37!important;background:rgba(212,168,79,0.10)!important;color:#2B1747!important;'
-            '}'
-            '</style>',
-            unsafe_allow_html=True,
-        )
         grupos_ordenados = sorted(
             grupos.items(),
             key=lambda item: len(item[1]),

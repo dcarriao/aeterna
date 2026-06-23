@@ -1857,6 +1857,30 @@ a.ae-card-read-btn:hover {
     color: #2B1747;
     text-decoration: none;
 }
+[class*="st-key-colecao_btn_"] {
+    display: flex;
+}
+[class*="st-key-colecao_btn_"] button {
+    width: 100% !important;
+    min-height: 1.52rem;
+    padding: 0.14rem 0.48rem;
+    border-radius: 8px !important;
+    font-size: 0.66rem;
+    font-weight: 600 !important;
+    background: rgba(255,255,255,0.72) !important;
+    color: #5F536B !important;
+    border: 1px solid rgba(212,168,79,0.35) !important;
+    transition: all 0.15s ease;
+    justify-content: center;
+    align-items: center;
+    box-shadow: none !important;
+    cursor: pointer;
+}
+[class*="st-key-colecao_btn_"] button:hover {
+    border-color: #d4af37 !important;
+    background: rgba(212,168,79,0.10) !important;
+    color: #2B1747 !important;
+}
 .st-key-filtro_voltar button, .st-key-filtro-voltar button {
     background: transparent !important;
     color: #5A2BB5 !important;
