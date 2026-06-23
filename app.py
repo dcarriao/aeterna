@@ -567,22 +567,6 @@ def render_minha_historia():
         usuario_id
     )
 
-    for idx, mem in enumerate(memorias[:4]):
-        key_ctx = f"continue_{idx}_{mem['id']}"
-        if st.session_state.get(f"_show_{key_ctx}", False):
-            expanded_key = key_ctx
-            expanded_memoria = mem
-            break
-
-    if expanded_memoria and expanded_key:
-        st.divider()
-        render_detalhes_memoria(expanded_memoria, expanded_key)
-        close_key = f"_close_{expanded_key}"
-        if st.button("✕ Fechar", key=close_key):
-            st.session_state[f"_show_{expanded_key}"] = False
-            st.rerun()
-        st.divider()
-
     def resumo_memoria(memoria: dict) -> str:
         conteudo = (memoria.get("conteudo") or "").strip()
         if not conteudo:
@@ -849,6 +833,22 @@ def render_minha_historia():
             "outras histórias": "livre",
         }
         return mapa.get(texto, texto or "livre")
+
+    for idx, mem in enumerate(memorias[:4]):
+        key_ctx = f"continue_{idx}_{mem['id']}"
+        if st.session_state.get(f"_show_{key_ctx}", False):
+            expanded_key = key_ctx
+            expanded_memoria = mem
+            break
+
+    if expanded_memoria and expanded_key:
+        st.divider()
+        render_detalhes_memoria(expanded_memoria, expanded_key)
+        close_key = f"_close_{expanded_key}"
+        if st.button("✕ Fechar", key=close_key):
+            st.session_state[f"_show_{expanded_key}"] = False
+            st.rerun()
+        st.divider()
 
     grupos = {}
     for memoria in memorias:
