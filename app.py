@@ -518,6 +518,24 @@ def render_minha_historia():
     usuario_id = st.session_state.usuario_atual["id"]
     filtro_cat = st.session_state.get("_ae_filtro_categoria")
 
+    expanded_key = None
+    expanded_memoria = None
+    for idx, mem in enumerate(memorias[:4]):
+        key_ctx = f"continue_{idx}_{mem['id']}"
+        if st.session_state.get(f"_show_{key_ctx}", False):
+            expanded_key = key_ctx
+            expanded_memoria = mem
+            break
+
+    if expanded_memoria and expanded_key:
+        st.divider()
+        render_detalhes_memoria(expanded_memoria, expanded_key)
+        close_key = f"_close_{expanded_key}"
+        if st.button("✕ Fechar", key=close_key):
+            st.session_state[f"_show_{expanded_key}"] = False
+            st.rerun()
+        st.divider()
+
     col_header, col_acao = st.columns([0.82, 0.18], vertical_alignment="center")
     with col_header:
         st.markdown(
@@ -847,7 +865,13 @@ def render_minha_historia():
             unsafe_allow_html=True,
         )
         exp_key_filtro, exp_mem_filtro = render_prateleira(grupos[filtro_cat], categoria_nome_filtro, contexto="filtro", quantidade_colunas=4)
-        expanded_key, expanded_memoria = exp_key_filtro, exp_mem_filtro
+        if exp_mem_filtro and exp_key_filtro:
+            st.divider()
+            render_detalhes_memoria(exp_mem_filtro, exp_key_filtro)
+            close_key = f"_close_{exp_key_filtro}"
+            if st.button("✕ Fechar", key=close_key):
+                st.session_state[f"_show_{exp_key_filtro}"] = False
+                st.rerun()
     else:
         # ── Vista normal: Continue + Coleções ─────────────────────────
         st.markdown('<div class="ae-story-section-title">Continue sua história</div>', unsafe_allow_html=True)
@@ -857,7 +881,6 @@ def render_minha_historia():
             contexto="continue",
             quantidade_colunas=4,
         )
-        expanded_key, expanded_memoria = exp_key_cont, exp_mem_cont
         st.markdown('<div class="ae-story-section-title ae-story-section-title-collections">Coleções</div>', unsafe_allow_html=True)
         grupos_ordenados = sorted(
             grupos.items(),
@@ -874,14 +897,6 @@ def render_minha_historia():
                     if st.button("Ver todas ›", key=f"colecao_btn_{cat}"):
                         st.session_state["_ae_filtro_categoria"] = cat
                         st.rerun()
-
-    if expanded_memoria and expanded_key:
-        st.divider()
-        render_detalhes_memoria(expanded_memoria, expanded_key)
-        close_key = f"_close_{expanded_key}"
-        if st.button("✕ Fechar", key=close_key):
-            st.session_state[f"_show_{expanded_key}"] = False
-            st.rerun()
 
 
 # ============================================================================
