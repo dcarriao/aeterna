@@ -516,10 +516,6 @@ def render_editor_visibilidade(
 def render_minha_historia():
     memorias = db.listar_memorias_usuario(st.session_state.usuario_atual["id"])
     usuario_id = st.session_state.usuario_atual["id"]
-    filtro_param = st.query_params.get("filtro", "")
-    if filtro_param:
-        st.session_state["_ae_filtro_categoria"] = filtro_param
-        st.query_params.clear()
     filtro_cat = st.session_state.get("_ae_filtro_categoria")
 
     col_header, col_acao = st.columns([0.82, 0.18], vertical_alignment="center")
@@ -650,10 +646,6 @@ def render_minha_historia():
             if mostrar_categoria
             else ""
         )
-        button_html = ""
-        if idx is not None and contexto is not None:
-            btn_key = f"{contexto}_{idx}_{memoria['id']}"
-            button_html = f'<a href="?ler={btn_key}" class="ae-card-read-btn">📖 Ler história</a>'
         card_html = (
             '<div class="ae-story-card">'
             f"{media_card_memoria(memoria)}"
@@ -664,7 +656,6 @@ def render_minha_historia():
             f"<p>{resumo_seguro}</p>"
             f'<div class="ae-story-indicators">{indicadores_memoria(memoria)}</div>'
             "</div>"
-            f"{button_html}"
             "</div>"
         )
         return card_html
@@ -702,7 +693,6 @@ def render_minha_historia():
                 "</div>"
             )
         mini_cards = "".join(mini_cards_itens)
-        cat_escape = html.escape(categoria)
         return (
             '<div class="ae-collection-box">'
             '<div class="ae-collection-head">'
@@ -711,7 +701,6 @@ def render_minha_historia():
             '<div class="ae-collection-mini-grid">'
             f"{mini_cards}"
             "</div>"
-            f'<a href="?filtro={cat_escape}" class="ae-ver-todas-link">Ver todas ›</a>'
             "</div>"
         )
 
@@ -759,26 +748,18 @@ def render_minha_historia():
             contexto: str,
             quantidade_colunas: int = 4,
     ):
-        ler_param = st.query_params.get("ler", "")
-        if ler_param and ler_param.startswith(f"{contexto}_"):
-            parts = ler_param.split("_", 2)
-            if len(parts) == 3:
-                mem_id = parts[2]
-                for m in itens:
-                    if str(m["id"]) == mem_id:
-                        st.session_state[f"_show_{ler_param}"] = True
-                        break
-            st.query_params.clear()
-
         expanded_key = None
         expanded_mem = None
+
         for row_start in range(0, len(itens), quantidade_colunas):
             row_items = itens[row_start:row_start + quantidade_colunas]
             cards_html = []
+            btn_keys = []
             for j, memoria in enumerate(row_items):
                 posicao = row_start + j
                 key_contexto = f"{contexto}_{posicao}_{memoria['id']}"
-                cards_html.append(render_card_memoria(memoria, categoria_nome, idx=posicao, contexto=contexto))
+                btn_keys.append(key_contexto)
+                cards_html.append(render_card_memoria(memoria, categoria_nome))
                 show_key = f"_show_{key_contexto}"
                 if st.session_state.get(show_key, False):
                     expanded_key = key_contexto
@@ -790,11 +771,29 @@ def render_minha_historia():
                 '.ae-story-card{display:flex!important;flex-direction:column!important;height:270px!important;max-height:270px!important;min-height:270px!important;}'
                 '.ae-story-media{height:86px!important;max-height:86px!important;min-height:86px!important;flex-shrink:0!important;}'
                 '.ae-story-body{height:146px!important;max-height:146px!important;min-height:146px!important;flex-shrink:0!important;}'
-                'a.ae-card-read-btn{display:flex!important;margin:auto auto 0.2rem!important;flex-shrink:0!important;width:calc(100%-0.4rem)!important;min-height:1.72rem;padding:0.14rem 0.48rem;border-radius:8px;font-size:0.72rem;font-weight:700;white-space:nowrap;background:linear-gradient(135deg,#f8dc92,#d4af37 62%,#b77a46);color:#2B1747!important;border:none!important;justify-content:center;align-items:center;cursor:pointer;text-decoration:none!important;box-sizing:border-box;line-height:1.2;}'
+                '.ae-card-read-btn-row{margin-top:-0.35rem!important;margin-bottom:0.5rem!important;}'
+                '.ae-card-read-btn-row .stButton>button{'
+                'width:100%!important;min-height:1.72rem!important;padding:0.14rem 0.48rem!important;border-radius:8px!important;'
+                'font-size:0.72rem!important;font-weight:700!important;white-space:nowrap!important;'
+                'background:linear-gradient(135deg,#f8dc92,#d4af37 62%,#b77a46)!important;color:#2B1747!important;border:none!important;'
+                'justify-content:center!important;align-items:center!important;cursor:pointer!important;'
+                'box-sizing:border-box!important;line-height:1.2!important;margin:0 auto!important;display:flex!important;'
+                '}'
                 '</style>'
                 + f'<div class="ae-card-grid-row" style="display:grid;grid-template-columns:repeat({quantidade_colunas},1fr);gap:0.5rem;">{cells}</div>',
                 unsafe_allow_html=True,
             )
+            btn_cols = st.columns(quantidade_colunas, gap="small")
+            for col_idx, col in enumerate(btn_cols):
+                if col_idx < len(row_items):
+                    key_ctx = btn_keys[col_idx]
+                    show_key = f"_show_{key_ctx}"
+                    with col:
+                        st.markdown('<div class="ae-card-read-btn-row">', unsafe_allow_html=True)
+                        if st.button("📖 Ler história", key=f"btn_{key_ctx}"):
+                            st.session_state[show_key] = True
+                            st.rerun()
+                        st.markdown('</div>', unsafe_allow_html=True)
         return expanded_key, expanded_mem
 
     def nome_categoria(categoria: str) -> str:
@@ -870,23 +869,37 @@ def render_minha_historia():
         )
         expanded_key, expanded_memoria = exp_key_cont, exp_mem_cont
         st.markdown('<div class="ae-story-section-title ae-story-section-title-collections">Coleções</div>', unsafe_allow_html=True)
+        st.markdown(
+            '<style>'
+            '.st-key-colecao_btn_ [data-testid="stFormSubmitBtn"], '
+            '.ae-collection-box + div button, '
+            '[data-testid="stHorizontalBlock"] .stButton>button{'
+            'font-size:0.66rem!important;font-weight:600!important;padding:0.14rem 0.48rem!important;'
+            'min-height:1.52rem!important;border-radius:8px!important;white-space:nowrap!important;'
+            'background:rgba(255,255,255,0.72)!important;color:#5F536B!important;'
+            'border:1px solid rgba(212,168,79,0.35)!important;cursor:pointer!important;'
+            '}'
+            '.ae-collection-box + div .stButton>button:hover{'
+            'border-color:#d4af37!important;background:rgba(212,168,79,0.10)!important;color:#2B1747!important;'
+            '}'
+            '</style>',
+            unsafe_allow_html=True,
+        )
         grupos_ordenados = sorted(
             grupos.items(),
             key=lambda item: len(item[1]),
             reverse=True,
         )
-        colecoes_html = [
-            render_colecao_box_html(categoria, itens)
-            for categoria, itens in grupos_ordenados
-        ]
-        for inicio in range(0, len(colecoes_html), 3):
-            row_htmls = colecoes_html[inicio:inicio + 3]
-            cells = "".join(f"<div>{c}</div>" for c in row_htmls)
-            cells += "<div></div>" * (3 - len(row_htmls))
-            st.markdown(
-                f'<div class="ae-colecoes-grid-row" style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;">{cells}</div>',
-                unsafe_allow_html=True,
-            )
+        for inicio in range(0, len(grupos_ordenados), 3):
+            row_items = grupos_ordenados[inicio:inicio + 3]
+            cols = st.columns(3)
+            for col_idx, (cat, itens) in enumerate(row_items):
+                with cols[col_idx]:
+                    box_html = render_colecao_box_html(cat, itens)
+                    st.markdown(box_html, unsafe_allow_html=True)
+                    if st.button("Ver todas ›", key=f"colecao_btn_{cat}"):
+                        st.session_state["_ae_filtro_categoria"] = cat
+                        st.rerun()
 
     if expanded_memoria and expanded_key:
         st.divider()
