@@ -516,6 +516,10 @@ def render_editor_visibilidade(
 def render_minha_historia():
     memorias = db.listar_memorias_usuario(st.session_state.usuario_atual["id"])
     usuario_id = st.session_state.usuario_atual["id"]
+    filtro_param = st.query_params.get("filtro", "")
+    if filtro_param:
+        st.session_state["_ae_filtro_categoria"] = filtro_param
+        st.query_params.clear()
     filtro_cat = st.session_state.get("_ae_filtro_categoria")
 
     col_header, col_acao = st.columns([0.82, 0.18], vertical_alignment="center")
@@ -635,7 +639,7 @@ def render_minha_historia():
             f"<span>{html.escape(indicador)}</span>" for indicador in indicadores
         )
 
-    def render_card_memoria(memoria: dict, categoria: str, mostrar_categoria: bool = False):
+    def render_card_memoria(memoria: dict, categoria: str, mostrar_categoria: bool = False, idx: int = None, contexto: str = None) -> str:
         data_evento = memoria.get("data_evento") or ""
         titulo = html.escape(memoria.get("titulo") or "História sem título")
         data_evento_segura = html.escape(str(data_evento))
@@ -646,19 +650,24 @@ def render_minha_historia():
             if mostrar_categoria
             else ""
         )
+        button_html = ""
+        if idx is not None and contexto is not None:
+            btn_key = f"{contexto}_{idx}_{memoria['id']}"
+            button_html = f'<a href="?ler={btn_key}" class="ae-card-read-btn">📖 Ler história</a>'
         card_html = (
-            '<div class="ae-story-card" style="height:232px;max-height:232px;min-height:232px;overflow:hidden;">'
+            '<div class="ae-story-card">'
             f"{media_card_memoria(memoria)}"
-            '<div class="ae-story-body" style="height:146px;max-height:146px;min-height:146px;overflow:hidden;">'
+            '<div class="ae-story-body">'
             f"{categoria_html}"
             f"<h3>{titulo}</h3>"
             f'<span class="ae-story-date">{data_evento_segura}</span>'
             f"<p>{resumo_seguro}</p>"
             f'<div class="ae-story-indicators">{indicadores_memoria(memoria)}</div>'
             "</div>"
+            f"{button_html}"
             "</div>"
         )
-        st.markdown(card_html, unsafe_allow_html=True)
+        return card_html
 
     def mini_card_memoria_html(memoria: dict) -> str:
         titulo = html.escape(memoria.get("titulo") or "História sem título")
@@ -673,7 +682,7 @@ def render_minha_historia():
             "</div>"
         )
 
-    def render_colecao_box(categoria: str, itens: list):
+    def render_colecao_box_html(categoria: str, itens: list) -> str:
         categoria_nome = nome_categoria(categoria)
         titulo = html.escape(categoria_nome)
         mini_cards_itens = [
@@ -693,18 +702,17 @@ def render_minha_historia():
                 "</div>"
             )
         mini_cards = "".join(mini_cards_itens)
-        st.markdown(
-            (
-                '<div class="ae-collection-box">'
-                '<div class="ae-collection-head">'
-                f'<h3>{icone_categoria(categoria)} {titulo}</h3>'
-                "</div>"
-                '<div class="ae-collection-mini-grid">'
-                f"{mini_cards}"
-                "</div>"
-                "</div>"
-            ),
-            unsafe_allow_html=True,
+        cat_escape = html.escape(categoria)
+        return (
+            '<div class="ae-collection-box">'
+            '<div class="ae-collection-head">'
+            f'<h3>{icone_categoria(categoria)} {titulo}</h3>'
+            "</div>"
+            '<div class="ae-collection-mini-grid">'
+            f"{mini_cards}"
+            "</div>"
+            f'<a href="?filtro={cat_escape}" class="ae-ver-todas-link">Ver todas ›</a>'
+            "</div>"
         )
 
     def render_detalhes_memoria(memoria: dict, key_contexto: str):
@@ -745,36 +753,48 @@ def render_minha_historia():
                     legenda=video.get("titulo", ""),
                 )
 
-    def render_acesso_historia(memoria: dict, key_contexto: str):
-        btn_key = f"_ler_{key_contexto}"
-        show_key = f"_show_{key_contexto}"
-        if st.button("📖 Ler história", key=btn_key, use_container_width=True):
-            st.session_state[show_key] = not st.session_state.get(show_key, False)
-            st.rerun()
-
     def render_prateleira(
             itens: list,
             categoria_nome: str,
             contexto: str,
             quantidade_colunas: int = 4,
     ):
+        ler_param = st.query_params.get("ler", "")
+        if ler_param and ler_param.startswith(f"{contexto}_"):
+            parts = ler_param.split("_", 2)
+            if len(parts) == 3:
+                mem_id = parts[2]
+                for m in itens:
+                    if str(m["id"]) == mem_id:
+                        st.session_state[f"_show_{ler_param}"] = True
+                        break
+            st.query_params.clear()
+
         expanded_key = None
         expanded_mem = None
-        for inicio in range(0, len(itens), quantidade_colunas):
-            colunas = st.columns(quantidade_colunas)
-            for indice, coluna in enumerate(colunas):
-                posicao = inicio + indice
-                if posicao >= len(itens):
-                    continue
-                memoria = itens[posicao]
+        for row_start in range(0, len(itens), quantidade_colunas):
+            row_items = itens[row_start:row_start + quantidade_colunas]
+            cards_html = []
+            for j, memoria in enumerate(row_items):
+                posicao = row_start + j
                 key_contexto = f"{contexto}_{posicao}_{memoria['id']}"
-                with coluna:
-                    render_card_memoria(memoria, categoria_nome)
-                    render_acesso_historia(memoria, key_contexto)
-                    show_key = f"_show_{key_contexto}"
-                    if st.session_state.get(show_key, False):
-                        expanded_key = key_contexto
-                        expanded_mem = memoria
+                cards_html.append(render_card_memoria(memoria, categoria_nome, idx=posicao, contexto=contexto))
+                show_key = f"_show_{key_contexto}"
+                if st.session_state.get(show_key, False):
+                    expanded_key = key_contexto
+                    expanded_mem = memoria
+            cells = "".join(f"<div>{c}</div>" for c in cards_html)
+            cells += "<div></div>" * (quantidade_colunas - len(row_items))
+            st.markdown(
+                '<style>'
+                '.ae-story-card{display:flex!important;flex-direction:column!important;height:270px!important;max-height:270px!important;min-height:270px!important;}'
+                '.ae-story-media{height:86px!important;max-height:86px!important;min-height:86px!important;flex-shrink:0!important;}'
+                '.ae-story-body{height:146px!important;max-height:146px!important;min-height:146px!important;flex-shrink:0!important;}'
+                'a.ae-card-read-btn{display:flex!important;margin:auto auto 0.2rem!important;flex-shrink:0!important;width:calc(100%-0.4rem)!important;min-height:1.72rem;padding:0.14rem 0.48rem;border-radius:8px;font-size:0.72rem;font-weight:700;white-space:nowrap;background:linear-gradient(135deg,#f8dc92,#d4af37 62%,#b77a46);color:#2B1747!important;border:none!important;justify-content:center;align-items:center;cursor:pointer;text-decoration:none!important;box-sizing:border-box;line-height:1.2;}'
+                '</style>'
+                + f'<div class="ae-card-grid-row" style="display:grid;grid-template-columns:repeat({quantidade_colunas},1fr);gap:0.5rem;">{cells}</div>',
+                unsafe_allow_html=True,
+            )
         return expanded_key, expanded_mem
 
     def nome_categoria(categoria: str) -> str:
@@ -855,18 +875,18 @@ def render_minha_historia():
             key=lambda item: len(item[1]),
             reverse=True,
         )
-        for inicio in range(0, len(grupos_ordenados), 3):
-            colunas_colecoes = st.columns(3)
-            for indice, coluna in enumerate(colunas_colecoes):
-                posicao = inicio + indice
-                if posicao >= len(grupos_ordenados):
-                    continue
-                categoria, itens = grupos_ordenados[posicao]
-                with coluna:
-                    render_colecao_box(categoria, itens)
-                    if st.button("Ver todas ›", key=f"ver_todas_{categoria}", use_container_width=False):
-                        st.session_state["_ae_filtro_categoria"] = categoria
-                        st.rerun()
+        colecoes_html = [
+            render_colecao_box_html(categoria, itens)
+            for categoria, itens in grupos_ordenados
+        ]
+        for inicio in range(0, len(colecoes_html), 3):
+            row_htmls = colecoes_html[inicio:inicio + 3]
+            cells = "".join(f"<div>{c}</div>" for c in row_htmls)
+            cells += "<div></div>" * (3 - len(row_htmls))
+            st.markdown(
+                f'<div class="ae-colecoes-grid-row" style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;">{cells}</div>',
+                unsafe_allow_html=True,
+            )
 
     if expanded_memoria and expanded_key:
         st.divider()
@@ -4634,11 +4654,15 @@ def render_inicio(
             "</div>"
         )
 
-    def card_historia_home(memoria: dict) -> str:
+    def card_historia_home(memoria: dict, idx: int = None, contexto: str = None) -> str:
         titulo = html.escape(memoria.get("titulo") or "História sem título")
         data = html.escape(str(memoria.get("data_evento") or ""))
         resumo = html.escape(resumo_curto(memoria.get("conteudo") or ""))
         data_html = f'<span class="ae-live-story-date">{data}</span>' if data else ""
+        button_html = ""
+        if idx is not None and contexto is not None:
+            btn_key = f"{contexto}_{idx}_{memoria['id']}"
+            button_html = f'<a href="?ler={btn_key}" class="ae-live-card-read-btn">📖 Ler história</a>'
         return (
             '<div class="ae-live-story-card">'
             f"{media_home_memoria(memoria)}"
@@ -4647,6 +4671,7 @@ def render_inicio(
             f"{data_html}"
             f"<p>{resumo}</p>"
             "</div>"
+            f"{button_html}"
             "</div>"
         )
 
@@ -4702,10 +4727,44 @@ def render_inicio(
 
     st.markdown('<div class="ae-live-section-title">Continue sua história</div>', unsafe_allow_html=True)
     if memorias:
-        colunas_memorias = st.columns(4)
-        for indice, memoria in enumerate(memorias[:4]):
-            with colunas_memorias[indice]:
-                st.markdown(card_historia_home(memoria), unsafe_allow_html=True)
+        home_ler_param = st.query_params.get("ler", "")
+        if home_ler_param and home_ler_param.startswith("home_"):
+            parts = home_ler_param.split("_", 2)
+            if len(parts) == 3:
+                mem_id = parts[2]
+                for m in memorias:
+                    if str(m["id"]) == mem_id:
+                        st.session_state[f"_show_{home_ler_param}"] = True
+                        break
+            st.query_params.clear()
+        cards_home = []
+        expanded_home_key = None
+        expanded_home_mem = None
+        for i, memoria in enumerate(memorias[:4]):
+            key_contexto = f"home_{i}_{memoria['id']}"
+            cards_home.append(card_historia_home(memoria, idx=i, contexto="home"))
+            if st.session_state.get(f"_show_{key_contexto}", False):
+                expanded_home_key = key_contexto
+                expanded_home_mem = memoria
+        st.markdown(
+            f'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem;">'
+            + "".join(f"<div>{c}</div>" for c in cards_home)
+            + "</div>",
+            unsafe_allow_html=True,
+        )
+        if expanded_home_mem and expanded_home_key:
+            st.divider()
+            if expanded_home_mem.get("data_evento"):
+                st.markdown(f"**Data:** {expanded_home_mem['data_evento']}")
+            if expanded_home_mem.get("local"):
+                st.markdown(f"**Local:** {expanded_home_mem['local']}")
+            if expanded_home_mem.get("pessoas_relacionadas"):
+                st.markdown(f"**Pessoas:** {expanded_home_mem['pessoas_relacionadas']}")
+            st.markdown(expanded_home_mem.get("conteudo", ""))
+            close_key = f"_close_{expanded_home_key}"
+            if st.button("✕ Fechar", key=close_key):
+                st.session_state[f"_show_{expanded_home_key}"] = False
+                st.rerun()
     else:
         st.markdown(
             """

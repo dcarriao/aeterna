@@ -730,16 +730,19 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-live-story-card {
-    height: 218px;
+    height: 250px;
     overflow: hidden;
     border-radius: 16px;
     background: rgba(255,255,255,0.97);
     border: 1px solid rgba(212,168,79,0.22);
     box-shadow: 0 12px 28px rgba(43,23,71,0.07);
+    display: flex;
+    flex-direction: column;
 }
 
 .ae-live-story-media {
     height: 88px;
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -781,6 +784,8 @@ button[data-baseweb="tab"][aria-selected="true"] {
 
 .ae-live-story-body {
     padding: 0.7rem 0.82rem;
+    flex: 1;
+    overflow: hidden;
 }
 
 .ae-live-story-body h3 {
@@ -812,6 +817,32 @@ button[data-baseweb="tab"][aria-selected="true"] {
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+}
+
+.ae-live-card-read-btn {
+    display: flex;
+    width: calc(100% - 0.4rem);
+    margin: 0 auto 0.2rem;
+    min-height: 1.72rem;
+    padding: 0.14rem 0.48rem;
+    border-radius: 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+    background: linear-gradient(135deg, #f8dc92, #d4af37 62%, #b77a46);
+    color: #2B1747;
+    border: none;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    text-decoration: none;
+    box-sizing: border-box;
+    line-height: 1.2;
+    flex-shrink: 0;
+}
+.ae-live-card-read-btn:hover {
+    opacity: 0.9;
+    box-shadow: 0 2px 8px rgba(212,168,79,0.35);
 }
 
 .ae-live-people-grid,
@@ -1553,19 +1584,19 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-story-card {
-    height: 232px;
-    max-height: 232px;
-    min-height: 232px;
+    position: relative;
+    height: 270px;
+    max-height: 270px;
+    min-height: 270px;
     width: 100%;
     overflow: hidden !important;
-    display: flex;
-    flex-direction: column;
     background: rgba(255,255,255,0.98);
     border: 1px solid rgba(212,168,79,0.24);
     border-radius: 16px;
     margin: 0.18rem 0 0;
     box-shadow: 0 12px 28px rgba(43,23,71,0.08);
-    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 .ae-story-media {
@@ -1718,6 +1749,37 @@ button[data-baseweb="tab"][aria-selected="true"] {
     box-shadow: 0 2px 8px rgba(212,168,79,0.35) !important;
 }
 
+a.ae-card-read-btn {
+    display: flex !important;
+    width: calc(100% - 0.4rem) !important;
+    margin: auto auto 0.2rem !important;
+    min-height: 1.72rem;
+    padding: 0.14rem 0.48rem;
+    border-radius: 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+    background: linear-gradient(135deg, #f8dc92, #d4af37 62%, #b77a46);
+    color: #2B1747 !important;
+    border: none !important;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    text-decoration: none !important;
+    box-sizing: border-box;
+    line-height: 1.2;
+    flex-shrink: 0 !important;
+}
+a.ae-card-read-btn:hover {
+    opacity: 0.9;
+    box-shadow: 0 2px 8px rgba(212,168,79,0.35);
+}
+
+[data-testid="stMarkdownContainer"] .ae-story-card {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
 .st-key-minha_historia_contar_historia, .st-key-minha-historia-contar-historia {
     display: flex;
     justify-content: flex-end;
@@ -1768,6 +1830,32 @@ button[data-baseweb="tab"][aria-selected="true"] {
     justify-content: flex-end;
     margin-top: 0.15rem;
     margin-bottom: 0;
+}
+
+.ae-ver-todas-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.72);
+    color: #5F536B;
+    border: 1px solid rgba(212,168,79,0.35);
+    font-size: 0.66rem;
+    font-weight: 600;
+    padding: 0.14rem 0.48rem;
+    min-height: 1.52rem;
+    border-radius: 8px;
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: all 0.15s ease;
+    margin-top: 0.15rem;
+}
+.ae-ver-todas-link:hover {
+    border-color: #d4af37;
+    background: rgba(212,168,79,0.10);
+    color: #2B1747;
+    text-decoration: none;
 }
 .st-key-filtro_voltar button, .st-key-filtro-voltar button {
     background: transparent !important;
