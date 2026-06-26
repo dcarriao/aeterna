@@ -346,56 +346,6 @@
     .badges img { width: 82px; height: 82px; object-fit: contain; border-radius: 50%; }
     .copyright { margin-top: 34px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,.08); display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; color: var(--muted-2); font-size: .82rem; }
 
-
-
-    /* RC2 compact fix: reduz escala do hero para caber melhor em desktop sem cortar */
-    @media (min-width: 1081px) {
-      .container { width: min(1120px, calc(100% - 56px)); }
-      .nav { height: 68px; }
-      .brand img { width: 170px; max-height: 46px; }
-      .nav-links { gap: 22px; font-size: .84rem; }
-      .btn-login { padding: 10px 16px; border-radius: 12px; }
-      .hero { padding: 48px 0 62px; min-height: calc(100vh - 68px); display: flex; align-items: center; }
-      .hero-grid { grid-template-columns: minmax(0, .95fr) minmax(390px, .85fr); gap: 34px; }
-      .eyebrow { padding: 8px 13px; font-size: .70rem; }
-      .hero h1 { font-size: clamp(3.1rem, 4.15vw, 4.55rem); line-height: .94; max-width: 660px; margin: 18px 0 20px; letter-spacing: -.045em; }
-      .hero-copy { font-size: 1.02rem; max-width: 610px; margin-bottom: 22px; }
-      .btn { min-height: 50px; padding: 0 21px; border-radius: 12px; }
-      .hero-actions { margin-bottom: 22px; }
-      .proof-pill { padding: 10px 12px; font-size: .79rem; border-radius: 12px; }
-      .hero-visual { min-height: 510px; }
-      .phone-stack { height: 505px; }
-      .glow { width: 430px; height: 430px; inset: 6% 5% auto auto; }
-      .phone { width: 292px; height: 505px; border-width: 9px; border-radius: 38px; }
-      .phone::before { top: 9px; width: 70px; height: 18px; }
-      .phone-screen { padding: 33px 14px 14px; }
-      .app-top { margin-bottom: 12px; }
-      .logo-dot { width: 28px; height: 28px; }
-      .screen-card { border-radius: 18px; padding: 13px; margin-bottom: 11px; }
-      .screen-card h4 { font-size: .90rem; margin-bottom: 5px; }
-      .screen-card p { font-size: .74rem; }
-      .screen-image { height: 96px; border-radius: 13px; margin: 9px 0; }
-      .tag { padding: 5px 8px; font-size: .66rem; }
-      .timeline-mini div { font-size: .70rem; grid-template-columns: 38px 1fr; }
-      .float-card { width: 198px; padding: 13px; border-radius: 15px; }
-      .float-card strong { font-size: .86rem; }
-      .float-card span { font-size: .74rem; }
-      .float-1 { left: 8px; top: 110px; }
-      .float-2 { right: 6px; bottom: 94px; }
-      .section { padding: 66px 0; }
-      .section-tight { padding: 48px 0; }
-    }
-
-    @media (min-width: 1280px) {
-      .container { width: min(1180px, calc(100% - 72px)); }
-      .hero-grid { gap: 44px; grid-template-columns: .95fr .85fr; }
-      .hero h1 { font-size: clamp(3.3rem, 4.35vw, 4.85rem); max-width: 700px; }
-      .hero-copy { max-width: 640px; }
-      .phone { width: 312px; height: 540px; }
-      .phone-stack { height: 540px; }
-      .hero-visual { min-height: 545px; }
-    }
-
     @media (max-width: 1080px) {
       .hero-grid, .problem-grid, .curator-showcase, .insights-strip { grid-template-columns: 1fr; }
       .hero-visual { min-height: 620px; }
@@ -426,7 +376,7 @@
     @media (max-width: 620px) {
       .container { width: min(100% - 28px, var(--max)); }
       .section { padding: 58px 0; }
-      .hero h1 { font-size: clamp(2.35rem, 11vw, 3.4rem); line-height: .96; }
+      .hero h1 { font-size: clamp(2.8rem, 14vw, 4rem); }
       .hero-actions .btn { width: 100%; }
       .phone { width: min(330px, 88vw); height: 560px; border-width: 9px; }
       .phone-screen { padding: 38px 14px 14px; }
