@@ -5530,8 +5530,8 @@ def main():
             fazer_cadastro
         )
     else:
-        aplicar_css_dashboard()
         aplicar_css_mobile()
+        aplicar_css_dashboard()
 
         if st.session_state.usuario_atual.get("tipo") == "visitante":
             nome_exibido = st.session_state.usuario_atual.get("nome", "Visitante")
