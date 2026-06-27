@@ -1,7 +1,7 @@
 import html
 import streamlit as st
 import os
-from datetime import datetime, date
+from datetime import datetime
 
 from utils.assistente_ia import AssistenteLuto
 from utils.banco import BancoDados
@@ -72,22 +72,9 @@ def _curador_nome_arquivo(upload) -> str:
 def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referencia: str):
     st.markdown("""
     <style>
-    .main .block-container,
-    [data-testid="stMainBlockContainer"] {
-        padding-top: 0.15rem !important;
-        padding-bottom: 0.45rem !important;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-        max-width: 1460px !important;
-        width: calc(100vw - 245px) !important;
-        margin-left: 1.2rem !important;
-        margin-right: 1rem !important;
-    }
-    .ae-curador-hero {
-        margin-top: -0.35rem !important;
-    }
-    .ae-curador-hero h1 {
-        margin-top: 0 !important;
+    .main .block-container {
+        padding-top: 0.6rem !important;
+        padding-bottom: 0.8rem !important;
     }
     .ae-curador-hero h1 {
         color: #21104a;
@@ -130,7 +117,7 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         color: #b36e16;
     }
     .ae-curador-preview-media {
-        height: 96px;
+        height: 118px;
         border-radius: 14px;
         display: flex;
         align-items: center;
@@ -286,9 +273,9 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         min-height: 128px !important;
     }
     .st-key-curador_form_panel [data-testid="stFileUploader"] section {
-        min-height: 86px !important;
-        padding-top: 0.35rem !important;
-        padding-bottom: 0.3rem !important;
+        min-height: 108px !important;
+        padding-top: 0.55rem !important;
+        padding-bottom: 0.45rem !important;
     }
     .st-key-curador_form_panel [data-testid="stFileUploader"] small {
         font-size: 0.74rem !important;
@@ -304,52 +291,6 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
     .st-key-curador_explore_panel {
         padding-top: 0 !important;
         margin-top: 0 !important;
-    }
-
-    .ae-curador-saved-card {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 1rem;
-        background: rgba(242, 248, 232, 0.95);
-        border: 1px solid rgba(72, 163, 109, 0.34);
-        border-radius: 16px;
-        padding: 0.72rem 0.9rem;
-        margin: 0.5rem 0 0.7rem;
-        color: #1f5b38;
-        box-shadow: 0 10px 28px rgba(35, 88, 55, 0.06);
-    }
-    .ae-curador-saved-card strong {
-        color: #1f5b38;
-        display: block;
-        margin-bottom: 0.1rem;
-    }
-    .ae-curador-saved-card span {
-        color: #406b50;
-        font-size: 0.84rem;
-    }
-    .st-key-curador_ver_historia_salva button {
-        background: rgba(255,255,255,0.86) !important;
-        color: #1f5b38 !important;
-        border: 1px solid rgba(72,163,109,0.38) !important;
-        border-radius: 10px !important;
-        min-height: 2rem !important;
-        font-weight: 900 !important;
-    }
-    @media (max-width: 900px) {
-        .main .block-container,
-        [data-testid="stMainBlockContainer"] {
-            width: 100% !important;
-            max-width: 100% !important;
-            margin-left: 0 !important;
-            margin-right: 0 !important;
-            padding-left: 0.85rem !important;
-            padding-right: 0.85rem !important;
-        }
-        .ae-curador-steps { grid-template-columns: 1fr 1fr; }
-        .ae-curador-how-grid { display: grid; grid-template-columns: 1fr; gap: 0.5rem; }
-        .ae-curador-how-arrow { display: none; }
-        .ae-curador-saved-card { display: block; }
     }
     </style>
     """, unsafe_allow_html=True)
@@ -391,20 +332,7 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         unsafe_allow_html=True,
     )
 
-    memoria_salva_topo = st.session_state.get("curador_memoria_salva")
-    if memoria_salva_topo:
-        st.markdown(
-            '<div class="ae-curador-saved-card">'
-            '<div><strong>Memória salva.</strong><span>Escolha uma pergunta em “Aprofundar agora” ou abra a história na sua coleção.</span></div>'
-            '</div>',
-            unsafe_allow_html=True,
-        )
-        with st.container(key="curador_ver_historia_salva"):
-            if st.button("Ver em Minha História", use_container_width=False):
-                st.session_state.pagina_atual = "minha_historia"
-                st.rerun()
-
-    col_form, col_preview, col_explore = st.columns([1.25, 0.88, 0.72], gap="small")
+    col_form, col_preview, col_explore = st.columns([1.35, 0.92, 0.78], gap="medium")
 
     with col_form:
         st.markdown("### Nova memória")
@@ -439,11 +367,10 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         )
         meta_col1, meta_col2 = st.columns(2, gap="small")
         with meta_col1:
-            data_aproximada = st.date_input(
-                "Data da memória",
+            data_aproximada = st.text_input(
+                "Data aproximada",
                 key="curador_memoria_data",
-                value=None,
-                format="DD/MM/YYYY",
+                placeholder="DD/MM/AAAA ou período",
             )
         with meta_col2:
             pessoas_relacionadas = st.multiselect(
@@ -478,8 +405,8 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
     preview_titulo = titulo.strip() or "Título da memória aparecerá aqui"
     preview_texto = _curador_trecho(conteudo)
     preview_data = _curador_preview_data(data_aproximada)
-    preview_pessoas = ", ".join(pessoas_relacionadas) if pessoas_relacionadas else "Pessoas relacionadas"
-    preview_colecao = mapa_colecoes.get(colecao_valor, "Coleção")
+    preview_pessoas = ", ".join(pessoas_relacionadas) if pessoas_relacionadas else "Alice, Darlan e Bia"
+    preview_colecao = mapa_colecoes.get(colecao_valor, "Viagens em Família")
     media_total = int(bool(foto_memoria)) + int(bool(video_memoria))
 
     with col_preview:
@@ -520,12 +447,12 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
     ]
 
     with col_explore:
-        memoria_salva = st.session_state.get("curador_memoria_salva")
-        st.markdown("### Aprofundar agora" if memoria_salva else "### Explorar depois de salvar")
+        st.markdown("### Explorar depois de salvar")
         st.markdown(
-            "<div style='color:#6d6380;line-height:1.36;font-size:.84rem;margin-bottom:.46rem;'>Depois de salvar sua memória, escolha uma pergunta para aprofundar a história.</div>" if memoria_salva else "<div style='color:#6d6380;line-height:1.36;font-size:.84rem;margin-bottom:.46rem;'>Depois de salvar sua memória, o Curador pode ajudar você a aprofundar e enriquecer os detalhes.</div>",
+            "<div style='color:#6d6380;line-height:1.36;font-size:.84rem;margin-bottom:.46rem;'>Depois de salvar sua memória, o Curador pode ajudar você a aprofundar e enriquecer os detalhes.</div>",
             unsafe_allow_html=True,
         )
+        memoria_salva = st.session_state.get("curador_memoria_salva")
         if not memoria_salva:
             st.markdown("<div class='ae-curador-question-shell'>", unsafe_allow_html=True)
             for icone, pergunta in perguntas_curador:
@@ -637,7 +564,7 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
                     "categoria": colecao_valor or "livre",
                 }
                 st.session_state.pop("curador_exploracao", None)
-                st.rerun()
+                st.success("Memória salva. Agora o Curador pode ajudar a aprofundar essa história.")
             except Exception as exc:
                 print("Erro ao salvar memória no curador:", exc)
                 st.error("Não foi possível salvar a memória agora. Tente novamente em alguns instantes.")

@@ -48,7 +48,8 @@ header,
 
 [data-testid="stSidebar"] > div:first-child {
     width: 200px !important;
-    padding: 0.25rem 0.6rem 0.6rem !important;
+    padding-left: 0.6rem !important;
+    padding-right: 0.6rem !important;
 }
 
 [data-testid="stSidebar"] * {
@@ -57,9 +58,8 @@ header,
 
 .ae-sidebar-brand {
     text-align: center;
-    padding: 0 0 0.22rem;
-    margin-top: -0.35rem;
-    margin-bottom: 0.22rem;
+    padding: 0.15rem 0 0.3rem;
+    margin-bottom: 0.35rem;
     border-bottom: 1px solid rgba(212,175,55,0.22);
 }
 
@@ -3437,7 +3437,7 @@ def render_sidebar_premium(
             try:
                 st.image(
                     "assets/logo-sidebar.png",
-                    width=126
+                    width=132
                 )
             except Exception as exc:
                 print("Erro ao carregar logo da sidebar:", exc)

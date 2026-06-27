@@ -4458,97 +4458,108 @@ def render_sidebar_principal(
         _psc_contrib_danger = " ae-psc-bar-danger" if _psc_contrib_pct >= 90 else ""
         st.markdown("""<style>
 .ae-psc {
-    background: #23105D !important;
-    border: 1.5px solid #6A4DBF !important;
-    border-radius: 16px;
-    padding: 16px;
-    margin: 4px 0 0 0;
-    font-family: 'Inter', sans-serif;
-    box-sizing: border-box;
+    background: linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.045)) !important;
+    border: 1px solid rgba(212,175,55,0.34) !important;
+    border-radius: 16px !important;
+    padding: 14px 14px 13px !important;
+    margin: 8px 0 0 0 !important;
+    box-shadow: 0 16px 38px rgba(0,0,0,0.18) !important;
+    font-family: 'Inter', sans-serif !important;
+    box-sizing: border-box !important;
 }
 .ae-psc-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    margin-bottom: 13px !important;
 }
 .ae-psc-label {
-    color: #FFFFFF;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
+    color: #F8E6AE !important;
+    font-size: 10.5px !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.7px !important;
 }
 .ae-psc-badge {
-    background: #4A3297;
-    color: #C8B8F0;
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 999px;
+    background: rgba(212,175,55,0.18) !important;
+    color: #F2C572 !important;
+    border: 1px solid rgba(212,175,55,0.34) !important;
+    font-size: 9.5px !important;
+    font-weight: 900 !important;
+    padding: 2px 7px !important;
+    border-radius: 999px !important;
+    line-height: 1.2 !important;
 }
 .ae-psc-metric {
-    margin-bottom: 9px;
+    margin-bottom: 10px !important;
 }
 .ae-psc-metric:last-child {
-    margin-bottom: 0;
+    margin-bottom: 0 !important;
 }
 .ae-psc-metric-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 4px;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-bottom: 5px !important;
 }
 .ae-psc-metric-name {
-    color: #B8A8E8;
-    font-size: 11px;
-    font-weight: 400;
+    color: rgba(255,255,255,0.88) !important;
+    font-size: 10.8px !important;
+    font-weight: 800 !important;
 }
 .ae-psc-metric-count {
-    color: #FFFFFF;
-    font-size: 10px;
-    font-weight: 600;
+    color: #F8E6AE !important;
+    font-size: 10px !important;
+    font-weight: 900 !important;
+    white-space: nowrap !important;
 }
 .ae-psc-bar-track {
-    height: 4px;
-    background: #3D2680;
-    border-radius: 999px;
-    overflow: hidden;
+    height: 5px !important;
+    background: rgba(255,255,255,0.14) !important;
+    border-radius: 999px !important;
+    overflow: hidden !important;
 }
 .ae-psc-bar-fill {
-    height: 100%;
-    background: #E3B12D;
-    border-radius: 999px;
+    height: 100% !important;
+    background: linear-gradient(90deg, #F8DC92, #D4AF37 68%, #B77A46) !important;
+    border-radius: 999px !important;
 }
 .ae-psc-bar-danger {
-    background: #E05858 !important;
+    background: linear-gradient(90deg, #F8DC92, #D4AF37 58%, #B77A46) !important;
 }
 .ae-psc-divider {
-    border: none;
-    border-top: 1px solid #4A3297;
-    margin: 12px 0 10px 0;
+    display: none !important;
 }
 section[data-testid="stSidebar"] .ae-psc-btn-wrap > div > button,
 section[data-testid="stSidebar"] .ae-psc-btn-wrap > div > div > button {
-    background: #5A2BB5 !important;
-    color: #FFFFFF !important;
-    border: none !important;
+    background: linear-gradient(135deg, #F8DC92, #D4AF37 62%, #B77A46) !important;
+    color: #1B0F2E !important;
+    border: 0 !important;
     border-radius: 12px !important;
-    font-size: 12px !important;
-    font-weight: 600 !important;
+    font-size: 11.5px !important;
+    font-weight: 900 !important;
     font-family: 'Inter', sans-serif !important;
     height: 34px !important;
     width: 100% !important;
-    margin-top: 0 !important;
+    margin-top: 7px !important;
     padding: 0 8px !important;
     cursor: pointer !important;
-    transition: background 0.2s !important;
+    box-shadow: 0 8px 20px rgba(212,175,55,0.18) !important;
 }
 section[data-testid="stSidebar"] .ae-psc-btn-wrap > div > button:hover,
 section[data-testid="stSidebar"] .ae-psc-btn-wrap > div > div > button:hover {
-    background: #4A22A4 !important;
-    border: none !important;
-    color: #FFFFFF !important;
+    background: linear-gradient(135deg, #FFE7A6, #D4AF37 68%, #B77A46) !important;
+    color: #1B0F2E !important;
+    border: 0 !important;
+}
+@media (max-width: 768px) {
+    .ae-psc {
+        margin-top: 10px !important;
+        padding: 13px !important;
+        border-radius: 15px !important;
+    }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -5530,8 +5541,8 @@ def main():
             fazer_cadastro
         )
     else:
-        aplicar_css_dashboard()
         aplicar_css_mobile()
+        aplicar_css_dashboard()
 
         if st.session_state.usuario_atual.get("tipo") == "visitante":
             nome_exibido = st.session_state.usuario_atual.get("nome", "Visitante")
