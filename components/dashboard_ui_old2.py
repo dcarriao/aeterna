@@ -48,8 +48,7 @@ header,
 
 [data-testid="stSidebar"] > div:first-child {
     width: 200px !important;
-    padding-left: 0.6rem !important;
-    padding-right: 0.6rem !important;
+    padding: 0.25rem 0.6rem 0.6rem !important;
 }
 
 [data-testid="stSidebar"] * {
@@ -58,8 +57,9 @@ header,
 
 .ae-sidebar-brand {
     text-align: center;
-    padding: 0.15rem 0 0.3rem;
-    margin-bottom: 0.35rem;
+    padding: 0 0 0.22rem;
+    margin-top: -0.35rem;
+    margin-bottom: 0.22rem;
     border-bottom: 1px solid rgba(212,175,55,0.22);
 }
 
@@ -3414,41 +3414,6 @@ a.ae-card-read-btn:hover {
     }
 }
 
-
-
-/* FIX FINAL: compactar topo, sidebar e card de plano */
-[data-testid="stMainBlockContainer"],
-.block-container {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
-}
-[data-testid="stSidebar"] > div:first-child,
-[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
-}
-.ae-sidebar-brand {
-    padding-top: 0 !important;
-    margin-top: -0.25rem !important;
-    margin-bottom: 0.25rem !important;
-}
-.ae-sidebar-brand img,
-[data-testid="stSidebar"] img {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-}
-.ae-psc {
-    background: linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.035)) !important;
-    border: 1px solid rgba(212,175,55,0.44) !important;
-    box-shadow: none !important;
-}
-.ae-psc-badge {
-    background: rgba(242,197,114,0.18) !important;
-    color: #F2C572 !important;
-    border: 1px solid rgba(242,197,114,0.28) !important;
-}
-.ae-psc-bar-track { background: rgba(255,255,255,0.16) !important; }
-.ae-psc-divider { border-top-color: rgba(212,175,55,0.22) !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -3472,7 +3437,7 @@ def render_sidebar_premium(
             try:
                 st.image(
                     "assets/logo-sidebar.png",
-                    width=132
+                    width=126
                 )
             except Exception as exc:
                 print("Erro ao carregar logo da sidebar:", exc)
