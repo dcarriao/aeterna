@@ -3416,39 +3416,20 @@ a.ae-card-read-btn:hover {
 
 
 
-/* FIX FINAL: compactar topo, sidebar e card de plano */
-[data-testid="stMainBlockContainer"],
-.block-container {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
-}
-[data-testid="stSidebar"] > div:first-child,
-[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
-}
-.ae-sidebar-brand {
-    padding-top: 0 !important;
-    margin-top: -0.25rem !important;
-    margin-bottom: 0.25rem !important;
-}
-.ae-sidebar-brand img,
-[data-testid="stSidebar"] img {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-}
-.ae-psc {
-    background: linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.035)) !important;
-    border: 1px solid rgba(212,175,55,0.44) !important;
+/* Correção final sidebar/plano */
+[data-testid="stSidebar"] { padding-top: 0 !important; }
+[data-testid="stSidebar"] > div:first-child { padding-top: 0 !important; }
+.ae-sidebar-brand { padding: 0 !important; margin: -0.7rem 0 0.3rem !important; border-bottom: 1px solid rgba(212,175,55,0.22) !important; }
+.ae-sidebar-brand img, [data-testid="stSidebar"] .ae-sidebar-brand img { max-width: 130px !important; margin: 0 auto !important; }
+.ae-sidebar-plan, .ae-plan-status, .plan-status-card, .ae-sidebar-card-plan {
+    background: rgba(255,255,255,0.065) !important;
+    border: 1px solid rgba(212,175,55,0.42) !important;
+    border-radius: 18px !important;
     box-shadow: none !important;
+    color: rgba(255,255,255,0.92) !important;
 }
-.ae-psc-badge {
-    background: rgba(242,197,114,0.18) !important;
-    color: #F2C572 !important;
-    border: 1px solid rgba(242,197,114,0.28) !important;
-}
-.ae-psc-bar-track { background: rgba(255,255,255,0.16) !important; }
-.ae-psc-divider { border-top-color: rgba(212,175,55,0.22) !important; }
+.ae-sidebar-plan *, .ae-plan-status *, .plan-status-card *, .ae-sidebar-card-plan * { color: rgba(255,255,255,0.92) !important; }
+.ae-sidebar-plan strong, .ae-plan-status strong, .plan-status-card strong, .ae-sidebar-card-plan strong { color: #f2c572 !important; }
 </style>
 """, unsafe_allow_html=True)
 

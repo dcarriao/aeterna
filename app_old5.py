@@ -4458,8 +4458,8 @@ def render_sidebar_principal(
         _psc_contrib_danger = " ae-psc-bar-danger" if _psc_contrib_pct >= 90 else ""
         st.markdown("""<style>
 .ae-psc {
-    background: #23105D !important;
-    border: 1.5px solid #6A4DBF !important;
+    background: linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.035)) !important;
+    border: 1px solid rgba(212,175,55,0.44) !important;
     border-radius: 16px;
     padding: 16px;
     margin: 4px 0 0 0;
@@ -4480,8 +4480,8 @@ def render_sidebar_principal(
     letter-spacing: 0.6px;
 }
 .ae-psc-badge {
-    background: #4A3297;
-    color: #C8B8F0;
+    background: rgba(242,197,114,0.18);
+    color: #F2C572;
     font-size: 10px;
     font-weight: 600;
     padding: 2px 8px;
@@ -4500,7 +4500,7 @@ def render_sidebar_principal(
     margin-bottom: 4px;
 }
 .ae-psc-metric-name {
-    color: #B8A8E8;
+    color: rgba(255,255,255,0.82);
     font-size: 11px;
     font-weight: 400;
 }
@@ -4511,7 +4511,7 @@ def render_sidebar_principal(
 }
 .ae-psc-bar-track {
     height: 4px;
-    background: #3D2680;
+    background: rgba(255,255,255,0.16);
     border-radius: 999px;
     overflow: hidden;
 }
@@ -4525,13 +4525,13 @@ def render_sidebar_principal(
 }
 .ae-psc-divider {
     border: none;
-    border-top: 1px solid #4A3297;
+    border-top: 1px solid rgba(212,175,55,0.22);
     margin: 12px 0 10px 0;
 }
 section[data-testid="stSidebar"] .ae-psc-btn-wrap > div > button,
 section[data-testid="stSidebar"] .ae-psc-btn-wrap > div > div > button {
-    background: #5A2BB5 !important;
-    color: #FFFFFF !important;
+    background: linear-gradient(135deg, rgba(248,220,146,.95), rgba(212,175,55,.95) 62%, rgba(183,122,70,.95)) !important;
+    color: #1b0f2e !important;
     border: none !important;
     border-radius: 12px !important;
     font-size: 12px !important;
@@ -4546,9 +4546,9 @@ section[data-testid="stSidebar"] .ae-psc-btn-wrap > div > div > button {
 }
 section[data-testid="stSidebar"] .ae-psc-btn-wrap > div > button:hover,
 section[data-testid="stSidebar"] .ae-psc-btn-wrap > div > div > button:hover {
-    background: #4A22A4 !important;
+    background: linear-gradient(135deg, #f8dc92, #d4af37 62%, #b77a46) !important;
     border: none !important;
-    color: #FFFFFF !important;
+    color: #1b0f2e !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -5530,8 +5530,8 @@ def main():
             fazer_cadastro
         )
     else:
-        aplicar_css_mobile()
         aplicar_css_dashboard()
+        aplicar_css_mobile()
 
         if st.session_state.usuario_atual.get("tipo") == "visitante":
             nome_exibido = st.session_state.usuario_atual.get("nome", "Visitante")

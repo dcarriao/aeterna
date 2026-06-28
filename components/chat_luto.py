@@ -1,9 +1,8 @@
 import html
-import json
-import re
 import streamlit as st
 import os
-from datetime import datetime
+import json
+from datetime import datetime, date
 
 from utils.assistente_ia import AssistenteLuto
 from utils.banco import BancoDados
@@ -71,388 +70,573 @@ def _curador_nome_arquivo(upload) -> str:
     return getattr(upload, "name", "") if upload else ""
 
 
-# ==========================================================================
-# CURADOR INTELIGENTE - SITE ALINHADO AO MOBILE
-# ==========================================================================
-_TIPOS_CURADOR = [
-    "Pessoa", "Evento familiar", "Viagem", "Infância", "Relacionamento",
-    "Trabalho", "Conquista", "Mudança de vida", "Aprendizado", "Rotina",
-    "Data comemorativa", "Outro",
-]
 
 
-def _curador_json_limpo(texto: str) -> dict:
-    bruto = str(texto or "").strip()
-    if not bruto:
+def _curador_json_from_text(texto: str) -> dict:
+    base = str(texto or "").strip()
+    if not base:
         return {}
-    bruto = re.sub(r"^```(?:json)?", "", bruto, flags=re.I).strip()
-    bruto = re.sub(r"```$", "", bruto).strip()
-    match = re.search(r"\{.*\}", bruto, flags=re.S)
+    match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", base, re.S)
     if match:
-        bruto = match.group(0)
+        base = match.group(1)
+    else:
+        start = base.find("{")
+        end = base.rfind("}")
+        if start >= 0 and end > start:
+            base = base[start:end + 1]
     try:
-        return json.loads(bruto)
+        return json.loads(base)
     except Exception:
         return {}
 
 
-def _curador_lista(valor, limite=None):
-    if isinstance(valor, list):
-        itens = [str(v).strip() for v in valor if str(v).strip()]
-    elif isinstance(valor, str):
-        itens = [v.strip(" -•\t") for v in valor.split("\n") if v.strip(" -•\t")]
-    else:
-        itens = []
-    vistos = []
-    for item in itens:
-        if item and item not in vistos:
-            vistos.append(item)
-    return vistos[:limite] if limite else vistos
+def _curador_limpar_lista(valores, limite: int = 7) -> list:
+    saida = []
+    if isinstance(valores, str):
+        valores = [valores]
+    if not isinstance(valores, list):
+        return []
+    for valor in valores:
+        texto = str(valor or "").strip()
+        if texto and texto not in saida:
+            saida.append(texto)
+        if len(saida) >= limite:
+            break
+    return saida
 
 
-def _curador_plano_fallback(titulo: str, conteudo: str, data_evento: str, pessoas: list, colecao: str) -> dict:
-    base = f"{titulo} {conteudo} {colecao}".lower()
-    if any(p in base for p in ["pai", "mãe", "mae", "avó", "avo", "avô", "tio", "tia", "filho", "filha"]):
-        tipo = "Pessoa"
-        perguntas = [
-            "Como você descreveria essa pessoa?",
-            "Qual característica dela você mais quer preservar?",
-            "Existe uma lembrança que representa bem quem ela era?",
-            "O que essa pessoa ensinou a você?",
-            "O que você gostaria que sua família soubesse sobre ela?",
-        ]
-    elif any(p in base for p in ["viagem", "praia", "gramado", "hotel", "foz", "canyons", "passeio"]):
-        tipo = "Viagem"
-        perguntas = [
-            "Como essa viagem começou?",
-            "Quem estava com você?",
-            "Qual momento dessa viagem ficou mais marcado?",
-            "Houve algo inesperado ou engraçado?",
-            "O que essa viagem representa para você hoje?",
-        ]
-    elif any(p in base for p in ["emprego", "trabalho", "empresa", "chefe", "carreira"]):
-        tipo = "Trabalho"
-        perguntas = [
-            "Como surgiu essa oportunidade?",
-            "Quais dificuldades você enfrentou nessa fase?",
-            "Quem ajudou você nesse período?",
-            "O que você aprendeu com essa experiência?",
-            "Como isso mudou sua vida?",
-        ]
-    elif any(p in base for p in ["almoço", "almoco", "jantar", "domingo", "família", "familia", "aniversário", "aniversario"]):
-        tipo = "Evento familiar"
-        perguntas = [
-            "Como esse encontro aconteceu?",
-            "Quem estava presente?",
-            "O que tornou esse momento especial?",
-            "Houve alguma conversa marcante?",
-            "Como você gostaria que sua família lembrasse desse dia?",
-        ]
-    else:
-        tipo = "Outro"
-        perguntas = [
-            "O que aconteceu nesse momento?",
-            "Quem estava envolvido?",
-            "O que tornou essa lembrança importante?",
-            "O que você aprendeu com essa experiência?",
-        ]
-    return {
-        "tipo": tipo,
-        "perguntas": perguntas[:7],
-        "valores_percebidos": [],
-        "pessoas_identificadas": pessoas or [],
-        "locais_identificados": [],
-        "datas_identificadas": [data_evento] if data_evento else [],
-    }
+def _curador_contexto_base(titulo: str, conteudo: str, data_memoria, pessoas: list, categoria: str) -> str:
+    data_txt = ""
+    if data_memoria:
+        try:
+            data_txt = data_memoria.strftime("%d/%m/%Y")
+        except Exception:
+            data_txt = str(data_memoria)
+    partes = [
+        f"Título: {titulo.strip()}",
+        f"Texto inicial: {conteudo.strip()}",
+        f"Data informada: {data_txt}",
+        f"Pessoas selecionadas: {', '.join(pessoas) if pessoas else ''}",
+        f"Categoria escolhida pelo usuário: {categoria or ''}",
+    ]
+    return "\n".join(partes)
 
 
-def _curador_gerar_plano(assistente, titulo: str, conteudo: str, data_evento: str, pessoas: list, colecao: str) -> dict:
-    contexto = (
-        f"Título: {titulo or ''}\n"
-        f"Texto inicial: {conteudo or ''}\n"
-        f"Data informada: {data_evento or ''}\n"
-        f"Pessoas informadas: {', '.join(pessoas or [])}\n"
-        f"Coleção informada: {colecao or ''}"
-    )
+def _curador_analisar_memoria_com_ia(assistente, titulo: str, conteudo: str, data_memoria, pessoas: list, categoria: str) -> dict:
+    contexto = _curador_contexto_base(titulo, conteudo, data_memoria, pessoas, categoria)
     prompt = f"""
 Você é o Curador de Histórias da aEterna.
-Analise a memória abaixo e responda APENAS em JSON válido.
-Não mostre explicações fora do JSON.
-Não invente fatos.
-Se não houver evidência suficiente para classificar, use tipo "Outro".
-Tipos permitidos: {', '.join(_TIPOS_CURADOR)}.
-Gere entre 4 e 7 perguntas específicas para esse tipo de memória.
-Não use perguntas incompatíveis com o contexto.
-Não trate uma viagem ou almoço como se fosse sempre sobre uma pessoa.
+Analise a memória abaixo e devolva SOMENTE JSON válido.
+Não use markdown. Não explique. Não invente fatos.
+
+Tipos permitidos:
+Pessoa, Evento familiar, Viagem, Infância, Relacionamento, Trabalho, Conquista, Mudança de vida, Aprendizado, Rotina, Data comemorativa, Outro.
+
+Regras:
+- Identifique o tipo apenas se houver evidência no texto.
+- Se não houver evidência suficiente, use "Outro".
+- Gere entre 4 e 7 perguntas adequadas ao tipo identificado.
+- As perguntas devem estimular lembranças, não coletar dados mecânicos.
+- Nunca usar perguntas incompatíveis com o tipo.
+- Não assumir que toda memória é sobre uma pessoa.
 
 Memória:
 {contexto}
 
-Formato obrigatório:
+JSON esperado:
 {{
-  "tipo": "...",
-  "perguntas": ["..."],
-  "valores_percebidos": ["..."],
-  "pessoas_identificadas": ["..."],
-  "locais_identificados": ["..."],
-  "datas_identificadas": ["..."]
+  "tipo": "Outro",
+  "evidencia_tipo": "trecho ou motivo curto",
+  "perguntas": ["pergunta 1", "pergunta 2", "pergunta 3", "pergunta 4"],
+  "valores_possiveis": [],
+  "pessoas_identificadas": [],
+  "locais_identificados": [],
+  "datas_identificadas": []
 }}
 """.strip()
-    try:
-        dados = _curador_json_limpo(assistente.conversar(prompt))
-    except Exception as exc:
-        print("Erro ao gerar plano do Curador:", exc)
-        dados = {}
-    if not dados:
-        dados = _curador_plano_fallback(titulo, conteudo, data_evento, pessoas, colecao)
-    tipo = dados.get("tipo") if dados.get("tipo") in _TIPOS_CURADOR else "Outro"
-    perguntas = _curador_lista(dados.get("perguntas"), 7)
+    resposta = assistente.conversar(prompt)
+    dados = _curador_json_from_text(resposta)
+    perguntas = _curador_limpar_lista(dados.get("perguntas"), 7)
     if len(perguntas) < 4:
-        fallback = _curador_plano_fallback(titulo, conteudo, data_evento, pessoas, colecao)
-        perguntas = fallback["perguntas"]
-        if tipo == "Outro":
-            tipo = fallback["tipo"]
+        raise ValueError("A IA não retornou perguntas suficientes para o Curador.")
+    tipo = str(dados.get("tipo") or "Outro").strip()
+    tipos_validos = {"Pessoa", "Evento familiar", "Viagem", "Infância", "Relacionamento", "Trabalho", "Conquista", "Mudança de vida", "Aprendizado", "Rotina", "Data comemorativa", "Outro"}
+    if tipo not in tipos_validos:
+        tipo = "Outro"
     return {
         "tipo": tipo,
-        "perguntas": perguntas[:7],
-        "valores_percebidos": _curador_lista(dados.get("valores_percebidos"), 8),
-        "pessoas_identificadas": _curador_lista(dados.get("pessoas_identificadas"), 10),
-        "locais_identificados": _curador_lista(dados.get("locais_identificados"), 6),
-        "datas_identificadas": _curador_lista(dados.get("datas_identificadas"), 6),
+        "evidencia_tipo": str(dados.get("evidencia_tipo") or "").strip(),
+        "perguntas": perguntas,
+        "valores_possiveis": _curador_limpar_lista(dados.get("valores_possiveis"), 8),
+        "pessoas_identificadas": _curador_limpar_lista(dados.get("pessoas_identificadas"), 12),
+        "locais_identificados": _curador_limpar_lista(dados.get("locais_identificados"), 8),
+        "datas_identificadas": _curador_limpar_lista(dados.get("datas_identificadas"), 8),
     }
 
 
-def _curador_gerar_narrativa(assistente, titulo: str, conteudo: str, plano: dict, respostas: dict) -> dict:
-    respostas_limpas = {p: r for p, r in respostas.items() if str(r or "").strip()}
+def _curador_gerar_narrativa_com_ia(assistente, titulo: str, conteudo: str, data_memoria, pessoas: list, categoria: str, analise: dict, respostas: dict) -> dict:
+    contexto = _curador_contexto_base(titulo, conteudo, data_memoria, pessoas, categoria)
+    qa = []
+    for pergunta in analise.get("perguntas", []):
+        resposta = str(respostas.get(pergunta) or "").strip()
+        if resposta:
+            qa.append({"pergunta": pergunta, "resposta": resposta})
     prompt = f"""
 Você é o Curador de Histórias da aEterna.
-Transforme as informações abaixo em uma narrativa final fluida e curta.
-Use apenas informações fornecidas.
-Não invente pessoas, datas, locais, sentimentos ou fatos.
-Não concatene respostas soltas.
-Depois gere análise objetiva.
-Responda APENAS em JSON válido.
+Com base APENAS nas informações fornecidas, gere a narrativa final da memória.
+Devolva SOMENTE JSON válido. Não use markdown. Não invente fatos. Não preencha lacunas.
+A narrativa deve ser fluida, humana e legível. Não concatene respostas.
 
-Título: {titulo or ''}
-Texto inicial: {conteudo or ''}
-Tipo identificado: {plano.get('tipo') or 'Outro'}
-Perguntas e respostas: {json.dumps(respostas_limpas, ensure_ascii=False)}
-Entidades já identificadas: {json.dumps(plano, ensure_ascii=False)}
+Memória original:
+{contexto}
 
-Formato obrigatório:
+Tipo identificado: {analise.get('tipo') or 'Outro'}
+Perguntas e respostas:
+{json.dumps(qa, ensure_ascii=False)}
+
+Entidades já identificadas:
+{json.dumps({
+    'valores': analise.get('valores_possiveis', []),
+    'pessoas': analise.get('pessoas_identificadas', []),
+    'locais': analise.get('locais_identificados', []),
+    'datas': analise.get('datas_identificadas', []),
+}, ensure_ascii=False)}
+
+JSON esperado:
 {{
-  "narrativa": "...",
-  "valores_percebidos": ["..."],
-  "pessoas_identificadas": ["..."],
-  "locais_identificados": ["..."],
-  "datas_identificadas": ["..."]
+  "narrativa": "texto final fluido",
+  "valores_percebidos": [],
+  "pessoas_identificadas": [],
+  "locais_identificados": [],
+  "datas_identificadas": [],
+  "observacoes": []
 }}
 """.strip()
-    try:
-        dados = _curador_json_limpo(assistente.conversar(prompt))
-    except Exception as exc:
-        print("Erro ao gerar narrativa do Curador:", exc)
-        dados = {}
-    narrativa = str(dados.get("narrativa") or conteudo or titulo or "").strip()
+    resposta = assistente.conversar(prompt)
+    dados = _curador_json_from_text(resposta)
+    narrativa = str(dados.get("narrativa") or "").strip()
+    if not narrativa:
+        raise ValueError("A IA não retornou narrativa final.")
     return {
         "narrativa": narrativa,
-        "valores_percebidos": _curador_lista(dados.get("valores_percebidos") or plano.get("valores_percebidos"), 8),
-        "pessoas_identificadas": _curador_lista(dados.get("pessoas_identificadas") or plano.get("pessoas_identificadas"), 10),
-        "locais_identificados": _curador_lista(dados.get("locais_identificados") or plano.get("locais_identificados"), 6),
-        "datas_identificadas": _curador_lista(dados.get("datas_identificadas") or plano.get("datas_identificadas"), 6),
+        "valores_percebidos": _curador_limpar_lista(dados.get("valores_percebidos"), 10),
+        "pessoas_identificadas": _curador_limpar_lista(dados.get("pessoas_identificadas"), 12),
+        "locais_identificados": _curador_limpar_lista(dados.get("locais_identificados"), 8),
+        "datas_identificadas": _curador_limpar_lista(dados.get("datas_identificadas"), 8),
+        "observacoes": _curador_limpar_lista(dados.get("observacoes"), 6),
     }
 
 
-def _curador_montar_conteudo_final(titulo: str, conteudo: str, plano: dict, respostas: dict, resultado: dict) -> str:
-    partes = []
-    narrativa = (resultado.get("narrativa") or conteudo or "").strip()
-    if narrativa:
-        partes.append(narrativa)
-    partes.append("\n---\nAnálise da memória")
-    partes.append(f"Tipo identificado: {plano.get('tipo') or 'Outro'}")
-    for rotulo, chave in [
-        ("Valores percebidos", "valores_percebidos"),
-        ("Pessoas identificadas", "pessoas_identificadas"),
-        ("Locais identificados", "locais_identificados"),
-        ("Datas identificadas", "datas_identificadas"),
-    ]:
-        itens = resultado.get(chave) or plano.get(chave) or []
+def _curador_montar_conteudo_salvo(narrativa: dict, analise: dict, respostas: dict, texto_original: str) -> str:
+    linhas = [narrativa.get("narrativa", "").strip()]
+    linhas.append("\n---\n")
+    linhas.append("### Análise da memória")
+    linhas.append(f"**Tipo identificado:** {analise.get('tipo') or 'Outro'}")
+    secoes = [
+        ("Valores percebidos", narrativa.get("valores_percebidos") or analise.get("valores_possiveis") or []),
+        ("Pessoas identificadas", narrativa.get("pessoas_identificadas") or analise.get("pessoas_identificadas") or []),
+        ("Locais identificados", narrativa.get("locais_identificados") or analise.get("locais_identificados") or []),
+        ("Datas identificadas", narrativa.get("datas_identificadas") or analise.get("datas_identificadas") or []),
+    ]
+    for titulo, itens in secoes:
         if itens:
-            partes.append(f"{rotulo}: {', '.join(itens)}")
-    respostas_limpas = {p: r for p, r in respostas.items() if str(r or '').strip()}
-    if respostas_limpas:
-        partes.append("\nPerguntas do Curador")
-        for pergunta, resposta in respostas_limpas.items():
-            partes.append(f"- {pergunta}\n  Resposta: {str(resposta).strip()}")
-    if conteudo and conteudo.strip() and conteudo.strip() not in narrativa:
-        partes.append("\nTexto inicial informado")
-        partes.append(conteudo.strip())
-    return "\n".join(partes).strip()
+            linhas.append(f"\n**{titulo}:**")
+            for item in itens:
+                linhas.append(f"- {item}")
+    respostas_validas = [(p, str(respostas.get(p) or "").strip()) for p in analise.get("perguntas", []) if str(respostas.get(p) or "").strip()]
+    if respostas_validas:
+        linhas.append("\n### Respostas usadas pelo Curador")
+        for pergunta, resposta in respostas_validas:
+            linhas.append(f"**{pergunta}**")
+            linhas.append(resposta)
+    if texto_original.strip():
+        linhas.append("\n### Registro original")
+        linhas.append(texto_original.strip())
+    return "\n\n".join(linhas).strip()
 
 
 def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referencia: str):
     st.markdown("""
     <style>
-    .main .block-container, [data-testid="stMainBlockContainer"] {
-        padding-top: 0.15rem !important;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-        padding-bottom: 0.6rem !important;
+    .main .block-container,
+    .block-container,
+    [data-testid="stMainBlockContainer"] {
+        padding-top: 0.25rem !important;
+        padding-bottom: 0.75rem !important;
+        max-width: 980px !important;
+        width: min(980px, calc(100vw - 260px)) !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
     }
-    .ae-curador-hero { margin-top: -1.1rem; margin-bottom: .55rem; }
-    .ae-curador-hero h1 { color:#21104a; font-size:1.55rem; line-height:1.05; margin:0; font-weight:950; }
-    .ae-curador-hero p { color:#6d6380; margin:.15rem 0 0; font-size:.88rem; }
-    .ae-curador-grid { display:grid; grid-template-columns: 1.05fr .95fr; gap:1.05rem; align-items:start; }
-    .ae-curador-card { background:rgba(255,255,255,.55); border:1px solid rgba(222,202,166,.86); border-radius:18px; padding:.8rem; box-shadow:0 12px 30px rgba(43,23,71,.045); }
-    .ae-curador-card h2, .ae-curador-card h3 { color:#21104a; margin:0 0 .55rem; }
-    .ae-curador-meta { display:flex; flex-wrap:wrap; gap:.35rem; margin:.45rem 0; }
-    .ae-curador-pill { display:inline-flex; align-items:center; border:1px solid rgba(212,168,79,.38); background:rgba(255,248,231,.78); color:#21104a; border-radius:999px; padding:.26rem .58rem; font-size:.78rem; font-weight:850; }
-    .ae-curador-question { border:1px solid rgba(104,79,176,.24); border-radius:14px; background:rgba(255,255,255,.70); padding:.55rem .65rem; margin:.42rem 0; }
-    .ae-curador-question strong { color:#21104a; display:block; margin-bottom:.28rem; }
-    .ae-curador-note { color:#6d6380; font-size:.82rem; line-height:1.38; }
-    .ae-curador-preview { border-left:3px solid #d4a84f; padding-left:.75rem; color:#2f2440; line-height:1.45; }
-    .st-key-curador_gerar_plano button, .st-key-curador_salvar_final button, .st-key-curador_nova_memoria button {
-        background:linear-gradient(135deg,#f8dc92,#d4af37 62%,#b77a46)!important; color:#1b0f2e!important; border:0!important; border-radius:12px!important; font-weight:900!important; min-height:2.5rem!important;
+    .ae-curador-mobile-wrap {
+        max-width: 780px;
+        margin: 0 auto;
     }
-    .st-key-curador_ver_historia button { background:rgba(255,255,255,.92)!important; color:#21104a!important; border:1px solid rgba(212,168,79,.40)!important; border-radius:12px!important; font-weight:900!important; }
-    @media (max-width: 900px) {
-        .ae-curador-grid { grid-template-columns:1fr; gap:.75rem; }
-        .ae-curador-hero { margin-top:-.35rem; }
-        .ae-curador-card { padding:.7rem; }
+    .ae-curador-mobile-title {
+        color: #2B1747;
+        font-size: 1.78rem;
+        line-height: 1.05;
+        font-weight: 950;
+        margin: 0 0 0.25rem;
+        letter-spacing: -0.03em;
+    }
+    .ae-curador-mobile-subtitle {
+        color: #6f6478;
+        font-size: 0.92rem;
+        margin: 0 0 0.85rem;
+    }
+    .ae-curador-card {
+        background: rgba(255,255,255,0.82);
+        border: 1px solid rgba(212,168,79,0.24);
+        border-radius: 22px;
+        padding: 1rem;
+        box-shadow: 0 12px 34px rgba(43,23,71,0.06);
+        margin-bottom: 0.85rem;
+    }
+    .ae-curador-section-title {
+        color: #2B1747;
+        font-weight: 950;
+        font-size: 1.05rem;
+        margin: 0 0 0.45rem;
+    }
+    .ae-curador-analysis {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        margin: 0.35rem 0 0.1rem;
+    }
+    .ae-curador-chip {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 0.34rem 0.62rem;
+        background: rgba(244,238,252,0.92);
+        border: 1px solid rgba(193,177,231,0.72);
+        color: #4f2476;
+        font-size: 0.78rem;
+        font-weight: 850;
+    }
+    .ae-curador-question {
+        border: 1px solid rgba(193,177,231,0.72);
+        border-radius: 18px;
+        background: rgba(255,255,255,0.78);
+        padding: 0.85rem;
+        margin-bottom: 0.72rem;
+    }
+    .ae-curador-question strong {
+        color: #2B1747;
+        display: block;
+        margin-bottom: 0.35rem;
+    }
+    .ae-curador-final-text {
+        color: #2B1747;
+        line-height: 1.58;
+        font-size: 0.96rem;
+        background: rgba(255,250,241,0.92);
+        border: 1px solid rgba(212,168,79,0.26);
+        border-radius: 18px;
+        padding: 1rem;
+    }
+    .st-key-curador_aprofundar_btn button,
+    .st-key-curador_salvar_final_btn button,
+    .st-key-curador_salvar_direto_btn button {
+        background: #2B1747 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 14px !important;
+        font-weight: 950 !important;
+        min-height: 3rem !important;
+    }
+    .st-key-curador_gerar_narrativa_btn button {
+        background: linear-gradient(135deg, #f8dc92, #d4af37 62%, #b77a46) !important;
+        color: #1b0f2e !important;
+        border: none !important;
+        border-radius: 14px !important;
+        font-weight: 950 !important;
+        min-height: 3rem !important;
+    }
+    .st-key-curador_nova_memoria_btn button,
+    .st-key-curador_reanalisar_btn button {
+        border-radius: 14px !important;
+        font-weight: 900 !important;
+        min-height: 2.7rem !important;
+    }
+    .ae-curador-mobile-wrap input,
+    .ae-curador-mobile-wrap textarea {
+        font-size: 16px !important;
+    }
+    @media (max-width: 768px) {
+        .main .block-container,
+        .block-container,
+        [data-testid="stMainBlockContainer"] {
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 0.55rem 1rem 5rem !important;
+        }
+        .ae-curador-card { padding: 0.85rem; border-radius: 18px; }
+        .ae-curador-mobile-title { font-size: 1.48rem; }
     }
     </style>
     """, unsafe_allow_html=True)
 
     usuario_id = usuario.get("id")
+    if not usuario_id:
+        st.error("Usuário não identificado.")
+        return
+
+    _inicializar_chat()
+    assistente = st.session_state.get("assistente_obj")
+
+    prefixo = "curador_site_mobile_"
+    etapa_key = prefixo + "etapa"
+    if etapa_key not in st.session_state:
+        st.session_state[etapa_key] = "form"
+
+    contatos = []
     try:
-        contatos = db.listar_contatos_usuario(usuario_id)
+        contatos = db.listar_contatos_usuario(usuario_id) or []
     except Exception as exc:
         print("Erro ao listar contatos do curador:", exc)
-        contatos = []
-
     nomes_contatos = [c.get("nome_completo") for c in contatos if c.get("nome_completo")]
-    colecoes = [
-        ("livre", "Selecione uma coleção"), ("familia", "Família"),
-        ("viagens", "Viagens"), ("infancia", "Infância"),
-        ("carreira", "Carreira"), ("valores", "Valores"),
-        ("amor", "Amor"), ("conquista", "Conquistas"),
-    ]
-    mapa_colecoes = {valor: rotulo for valor, rotulo in colecoes}
 
-    st.markdown('<div class="ae-curador-hero"><h1>Curador de Histórias</h1><p>Registre uma memória. Depois o Curador identifica o contexto e faz perguntas adequadas.</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="ae-curador-mobile-wrap">', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="ae-curador-mobile-title">Nova memória</div>'
+        '<div class="ae-curador-mobile-subtitle">Escreva primeiro. Depois aprofunde a história com perguntas adequadas ao contexto.</div>',
+        unsafe_allow_html=True,
+    )
 
-    if st.session_state.get("curador_reset"):
-        for key in list(st.session_state.keys()):
-            if key.startswith("curador_") and key not in {"curador_reset"}:
-                del st.session_state[key]
-        st.session_state.pop("curador_reset", None)
+    etapa = st.session_state.get(etapa_key, "form")
 
-    st.markdown('<div class="ae-curador-grid">', unsafe_allow_html=True)
-    col_form, col_curador = st.columns([1.05, .95], gap="large")
-
-    with col_form:
-        st.markdown('<div class="ae-curador-card">', unsafe_allow_html=True)
-        st.markdown("## Nova memória")
-        media_cols = st.columns(2, gap="small")
-        with media_cols[0]:
-            foto_memoria = st.file_uploader("Foto (opcional)", type=["png", "jpg", "jpeg", "webp"], key="curador_memoria_foto")
-        with media_cols[1]:
-            video_memoria = st.file_uploader("Vídeo (opcional)", type=["mp4", "mov", "avi", "mkv"], key="curador_memoria_video")
-
-        titulo = st.text_input("Título ou início da memória", key="curador_memoria_titulo", placeholder="Ex: Almoço com a tia Denir")
-        conteudo = st.text_area("O que você já lembra?", key="curador_memoria_conteudo", height=118, placeholder="Escreva o que aconteceu, quem estava junto, onde foi ou por que isso importa...", max_chars=5000)
-        meta_col1, meta_col2 = st.columns(2, gap="small")
-        with meta_col1:
-            data_valor = st.date_input("Data aproximada", value=None, format="DD/MM/YYYY", key="curador_memoria_data_input")
-            data_aproximada = data_valor.strftime("%d/%m/%Y") if data_valor else ""
-        with meta_col2:
-            pessoas_relacionadas = st.multiselect("Pessoas relacionadas (opcional)", options=nomes_contatos, key="curador_memoria_pessoas", placeholder="Digite nomes e selecione")
-        colecao_valor = st.selectbox("Coleção (opcional)", options=[item[0] for item in colecoes], format_func=lambda valor: mapa_colecoes.get(valor, valor), key="curador_memoria_colecao")
-
-        gerar_disabled = not (titulo.strip() or conteudo.strip())
-        if st.button("Gerar perguntas do Curador", key="curador_gerar_plano", type="primary", use_container_width=True, disabled=gerar_disabled):
-            plano = _curador_gerar_plano(st.session_state.assistente_obj, titulo, conteudo, data_aproximada, pessoas_relacionadas, mapa_colecoes.get(colecao_valor, colecao_valor))
-            st.session_state["curador_plano"] = plano
-            st.session_state.pop("curador_resultado", None)
-            st.session_state.pop("curador_memoria_salva_id", None)
-            st.rerun()
-        if gerar_disabled:
-            st.caption("Informe pelo menos um título ou uma lembrança para o Curador analisar.")
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    plano = st.session_state.get("curador_plano")
-    respostas = {}
-
-    with col_curador:
-        st.markdown('<div class="ae-curador-card">', unsafe_allow_html=True)
-        st.markdown("## Curadoria")
-        if not plano:
-            st.markdown('<div class="ae-curador-note">O Curador ainda não analisou esta memória. Ele só gera perguntas depois de entender o contexto informado.</div>', unsafe_allow_html=True)
-        else:
-            tipo = plano.get("tipo") or "Outro"
-            st.markdown(f"<div class='ae-curador-pill'>Tipo identificado: {html.escape(tipo)}</div>", unsafe_allow_html=True)
-            perguntas = plano.get("perguntas") or []
-            for idx, pergunta in enumerate(perguntas):
-                st.markdown(f"<div class='ae-curador-question'><strong>{idx+1}. {html.escape(pergunta)}</strong></div>", unsafe_allow_html=True)
-                respostas[pergunta] = st.text_area("Responder ou pular", key=f"curador_resposta_{idx}", height=72, label_visibility="collapsed")
-
-            if st.button("Gerar narrativa e salvar memória", key="curador_salvar_final", type="primary", use_container_width=True):
-                if not (titulo.strip() or conteudo.strip()):
-                    st.warning("Informe um título ou texto inicial antes de salvar.")
-                else:
-                    try:
-                        resultado = _curador_gerar_narrativa(st.session_state.assistente_obj, titulo, conteudo, plano, respostas)
-                        conteudo_final = _curador_montar_conteudo_final(titulo, conteudo, plano, respostas, resultado)
-                        pessoas_final = plano.get("pessoas_identificadas") or pessoas_relacionadas
-                        memoria_id = db.salvar_memoria(
-                            usuario_id=usuario_id,
-                            conteudo=conteudo_final,
-                            titulo=titulo.strip() or "Memória sem título",
-                            categoria=plano.get("tipo") or colecao_valor or "Outro",
-                            origem="curador",
-                            data_evento=_curador_normalizar_data(data_aproximada),
-                            pessoas_relacionadas=", ".join(pessoas_final) if pessoas_final else None,
-                            visibilidade="contatos",
-                            contatos_ids=[],
-                        )
-                        if foto_memoria:
-                            upload_foto = storage.upload_streamlit_file(bucket="fotos", arquivo=foto_memoria, usuario_id=usuario_id, pasta="memorias")
-                            foto_id = db.adicionar_foto_com_acesso(usuario_id=usuario_id, titulo=titulo.strip() or "Foto da memória", descricao=conteudo_final[:300], categoria=plano.get("tipo") or colecao_valor or "Outro", caminho_arquivo=upload_foto["url"], contatos_ids=[], visibilidade="contatos")
-                            db.associar_foto_memoria(memoria_id=memoria_id, foto_id=foto_id)
-                        if video_memoria:
-                            upload_video = storage.upload_streamlit_file(bucket="videos", arquivo=video_memoria, usuario_id=usuario_id, pasta="memorias")
-                            video_id = db.adicionar_video_com_acesso(usuario_id=usuario_id, titulo=titulo.strip() or "Vídeo da memória", destinatario=", ".join(pessoas_relacionadas), caminho_arquivo=upload_video["url"], contatos_ids=[], categoria=plano.get("tipo") or colecao_valor or "Outro", visibilidade="contatos")
-                            db.associar_video_memoria(memoria_id=memoria_id, video_id=video_id)
-                        st.session_state["curador_memoria_salva_id"] = memoria_id
-                        st.session_state["curador_resultado"] = resultado
-                        st.success("Memória salva com narrativa e curadoria.")
-                        st.rerun()
-                    except Exception as exc:
-                        print("Erro ao salvar memória curada:", exc)
-                        st.error("Não foi possível salvar a memória agora.")
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    resultado = st.session_state.get("curador_resultado")
-    if resultado:
-        st.markdown("### Narrativa final")
-        st.markdown(f"<div class='ae-curador-card ae-curador-preview'>{_safe_text(resultado.get('narrativa') or '')}</div>", unsafe_allow_html=True)
-        analise_html = []
-        for rotulo, chave in [("Valores percebidos", "valores_percebidos"), ("Pessoas identificadas", "pessoas_identificadas"), ("Locais identificados", "locais_identificados"), ("Datas identificadas", "datas_identificadas")]:
-            itens = resultado.get(chave) or plano.get(chave) or []
-            if itens:
-                analise_html.append(f"<div><strong>{html.escape(rotulo)}:</strong> {html.escape(', '.join(itens))}</div>")
-        if analise_html:
-            st.markdown("### Análise da memória")
-            st.markdown("<div class='ae-curador-card'>" + "".join(analise_html) + "</div>", unsafe_allow_html=True)
-        b1, b2 = st.columns(2)
-        with b1:
-            if st.button("Ver em Minha História", key="curador_ver_historia", use_container_width=True):
+    if etapa == "salvo":
+        st.success("Memória salva.")
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.button("Criar outra memória", key="curador_nova_memoria_btn", use_container_width=True):
+                for key in list(st.session_state.keys()):
+                    if key.startswith(prefixo):
+                        del st.session_state[key]
+                st.rerun()
+        with c2:
+            if st.button("Ver em Minha História", key="curador_ver_historia_btn", use_container_width=True):
                 st.session_state.pagina_atual = "minha_historia"
                 st.rerun()
-        with b2:
-            if st.button("Criar outra memória", key="curador_nova_memoria", use_container_width=True):
-                st.session_state["curador_reset"] = True
+        st.markdown('</div>', unsafe_allow_html=True)
+        return
+
+    with st.container():
+        st.markdown('<div class="ae-curador-card">', unsafe_allow_html=True)
+        titulo = st.text_input("Título", key=prefixo + "titulo", placeholder="Título")
+        data_memoria = st.date_input(
+            "Data da memória",
+            key=prefixo + "data",
+            value=None,
+            format="DD/MM/YYYY",
+        )
+        categoria_visual = st.selectbox(
+            "Categoria",
+            ["Momentos", "Família", "Viagens", "Infância", "Trabalho", "Aprendizados", "Conquistas", "Outro"],
+            key=prefixo + "categoria_visual",
+        )
+        compartilhar = st.toggle("Compartilhar com familiares", key=prefixo + "compartilhar", value=False)
+        pessoas_relacionadas = st.multiselect(
+            "Quem participou deste momento?",
+            options=nomes_contatos,
+            key=prefixo + "pessoas",
+            placeholder="Adicionar pessoas",
+        )
+        conteudo = st.text_area(
+            "O que aconteceu?",
+            key=prefixo + "conteudo",
+            placeholder="O que aconteceu?",
+            height=170,
+        )
+        with st.expander("Adicionar foto ou vídeo", expanded=False):
+            c_foto, c_video = st.columns(2)
+            with c_foto:
+                foto_memoria = st.file_uploader(
+                    "Foto",
+                    type=["png", "jpg", "jpeg", "webp"],
+                    key=prefixo + "foto",
+                )
+            with c_video:
+                video_memoria = st.file_uploader(
+                    "Vídeo",
+                    type=["mp4", "mov", "avi", "mkv"],
+                    key=prefixo + "video",
+                )
+        c1, c2 = st.columns([1, 1])
+        with c1:
+            aprofundar = st.button("Aprofundar esta história", key="curador_aprofundar_btn", use_container_width=True)
+        with c2:
+            salvar_direto = st.button("Salvar memória", key="curador_salvar_direto_btn", use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    if aprofundar:
+        if not titulo.strip() and not conteudo.strip():
+            st.warning("Escreva um título ou uma memória antes de aprofundar.")
+        elif not assistente:
+            st.error("Curador indisponível no momento.")
+        else:
+            with st.spinner("Analisando a memória..."):
+                try:
+                    analise = _curador_analisar_memoria_com_ia(
+                        assistente,
+                        titulo,
+                        conteudo,
+                        data_memoria,
+                        pessoas_relacionadas,
+                        categoria_visual,
+                    )
+                    st.session_state[prefixo + "analise"] = analise
+                    st.session_state[etapa_key] = "perguntas"
+                    st.rerun()
+                except Exception as exc:
+                    print("Erro ao analisar memória com IA:", exc)
+                    st.error("Não foi possível gerar perguntas contextualizadas agora.")
+
+    if salvar_direto:
+        if st.session_state.get(prefixo + "salvando"):
+            st.warning("Esta memória já está sendo salva.")
+        elif not conteudo.strip():
+            st.warning("Escreva a memória antes de salvar.")
+        else:
+            st.session_state[prefixo + "salvando"] = True
+            try:
+                memoria_id = db.salvar_memoria(
+                    usuario_id=usuario_id,
+                    conteudo=conteudo.strip(),
+                    titulo=titulo.strip() or "Memória sem título",
+                    categoria=categoria_visual,
+                    origem="curador",
+                    data_evento=data_memoria.strftime("%Y-%m-%d") if data_memoria else None,
+                    pessoas_relacionadas=", ".join(pessoas_relacionadas) if pessoas_relacionadas else None,
+                    visibilidade="contatos" if compartilhar else "privado",
+                    contatos_ids=[],
+                )
+                if foto_memoria:
+                    upload_foto = storage.upload_streamlit_file("fotos", foto_memoria, usuario_id, "memorias")
+                    foto_id = db.adicionar_foto_com_acesso(usuario_id, titulo.strip() or "Foto da memória", conteudo.strip()[:300], categoria_visual, upload_foto["url"], [], "contatos" if compartilhar else "privado")
+                    db.associar_foto_memoria(memoria_id=memoria_id, foto_id=foto_id)
+                if video_memoria:
+                    upload_video = storage.upload_streamlit_file("videos", video_memoria, usuario_id, "memorias")
+                    video_id = db.adicionar_video_com_acesso(usuario_id, titulo.strip() or "Vídeo da memória", ", ".join(pessoas_relacionadas), upload_video["url"], [], categoria_visual, "contatos" if compartilhar else "privado")
+                    db.associar_video_memoria(memoria_id=memoria_id, video_id=video_id)
+                st.session_state[prefixo + "memoria_id"] = memoria_id
+                st.session_state[etapa_key] = "salvo"
                 st.rerun()
+            except Exception as exc:
+                st.session_state[prefixo + "salvando"] = False
+                print("Erro ao salvar memória:", exc)
+                st.error("Não foi possível salvar a memória agora.")
+
+    if etapa == "perguntas":
+        analise = st.session_state.get(prefixo + "analise") or {}
+        perguntas = analise.get("perguntas") or []
+        st.markdown('<div class="ae-curador-card">', unsafe_allow_html=True)
+        st.markdown('<div class="ae-curador-section-title">Aprofundar esta história</div>', unsafe_allow_html=True)
+        st.markdown(
+            f'<span class="ae-curador-chip">Tipo: {html.escape(analise.get("tipo") or "Outro")}</span>',
+            unsafe_allow_html=True,
+        )
+        if analise.get("evidencia_tipo"):
+            st.caption(analise.get("evidencia_tipo"))
+        respostas = {}
+        for idx, pergunta in enumerate(perguntas, start=1):
+            st.markdown(f'<div class="ae-curador-question"><strong>{idx}. {html.escape(pergunta)}</strong>', unsafe_allow_html=True)
+            respostas[pergunta] = st.text_area(
+                "Resposta opcional",
+                key=f"{prefixo}resposta_{idx}",
+                label_visibility="collapsed",
+                placeholder="Responder ou deixar em branco para pular",
+                height=92,
+            )
+            st.markdown('</div>', unsafe_allow_html=True)
+        c1, c2 = st.columns(2)
+        with c1:
+            gerar_narrativa = st.button("Gerar narrativa", key="curador_gerar_narrativa_btn", use_container_width=True)
+        with c2:
+            if st.button("Refazer perguntas", key="curador_reanalisar_btn", use_container_width=True):
+                st.session_state.pop(prefixo + "analise", None)
+                st.session_state[etapa_key] = "form"
+                st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        if gerar_narrativa:
+            if not assistente:
+                st.error("Curador indisponível no momento.")
+            else:
+                with st.spinner("Gerando narrativa..."):
+                    try:
+                        narrativa = _curador_gerar_narrativa_com_ia(
+                            assistente,
+                            titulo,
+                            conteudo,
+                            data_memoria,
+                            pessoas_relacionadas,
+                            categoria_visual,
+                            analise,
+                            respostas,
+                        )
+                        st.session_state[prefixo + "respostas"] = respostas
+                        st.session_state[prefixo + "narrativa"] = narrativa
+                        st.session_state[etapa_key] = "final"
+                        st.rerun()
+                    except Exception as exc:
+                        print("Erro ao gerar narrativa:", exc)
+                        st.error("Não foi possível gerar a narrativa agora.")
+
+    if etapa == "final":
+        analise = st.session_state.get(prefixo + "analise") or {}
+        narrativa = st.session_state.get(prefixo + "narrativa") or {}
+        respostas = st.session_state.get(prefixo + "respostas") or {}
+        conteudo_salvo = _curador_montar_conteudo_salvo(narrativa, analise, respostas, conteudo)
+        st.markdown('<div class="ae-curador-card">', unsafe_allow_html=True)
+        st.markdown('<div class="ae-curador-section-title">Narrativa final</div>', unsafe_allow_html=True)
+        narrativa_editada = st.text_area(
+            "Revise antes de salvar",
+            value=conteudo_salvo,
+            key=prefixo + "narrativa_editada",
+            height=320,
+        )
+        st.markdown('<div class="ae-curador-analysis">', unsafe_allow_html=True)
+        st.markdown(f'<span class="ae-curador-chip">Tipo: {html.escape(analise.get("tipo") or "Outro")}</span>', unsafe_allow_html=True)
+        for valor in (narrativa.get("valores_percebidos") or [])[:8]:
+            st.markdown(f'<span class="ae-curador-chip">{html.escape(valor)}</span>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+        salvar_final = st.button("Salvar memória", key="curador_salvar_final_btn", use_container_width=True, disabled=bool(st.session_state.get(prefixo + "memoria_id")))
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        if salvar_final:
+            if st.session_state.get(prefixo + "memoria_id"):
+                st.warning("Esta memória já foi salva.")
+            else:
+                try:
+                    memoria_id = db.salvar_memoria(
+                        usuario_id=usuario_id,
+                        conteudo=narrativa_editada.strip(),
+                        titulo=titulo.strip() or "Memória sem título",
+                        categoria=analise.get("tipo") or categoria_visual or "Outro",
+                        origem="curador",
+                        data_evento=data_memoria.strftime("%Y-%m-%d") if data_memoria else None,
+                        pessoas_relacionadas=", ".join(pessoas_relacionadas) if pessoas_relacionadas else None,
+                        visibilidade="contatos" if compartilhar else "privado",
+                        contatos_ids=[],
+                    )
+                    if foto_memoria:
+                        upload_foto = storage.upload_streamlit_file("fotos", foto_memoria, usuario_id, "memorias")
+                        foto_id = db.adicionar_foto_com_acesso(usuario_id, titulo.strip() or "Foto da memória", narrativa_editada.strip()[:300], analise.get("tipo") or categoria_visual, upload_foto["url"], [], "contatos" if compartilhar else "privado")
+                        db.associar_foto_memoria(memoria_id=memoria_id, foto_id=foto_id)
+                    if video_memoria:
+                        upload_video = storage.upload_streamlit_file("videos", video_memoria, usuario_id, "memorias")
+                        video_id = db.adicionar_video_com_acesso(usuario_id, titulo.strip() or "Vídeo da memória", ", ".join(pessoas_relacionadas), upload_video["url"], [], analise.get("tipo") or categoria_visual, "contatos" if compartilhar else "privado")
+                        db.associar_video_memoria(memoria_id=memoria_id, video_id=video_id)
+                    st.session_state[prefixo + "memoria_id"] = memoria_id
+                    st.session_state[etapa_key] = "salvo"
+                    st.rerun()
+                except Exception as exc:
+                    print("Erro ao salvar narrativa final:", exc)
+                    st.error("Não foi possível salvar a memória agora.")
 
     st.markdown('</div>', unsafe_allow_html=True)
 

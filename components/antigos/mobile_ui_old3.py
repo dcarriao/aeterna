@@ -309,16 +309,26 @@ def aplicar_css_mobile():
 }
 
 
+/* FIX FINAL MOBILE */
 @media (max-width: 768px) {
-    .main .block-container, .block-container, [data-testid="stMainBlockContainer"] {
+    [data-testid="stMainBlockContainer"],
+    .block-container {
         padding-top: 0 !important;
-        padding-left: .8rem !important;
-        padding-right: .8rem !important;
-        margin-top: -1.2rem !important;
+        padding-left: 0.65rem !important;
+        padding-right: 0.65rem !important;
         max-width: 100% !important;
+        width: 100% !important;
     }
-    [data-testid="stSidebar"] { padding-top: 0 !important; }
-    .ae-sidebar-brand { margin-top: -0.65rem !important; padding-top: 0 !important; }
+    [data-testid="stSidebar"] > div:first-child,
+    [data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {
+        padding-top: 0 !important;
+    }
+    .ae-sidebar-brand { padding-top: 0 !important; margin-top: -0.3rem !important; }
+    .ae-psc {
+        background: linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.035)) !important;
+        border: 1px solid rgba(212,175,55,0.44) !important;
+    }
+    .ae-psc-badge { background: rgba(242,197,114,0.18) !important; color:#F2C572 !important; }
 }
 </style>
 """, unsafe_allow_html=True)
