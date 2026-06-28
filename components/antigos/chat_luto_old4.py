@@ -261,55 +261,37 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
     .main .block-container,
     .block-container,
     [data-testid="stMainBlockContainer"] {
-        padding-top: 0 !important;
+        padding-top: 0.25rem !important;
         padding-bottom: 0.75rem !important;
-        max-width: 880px !important;
-        width: min(880px, calc(100vw - 260px)) !important;
+        max-width: 980px !important;
+        width: min(980px, calc(100vw - 260px)) !important;
         margin-left: auto !important;
         margin-right: auto !important;
     }
     .ae-curador-mobile-wrap {
-        max-width: 760px;
-        margin: -1.2rem auto 0;
+        max-width: 780px;
+        margin: 0 auto;
     }
     .ae-curador-mobile-title {
         color: #2B1747;
         font-size: 1.78rem;
         line-height: 1.05;
         font-weight: 950;
-        margin: 0 0 0.15rem;
+        margin: 0 0 0.25rem;
         letter-spacing: -0.03em;
     }
     .ae-curador-mobile-subtitle {
         color: #6f6478;
         font-size: 0.92rem;
-        margin: 0 0 0.55rem;
+        margin: 0 0 0.85rem;
     }
     .ae-curador-card {
-        margin-bottom: 0.75rem;
-    }
-    .ae-curador-media-row {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 0.75rem;
-        margin: 0.2rem 0 0.75rem;
-    }
-    .ae-curador-actions-row {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 0.65rem;
-        margin-top: 0.75rem;
-    }
-    div[data-testid="stFileUploader"] section {
-        background: rgba(239,231,214,0.72) !important;
-        border: 1px solid rgba(212,168,79,0.20) !important;
-        border-radius: 14px !important;
-        min-height: 88px !important;
-    }
-    .st-key-curador_aprofundar_btn button {
-        background: transparent !important;
-        color: #2B1747 !important;
-        border: 1.5px solid rgba(43,23,71,0.55) !important;
+        background: rgba(255,255,255,0.82);
+        border: 1px solid rgba(212,168,79,0.24);
+        border-radius: 22px;
+        padding: 1rem;
+        box-shadow: 0 12px 34px rgba(43,23,71,0.06);
+        margin-bottom: 0.85rem;
     }
     .ae-curador-section-title {
         color: #2B1747;
@@ -391,8 +373,7 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
             max-width: 100% !important;
             padding: 0.55rem 1rem 5rem !important;
         }
-        .ae-curador-mobile-wrap { margin-top: 0 !important; }
-        .ae-curador-media-row { grid-template-columns: 1fr !important; }
+        .ae-curador-card { padding: 0.85rem; border-radius: 18px; }
         .ae-curador-mobile-title { font-size: 1.48rem; }
     }
     </style>
@@ -443,52 +424,53 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         st.markdown('</div>', unsafe_allow_html=True)
         return
 
-    st.caption("Mídia opcional")
-    st.markdown('<div class="ae-curador-media-row">', unsafe_allow_html=True)
-    c_foto, c_video = st.columns(2, gap="small")
-    with c_foto:
-        foto_memoria = st.file_uploader(
-            "Adicionar foto",
-            type=["png", "jpg", "jpeg", "webp"],
-            key=prefixo + "foto",
+    with st.container():
+        st.markdown('<div class="ae-curador-card">', unsafe_allow_html=True)
+        titulo = st.text_input("Título", key=prefixo + "titulo", placeholder="Título")
+        data_memoria = st.date_input(
+            "Data da memória",
+            key=prefixo + "data",
+            value=None,
+            format="DD/MM/YYYY",
         )
-    with c_video:
-        video_memoria = st.file_uploader(
-            "Adicionar vídeo",
-            type=["mp4", "mov", "avi", "mkv"],
-            key=prefixo + "video",
+        categoria_visual = st.selectbox(
+            "Categoria",
+            ["Momentos", "Família", "Viagens", "Infância", "Trabalho", "Aprendizados", "Conquistas", "Outro"],
+            key=prefixo + "categoria_visual",
         )
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    titulo = st.text_input("Título", key=prefixo + "titulo", placeholder="Título")
-    data_memoria = st.date_input(
-        "Data da memória",
-        key=prefixo + "data",
-        value=None,
-        format="DD/MM/YYYY",
-    )
-    categoria_visual = st.selectbox(
-        "Categoria",
-        ["Momentos", "Família", "Viagens", "Infância", "Trabalho", "Aprendizados", "Conquistas", "Outro"],
-        key=prefixo + "categoria_visual",
-    )
-    compartilhar = st.toggle("Compartilhar com familiares", key=prefixo + "compartilhar", value=False)
-    pessoas_relacionadas = st.multiselect(
-        "Quem participou deste momento?",
-        options=nomes_contatos,
-        key=prefixo + "pessoas",
-        placeholder="Adicionar pessoas",
-    )
-    conteudo = st.text_area(
-        "O que aconteceu?",
-        key=prefixo + "conteudo",
-        placeholder="O que aconteceu?",
-        height=150,
-    )
-    st.markdown('<div class="ae-curador-actions-row">', unsafe_allow_html=True)
-    aprofundar = st.button("Aprofundar esta história", key="curador_aprofundar_btn", use_container_width=True)
-    salvar_direto = st.button("Salvar memória", key="curador_salvar_direto_btn", use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+        compartilhar = st.toggle("Compartilhar com familiares", key=prefixo + "compartilhar", value=False)
+        pessoas_relacionadas = st.multiselect(
+            "Quem participou deste momento?",
+            options=nomes_contatos,
+            key=prefixo + "pessoas",
+            placeholder="Adicionar pessoas",
+        )
+        conteudo = st.text_area(
+            "O que aconteceu?",
+            key=prefixo + "conteudo",
+            placeholder="O que aconteceu?",
+            height=170,
+        )
+        with st.expander("Adicionar foto ou vídeo", expanded=False):
+            c_foto, c_video = st.columns(2)
+            with c_foto:
+                foto_memoria = st.file_uploader(
+                    "Foto",
+                    type=["png", "jpg", "jpeg", "webp"],
+                    key=prefixo + "foto",
+                )
+            with c_video:
+                video_memoria = st.file_uploader(
+                    "Vídeo",
+                    type=["mp4", "mov", "avi", "mkv"],
+                    key=prefixo + "video",
+                )
+        c1, c2 = st.columns([1, 1])
+        with c1:
+            aprofundar = st.button("Aprofundar esta história", key="curador_aprofundar_btn", use_container_width=True)
+        with c2:
+            salvar_direto = st.button("Salvar memória", key="curador_salvar_direto_btn", use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     if aprofundar:
         if not titulo.strip() and not conteudo.strip():
@@ -551,6 +533,7 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
     if etapa == "perguntas":
         analise = st.session_state.get(prefixo + "analise") or {}
         perguntas = analise.get("perguntas") or []
+        st.markdown('<div class="ae-curador-card">', unsafe_allow_html=True)
         st.markdown('<div class="ae-curador-section-title">Aprofundar esta história</div>', unsafe_allow_html=True)
         st.markdown(
             f'<span class="ae-curador-chip">Tipo: {html.escape(analise.get("tipo") or "Outro")}</span>',
@@ -577,6 +560,7 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
                 st.session_state.pop(prefixo + "analise", None)
                 st.session_state[etapa_key] = "form"
                 st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
         if gerar_narrativa:
             if not assistente:
@@ -607,6 +591,7 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         narrativa = st.session_state.get(prefixo + "narrativa") or {}
         respostas = st.session_state.get(prefixo + "respostas") or {}
         conteudo_salvo = _curador_montar_conteudo_salvo(narrativa, analise, respostas, conteudo)
+        st.markdown('<div class="ae-curador-card">', unsafe_allow_html=True)
         st.markdown('<div class="ae-curador-section-title">Narrativa final</div>', unsafe_allow_html=True)
         narrativa_editada = st.text_area(
             "Revise antes de salvar",
@@ -620,6 +605,7 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
             st.markdown(f'<span class="ae-curador-chip">{html.escape(valor)}</span>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
         salvar_final = st.button("Salvar memória", key="curador_salvar_final_btn", use_container_width=True, disabled=bool(st.session_state.get(prefixo + "memoria_id")))
+        st.markdown('</div>', unsafe_allow_html=True)
 
         if salvar_final:
             if st.session_state.get(prefixo + "memoria_id"):
