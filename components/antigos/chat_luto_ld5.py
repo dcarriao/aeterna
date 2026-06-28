@@ -262,30 +262,28 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
     .block-container,
     [data-testid="stMainBlockContainer"] {
         padding-top: 0 !important;
-        padding-bottom: 0.45rem !important;
-        max-width: 980px !important;
-        width: min(980px, calc(100vw - 245px)) !important;
-        margin-left: 1.6rem !important;
+        padding-bottom: 0.75rem !important;
+        max-width: 880px !important;
+        width: min(880px, calc(100vw - 260px)) !important;
+        margin-left: auto !important;
         margin-right: auto !important;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
     }
     .ae-curador-mobile-wrap {
-        max-width: 940px;
-        margin: -4.4rem 0 0 0;
+        max-width: 760px;
+        margin: -1.2rem auto 0;
     }
     .ae-curador-mobile-title {
         color: #2B1747;
-        font-size: 1.52rem;
+        font-size: 1.78rem;
         line-height: 1.05;
         font-weight: 950;
-        margin: 0 0 0.08rem;
+        margin: 0 0 0.15rem;
         letter-spacing: -0.03em;
     }
     .ae-curador-mobile-subtitle {
         color: #6f6478;
-        font-size: 0.82rem;
-        margin: 0 0 0.35rem;
+        font-size: 0.92rem;
+        margin: 0 0 0.55rem;
     }
     .ae-curador-card {
         margin-bottom: 0.75rem;
@@ -293,8 +291,8 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
     .ae-curador-media-row {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 0.65rem;
-        margin: 0.05rem 0 0.48rem;
+        gap: 0.75rem;
+        margin: 0.2rem 0 0.75rem;
     }
     .ae-curador-actions-row {
         display: grid;
@@ -306,7 +304,7 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         background: rgba(239,231,214,0.72) !important;
         border: 1px solid rgba(212,168,79,0.20) !important;
         border-radius: 14px !important;
-        min-height: 64px !important;
+        min-height: 88px !important;
     }
     .st-key-curador_aprofundar_btn button {
         background: transparent !important;
@@ -365,7 +363,7 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         border: none !important;
         border-radius: 14px !important;
         font-weight: 950 !important;
-        min-height: 2.65rem !important;
+        min-height: 3rem !important;
     }
     .st-key-curador_gerar_narrativa_btn button {
         background: linear-gradient(135deg, #f8dc92, #d4af37 62%, #b77a46) !important;
@@ -373,34 +371,17 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         border: none !important;
         border-radius: 14px !important;
         font-weight: 950 !important;
-        min-height: 2.65rem !important;
+        min-height: 3rem !important;
     }
     .st-key-curador_nova_memoria_btn button,
     .st-key-curador_reanalisar_btn button {
         border-radius: 14px !important;
         font-weight: 900 !important;
-        min-height: 2.45rem !important;
+        min-height: 2.7rem !important;
     }
     .ae-curador-mobile-wrap input,
     .ae-curador-mobile-wrap textarea {
         font-size: 16px !important;
-    }
-
-    .ae-curador-mobile-wrap [data-testid="stVerticalBlock"] { gap: 0.42rem !important; }
-    .ae-curador-mobile-wrap label, .ae-curador-mobile-wrap [data-testid="stWidgetLabel"] p {
-        font-size: 0.78rem !important;
-        margin-bottom: 0.12rem !important;
-    }
-    .ae-curador-mobile-wrap .stTextInput input,
-    .ae-curador-mobile-wrap .stDateInput input,
-    .ae-curador-mobile-wrap .stSelectbox div[data-baseweb="select"] > div,
-    .ae-curador-mobile-wrap .stMultiSelect div[data-baseweb="select"] > div {
-        min-height: 2.2rem !important;
-        font-size: 0.86rem !important;
-    }
-    .ae-curador-mobile-wrap .stTextArea textarea {
-        min-height: 118px !important;
-        font-size: 0.86rem !important;
     }
     @media (max-width: 768px) {
         .main .block-container,
@@ -480,12 +461,12 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
     st.markdown('</div>', unsafe_allow_html=True)
 
     titulo = st.text_input("Título", key=prefixo + "titulo", placeholder="Título")
-    data_memoria_txt = st.text_input(
+    data_memoria = st.date_input(
         "Data da memória",
-        key=prefixo + "data_txt",
-        placeholder="DD/MM/AAAA",
+        key=prefixo + "data",
+        value=None,
+        format="DD/MM/YYYY",
     )
-    data_memoria = _curador_normalizar_data(data_memoria_txt)
     categoria_visual = st.selectbox(
         "Categoria",
         ["Momentos", "Família", "Viagens", "Infância", "Trabalho", "Aprendizados", "Conquistas", "Outro"],
@@ -502,7 +483,7 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         "O que aconteceu?",
         key=prefixo + "conteudo",
         placeholder="O que aconteceu?",
-        height=118,
+        height=150,
     )
     st.markdown('<div class="ae-curador-actions-row">', unsafe_allow_html=True)
     aprofundar = st.button("Aprofundar esta história", key="curador_aprofundar_btn", use_container_width=True)
@@ -546,7 +527,7 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
                     titulo=titulo.strip() or "Memória sem título",
                     categoria=categoria_visual,
                     origem="curador",
-                    data_evento=data_memoria if data_memoria else None,
+                    data_evento=data_memoria.strftime("%Y-%m-%d") if data_memoria else None,
                     pessoas_relacionadas=", ".join(pessoas_relacionadas) if pessoas_relacionadas else None,
                     visibilidade="contatos" if compartilhar else "privado",
                     contatos_ids=[],
@@ -651,7 +632,7 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
                         titulo=titulo.strip() or "Memória sem título",
                         categoria=analise.get("tipo") or categoria_visual or "Outro",
                         origem="curador",
-                        data_evento=data_memoria if data_memoria else None,
+                        data_evento=data_memoria.strftime("%Y-%m-%d") if data_memoria else None,
                         pessoas_relacionadas=", ".join(pessoas_relacionadas) if pessoas_relacionadas else None,
                         visibilidade="contatos" if compartilhar else "privado",
                         contatos_ids=[],

@@ -4458,55 +4458,41 @@ def render_sidebar_principal(
         _psc_contrib_danger = " ae-psc-bar-danger" if _psc_contrib_pct >= 90 else ""
         st.markdown("""<style>
 .ae-psc {
-    background:
-        radial-gradient(circle at 88% 12%, rgba(242,197,114,0.16), transparent 34%),
-        linear-gradient(180deg, rgba(255,255,255,0.085), rgba(255,255,255,0.045)) !important;
-    border: 1px solid rgba(212,175,55,0.48) !important;
-    border-radius: 18px !important;
-    padding: 15px 14px 14px !important;
-    margin: 12px 0 8px 0 !important;
-    font-family: 'Inter', sans-serif !important;
-    box-sizing: border-box !important;
-    box-shadow: 0 14px 34px rgba(0,0,0,0.18) !important;
+    background: #23105D !important;
+    border: 1.5px solid #6A4DBF !important;
+    border-radius: 16px;
+    padding: 16px;
+    margin: 4px 0 0 0;
+    font-family: 'Inter', sans-serif;
+    box-sizing: border-box;
 }
 .ae-psc-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
-    margin-bottom: 11px;
+    margin-bottom: 12px;
 }
 .ae-psc-label {
-    color: #FFFFFF !important;
-    font-size: 11px !important;
-    font-weight: 900 !important;
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.6px;
-    line-height: 1.15;
 }
 .ae-psc-badge {
-    background: rgba(242,197,114,0.16) !important;
-    color: #F2C572 !important;
-    border: 1px solid rgba(242,197,114,0.42) !important;
-    font-size: 9px !important;
-    font-weight: 900 !important;
-    padding: 3px 8px !important;
-    border-radius: 999px !important;
-    white-space: nowrap;
+    background: #4A3297;
+    color: #C8B8F0;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
 }
-.ae-psc-limit-note {
-    background: rgba(242,197,114,0.10) !important;
-    border: 1px solid rgba(242,197,114,0.26) !important;
-    border-radius: 12px !important;
-    color: rgba(255,255,255,0.86) !important;
-    font-size: 10px !important;
-    line-height: 1.35 !important;
-    padding: 8px 9px !important;
-    margin: 0 0 10px 0 !important;
+.ae-psc-metric {
+    margin-bottom: 9px;
 }
-.ae-psc-limit-note strong { color: #F2C572 !important; }
-.ae-psc-metric { margin-bottom: 9px !important; }
-.ae-psc-metric:last-child { margin-bottom: 0 !important; }
+.ae-psc-metric:last-child {
+    margin-bottom: 0;
+}
 .ae-psc-metric-row {
     display: flex;
     justify-content: space-between;
@@ -4514,68 +4500,62 @@ def render_sidebar_principal(
     margin-bottom: 4px;
 }
 .ae-psc-metric-name {
-    color: rgba(255,255,255,0.78) !important;
-    font-size: 11px !important;
-    font-weight: 800 !important;
+    color: #B8A8E8;
+    font-size: 11px;
+    font-weight: 400;
 }
 .ae-psc-metric-count {
-    color: #FFFFFF !important;
-    font-size: 10px !important;
-    font-weight: 900 !important;
+    color: #FFFFFF;
+    font-size: 10px;
+    font-weight: 600;
 }
 .ae-psc-bar-track {
-    height: 4px !important;
-    background: rgba(255,255,255,0.16) !important;
-    border-radius: 999px !important;
-    overflow: hidden !important;
+    height: 4px;
+    background: #3D2680;
+    border-radius: 999px;
+    overflow: hidden;
 }
 .ae-psc-bar-fill {
-    height: 100% !important;
-    background: linear-gradient(90deg, #F8DC92, #D4AF37, #B77A46) !important;
-    border-radius: 999px !important;
+    height: 100%;
+    background: #E3B12D;
+    border-radius: 999px;
 }
-.ae-psc-bar-danger { background: linear-gradient(90deg, #f2c572, #e05858) !important; }
+.ae-psc-bar-danger {
+    background: #E05858 !important;
+}
 .ae-psc-divider {
-    border: none !important;
-    border-top: 1px solid rgba(212,175,55,0.22) !important;
-    margin: 12px 0 10px 0 !important;
-}
-section[data-testid="stSidebar"] .ae-psc-btn-wrap {
-    margin: 0 0 10px 0 !important;
+    border: none;
+    border-top: 1px solid #4A3297;
+    margin: 12px 0 10px 0;
 }
 section[data-testid="stSidebar"] .ae-psc-btn-wrap > div > button,
 section[data-testid="stSidebar"] .ae-psc-btn-wrap > div > div > button {
-    background: linear-gradient(135deg, #F8DC92 0%, #D4AF37 58%, #B77A46 100%) !important;
-    color: #1B0F2E !important;
-    border: 0 !important;
-    border-radius: 13px !important;
+    background: #5A2BB5 !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 12px !important;
     font-size: 12px !important;
-    font-weight: 950 !important;
+    font-weight: 600 !important;
     font-family: 'Inter', sans-serif !important;
-    min-height: 38px !important;
+    height: 34px !important;
     width: 100% !important;
-    padding: 0 10px !important;
-    box-shadow: 0 10px 22px rgba(212,175,55,0.20) !important;
+    margin-top: 0 !important;
+    padding: 0 8px !important;
+    cursor: pointer !important;
+    transition: background 0.2s !important;
 }
 section[data-testid="stSidebar"] .ae-psc-btn-wrap > div > button:hover,
 section[data-testid="stSidebar"] .ae-psc-btn-wrap > div > div > button:hover {
-    background: linear-gradient(135deg, #FFF0BF 0%, #F2C572 42%, #D4AF37 100%) !important;
-    color: #1B0F2E !important;
-    border: 0 !important;
+    background: #4A22A4 !important;
+    border: none !important;
+    color: #FFFFFF !important;
 }
 </style>
 """, unsafe_allow_html=True)
-        _psc_acima_limite = _psc_qtd_memorias >= _psc_lim_memorias
-        _psc_cta_texto = "Atualizar plano" if _psc_acima_limite else "Ver planos Premium"
-        _psc_nota = (
-            "<strong>Limite atingido.</strong> Atualize para continuar preservando novas memórias."
-            if _psc_acima_limite
-            else "Planos pagos liberam mais memórias, fotos, vídeos e contribuições."
-        )
-        st.markdown(f"""<div class="ae-psc"><div class="ae-psc-header"><span class="ae-psc-label">Seu Plano</span><span class="ae-psc-badge">Gratuito</span></div><div class="ae-psc-limit-note">{_psc_nota}</div><div class="ae-psc-metric"><div class="ae-psc-metric-row"><span class="ae-psc-metric-name">Memórias</span><span class="ae-psc-metric-count">{_psc_qtd_memorias} / {_psc_lim_memorias}</span></div><div class="ae-psc-bar-track"><div class="ae-psc-bar-fill{_psc_mem_danger}" style="width:{_psc_mem_pct}%"></div></div></div><div class="ae-psc-metric"><div class="ae-psc-metric-row"><span class="ae-psc-metric-name">Fotos e vídeos</span><span class="ae-psc-metric-count">{_psc_qtd_cofre} / {_psc_lim_medias}</span></div><div class="ae-psc-bar-track"><div class="ae-psc-bar-fill{_psc_media_danger}" style="width:{_psc_media_pct}%"></div></div></div><div class="ae-psc-metric"><div class="ae-psc-metric-row"><span class="ae-psc-metric-name">Contribuições</span><span class="ae-psc-metric-count">{_psc_qtd_contatos} / {_psc_lim_contribs}</span></div><div class="ae-psc-bar-track"><div class="ae-psc-bar-fill{_psc_contrib_danger}" style="width:{_psc_contrib_pct}%"></div></div></div><hr class="ae-psc-divider"/></div>""", unsafe_allow_html=True)
+        st.markdown(f"""<div class="ae-psc"><div class="ae-psc-header"><span class="ae-psc-label">Seu Plano</span><span class="ae-psc-badge">Gratuito</span></div><div class="ae-psc-metric"><div class="ae-psc-metric-row"><span class="ae-psc-metric-name">Memórias</span><span class="ae-psc-metric-count">{_psc_qtd_memorias} / {_psc_lim_memorias}</span></div><div class="ae-psc-bar-track"><div class="ae-psc-bar-fill{_psc_mem_danger}" style="width:{_psc_mem_pct}%"></div></div></div><div class="ae-psc-metric"><div class="ae-psc-metric-row"><span class="ae-psc-metric-name">Fotos e vídeos</span><span class="ae-psc-metric-count">{_psc_qtd_cofre} / {_psc_lim_medias}</span></div><div class="ae-psc-bar-track"><div class="ae-psc-bar-fill{_psc_media_danger}" style="width:{_psc_media_pct}%"></div></div></div><div class="ae-psc-metric"><div class="ae-psc-metric-row"><span class="ae-psc-metric-name">Contribuições</span><span class="ae-psc-metric-count">{_psc_qtd_contatos} / {_psc_lim_contribs}</span></div><div class="ae-psc-bar-track"><div class="ae-psc-bar-fill{_psc_contrib_danger}" style="width:{_psc_contrib_pct}%"></div></div></div><hr class="ae-psc-divider"/></div>""", unsafe_allow_html=True)
         st.markdown('<div class="ae-psc-btn-wrap">', unsafe_allow_html=True)
-        if st.button(_psc_cta_texto, key="psc_conhecer_premium", use_container_width=True):
-            navegar_para("planos")
+        if st.button("Conhecer Premium", key="psc_conhecer_premium"):
+            st.session_state.pagina_atual = "planos"
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
