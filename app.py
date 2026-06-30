@@ -4447,9 +4447,22 @@ def render_sidebar_principal(
         _psc_qtd_memorias = st.session_state.get("_ae_qtd_memorias", 0)
         _psc_qtd_cofre    = st.session_state.get("_ae_qtd_cofre",    0)
         _psc_qtd_contatos = st.session_state.get("_ae_qtd_contatos", 0)
+        
+        _psc_nome_plano = "Gratuito"
         _psc_lim_memorias = 10
         _psc_lim_medias   = 20
         _psc_lim_contribs = 5
+        try:
+            plano_db = db.obter_plano_usuario(st.session_state.usuario_atual['id'])
+            if plano_db:
+                _psc_nome_plano = plano_db.get("nome", "Gratuito")
+                if _psc_nome_plano != "Gratuito":
+                    _psc_lim_memorias = 1000
+                    _psc_lim_medias = plano_db.get("max_videos_total", 100) or 100
+                    _psc_lim_contribs = plano_db.get("max_contatos", 50) or 50
+        except Exception as exc:
+            print("Erro ao obter limites do plano para a sidebar:", exc)
+
         _psc_mem_pct     = min(100, int(_psc_qtd_memorias / _psc_lim_memorias * 100)) if _psc_lim_memorias > 0 else 0
         _psc_media_pct   = min(100, int(_psc_qtd_cofre    / _psc_lim_medias   * 100)) if _psc_lim_medias   > 0 else 0
         _psc_contrib_pct = min(100, int(_psc_qtd_contatos / _psc_lim_contribs * 100)) if _psc_lim_contribs > 0 else 0
@@ -4543,8 +4556,10 @@ def render_sidebar_principal(
 section[data-testid="stSidebar"] .ae-psc-btn-wrap {
     margin: 0 0 10px 0 !important;
 }
-section[data-testid="stSidebar"] .ae-psc-btn-wrap > div > button,
-section[data-testid="stSidebar"] .ae-psc-btn-wrap > div > div > button {
+[data-testid="stSidebar"] div[class*="st-key-psc_conhecer_premium"] button,
+[data-testid="stSidebar"] div[class*="psc_conhecer_premium"] button,
+[data-testid="stSidebar"] button[key="psc_conhecer_premium"],
+div[class*="st-key-psc_conhecer_premium"] button {
     background: linear-gradient(135deg, #F8DC92 0%, #D4AF37 58%, #B77A46 100%) !important;
     color: #1B0F2E !important;
     border: 0 !important;
@@ -4556,23 +4571,30 @@ section[data-testid="stSidebar"] .ae-psc-btn-wrap > div > div > button {
     width: 100% !important;
     padding: 0 10px !important;
     box-shadow: 0 10px 22px rgba(212,175,55,0.20) !important;
+    cursor: pointer !important;
 }
-section[data-testid="stSidebar"] .ae-psc-btn-wrap > div > button:hover,
-section[data-testid="stSidebar"] .ae-psc-btn-wrap > div > div > button:hover {
+[data-testid="stSidebar"] div[class*="st-key-psc_conhecer_premium"] button:hover,
+[data-testid="stSidebar"] div[class*="psc_conhecer_premium"] button:hover,
+[data-testid="stSidebar"] button[key="psc_conhecer_premium"]:hover,
+div[class*="st-key-psc_conhecer_premium"] button:hover {
     background: linear-gradient(135deg, #FFF0BF 0%, #F2C572 42%, #D4AF37 100%) !important;
     color: #1B0F2E !important;
     border: 0 !important;
 }
 </style>
 """, unsafe_allow_html=True)
-        _psc_acima_limite = _psc_qtd_memorias >= _psc_lim_memorias
-        _psc_cta_texto = "Atualizar plano" if _psc_acima_limite else "Ver planos Premium"
-        _psc_nota = (
-            "<strong>Limite atingido.</strong> Atualize para continuar preservando novas memórias."
-            if _psc_acima_limite
-            else "Planos pagos liberam mais memórias, fotos, vídeos e contribuições."
-        )
-        st.markdown(f"""<div class="ae-psc"><div class="ae-psc-header"><span class="ae-psc-label">Seu Plano</span><span class="ae-psc-badge">Gratuito</span></div><div class="ae-psc-limit-note">{_psc_nota}</div><div class="ae-psc-metric"><div class="ae-psc-metric-row"><span class="ae-psc-metric-name">Memórias</span><span class="ae-psc-metric-count">{_psc_qtd_memorias} / {_psc_lim_memorias}</span></div><div class="ae-psc-bar-track"><div class="ae-psc-bar-fill{_psc_mem_danger}" style="width:{_psc_mem_pct}%"></div></div></div><div class="ae-psc-metric"><div class="ae-psc-metric-row"><span class="ae-psc-metric-name">Fotos e vídeos</span><span class="ae-psc-metric-count">{_psc_qtd_cofre} / {_psc_lim_medias}</span></div><div class="ae-psc-bar-track"><div class="ae-psc-bar-fill{_psc_media_danger}" style="width:{_psc_media_pct}%"></div></div></div><div class="ae-psc-metric"><div class="ae-psc-metric-row"><span class="ae-psc-metric-name">Contribuições</span><span class="ae-psc-metric-count">{_psc_qtd_contatos} / {_psc_lim_contribs}</span></div><div class="ae-psc-bar-track"><div class="ae-psc-bar-fill{_psc_contrib_danger}" style="width:{_psc_contrib_pct}%"></div></div></div><hr class="ae-psc-divider"/></div>""", unsafe_allow_html=True)
+        if _psc_nome_plano != "Gratuito":
+            _psc_cta_texto = "Gerenciar plano"
+            _psc_nota = "Você possui acesso total aos recursos da plataforma aEterna."
+        else:
+            _psc_acima_limite = _psc_qtd_memorias >= _psc_lim_memorias
+            _psc_cta_texto = "Atualizar plano" if _psc_acima_limite else "Ver planos Premium"
+            _psc_nota = (
+                "<strong>Limite atingido.</strong> Atualize para continuar preservando novas memórias."
+                if _psc_acima_limite
+                else "Planos pagos liberam mais memórias, mídias e contribuições."
+            )
+        st.markdown(f"""<div class="ae-psc"><div class="ae-psc-header"><span class="ae-psc-label">Seu Plano</span><span class="ae-psc-badge">{_psc_nome_plano}</span></div><div class="ae-psc-limit-note">{_psc_nota}</div><div class="ae-psc-metric"><div class="ae-psc-metric-row"><span class="ae-psc-metric-name">Memórias</span><span class="ae-psc-metric-count">{_psc_qtd_memorias} / {_psc_lim_memorias}</span></div><div class="ae-psc-bar-track"><div class="ae-psc-bar-fill{_psc_mem_danger}" style="width:{_psc_mem_pct}%"></div></div></div><div class="ae-psc-metric"><div class="ae-psc-metric-row"><span class="ae-psc-metric-name">Fotos e vídeos</span><span class="ae-psc-metric-count">{_psc_qtd_cofre} / {_psc_lim_medias}</span></div><div class="ae-psc-bar-track"><div class="ae-psc-bar-fill{_psc_media_danger}" style="width:{_psc_media_pct}%"></div></div></div><div class="ae-psc-metric"><div class="ae-psc-metric-row"><span class="ae-psc-metric-name">Contribuições</span><span class="ae-psc-metric-count">{_psc_qtd_contatos} / {_psc_lim_contribs}</span></div><div class="ae-psc-bar-track"><div class="ae-psc-bar-fill{_psc_contrib_danger}" style="width:{_psc_contrib_pct}%"></div></div></div><hr class="ae-psc-divider"/></div>""", unsafe_allow_html=True)
         st.markdown('<div class="ae-psc-btn-wrap">', unsafe_allow_html=True)
         if st.button(_psc_cta_texto, key="psc_conhecer_premium", use_container_width=True):
             navegar_para("planos")
