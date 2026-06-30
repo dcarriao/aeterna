@@ -279,16 +279,28 @@ def _curador_montar_conteudo_salvo(narrativa: dict, analise: dict, respostas: di
 def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referencia: str):
     st.markdown("""
     <style>
-    /* Main Block Container - wide layout */
+    /* Hide Streamlit default header to eliminate huge top margin */
+    [data-testid="stHeader"] {
+        display: none !important;
+        height: 0 !important;
+    }
+
+    /* Main Block Container - wide layout and pulled up */
     .main .block-container,
     .block-container,
     [data-testid="stMainBlockContainer"] {
-        padding-top: 0 !important;
+        padding-top: 0.15rem !important;
         padding-bottom: 0.45rem !important;
         max-width: 1420px !important;
         width: min(1420px, calc(100vw - 250px)) !important;
         margin-left: auto !important;
         margin-right: auto !important;
+        margin-top: -3.5rem !important; /* Pulls the entire page up */
+    }
+
+    /* Reduce vertical gaps between elements in the main columns */
+    [data-testid="stHorizontalBlock"]:has(.ae-curador-page-marker) [data-testid="stVerticalBlock"] {
+        gap: 0.45rem !important;
     }
 
     /* Style the columns in desktop view as gorgeous, bordered cards */
@@ -316,12 +328,19 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         }
     }
 
+    /* Prevent preview images from expanding vertically and causing excessive scrolling */
+    [data-testid="stHorizontalBlock"]:has(.ae-curador-page-marker) div[data-testid="stColumn"]:nth-child(2) img {
+        max-height: 130px !important;
+        object-fit: cover !important;
+        border-radius: 14px !important;
+    }
+
     /* Steps Progress bar */
     .ae-curador-steps {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 0.45rem;
-        margin: 0.35rem 0 0.65rem;
+        margin: 0.2rem 0 0.45rem;
         padding: 0.24rem;
         border: 1px solid rgba(233, 222, 198, 0.6);
         border-radius: 16px;
@@ -425,19 +444,19 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         line-height: 1.18;
     }
 
-    /* Como funciona block at the bottom */
+    /* Como funciona block at the bottom - extremely compact */
     .ae-curador-how {
-        margin-top: 0.85rem;
+        margin-top: 0.5rem !important;
         background: rgba(255,255,255,.92);
         border: 1px solid rgba(233, 222, 198, 0.7);
         border-radius: 20px;
         box-shadow: 0 10px 30px rgba(64, 45, 19, 0.03);
-        padding: 0.62rem 0.72rem;
+        padding: 0.45rem 0.55rem !important;
     }
     .ae-curador-how h3 {
         color: #21104a;
-        margin: 0 0 0.58rem;
-        font-size: 0.92rem;
+        margin: 0 0 0.35rem !important;
+        font-size: 0.88rem !important;
         font-weight: 900;
     }
     .ae-curador-how-grid {
@@ -450,27 +469,27 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         border: 1px solid rgba(233, 222, 198, 0.6);
         border-radius: 16px;
         background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(250,247,241,.96));
-        padding: 0.55rem;
-        min-height: 80px;
-        font-size: 0.78rem;
+        padding: 0.4rem !important;
+        min-height: 64px !important;
+        font-size: 0.74rem !important;
         line-height: 1.36;
     }
     .ae-curador-how-item strong {
         display: block;
         color: #21104a;
-        margin-bottom: 0.28rem;
+        margin-bottom: 0.15rem !important;
     }
     .ae-curador-how-icon {
-        font-size: 1.3rem;
+        font-size: 1.15rem !important;
         display: block;
-        margin-bottom: 0.3rem;
+        margin-bottom: 0.15rem !important;
     }
     .ae-curador-how-arrow {
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 0 0.28rem;
-        padding-top: 0.6rem;
+        padding-top: 0.4rem !important;
         color: #b07a1d;
         font-size: 0.9rem;
         font-weight: 700;
@@ -505,14 +524,14 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         border: 1px solid rgba(193,177,231,0.4);
         border-radius: 14px;
         background: rgba(255,255,255,0.75);
-        padding: 0.65rem;
-        margin-bottom: 0.58rem;
+        padding: 0.45rem 0.55rem !important;
+        margin-bottom: 0.42rem !important;
     }
     .ae-curador-question strong {
         color: #2B1747;
         display: block;
-        margin-bottom: 0.25rem;
-        font-size: 0.82rem;
+        margin-bottom: 0.2rem !important;
+        font-size: 0.8rem;
     }
 
     /* Streamlit Button overrides inside curator */
