@@ -393,6 +393,14 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         font-weight: 950 !important;
         min-height: 2.45rem !important;
     }
+    .st-key-curador_salvar_direto_btn button {
+        background: #2B1747 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 14px !important;
+        font-weight: 950 !important;
+        min-height: 2.45rem !important;
+    }
     .st-key-curador_reanalisar_btn button,
     .st-key-curador_voltar_perguntas_btn button,
     .st-key-curador_nova_memoria_btn button,
@@ -448,18 +456,26 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         
         is_disabled = (etapa != "form")
 
+        c_foto, c_video = st.columns(2, gap="small")
+        with c_foto:
+            foto_memoria = st.file_uploader(
+                "Foto (opcional)",
+                type=["png", "jpg", "jpeg", "webp"],
+                key=prefixo + "foto",
+                disabled=is_disabled
+            )
+        with c_video:
+            video_memoria = st.file_uploader(
+                "Vídeo (opcional)",
+                type=["mp4", "mov", "avi", "mkv"],
+                key=prefixo + "video",
+                disabled=is_disabled
+            )
+
         titulo = st.text_input(
             "Título",
             key=prefixo + "titulo",
             placeholder="Título ou início da memória",
-            disabled=is_disabled
-        )
-
-        conteudo = st.text_area(
-            "O que aconteceu?",
-            key=prefixo + "conteudo",
-            placeholder="Escreva o que aconteceu, quem estava junto, onde foi ou por que isso importa...",
-            height=110,
             disabled=is_disabled
         )
 
@@ -497,29 +513,30 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
                 disabled=is_disabled
             )
 
-        c_foto, c_video = st.columns(2, gap="small")
-        with c_foto:
-            foto_memoria = st.file_uploader(
-                "Foto (opcional)",
-                type=["png", "jpg", "jpeg", "webp"],
-                key=prefixo + "foto",
-                disabled=is_disabled
-            )
-        with c_video:
-            video_memoria = st.file_uploader(
-                "Vídeo (opcional)",
-                type=["mp4", "mov", "avi", "mkv"],
-                key=prefixo + "video",
-                disabled=is_disabled
-            )
-
-        st.markdown('<div style="margin-top: 0.8rem;"></div>', unsafe_allow_html=True)
-        aprofundar = st.button(
-            "✨ Aprofundar esta história",
-            key="curador_aprofundar_btn",
-            use_container_width=True,
+        conteudo = st.text_area(
+            "O que aconteceu?",
+            key=prefixo + "conteudo",
+            placeholder="Escreva o que aconteceu, quem estava junto, onde foi ou por que isso importa...",
+            height=110,
             disabled=is_disabled
         )
+
+        st.markdown('<div style="margin-top: 0.8rem;"></div>', unsafe_allow_html=True)
+        c_btn1, c_btn2 = st.columns(2, gap="small")
+        with c_btn1:
+            aprofundar = st.button(
+                "✨ Aprofundar esta história",
+                key="curador_aprofundar_btn",
+                use_container_width=True,
+                disabled=is_disabled
+            )
+        with c_btn2:
+            salvar_direto = st.button(
+                "💾 Salvar história",
+                key="curador_salvar_direto_btn",
+                use_container_width=True,
+                disabled=is_disabled
+            )
 
     with col_right:
         if etapa == "form":
@@ -572,6 +589,41 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
                         except Exception as exc:
                             print("Erro ao analisar memória com IA:", exc)
                             st.error("Não foi possível gerar perguntas contextualizadas agora.")
+
+            if salvar_direto:
+                if st.session_state.get(prefixo + "salvando_direto"):
+                    st.warning("Esta memória já está sendo salva.")
+                elif not conteudo.strip():
+                    st.warning("Escreva a memória antes de salvar.")
+                else:
+                    st.session_state[prefixo + "salvando_direto"] = True
+                    try:
+                        memoria_id = db.salvar_memoria(
+                            usuario_id=usuario_id,
+                            conteudo=conteudo.strip(),
+                            titulo=titulo.strip() or "Memória sem título",
+                            categoria=categoria_visual,
+                            origem="curador",
+                            data_evento=data_memoria if data_memoria else None,
+                            pessoas_relacionadas=", ".join(pessoas_relacionadas) if pessoas_relacionadas else None,
+                            visibilidade="contatos" if compartilhar else "privado",
+                            contatos_ids=[],
+                        )
+                        if foto_memoria:
+                            upload_foto = storage.upload_streamlit_file("fotos", foto_memoria, usuario_id, "memorias")
+                            foto_id = db.adicionar_foto_com_acesso(usuario_id, titulo.strip() or "Foto da memória", conteudo.strip()[:300], categoria_visual, upload_foto["url"], [], "contatos" if compartilhar else "privado")
+                            db.associar_foto_memoria(memoria_id=memoria_id, foto_id=foto_id)
+                        if video_memoria:
+                            upload_video = storage.upload_streamlit_file("videos", video_memoria, usuario_id, "memorias")
+                            video_id = db.adicionar_video_com_acesso(usuario_id, titulo.strip() or "Vídeo da memória", ", ".join(pessoas_relacionadas), upload_video["url"], [], categoria_visual, "contatos" if compartilhar else "privado")
+                            db.associar_video_memoria(memoria_id=memoria_id, video_id=video_id)
+                        st.session_state[prefixo + "memoria_id"] = memoria_id
+                        st.session_state[etapa_key] = "salvo"
+                        st.rerun()
+                    except Exception as exc:
+                        st.session_state[prefixo + "salvando_direto"] = False
+                        print("Erro ao salvar direto:", exc)
+                        st.error("Não foi possível salvar a memória agora.")
 
         elif etapa == "perguntas":
             analise = st.session_state.get(prefixo + "analise") or {}
