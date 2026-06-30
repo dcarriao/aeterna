@@ -264,28 +264,65 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
     [data-testid="stMainBlockContainer"] {
         padding-top: 0 !important;
         padding-bottom: 0.45rem !important;
-        max-width: 1120px !important;
-        width: min(1120px, calc(100vw - 250px)) !important;
+        max-width: 1420px !important;
+        width: min(1420px, calc(100vw - 250px)) !important;
         margin-left: auto !important;
         margin-right: auto !important;
     }
 
-    /* Style the columns in desktop view */
+    /* Style the columns in desktop view as gorgeous, bordered cards */
     @media (min-width: 769px) {
-        [data-testid="stHorizontalBlock"]:has(.ae-curador-page-marker) > div[data-testid="stColumn"]:first-child {
-            background: rgba(255, 255, 255, 0.68) !important;
+        [data-testid="stHorizontalBlock"]:has(.ae-curador-page-marker) > div[data-testid="stColumn"]:nth-child(1) {
+            background: rgba(255, 255, 255, 0.78) !important;
             border: 1px solid rgba(212, 168, 79, 0.22) !important;
             border-radius: 20px !important;
-            padding: 1.1rem !important;
+            padding: 1rem !important;
             box-shadow: 0 10px 30px rgba(43,23,71,0.03) !important;
         }
-        [data-testid="stHorizontalBlock"]:has(.ae-curador-page-marker) > div[data-testid="stColumn"]:last-child {
-            background: rgba(255, 255, 255, 0.74) !important;
-            border: 1px solid rgba(193, 177, 231, 0.38) !important;
+        [data-testid="stHorizontalBlock"]:has(.ae-curador-page-marker) > div[data-testid="stColumn"]:nth-child(2) {
+            background: rgba(255, 255, 255, 0.72) !important;
+            border: 1px solid rgba(212, 168, 79, 0.18) !important;
             border-radius: 20px !important;
-            padding: 1.1rem !important;
+            padding: 1rem !important;
             box-shadow: 0 10px 30px rgba(43,23,71,0.03) !important;
         }
+        [data-testid="stHorizontalBlock"]:has(.ae-curador-page-marker) > div[data-testid="stColumn"]:nth-child(3) {
+            background: rgba(255, 255, 255, 0.82) !important;
+            border: 1px solid rgba(193, 177, 231, 0.45) !important;
+            border-radius: 20px !important;
+            padding: 1rem !important;
+            box-shadow: 0 10px 30px rgba(43,23,71,0.03) !important;
+        }
+    }
+
+    /* Steps Progress bar */
+    .ae-curador-steps {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.45rem;
+        margin: 0.35rem 0 0.65rem;
+        padding: 0.24rem;
+        border: 1px solid rgba(233, 222, 198, 0.6);
+        border-radius: 16px;
+        background: rgba(255,255,255,0.72);
+    }
+    .ae-curador-step {
+        border-radius: 13px;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        padding: 0.25rem 0.5rem;
+        color: #47507a;
+        font-weight: 700;
+        text-align: center;
+        font-size: 0.82rem;
+    }
+    .ae-curador-step.is-active {
+        background: linear-gradient(180deg, rgba(255,250,241,.95), rgba(255,248,232,.92));
+        border: 1px solid rgba(234, 181, 77, 0.55);
+        color: #b36e16;
     }
 
     /* File Uploader styling - extremely compact */
@@ -300,10 +337,126 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         font-size: 0.72rem !important;
     }
 
-    /* Text Inputs, Text Area, Selectbox styling */
-    .ae-curador-page-marker {
-        display: none;
+    /* Preview Card details */
+    .ae-curador-preview-media {
+        height: 96px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at top, rgba(255, 218, 153, .45), rgba(219, 205, 180, .2) 55%, rgba(250, 246, 239, .9));
+        overflow: hidden;
+        margin-bottom: 0.48rem;
+        position: relative;
     }
+    .ae-curador-preview-media .ae-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(43, 23, 71, 0.74);
+        color: white;
+        border-radius: 999px;
+        padding: 0.2rem 0.48rem;
+        font-size: 0.76rem;
+        font-weight: 800;
+    }
+    .ae-curador-preview-media img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .ae-curador-hint {
+        border-top: 1px solid rgba(233, 222, 198, 0.7);
+        margin-top: 0.45rem;
+        padding-top: 0.45rem;
+        color: #6d6380;
+        font-size: 0.79rem;
+    }
+    .ae-curador-tip {
+        border: 1px solid rgba(233, 222, 198, 0.6);
+        border-radius: 14px;
+        padding: 0.5rem;
+        color: #6d6380;
+        background: rgba(255,255,255,.72);
+        font-size: 0.78rem;
+        margin-top: 0.4rem;
+    }
+
+    /* Question Pills in Column 3 */
+    .ae-curador-question-shell {
+        display: grid;
+        gap: 0.4rem;
+        margin-top: 0.5rem;
+    }
+    .ae-curador-question-pill {
+        min-height: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 0.4rem 0.7rem;
+        border-radius: 12px;
+        background: linear-gradient(180deg, rgba(249,245,255,.98), rgba(244,238,252,.98));
+        color: #5c3d87;
+        border: 1px solid rgba(193, 177, 231, 0.7);
+        font-weight: 700;
+        font-size: 0.8rem;
+        line-height: 1.18;
+    }
+
+    /* Como funciona block at the bottom */
+    .ae-curador-how {
+        margin-top: 0.85rem;
+        background: rgba(255,255,255,.92);
+        border: 1px solid rgba(233, 222, 198, 0.7);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(64, 45, 19, 0.03);
+        padding: 0.62rem 0.72rem;
+    }
+    .ae-curador-how h3 {
+        color: #21104a;
+        margin: 0 0 0.58rem;
+        font-size: 0.92rem;
+        font-weight: 900;
+    }
+    .ae-curador-how-grid {
+        display: flex;
+        align-items: flex-start;
+        gap: 0;
+    }
+    .ae-curador-how-item {
+        flex: 1;
+        border: 1px solid rgba(233, 222, 198, 0.6);
+        border-radius: 16px;
+        background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(250,247,241,.96));
+        padding: 0.55rem;
+        min-height: 80px;
+        font-size: 0.78rem;
+        line-height: 1.36;
+    }
+    .ae-curador-how-item strong {
+        display: block;
+        color: #21104a;
+        margin-bottom: 0.28rem;
+    }
+    .ae-curador-how-icon {
+        font-size: 1.3rem;
+        display: block;
+        margin-bottom: 0.3rem;
+    }
+    .ae-curador-how-arrow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 0.28rem;
+        padding-top: 0.6rem;
+        color: #b07a1d;
+        font-size: 0.9rem;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    /* Style overrides for details and chips */
     .ae-curador-section-title {
         color: #2B1747;
         font-weight: 950;
@@ -340,47 +493,6 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         margin-bottom: 0.25rem;
         font-size: 0.82rem;
     }
-    .ae-curador-instructions h3 {
-        color: #2B1747;
-        font-size: 1.1rem;
-        font-weight: 900;
-        margin-top: 0;
-        margin-bottom: 0.85rem;
-    }
-    .ae-curador-inst-step {
-        display: flex;
-        gap: 0.75rem;
-        align-items: flex-start;
-        margin-bottom: 0.85rem;
-        background: rgba(255,255,255,0.45);
-        border: 1px solid rgba(233, 222, 198, 0.5);
-        border-radius: 14px;
-        padding: 0.65rem;
-    }
-    .ae-curador-inst-icon {
-        font-size: 1.5rem;
-        background: rgba(212, 168, 79, 0.12);
-        border-radius: 50%;
-        width: 42px;
-        height: 42px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-    }
-    .ae-curador-inst-step strong {
-        display: block;
-        color: #2B1747;
-        font-size: 0.86rem;
-        font-weight: 800;
-        margin-bottom: 0.15rem;
-    }
-    .ae-curador-inst-step span {
-        color: #6F6478;
-        font-size: 0.76rem;
-        line-height: 1.3;
-        display: block;
-    }
 
     /* Streamlit Button overrides inside curator */
     .st-key-curador_aprofundar_btn button,
@@ -412,6 +524,20 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         font-weight: 900 !important;
         min-height: 2.45rem !important;
     }
+
+    @media (max-width: 768px) {
+        .ae-curador-steps {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+        .ae-curador-how-grid {
+            display: grid !important;
+            grid-template-columns: 1fr !important;
+            gap: 0.5rem !important;
+        }
+        .ae-curador-how-arrow {
+            display: none !important;
+        }
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -437,11 +563,27 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
 
     etapa = st.session_state.get(etapa_key, "form")
 
+    # Wizard Steps progress calculation
+    step1_active = "is-active" if etapa == "form" else ""
+    step2_active = "is-active" if etapa == "form" else ""
+    step3_active = "is-active" if etapa == "salvo" else ""
+    step4_active = "is-active" if etapa in ("perguntas", "final") else ""
+
+    st.markdown(f"""
+    <div class="ae-curador-steps">
+        <div class="ae-curador-step {step1_active}">🖼️ 1. Adicionar mídia (opcional)</div>
+        <div class="ae-curador-step {step2_active}">✏️ 2. Escrever contexto</div>
+        <div class="ae-curador-step {step3_active}">✅ 3. Salvar memória</div>
+        <div class="ae-curador-step {step4_active}">💬 4. Explorar com o Curador</div>
+    </div>
+    """, unsafe_allow_html=True)
+
     if etapa != "form" and etapa != "salvo":
         st.markdown("""
         <style>
         @media (max-width: 768px) {
-            [data-testid="stHorizontalBlock"]:has(.ae-curador-page-marker) > div[data-testid="stColumn"]:first-child {
+            [data-testid="stHorizontalBlock"]:has(.ae-curador-page-marker) > div[data-testid="stColumn"]:nth-child(1),
+            [data-testid="stHorizontalBlock"]:has(.ae-curador-page-marker) > div[data-testid="stColumn"]:nth-child(2) {
                 display: none !important;
             }
         }
@@ -449,9 +591,9 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         """, unsafe_allow_html=True)
 
     st.markdown('<span class="ae-curador-page-marker"></span>', unsafe_allow_html=True)
-    col_left, col_right = st.columns([1.05, 0.95], gap="large")
+    col_form, col_preview, col_explore = st.columns([1.25, 0.88, 0.87], gap="small")
 
-    with col_left:
+    with col_form:
         st.markdown('<div class="ae-curador-section-title">✍️ Nova memória</div>', unsafe_allow_html=True)
         
         is_disabled = (etapa != "form")
@@ -459,23 +601,25 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         c_foto, c_video = st.columns(2, gap="small")
         with c_foto:
             foto_memoria = st.file_uploader(
-                "Foto (opcional)",
+                "Adicionar foto",
                 type=["png", "jpg", "jpeg", "webp"],
                 key=prefixo + "foto",
-                disabled=is_disabled
+                disabled=is_disabled,
+                help="JPG, PNG até 10MB"
             )
         with c_video:
             video_memoria = st.file_uploader(
-                "Vídeo (opcional)",
+                "Adicionar vídeo",
                 type=["mp4", "mov", "avi", "mkv"],
                 key=prefixo + "video",
-                disabled=is_disabled
+                disabled=is_disabled,
+                help="MP4 até 50MB"
             )
 
         titulo = st.text_input(
-            "Título",
+            "Título da memória",
             key=prefixo + "titulo",
-            placeholder="Título ou início da memória",
+            placeholder="Dê um título para esta memória",
             disabled=is_disabled
         )
 
@@ -490,7 +634,7 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
             data_memoria = _curador_normalizar_data(data_memoria_txt)
         with c_cat:
             categoria_visual = st.selectbox(
-                "Categoria",
+                "Categoria (opcional)",
                 ["Momentos", "Família", "Viagens", "Infância", "Trabalho", "Aprendizados", "Conquistas", "Outro"],
                 key=prefixo + "categoria_visual",
                 disabled=is_disabled
@@ -499,10 +643,10 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         c_people, c_share = st.columns([1.3, 0.7], gap="small")
         with c_people:
             pessoas_relacionadas = st.multiselect(
-                "Quem participou?",
+                "Pessoas relacionadas (opcional)",
                 options=nomes_contatos,
                 key=prefixo + "pessoas",
-                placeholder="Adicionar pessoas",
+                placeholder="Digite nomes e selecione",
                 disabled=is_disabled
             )
         with c_share:
@@ -514,9 +658,9 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
             )
 
         conteudo = st.text_area(
-            "O que aconteceu?",
+            "Conte esta história",
             key=prefixo + "conteudo",
-            placeholder="Escreva o que aconteceu, quem estava junto, onde foi ou por que isso importa...",
+            placeholder="Escreva o que aconteceu, onde, com quem, detalhes marcantes...",
             height=110,
             disabled=is_disabled
         )
@@ -538,34 +682,74 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
                 disabled=is_disabled
             )
 
-    with col_right:
+    # Column 2: Live Memory Preview
+    with col_preview:
+        st.markdown('<div class="ae-curador-section-title">👁️ Prévia da memória</div>', unsafe_allow_html=True)
+        
+        preview_titulo = st.session_state.get(prefixo + "titulo", "").strip() or "Título da memória aparecerá aqui"
+        preview_texto = _curador_trecho(st.session_state.get(prefixo + "conteudo", ""))
+        preview_data = _curador_preview_data(data_memoria) if data_memoria else (st.session_state.get(prefixo + "data_txt", "") or "Data da memória")
+        
+        sel_pessoas = st.session_state.get(prefixo + "pessoas", [])
+        preview_pessoas = ", ".join(sel_pessoas) if sel_pessoas else "Pessoas relacionadas"
+        sel_categoria = st.session_state.get(prefixo + "categoria_visual", "Outro")
+        
+        media_total = int(bool(foto_memoria)) + int(bool(video_memoria))
+        
+        if foto_memoria:
+            st.image(foto_memoria, use_container_width=True)
+        else:
+            st.markdown(
+                "<div class='ae-curador-preview-media'><div style='font-size:2.2rem;color:#a48b62;'>📖</div></div>",
+                unsafe_allow_html=True,
+            )
+            
+        st.markdown(
+            f"<div style='display:flex;justify-content:flex-end;margin:.18rem 0 .08rem;'><span class='ae-badge' style='background:rgba(43,23,71,.74);color:white;border-radius:999px;padding:.16rem .44rem;font-size:.72rem;font-weight:800;'>{max(media_total, 1)}/3</span></div>",
+            unsafe_allow_html=True,
+        )
+        st.markdown(f"<div style='color:#21104a;font-weight:900;font-size:.96rem;margin-bottom:.18rem;'>{html.escape(preview_titulo)}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='color:#6d6380;line-height:1.34;font-size:.83rem;'>{html.escape(preview_texto)}</div>", unsafe_allow_html=True)
+        st.markdown(
+            f"<div class='ae-curador-hint'>"
+            f"<div style='margin-bottom:.24rem;'>🗓️ {html.escape(preview_data)}</div>"
+            f"<div style='margin-bottom:.24rem;'>👥 {html.escape(preview_pessoas)}</div>"
+            f"<div>🗂️ {html.escape(sel_categoria)}</div>"
+            "</div>",
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            "<div class='ae-curador-tip'>A prévia é atualizada conforme você preenche os campos.</div>",
+            unsafe_allow_html=True,
+        )
+
+    # Column 3: Curadoria Step
+    with col_explore:
         if etapa == "form":
-            st.markdown("""
-            <div class="ae-curador-instructions">
-                <h3>Como funciona o Curador</h3>
-                <div class="ae-curador-inst-step">
-                    <span class="ae-curador-inst-icon">✍️</span>
-                    <div>
-                        <strong>1. Escreva sua história</strong>
-                        <span>Preencha os detalhes e escreva o que você já lembra no formulário ao lado.</span>
-                    </div>
-                </div>
-                <div class="ae-curador-inst-step">
-                    <span class="ae-curador-inst-icon">✨</span>
-                    <div>
-                        <strong>2. Aprofunde os detalhes</strong>
-                        <span>Clique em <strong>Aprofundar esta história</strong> para que nossa IA analise o contexto e crie perguntas exclusivas.</span>
-                    </div>
-                </div>
-                <div class="ae-curador-inst-step">
-                    <span class="ae-curador-inst-icon">📖</span>
-                    <div>
-                        <strong>3. Crie uma narrativa rica</strong>
-                        <span>Responda ou pule as perguntas para gerar uma história final fluida e memorável antes de salvar.</span>
-                    </div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown("### Explorar com o Curador")
+            st.markdown(
+                "<div style='color:#6d6380;line-height:1.36;font-size:.84rem;margin-bottom:.46rem;'>"
+                "Após preencher sua memória ao lado, o Curador identificará o contexto e criará perguntas para aprofundar sua história."
+                "</div>",
+                unsafe_allow_html=True,
+            )
+            st.markdown("<div class='ae-curador-question-shell'>", unsafe_allow_html=True)
+            default_pills = [
+                ("👤", "Quem estava com você?"),
+                ("⭐", "O que tornou esse momento especial?"),
+                ("📷", "Existe outra foto desse dia?"),
+                ("💜", "Como você se sentiu?"),
+            ]
+            for icone, pergunta in default_pills:
+                st.markdown(
+                    f"<div class='ae-curador-question-pill'>{icone} {html.escape(pergunta)}</div>",
+                    unsafe_allow_html=True,
+                )
+            st.markdown("</div>", unsafe_allow_html=True)
+            st.markdown(
+                "<div class='ae-curador-tip' style='margin-top:.52rem;'>O Curador não substitui a memória. Ele ajuda a aprofundar o que você registrou.</div>",
+                unsafe_allow_html=True,
+            )
 
             if aprofundar:
                 if not titulo.strip() and not conteudo.strip():
@@ -780,6 +964,19 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
                 if st.button("📖 Ver Minha História", key="curador_ver_historia_btn", use_container_width=True):
                     st.session_state.pagina_atual = "minha_historia"
                     st.rerun()
+
+    st.markdown(
+        "<div class='ae-curador-how'><h3>Como funciona</h3><div class='ae-curador-how-grid'>"
+        "<div class='ae-curador-how-item'><span class='ae-curador-how-icon'>🖼️</span><strong>1. Registrar</strong>Adicione mídia (se tiver) e escreva o contexto da sua memória.</div>"
+        "<div class='ae-curador-how-arrow'>→</div>"
+        "<div class='ae-curador-how-item'><span class='ae-curador-how-icon'>☁️</span><strong>2. Salvar</strong>Salve sua memória com segurança. Você pode editar depois.</div>"
+        "<div class='ae-curador-how-arrow'>→</div>"
+        "<div class='ae-curador-how-item'><span class='ae-curador-how-icon'>💬</span><strong>3. Receber sugestões</strong>O Curador oferece perguntas que ajudam a trazer mais detalhes.</div>"
+        "<div class='ae-curador-how-arrow'>→</div>"
+        "<div class='ae-curador-how-item'><span class='ae-curador-how-icon'>💛</span><strong>4. Aprofundar a história</strong>Você decide o que responder e transforma lembranças em legado.</div>"
+        "</div></div>",
+        unsafe_allow_html=True,
+    )
 
 def render_curador_memoria_primeiro():
     _inicializar_chat()
