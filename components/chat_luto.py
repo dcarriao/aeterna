@@ -157,8 +157,29 @@ JSON esperado:
     resposta = assistente.conversar(prompt)
     dados = _curador_json_from_text(resposta)
     perguntas = _curador_limpar_lista(dados.get("perguntas"), 7)
-    if len(perguntas) < 4:
-        raise ValueError("A IA não retornou perguntas suficientes para o Curador.")
+    
+    # Robust fallback: if AI returned fewer than 3 questions, fill them with context-aware generic ones so we never crash!
+    if len(perguntas) < 3:
+        if not perguntas:
+            perguntas = [
+                "Quem estava com você nesse momento especial?",
+                "O que tornou esse dia inesquecível ou diferente de outros?",
+                "Quais sentimentos ou lembranças essa memória traz para você?",
+                "Há algum outro detalhe ou foto que represente bem esse dia?"
+            ]
+        else:
+            generics = [
+                "Quem estava com você nesse momento especial?",
+                "O que tornou esse dia inesquecível?",
+                "Quais sentimentos ou lembranças essa memória traz?",
+                "Há algum outro detalhe que queira registrar?"
+            ]
+            for g in generics:
+                if g not in perguntas:
+                    perguntas.append(g)
+                if len(perguntas) >= 3:
+                    break
+
     tipo = str(dados.get("tipo") or "Outro").strip()
     tipos_validos = {"Pessoa", "Evento familiar", "Viagem", "Infância", "Relacionamento", "Trabalho", "Conquista", "Mudança de vida", "Aprendizado", "Rotina", "Data comemorativa", "Outro"}
     if tipo not in tipos_validos:
@@ -657,6 +678,25 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
                 disabled=is_disabled
             )
 
+        # Handle selective sharing dynamically
+        contatos_selecionados_ids = []
+        if compartilhar:
+            opcoes_contato = {
+                c["nome_completo"]: c["id"]
+                for c in contatos if c.get("nome_completo")
+            }
+            if opcoes_contato:
+                contatos_vis_nomes = st.multiselect(
+                    "Compartilhar com pessoas específicas (opcional)",
+                    options=list(opcoes_contato.keys()),
+                    key=prefixo + "contatos_compartilhar",
+                    disabled=is_disabled,
+                    placeholder="Selecione contatos (vazio = compartilhar com todos)"
+                )
+                contatos_selecionados_ids = [opcoes_contato[n] for n in contatos_vis_nomes]
+            else:
+                st.caption("⚠️ Nenhum contato cadastrado.")
+
         conteudo = st.text_area(
             "Conte esta história",
             key=prefixo + "conteudo",
@@ -782,6 +822,8 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
                 else:
                     st.session_state[prefixo + "salvando_direto"] = True
                     try:
+                        visibilidade_direto = "seletivo" if (compartilhar and contatos_selecionados_ids) else ("contatos" if compartilhar else "privado")
+                        contatos_ids_direto = contatos_selecionados_ids if visibilidade_direto == "seletivo" else []
                         memoria_id = db.salvar_memoria(
                             usuario_id=usuario_id,
                             conteudo=conteudo.strip(),
@@ -790,16 +832,16 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
                             origem="curador",
                             data_evento=data_memoria if data_memoria else None,
                             pessoas_relacionadas=", ".join(pessoas_relacionadas) if pessoas_relacionadas else None,
-                            visibilidade="contatos" if compartilhar else "privado",
-                            contatos_ids=[],
+                            visibilidade=visibilidade_direto,
+                            contatos_ids=contatos_ids_direto,
                         )
                         if foto_memoria:
                             upload_foto = storage.upload_streamlit_file("fotos", foto_memoria, usuario_id, "memorias")
-                            foto_id = db.adicionar_foto_com_acesso(usuario_id, titulo.strip() or "Foto da memória", conteudo.strip()[:300], categoria_visual, upload_foto["url"], [], "contatos" if compartilhar else "privado")
+                            foto_id = db.adicionar_foto_com_acesso(usuario_id, titulo.strip() or "Foto da memória", conteudo.strip()[:300], categoria_visual, upload_foto["url"], contatos_ids_direto, visibilidade_direto)
                             db.associar_foto_memoria(memoria_id=memoria_id, foto_id=foto_id)
                         if video_memoria:
                             upload_video = storage.upload_streamlit_file("videos", video_memoria, usuario_id, "memorias")
-                            video_id = db.adicionar_video_com_acesso(usuario_id, titulo.strip() or "Vídeo da memória", ", ".join(pessoas_relacionadas), upload_video["url"], [], categoria_visual, "contatos" if compartilhar else "privado")
+                            video_id = db.adicionar_video_com_acesso(usuario_id, titulo.strip() or "Vídeo da memória", ", ".join(pessoas_relacionadas), upload_video["url"], contatos_ids_direto, categoria_visual, visibilidade_direto)
                             db.associar_video_memoria(memoria_id=memoria_id, video_id=video_id)
                         st.session_state[prefixo + "memoria_id"] = memoria_id
                         st.session_state[etapa_key] = "salvo"
@@ -904,6 +946,8 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
                     st.warning("Esta memória já foi salva.")
                 else:
                     try:
+                        visibilidade_final = "seletivo" if (compartilhar and contatos_selecionados_ids) else ("contatos" if compartilhar else "privado")
+                        contatos_ids_final = contatos_selecionados_ids if visibilidade_final == "seletivo" else []
                         memoria_id = db.salvar_memoria(
                             usuario_id=usuario_id,
                             conteudo=narrativa_editada.strip(),
@@ -912,16 +956,16 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
                             origem="curador",
                             data_evento=data_memoria if data_memoria else None,
                             pessoas_relacionadas=", ".join(pessoas_relacionadas) if pessoas_relacionadas else None,
-                            visibilidade="contatos" if compartilhar else "privado",
-                            contatos_ids=[],
+                            visibilidade=visibilidade_final,
+                            contatos_ids=contatos_ids_final,
                         )
                         if foto_memoria:
                             upload_foto = storage.upload_streamlit_file("fotos", foto_memoria, usuario_id, "memorias")
-                            foto_id = db.adicionar_foto_com_acesso(usuario_id, titulo.strip() or "Foto da memória", narrativa_editada.strip()[:300], analise.get("tipo") or categoria_visual, upload_foto["url"], [], "contatos" if compartilhar else "privado")
+                            foto_id = db.adicionar_foto_com_acesso(usuario_id, titulo.strip() or "Foto da memória", narrativa_editada.strip()[:300], analise.get("tipo") or categoria_visual, upload_foto["url"], contatos_ids_final, visibilidade_final)
                             db.associar_foto_memoria(memoria_id=memoria_id, foto_id=foto_id)
                         if video_memoria:
                             upload_video = storage.upload_streamlit_file("videos", video_memoria, usuario_id, "memorias")
-                            video_id = db.adicionar_video_com_acesso(usuario_id, titulo.strip() or "Vídeo da memória", ", ".join(pessoas_relacionadas), upload_video["url"], [], analise.get("tipo") or categoria_visual, "contatos" if compartilhar else "privado")
+                            video_id = db.adicionar_video_com_acesso(usuario_id, titulo.strip() or "Vídeo da memória", ", ".join(pessoas_relacionadas), upload_video["url"], contatos_ids_final, analise.get("tipo") or categoria_visual, visibilidade_final)
                             db.associar_video_memoria(memoria_id=memoria_id, video_id=video_id)
                         st.session_state[prefixo + "memoria_id"] = memoria_id
                         st.session_state[etapa_key] = "salvo"
