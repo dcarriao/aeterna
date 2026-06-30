@@ -4474,24 +4474,24 @@ def render_sidebar_principal(
     background:
         radial-gradient(circle at 88% 12%, rgba(242,197,114,0.16), transparent 34%),
         linear-gradient(180deg, rgba(255,255,255,0.085), rgba(255,255,255,0.045)) !important;
-    border: 1px solid rgba(212,175,55,0.48) !important;
-    border-radius: 18px !important;
-    padding: 15px 14px 14px !important;
-    margin: 12px 0 8px 0 !important;
+    border: 1px solid rgba(212,175,55,0.42) !important;
+    border-radius: 16px !important;
+    padding: 11px 11px 9px !important;
+    margin: 4px 0 2px 0 !important;
     font-family: 'Inter', sans-serif !important;
     box-sizing: border-box !important;
-    box-shadow: 0 14px 34px rgba(0,0,0,0.18) !important;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.18) !important;
 }
 .ae-psc-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    margin-bottom: 11px;
+    margin-bottom: 6px;
 }
 .ae-psc-label {
     color: #FFFFFF !important;
-    font-size: 11px !important;
+    font-size: 10px !important;
     font-weight: 900 !important;
     text-transform: uppercase;
     letter-spacing: 0.6px;
@@ -4501,43 +4501,43 @@ def render_sidebar_principal(
     background: rgba(242,197,114,0.16) !important;
     color: #F2C572 !important;
     border: 1px solid rgba(242,197,114,0.42) !important;
-    font-size: 9px !important;
+    font-size: 8px !important;
     font-weight: 900 !important;
-    padding: 3px 8px !important;
+    padding: 2px 6px !important;
     border-radius: 999px !important;
     white-space: nowrap;
 }
 .ae-psc-limit-note {
     background: rgba(242,197,114,0.10) !important;
     border: 1px solid rgba(242,197,114,0.26) !important;
-    border-radius: 12px !important;
+    border-radius: 10px !important;
     color: rgba(255,255,255,0.86) !important;
-    font-size: 10px !important;
-    line-height: 1.35 !important;
-    padding: 8px 9px !important;
-    margin: 0 0 10px 0 !important;
+    font-size: 9px !important;
+    line-height: 1.30 !important;
+    padding: 5px 7px !important;
+    margin: 0 0 6px 0 !important;
 }
 .ae-psc-limit-note strong { color: #F2C572 !important; }
-.ae-psc-metric { margin-bottom: 9px !important; }
+.ae-psc-metric { margin-bottom: 6px !important; }
 .ae-psc-metric:last-child { margin-bottom: 0 !important; }
 .ae-psc-metric-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 .ae-psc-metric-name {
     color: rgba(255,255,255,0.78) !important;
-    font-size: 11px !important;
+    font-size: 10px !important;
     font-weight: 800 !important;
 }
 .ae-psc-metric-count {
     color: #FFFFFF !important;
-    font-size: 10px !important;
+    font-size: 9px !important;
     font-weight: 900 !important;
 }
 .ae-psc-bar-track {
-    height: 4px !important;
+    height: 3px !important;
     background: rgba(255,255,255,0.16) !important;
     border-radius: 999px !important;
     overflow: hidden !important;
@@ -4551,10 +4551,10 @@ def render_sidebar_principal(
 .ae-psc-divider {
     border: none !important;
     border-top: 1px solid rgba(212,175,55,0.22) !important;
-    margin: 12px 0 10px 0 !important;
+    margin: 8px 0 6px 0 !important;
 }
 section[data-testid="stSidebar"] .ae-psc-btn-wrap {
-    margin: 0 0 10px 0 !important;
+    margin: 0 0 4px 0 !important;
 }
 [data-testid="stSidebar"] div[class*="st-key-psc_conhecer_premium"] button,
 [data-testid="stSidebar"] div[class*="psc_conhecer_premium"] button,
@@ -4563,14 +4563,14 @@ div[class*="st-key-psc_conhecer_premium"] button {
     background: linear-gradient(135deg, #F8DC92 0%, #D4AF37 58%, #B77A46 100%) !important;
     color: #1B0F2E !important;
     border: 0 !important;
-    border-radius: 13px !important;
-    font-size: 12px !important;
+    border-radius: 12px !important;
+    font-size: 11px !important;
     font-weight: 950 !important;
     font-family: 'Inter', sans-serif !important;
-    min-height: 38px !important;
+    min-height: 32px !important;
     width: 100% !important;
-    padding: 0 10px !important;
-    box-shadow: 0 10px 22px rgba(212,175,55,0.20) !important;
+    padding: 0 8px !important;
+    box-shadow: 0 8px 18px rgba(212,175,55,0.20) !important;
     cursor: pointer !important;
 }
 [data-testid="stSidebar"] div[class*="st-key-psc_conhecer_premium"] button:hover,

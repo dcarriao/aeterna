@@ -3419,7 +3419,26 @@ a.ae-card-read-btn:hover {
 /* Correção final sidebar/plano */
 [data-testid="stSidebar"] { padding-top: 0 !important; }
 [data-testid="stSidebar"] > div:first-child { padding-top: 0 !important; }
-.ae-sidebar-brand { padding: 0 !important; margin: -0.7rem 0 0.3rem !important; border-bottom: 1px solid rgba(212,175,55,0.22) !important; }
+[data-testid="stSidebarHeader"] {
+    padding-top: 0.15rem !important;
+    padding-bottom: 0.15rem !important;
+    min-height: auto !important;
+    margin-bottom: 0 !important;
+}
+[data-testid="stSidebarContent"] {
+    padding-top: 0 !important;
+}
+[data-testid="stSidebarUserContent"] {
+    padding-top: 0 !important;
+}
+[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
+    gap: 0.35rem !important;
+}
+[data-testid="stSidebarNav"] {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+.ae-sidebar-brand { padding: 0 !important; margin: -1.2rem 0 0.15rem !important; border-bottom: 1px solid rgba(212,175,55,0.22) !important; }
 .ae-sidebar-brand img, [data-testid="stSidebar"] .ae-sidebar-brand img { max-width: 130px !important; margin: 0 auto !important; }
 .ae-sidebar-plan, .ae-plan-status, .plan-status-card, .ae-sidebar-card-plan {
     background: rgba(255,255,255,0.065) !important;
