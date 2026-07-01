@@ -3865,3 +3865,28 @@ class BancoDados:
         finally:
             cursor.close()
             conn.close()
+
+    def redefinir_senha_usuario(self, email: str, nova_senha: str) -> bool:
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            self.executar(cursor, "SELECT id FROM usuarios WHERE email = ?", (email,))
+            r = cursor.fetchone()
+            if not r:
+                return False
+            
+            senha_hash, salt = self.gerar_hash_senha(nova_senha)
+            self.executar(cursor, """
+                UPDATE usuarios
+                SET senha_hash = ?, salt = ?
+                WHERE email = ?
+            """, (senha_hash, salt, email))
+            conn.commit()
+            return True
+        except Exception as e:
+            conn.rollback()
+            print("Erro ao redefinir senha:", e)
+            return False
+        finally:
+            cursor.close()
+            conn.close()

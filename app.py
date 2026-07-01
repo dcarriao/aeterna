@@ -5572,6 +5572,13 @@ def main():
         render_aceite_convite(convite_token)
         return
 
+    # Intercept Password Recovery redefinition link
+    recuperar_param = st.query_params.get("recuperar")
+    if recuperar_param:
+        from components.login_compacto import render_redefinicao_senha
+        render_redefinicao_senha(recuperar_param)
+        return
+
     if not st.session_state.autenticado:
         render_login_compacto(
             carregar_logo,

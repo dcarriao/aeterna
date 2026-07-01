@@ -233,7 +233,14 @@ def _render_login_principal(fazer_login):
         st.markdown('<div class="ae-login-mode-title">Acessar minha conta</div>', unsafe_allow_html=True)
         email = st.text_input("E-mail", key="login_email_compacto")
         senha = st.text_input("Senha", type="password", key="login_senha_compacto")
-        submitted = st.form_submit_button("Entrar", use_container_width=True, type="primary")
+        c_btns = st.columns(2)
+        with c_btns[0]:
+            submitted = st.form_submit_button("Entrar", use_container_width=True, type="primary")
+        with c_btns[1]:
+            forgot_clicked = st.form_submit_button("Esqueci minha senha", use_container_width=True)
+            if forgot_clicked:
+                _set_mode("recuperar")
+                st.rerun()
 
         if submitted:
             if not email or not senha:
@@ -381,5 +388,109 @@ def render_login_compacto(
             _render_cadastro(fazer_cadastro)
         elif mode == "visitante":
             _render_visitante(fazer_login_visitante)
+        elif mode == "recuperar":
+            _render_recuperar_senha()
         else:
             _render_login_principal(fazer_login)
+
+
+def _render_recuperar_senha():
+    with st.form("recuperar_senha_form_compacto"):
+        st.markdown('<div class="ae-login-mode-title">Esqueci minha senha</div>', unsafe_allow_html=True)
+        st.info("Informe seu e-mail cadastrado para enviarmos as instruções de redefinição de senha.")
+        email = st.text_input("E-mail cadastrado", key="recuperar_email_input")
+        submitted = st.form_submit_button("Solicitar instruções", use_container_width=True, type="primary")
+
+        if submitted:
+            if not email.strip():
+                st.error("Por favor, informe seu e-mail.")
+            else:
+                import base64
+                email_encoded = base64.b64encode(email.strip().lower().encode('utf-8')).decode('utf-8')
+                
+                base_url = "https://aeterna-viva.streamlit.app"
+                try:
+                    base_url = st.secrets.get("BASE_URL", base_url)
+                except Exception:
+                    pass
+                redefine_link = f"{base_url}/?recuperar={email_encoded}"
+                
+                # Send email instructions dynamically
+                try:
+                    from utils.email_service import EmailService
+                    corpo_email = f"""
+                    Olá!
+                    
+                    Você solicitou a redefinição de senha na plataforma aEterna.
+                    Acesse o link único abaixo para cadastrar sua nova senha com segurança:
+                    
+                    {redefine_link}
+                    
+                    Caso não tenha solicitado, ignore este e-mail.
+                    
+                    Atenciosamente,
+                    Equipe aEterna
+                    """.strip()
+                    
+                    EmailService().enviar_mensagem(
+                        destinatario_email=email.strip().lower(),
+                        nome_destinatario="Usuário",
+                        assunto="Redefinição de Senha - aEterna",
+                        corpo=corpo_email
+                    )
+                except Exception as exc:
+                    print("Erro ao enviar e-mail de redefinição:", exc)
+                
+                st.info("Caso exista uma conta associada ao endereço de e-mail informado, as instruções para redefinição foram enviadas com sucesso.")
+                _set_mode("login")
+                st.rerun()
+
+    if st.button("Voltar para login", use_container_width=True, key="btn_forgot_voltar"):
+        _set_mode("login")
+        st.rerun()
+
+
+def render_redefinicao_senha(recuperar_param):
+    _css_login_compacto()
+    
+    # Decode email
+    import base64
+    try:
+        email = base64.b64decode(recuperar_param.encode('utf-8')).decode('utf-8')
+    except Exception:
+        st.error("❌ Link de redefinição inválido ou corrompido.")
+        if st.button("Voltar para o início", key="btn_redef_invalid_voltar"):
+            st.query_params.clear()
+            st.rerun()
+        return
+
+    _, center, _ = st.columns([1, 1.12, 1])
+    with center:
+        _render_logo()
+        with st.form("form_nova_senha_redefinicao"):
+            st.markdown('<div class="ae-login-mode-title">Nova Senha</div>', unsafe_allow_html=True)
+            st.caption(f"Defina uma nova senha de acesso seguro para a conta: {html.escape(email)}")
+            
+            nova_senha = st.text_input("Nova senha *", type="password", key="redef_nova_senha")
+            confirmar_nova_senha = st.text_input("Confirmar nova senha *", type="password", key="redef_confirmar_senha")
+            
+            submitted = st.form_submit_button("💾 Salvar Nova Senha", use_container_width=True, type="primary")
+
+            if submitted:
+                if not nova_senha or not confirmar_nova_senha:
+                    st.error("Preencha todos os campos.")
+                elif nova_senha != confirmar_nova_senha:
+                    st.error("As senhas não coincidem.")
+                elif len(nova_senha) < 6:
+                    st.warning("A senha deve ter pelo menos 6 caracteres.")
+                else:
+                    from utils.banco import BancoDados
+                    db_local = BancoDados()
+                    sucesso = db_local.redefinir_senha_usuario(email.strip().lower(), nova_senha)
+                    if sucesso:
+                        st.success("🎉 Senha redefinida com sucesso!")
+                        st.query_params.clear()
+                        _set_mode("login")
+                        st.rerun()
+                    else:
+                        st.error("Não foi possível redefinir a senha da conta informada.")
