@@ -22,13 +22,17 @@ def _get_openai_client():
 def render_criar_memorial():
     st.markdown("""
     <style>
+    /* Main Block Container - wide layout and pulled up */
     .main .block-container,
     .block-container,
     [data-testid="stMainBlockContainer"] {
-        max-width: 900px !important;
-        width: min(900px, calc(100vw - 250px)) !important;
+        padding-top: 0.15rem !important;
+        padding-bottom: 0.45rem !important;
+        max-width: 1140px !important;
+        width: min(1140px, calc(100vw - 250px)) !important;
         margin-left: auto !important;
         margin-right: auto !important;
+        margin-top: -3.5rem !important; /* Pull up to match curator top space */
     }
     .ae-memorial-header {
         color: #2B1747;
@@ -40,6 +44,13 @@ def render_criar_memorial():
         color: #6F6478;
         font-size: 0.86rem;
         margin-bottom: 1.15rem;
+    }
+    div[data-testid="stForm"] {
+        background: #FFFFFF !important;
+        border: 1.5px solid rgba(212, 168, 79, 0.22) !important;
+        border-radius: 20px !important;
+        padding: 1.5rem !important;
+        box-shadow: 0 14px 34px rgba(43,23,71,0.04) !important;
     }
     .stButton>button {
         border-radius: 14px !important;
@@ -75,9 +86,9 @@ def render_criar_memorial():
         
         c_dates = st.columns(2, gap="small")
         with c_dates[0]:
-            data_nascimento = st.date_input("Data de nascimento", value=None, format="DD/MM/YYYY")
+            data_nascimento = st.date_input("Data de nascimento", value=None, min_value=date(1900, 1, 1), max_value=date.today(), format="DD/MM/YYYY")
         with c_dates[1]:
-            data_falecimento = st.date_input("Data de falecimento", value=None, format="DD/MM/YYYY")
+            data_falecimento = st.date_input("Data de falecimento", value=None, min_value=date(1900, 1, 1), max_value=date.today(), format="DD/MM/YYYY")
             
         c_rel_vis = st.columns(2, gap="small")
         with c_rel_vis[0]:
@@ -122,14 +133,20 @@ def render_criar_memorial():
                     visibilidade=visibilidade
                 )
                 
-                # Link selected contacts to the memorial
+                # Link selected contacts to the memorial with a proper connection & cursor
                 opcoes_contato = {c["nome_completo"]: c["id"] for c in contatos if c.get("nome_completo")}
                 convites_pessoas = convidados
-                for nome_c in convites_pessoas:
-                    contato_id = opcoes_contato.get(nome_c)
-                    if contato_id:
-                        # We can link the contact to this memorial by updating it
-                        db.executar(db.conectar(), "UPDATE contatos SET memorial_id = %s WHERE id = %s", (memorial_id, contato_id))
+                conn = db.conectar()
+                cursor = conn.cursor()
+                try:
+                    for nome_c in convites_pessoas:
+                        contato_id = opcoes_contato.get(nome_c)
+                        if contato_id:
+                            db.executar(cursor, "UPDATE contatos SET memorial_id = ? WHERE id = ?", (memorial_id, contato_id))
+                    conn.commit()
+                finally:
+                    cursor.close()
+                    conn.close()
                 
                 st.success("✅ Memorial criado com sucesso!")
                 
