@@ -233,16 +233,38 @@ def render_memoriais_lista():
         font-size: 0.82rem !important;
         min-height: 2.15rem !important;
     }
-    .ae-btn-gold button {
+    
+    /* Gold gradient buttons */
+    [class*="st-key-btn_goto_criar_memorial"] button,
+    [class*="st-key-btn_abrir_mem_"] button,
+    [class*="st-key-curador_perfil_enviar"] button,
+    [class*="st-key-curador_perfil_guest_enviar"] button {
         background: linear-gradient(135deg, #f8dc92, #d4af37 62%, #b77a46) !important;
         color: #1b0f2e !important;
         border: none !important;
-        font-weight: 900 !important;
+        border-radius: 12px !important;
+        font-weight: 950 !important;
     }
-    .ae-btn-purple button {
+    
+    /* Purple buttons */
+    [class*="st-key-btn_curador_mem_"] button,
+    [class*="st-key-curador_nova_memoria_btn"] button,
+    [class*="st-key-curador_perfil_guest_finish"] button {
         background: #2B1747 !important;
         color: white !important;
         border: none !important;
+        border-radius: 12px !important;
+        font-weight: 950 !important;
+    }
+    
+    /* Secondary buttons */
+    [class*="st-key-curador_perfil_interromper"] button,
+    [class*="st-key-curador_perfil_voltar"] button,
+    [class*="st-key-memorial_ver_voltar"] button {
+        background: rgba(255,255,255,0.85) !important;
+        color: #2B1747 !important;
+        border: 1px solid rgba(43,23,71,0.22) !important;
+        border-radius: 12px !important;
         font-weight: 900 !important;
     }
     </style>
@@ -253,11 +275,9 @@ def render_memoriais_lista():
 
     usuario_id = st.session_state.usuario_atual["id"]
     
-    st.markdown('<div class="ae-btn-gold">', unsafe_allow_html=True)
     if st.button("➕ Criar Memorial", key="btn_goto_criar_memorial"):
         st.session_state.pagina_atual = "memorial_criar"
         st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
 
     try:
         memoriais = db.listar_memoriais_usuario(usuario_id) or []
@@ -284,17 +304,14 @@ def render_memoriais_lista():
         fal = datetime.strptime(str(m["data_falecimento"]), "%Y-%m-%d").strftime("%d/%m/%Y") if m["data_falecimento"] else "N/A"
         st.markdown(f'<div class="ae-memorial-card-dates">🌟 {nasc}  ✝️ {fal}</div>', unsafe_allow_html=True)
         
-        st.markdown('<div class="ae-btn-purple" style="width:100%;">', unsafe_allow_html=True)
         if st.button("📖 Abrir Memorial", key=f"btn_abrir_mem_{m['id']}", use_container_width=True):
             st.session_state.pagina_atual = f"memorial_ver_{m['id']}"
             st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
         
-        st.markdown('<div class="ae-btn-gold" style="width:100%; margin-top:0.35rem;">', unsafe_allow_html=True)
+        st.markdown('<div style="margin-top:0.35rem;"></div>', unsafe_allow_html=True)
         if st.button("✨ Curador de Perfil", key=f"btn_curador_mem_{m['id']}", use_container_width=True):
             st.session_state.pagina_atual = f"memorial_curador_{m['id']}"
             st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
         
         st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
@@ -397,12 +414,12 @@ def render_curador_perfil(memorial_id):
         })
         db.atualizar_conversa_curador_memorial(memorial_id, json.dumps(conversa), "conversa")
 
-    # Display Chat Bubble History
-    st.markdown('<div class="ae-chat-container">', unsafe_allow_html=True)
+    # Display Chat Bubble History in a SINGLE robust st.markdown block
+    chat_html_list = []
     for msg in conversa:
         classe = "ae-chat-bubble-assistant" if msg["role"] == "assistant" else "ae-chat-bubble-user"
-        st.markdown(f'<div class="{classe}">{html.escape(msg["content"])}</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+        chat_html_list.append(f'<div class="{classe}">{html.escape(msg["content"])}</div>')
+    st.markdown('<div class="ae-chat-container">' + "".join(chat_html_list) + '</div>', unsafe_allow_html=True)
 
     # User input
     with st.form("form_curador_perfil_input", clear_on_submit=True):
@@ -550,6 +567,38 @@ def render_pagina_memorial(memorial_id):
         font-weight: 900;
         color: #2B1747;
     }
+    .ae-chat-container {
+        border: 1px solid rgba(193, 177, 231, 0.45);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.78);
+        padding: 1rem;
+        min-height: 250px;
+        box-shadow: 0 10px 30px rgba(43,23,71,0.03);
+        margin-bottom: 0.85rem;
+    }
+    .ae-chat-bubble-assistant {
+        background: #F4EEFC;
+        border: 1px solid rgba(193, 177, 231, 0.4);
+        border-radius: 14px;
+        padding: 0.65rem 0.85rem;
+        margin-bottom: 0.58rem;
+        color: #2B1747;
+        max-width: 85%;
+        text-align: left;
+    }
+    .ae-chat-bubble-user {
+        background: #2B1747;
+        border-radius: 14px;
+        padding: 0.65rem 0.85rem;
+        margin-bottom: 0.58rem;
+        color: white !important;
+        max-width: 85%;
+        margin-left: auto;
+        text-align: right;
+    }
+    .ae-chat-bubble-user * {
+        color: white !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -561,23 +610,23 @@ def render_pagina_memorial(memorial_id):
     usuario_id = st.session_state.usuario_atual["id"]
     is_owner = (memorial["usuario_id"] == usuario_id)
 
-    # 1. Header Banner
-    st.markdown('<div class="ae-memorial-banner">', unsafe_allow_html=True)
-    if memorial["foto_perfil"]:
-        st.markdown(f'<img src="{memorial["foto_perfil"]}" class="ae-memorial-banner-img" />', unsafe_allow_html=True)
-    else:
-        st.markdown('<div class="ae-memorial-banner-img-placeholder">👤</div>', unsafe_allow_html=True)
-        
-    st.markdown('<div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="ae-memorial-banner-nome">{html.escape(memorial["nome"])}</div>', unsafe_allow_html=True)
-    
+    # 1. Header Banner (rendered in a single robust st.markdown block)
     nasc = datetime.strptime(str(memorial["data_nascimento"]), "%Y-%m-%d").strftime("%d/%m/%Y") if memorial["data_nascimento"] else "N/A"
     fal = datetime.strptime(str(memorial["data_falecimento"]), "%Y-%m-%d").strftime("%d/%m/%Y") if memorial["data_falecimento"] else "N/A"
-    st.markdown(f'<div class="ae-memorial-banner-info">🌟 {nasc}  ✝️ {fal}  &nbsp;|&nbsp;  Relação: {html.escape(memorial["parentesco"] or "Homenageado(a)")}</div>', unsafe_allow_html=True)
-    if memorial["biografia"]:
-        st.markdown(f'<div style="font-size:0.86rem; margin-top:0.45rem; line-height:1.4; font-style:italic;">"{html.escape(memorial["biografia"])}"</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    
+    foto_html = f'<img src="{memorial["foto_perfil"]}" class="ae-memorial-banner-img" />' if memorial["foto_perfil"] else '<div class="ae-memorial-banner-img-placeholder">👤</div>'
+    bio_html = f'<div style="font-size:0.86rem; margin-top:0.45rem; line-height:1.4; font-style:italic;">"{html.escape(memorial["biografia"])}"</div>' if memorial["biografia"] else ""
+    
+    st.markdown(f"""
+    <div class="ae-memorial-banner">
+        {foto_html}
+        <div>
+            <div class="ae-memorial-banner-nome">{html.escape(memorial["nome"])}</div>
+            <div class="ae-memorial-banner-info">🌟 {nasc} &nbsp;✝️ {fal} &nbsp;|&nbsp; Relação: {html.escape(memorial["parentesco"] or "Homenageado(a)")}</div>
+            {bio_html}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     # 2. Main Page Navigation and Tabs
     tab_timeline, tab_stories, tab_photos, tab_videos, tab_people, tab_curador, tab_contribs = st.tabs([
@@ -789,21 +838,34 @@ def render_pagina_memorial(memorial_id):
             
         contexto_memorial = "\n\n".join(contexto_textos)
 
-        # Chat interface
+        # Chat interface (rendered in a SINGLE robust st.markdown block to prevent layout breaking)
         chat_key = f"chat_memorial_{memorial_id}"
         if chat_key not in st.session_state:
             st.session_state[chat_key] = [{
                 "role": "assistant",
                 "content": f"Olá! Eu sou o Curador do Memorial de {memorial['nome']}. Você pode me perguntar sobre suas histórias, valores, viagens, lembranças de infância e ensinamentos. Responderei com base apenas nos registros preservados aqui. Como posso ajudar você a relembrar hoje?"
             }]
-
+            
+        chat_html_list = []
         for msg in st.session_state[chat_key]:
             classe = "ae-chat-bubble-assistant" if msg["role"] == "assistant" else "ae-chat-bubble-user"
-            st.markdown(f'<div class="{classe}">{html.escape(msg["content"])}</div>', unsafe_allow_html=True)
+            chat_html_list.append(f'<div class="{classe}">{html.escape(msg["content"])}</div>')
+        st.markdown('<div class="ae-chat-container">' + "".join(chat_html_list) + '</div>', unsafe_allow_html=True)
 
         with st.form(f"form_chat_memorial_{memorial_id}", clear_on_submit=True):
             user_msg = st.text_input("Sua pergunta", placeholder="Ex: O que ele gostava de fazer?")
-            enviar_chat = st.form_submit_button("Perguntar")
+            c_chat_btns = st.columns([0.7, 0.3], gap="small")
+            with c_chat_btns[0]:
+                enviar_chat = st.form_submit_button("Perguntar", use_container_width=True)
+            with c_chat_btns[1]:
+                limpar_chat = st.form_submit_button("🧹 Limpar conversa", use_container_width=True)
+
+        if limpar_chat:
+            st.session_state[chat_key] = [{
+                "role": "assistant",
+                "content": f"Olá! Eu sou o Curador do Memorial de {memorial['nome']}. Você pode me perguntar sobre suas histórias, valores, viagens, lembranças de infância e ensinamentos. Responderei com base apenas nos registros preservados aqui. Como posso ajudar você a relembrar hoje?"
+            }]
+            st.rerun()
 
         if enviar_chat and user_msg.strip():
             st.session_state[chat_key].append({"role": "user", "content": user_msg.strip()})
@@ -888,45 +950,126 @@ Contexto disponível sobre {memorial['nome']}:
             st.markdown("#### Contribuir com lembranças")
             st.caption("Ajude a manter esse legado vivo enviando histórias, fotos ou vídeos. O responsável pelo memorial avaliará e aprovará antes de publicar.")
             
-            with st.form("form_contribuir_memorial"):
-                c_nome = st.text_input("Seu nome completo *", value=st.session_state.usuario_atual.get("nome", ""))
-                c_email = st.text_input("Seu e-mail *", value=st.session_state.usuario_atual.get("email", ""))
-                c_tipo = st.selectbox("Tipo de contribuição", ["historia", "foto", "video"])
-                c_texto = st.text_area("Sua história ou descrição (opcional para foto/vídeo)")
-                c_file = st.file_uploader("Arquivo (necessário para foto ou vídeo)", type=["png", "jpg", "jpeg", "webp", "mp4", "mov"])
-                c_submit = st.form_submit_button("Enviar contribuição")
+            c_tipo = st.selectbox("Como deseja contribuir?", ["historia", "foto", "video", "Curador de Perfil"])
+            
+            if c_tipo == "Curador de Perfil":
+                st.markdown("##### ✨ Converse com o Curador de Perfil")
+                st.caption(f"Responda às perguntas do Curador para registrar histórias exclusivas sobre {memorial['nome']}. Ao terminar, envie a conversa como contribuição.")
                 
-            if c_submit:
-                if not c_nome.strip() or not c_email.strip():
-                    st.error("Nome e e-mail são obrigatórios.")
-                elif c_tipo != "historia" and not c_file:
-                    st.error("O arquivo é obrigatório para contribuições de Foto ou Vídeo.")
-                else:
-                    try:
-                        file_url = ""
-                        file_name = ""
-                        file_type = ""
-                        if c_file:
-                            bucket = "fotos" if c_tipo == "foto" else "videos"
-                            upload = storage.upload_streamlit_file(bucket, c_file, memorial["usuario_id"], "contribuicoes")
-                            file_url = upload["url"]
-                            file_name = c_file.name
-                            file_type = c_file.type
-                            
-                        db.criar_contribuicao_memorial(
-                            usuario_dono_id=memorial["usuario_id"],
-                            usuario_contribuidor_email=c_email.strip(),
-                            usuario_contribuidor_nome=c_nome.strip(),
-                            tipo_contribuicao=c_tipo,
-                            texto=c_texto.strip(),
-                            arquivo_url=file_url,
-                            memorial_id=memorial_id,
-                            arquivo_name=file_name,
-                            arquivo_type=file_type
-                        )
-                        st.success("🎉 Sua contribuição foi enviada e está aguardando a aprovação do responsável pelo memorial. Muito obrigado!")
-                    except Exception as e:
-                        st.error(f"Erro ao enviar contribuição: {e}")
+                conversa_key = f"guest_curador_conversa_{memorial_id}"
+                if conversa_key not in st.session_state:
+                    st.session_state[conversa_key] = [{
+                        "role": "assistant",
+                        "content": f"Olá! Eu sou o Curador de Perfil. Estou aqui para ajudar você, como amigo(a)/parente de {memorial['nome']}, a recordar momentos especiais e enriquecer seu memorial. Você poderia compartilhar uma lembrança marcante que viveu ao lado de {memorial['nome']}?"
+                    }]
+                    
+                # Render conversation in bubbles in a SINGLE robust st.markdown block
+                conversa_list = st.session_state[conversa_key]
+                chat_html_list = []
+                for msg in conversa_list:
+                    classe = "ae-chat-bubble-assistant" if msg["role"] == "assistant" else "ae-chat-bubble-user"
+                    chat_html_list.append(f'<div class="{classe}">{html.escape(msg["content"])}</div>')
+                st.markdown('<div class="ae-chat-container">' + "".join(chat_html_list) + '</div>', unsafe_allow_html=True)
+                
+                with st.form(f"form_guest_curador_{memorial_id}", clear_on_submit=True):
+                    guest_resp = st.text_input("Sua resposta para o Curador", placeholder="Escreva aqui...")
+                    c_g_btns = st.columns(2, gap="small")
+                    with c_g_btns[0]:
+                        enviar_guest_chat = st.form_submit_button("✨ Enviar resposta", use_container_width=True)
+                    with c_g_btns[1]:
+                        finalizar_guest_chat = st.form_submit_button("💾 Enviar como contribuição", use_container_width=True)
+                        
+                if enviar_guest_chat and guest_resp.strip():
+                    conversa_list.append({"role": "user", "content": guest_resp.strip()})
+                    st.session_state[conversa_key] = conversa_list
+                    st.rerun()
+                    
+                if len(conversa_list) > 0 and conversa_list[-1]["role"] == "user":
+                    with st.spinner("Refletindo..."):
+                        client = _get_openai_client()
+                        if client:
+                            try:
+                                system_prompt = f"""
+Você é o Curador de Perfil do Memorial de {memorial['nome']}.
+Seu objetivo é entrevistar o convidado/amigo para resgatar lembranças importantes sobre {memorial['nome']}.
+
+Regras importantes:
+1. Você conversa COM o convidado sobre {memorial['nome']}. Nunca finja ser ele.
+2. Faça perguntas afetuosas e estimulantes (máximo 1 pergunta por vez).
+3. Seja breve e acolhedor (máximo 4-5 linhas).
+                                """.strip()
+                                messages = [{"role": "system", "content": system_prompt}]
+                                for msg in conversa_list:
+                                    messages.append({"role": msg["role"], "content": msg["content"]})
+                                response = client.chat.completions.create(
+                                    model="gpt-4o-mini",
+                                    messages=messages,
+                                    max_tokens=250,
+                                    temperature=0.7
+                                )
+                                ai_text = response.choices[0].message.content.strip()
+                                conversa_list.append({"role": "assistant", "content": ai_text})
+                                st.session_state[conversa_key] = conversa_list
+                                st.rerun()
+                            except Exception as exc:
+                                st.error("Erro ao gerar pergunta do Curador.")
+                                
+                if finalizar_guest_chat:
+                    conversa_text = "\n\n".join([f"{'Você' if msg['role'] == 'user' else 'Curador'}: {msg['content']}" for msg in conversa_list])
+                    db.criar_contribuicao_memorial(
+                        usuario_dono_id=memorial["usuario_id"],
+                        usuario_contribuidor_email=st.session_state.usuario_atual.get("email", ""),
+                        usuario_contribuidor_nome=st.session_state.usuario_atual.get("nome", ""),
+                        tipo_contribuicao="historia",
+                        texto=conversa_text,
+                        arquivo_url="",
+                        memorial_id=memorial_id,
+                        arquivo_name="Entrevista do Curador",
+                        arquivo_tipo="text/plain"
+                    )
+                    st.success("🎉 Sua entrevista com o Curador foi enviada com sucesso para aprovação do responsável! Muito obrigado!")
+                    st.session_state.pop(conversa_key, None)
+                    st.rerun()
+            else:
+                with st.form("form_contribuir_memorial"):
+                    c_nome = st.text_input("Seu nome completo *", value=st.session_state.usuario_atual.get("nome", ""))
+                    c_email = st.text_input("Seu e-mail *", value=st.session_state.usuario_atual.get("email", ""))
+                    c_texto = st.text_area("Sua história ou descrição (opcional para foto/vídeo)")
+                    c_file = st.file_uploader("Arquivo (necessário para foto ou vídeo)", type=["png", "jpg", "jpeg", "webp", "mp4", "mov"])
+                    c_submit = st.form_submit_button("Enviar contribuição")
+                    
+                if c_submit:
+                    if not c_nome.strip() or not c_email.strip():
+                        st.error("Nome e e-mail são obrigatórios.")
+                    elif c_tipo != "historia" and not c_file:
+                        st.error("O arquivo é obrigatório para contribuições de Foto ou Vídeo.")
+                    else:
+                        try:
+                            file_url = ""
+                            file_name = ""
+                            file_type = ""
+                            if c_file:
+                                bucket = "fotos" if c_tipo == "foto" else "videos"
+                                upload = storage.upload_streamlit_file(bucket, c_file, memorial["usuario_id"], "contribuicoes")
+                                file_url = upload["url"]
+                                file_name = c_file.name
+                                file_type = c_file.type
+                                
+                            db.criar_contribuicao_memorial(
+                                usuario_dono_id=memorial["usuario_id"],
+                                usuario_contribuidor_email=c_email.strip(),
+                                usuario_contribuidor_nome=c_nome.strip(),
+                                tipo_contribuicao=c_tipo,
+                                texto=c_texto.strip(),
+                                arquivo_url=file_url,
+                                memorial_id=memorial_id,
+                                arquivo_name=file_name,
+                                arquivo_type=file_type
+                            )
+                            st.success("🎉 Sua contribuição foi enviada e está aguardando a aprovação do responsável pelo memorial. Muito obrigado!")
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Erro ao enviar contribuição: {e}")
 
     # Back button at the very bottom
     st.markdown('<div style="margin-top: 1.5rem;"></div>', unsafe_allow_html=True)
