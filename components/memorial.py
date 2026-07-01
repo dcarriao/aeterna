@@ -281,40 +281,71 @@ def render_memoriais_lista():
 
     try:
         memoriais = db.listar_memoriais_usuario(usuario_id) or []
+        user_email = st.session_state.usuario_atual.get("email", "")
+        user_tel = st.session_state.usuario_atual.get("telefone", "")
+        invites_recebidos = db.listar_convites_recebidos_usuario(user_email, user_tel) or []
     except Exception as e:
         print("Erro ao listar memoriais:", e)
         memoriais = []
+        invites_recebidos = []
 
+    st.markdown("### 📋 Meus Memoriais")
     if not memoriais:
         st.info("💡 Você ainda não possui nenhum memorial criado. Clique acima para começar a preservar um lindo legado.")
-        return
-
-    st.markdown('<div class="ae-memorial-grid">', unsafe_allow_html=True)
-    for m in memoriais:
-        st.markdown(f'<div class="ae-memorial-card">', unsafe_allow_html=True)
-        if m["foto_perfil"]:
-            st.markdown(f'<img src="{m["foto_perfil"]}" class="ae-memorial-card-img" />', unsafe_allow_html=True)
-        else:
-            st.markdown('<div class="ae-memorial-card-img-placeholder">👤</div>', unsafe_allow_html=True)
+    else:
+        st.markdown('<div class="ae-memorial-grid">', unsafe_allow_html=True)
+        for m in memoriais:
+            st.markdown(f'<div class="ae-memorial-card">', unsafe_allow_html=True)
+            if m["foto_perfil"]:
+                st.markdown(f'<img src="{m["foto_perfil"]}" class="ae-memorial-card-img" />', unsafe_allow_html=True)
+            else:
+                st.markdown('<div class="ae-memorial-card-img-placeholder">👤</div>', unsafe_allow_html=True)
+                
+            st.markdown(f'<div class="ae-memorial-card-nome">{html.escape(m["nome"])}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="ae-memorial-card-rel">{html.escape(m["parentesco"] or "Homenageado(a)")}</div>', unsafe_allow_html=True)
             
-        st.markdown(f'<div class="ae-memorial-card-nome">{html.escape(m["nome"])}</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="ae-memorial-card-rel">{html.escape(m["parentesco"] or "Homenageado(a)")}</div>', unsafe_allow_html=True)
-        
-        nasc = datetime.strptime(str(m["data_nascimento"]), "%Y-%m-%d").strftime("%d/%m/%Y") if m["data_nascimento"] else "N/A"
-        fal = datetime.strptime(str(m["data_falecimento"]), "%Y-%m-%d").strftime("%d/%m/%Y") if m["data_falecimento"] else "N/A"
-        st.markdown(f'<div class="ae-memorial-card-dates">🌟 {nasc}  ✝️ {fal}</div>', unsafe_allow_html=True)
-        
-        if st.button("📖 Abrir Memorial", key=f"btn_abrir_mem_{m['id']}", use_container_width=True):
-            st.session_state.pagina_atual = f"memorial_ver_{m['id']}"
-            st.rerun()
-        
-        st.markdown('<div style="margin-top:0.35rem;"></div>', unsafe_allow_html=True)
-        if st.button("✨ Curador de Perfil", key=f"btn_curador_mem_{m['id']}", use_container_width=True):
-            st.session_state.pagina_atual = f"memorial_curador_{m['id']}"
-            st.rerun()
-        
+            nasc = datetime.strptime(str(m["data_nascimento"]), "%Y-%m-%d").strftime("%d/%m/%Y") if m["data_nascimento"] else "N/A"
+            fal = datetime.strptime(str(m["data_falecimento"]), "%Y-%m-%d").strftime("%d/%m/%Y") if m["data_falecimento"] else "N/A"
+            st.markdown(f'<div class="ae-memorial-card-dates">🌟 {nasc}  ✝️ {fal}</div>', unsafe_allow_html=True)
+            
+            if st.button("📖 Abrir Memorial", key=f"btn_abrir_mem_{m['id']}", use_container_width=True):
+                st.session_state.pagina_atual = f"memorial_ver_{m['id']}"
+                st.rerun()
+            
+            st.markdown('<div style="margin-top:0.35rem;"></div>', unsafe_allow_html=True)
+            if st.button("✨ Curador de Perfil", key=f"btn_curador_mem_{m['id']}", use_container_width=True):
+                st.session_state.pagina_atual = f"memorial_curador_{m['id']}"
+                st.rerun()
+            
+            st.markdown('</div>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+
+    if invites_recebidos:
+        st.markdown("---")
+        st.markdown("### 🤝 Compartilhados Comigo")
+        st.markdown('<div class="ae-memorial-grid">', unsafe_allow_html=True)
+        for inv in invites_recebidos:
+            m_id = inv["memorial_id"]
+            m = db.obter_memorial(m_id)
+            if m:
+                st.markdown(f'<div class="ae-memorial-card">', unsafe_allow_html=True)
+                if m["foto_perfil"]:
+                    st.markdown(f'<img src="{m["foto_perfil"]}" class="ae-memorial-card-img" />', unsafe_allow_html=True)
+                else:
+                    st.markdown('<div class="ae-memorial-card-img-placeholder">👤</div>', unsafe_allow_html=True)
+                    
+                st.markdown(f'<div class="ae-memorial-card-nome">{html.escape(m["nome"])}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="ae-memorial-card-rel">{html.escape(m["parentesco"] or "Homenageado(a)")}</div>', unsafe_allow_html=True)
+                
+                nasc = datetime.strptime(str(m["data_nascimento"]), "%Y-%m-%d").strftime("%d/%m/%Y") if m["data_nascimento"] else "N/A"
+                fal = datetime.strptime(str(m["data_falecimento"]), "%Y-%m-%d").strftime("%d/%m/%Y") if m["data_falecimento"] else "N/A"
+                st.markdown(f'<div class="ae-memorial-card-dates">🌟 {nasc}  ✝️ {fal}</div>', unsafe_allow_html=True)
+                
+                if st.button("📖 Abrir Memorial", key=f"btn_abrir_shared_mem_{m['id']}", use_container_width=True):
+                    st.session_state.pagina_atual = f"memorial_ver_{m['id']}"
+                    st.rerun()
+                st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 def render_curador_perfil(memorial_id):
     st.markdown("""
@@ -810,6 +841,86 @@ def render_pagina_memorial(memorial_id):
             for c in contatos_list:
                 st.markdown(f"👤 **{html.escape(c['nome'])} {html.escape(c['sobrenome'])}** ({html.escape(c['parentesco'] or 'Relação não informada')})")
 
+        if is_owner:
+            st.markdown("---")
+            st.markdown("#### 💌 Enviar Convite via WhatsApp")
+            st.caption("Cadastre o contato e gere um link único de acesso para enviar pelo WhatsApp.")
+            
+            with st.form("form_add_convite_memorial"):
+                c_nome_inv = st.text_input("Nome do contato *", placeholder="Ex: Primo André")
+                c_tel_inv = st.text_input("Telefone / WhatsApp *", placeholder="DDD + Número (Ex: 11999998888)")
+                c_email_inv = st.text_input("E-mail (opcional)", placeholder="Ex: andre@email.com")
+                c_rel_inv = st.text_input("Relação com o falecido", placeholder="Ex: Sobrinho, Amigo de infância")
+                c_obs_inv = st.text_input("Observação interna (opcional)", placeholder="Ex: Mora em Curitiba")
+                c_submit_inv = st.form_submit_button("Gerar Convite")
+                
+            if c_submit_inv:
+                if not c_nome_inv.strip() or not c_tel_inv.strip():
+                    st.error("Nome e Telefone são obrigatórios.")
+                else:
+                    import secrets
+                    token = secrets.token_urlsafe(16)
+                    try:
+                        db.criar_convite_memorial(
+                            memorial_id=memorial_id,
+                            usuario_id=usuario_id,
+                            nome=c_nome_inv.strip(),
+                            telefone=c_tel_inv.strip(),
+                            email=c_email_inv.strip() or None,
+                            parentesco=c_rel_inv.strip() or None,
+                            observacao=c_obs_inv.strip() or None,
+                            token=token
+                        )
+                        st.success("🎉 Convite gerado com sucesso!")
+                        st.rerun()
+                    except Exception as e:
+                        print("Erro ao criar convite:", e)
+                        st.error("Erro ao gerar convite.")
+                        
+            # List existing invitations
+            st.markdown("#### 📋 Convidados e Status dos Convites")
+            try:
+                convites = db.listar_convites_memorial(memorial_id) or []
+            except Exception:
+                convites = []
+                
+            if not convites:
+                st.info("Nenhum convite enviado para este memorial ainda.")
+            else:
+                for c in convites:
+                    status_badge = "⏳ Pendente" if c["status"] == "pendente" else "✅ Aceito"
+                    st.markdown(f"**{html.escape(c['nome'])}** ({html.escape(c['parentesco'] or 'contato')}) &nbsp;|&nbsp; {status_badge}")
+                    if c["telefone"]:
+                        st.caption(f"📞 Telefone: {c['telefone']}")
+                    if c["email"]:
+                        st.caption(f"📧 E-mail: {c['email']}")
+                        
+                    # Generate unique link
+                    base_url = "https://aeterna-viva.streamlit.app"
+                    try:
+                        base_url = st.secrets.get("BASE_URL", base_url)
+                    except Exception:
+                        pass
+                    invite_link = f"{base_url}/?convite={c['token']}"
+                    
+                    st.text_input("Copiar link do convite", value=invite_link, key=f"inp_link_invite_{c['id']}", disabled=True)
+                    
+                    # Open WhatsApp Action
+                    msg_text = f"Oi, criei um Memorial na aEterna para preservar histórias, fotos e lembranças de {memorial['nome']}. Gostaria de te convidar para participar e, se quiser, contribuir com alguma memória. Acesse por aqui: {invite_link}"
+                    import urllib.parse
+                    msg_encoded = urllib.parse.quote(msg_text)
+                    tel_clean = ''.join(filter(str.isdigit, c['telefone']))
+                    wa_url = f"https://api.whatsapp.com/send?phone={tel_clean}&text={msg_encoded}"
+                    
+                    c_cols = st.columns([0.4, 0.6], gap="small")
+                    with c_cols[0]:
+                        st.markdown(f'<a href="{wa_url}" target="_blank"><button style="width:100%; border-radius:10px; background-color:#25D366; color:white; border:none; padding:5px 8px; font-weight:800; cursor:pointer;">💬 WhatsApp</button></a>', unsafe_allow_html=True)
+                    with c_cols[1]:
+                        if st.button("❌ Remover", key=f"btn_rem_invite_{c['id']}", use_container_width=True):
+                            db.remover_convite_memorial(c["id"])
+                            st.success("Convite removido!")
+                            st.rerun()
+
     # Tab 6: Conversar com o Memorial (Curador da Página)
     with tab_curador:
         st.markdown("### ✨ Conversar com o Memorial")
@@ -1076,3 +1187,101 @@ Regras importantes:
     if st.button("← Voltar para os Memoriais", key="memorial_ver_voltar"):
         st.session_state.pagina_atual = "memorial_lista"
         st.rerun()
+
+def render_aceite_convite(token):
+    st.markdown("""
+    <style>
+    .main .block-container,
+    .block-container,
+    [data-testid="stMainBlockContainer"] {
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+        max-width: 780px !important;
+        width: min(780px, calc(100vw - 250px)) !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+    .ae-invite-card {
+        background: #FFFFFF !important;
+        border: 1.5px solid rgba(212, 168, 79, 0.22) !important;
+        border-radius: 20px !important;
+        padding: 2.2rem !important;
+        box-shadow: 0 14px 34px rgba(43,23,71,0.06) !important;
+        text-align: center;
+    }
+    .ae-invite-card h2 {
+        color: #2B1747;
+        font-family: "Cormorant Garamond", Georgia, serif;
+        font-size: 2rem;
+        margin-bottom: 0.85rem;
+    }
+    .stButton>button {
+        border-radius: 14px !important;
+        font-weight: 950 !important;
+        min-height: 2.5rem !important;
+    }
+    [class*="st-key-btn_accept_memorial_invite"] button {
+        background: linear-gradient(135deg, #f8dc92, #d4af37 62%, #b77a46) !important;
+        color: #1b0f2e !important;
+        border: none !important;
+        font-size: 1rem !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    convite = db.obter_convite_memorial_por_token(token)
+    if not convite:
+        st.error("❌ Convite inválido ou expirado.")
+        if st.button("Ir para o início", key="btn_invite_invalid_goto_start"):
+            st.query_params.clear()
+            st.rerun()
+        return
+        
+    memorial = db.obter_memorial(convite["memorial_id"])
+    if not memorial:
+        st.error("❌ O Memorial vinculado a este convite não foi encontrado.")
+        return
+        
+    # Find owner name
+    owner_nome = "Alguém especial"
+    try:
+        conn = db.conectar()
+        cursor = conn.cursor()
+        db.executar(cursor, "SELECT nome, sobrenome FROM usuarios WHERE id = ?", (memorial["usuario_id"],))
+        u = cursor.fetchone()
+        if u:
+            owner_nome = f"{u[0]} {u[1]}"
+        conn.close()
+    except Exception:
+        pass
+
+    st.markdown('<div style="text-align: center; margin-bottom: 1.5rem;"><img src="https://raw.githubusercontent.com/dcarriao/aeterna/main/assets/logo.png" width="120" /></div>', unsafe_allow_html=True)
+
+    st.markdown(f"""
+    <div class="ae-invite-card">
+        <h2>Convite Especial</h2>
+        <p style="color:#6F6478; font-size:0.96rem; line-height:1.45; margin-bottom:1.5rem;">
+            Olá, <strong>{html.escape(convite["nome"])}</strong>!<br><br>
+            <strong>{html.escape(owner_nome)}</strong> convidou você para acessar e contribuir com o Memorial de 
+            <strong style="color:#B77A46; font-size:1.15rem; display:block; margin:0.35rem 0;">{html.escape(memorial["nome"])} ({html.escape(convite["parentesco"] or "conhecido")})</strong>
+            um espaço de memórias e afetos para preservar para sempre esse lindo legado.
+        </p>
+    """, unsafe_allow_html=True)
+    
+    if st.button("🤍 Aceitar Convite e Acessar", key="btn_accept_memorial_invite", use_container_width=True):
+        try:
+            # Update status
+            db.atualizar_status_convite_memorial(convite["id"], "aceito")
+            st.success("🎉 Convite aceito com sucesso!")
+            
+            # Save accepted token in session state to grant temporary or permanent access
+            if "acessos_memoriais" not in st.session_state:
+                st.session_state.acessos_memoriais = []
+            st.session_state.acessos_memoriais.append(memorial["id"])
+            
+            st.query_params.clear()
+            st.session_state.pagina_atual = f"memorial_ver_{memorial['id']}"
+            st.rerun()
+        except Exception as e:
+            st.error("Erro ao aceitar convite.")
+    st.markdown('</div>', unsafe_allow_html=True)

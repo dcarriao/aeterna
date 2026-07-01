@@ -3687,3 +3687,181 @@ class BancoDados:
             INSERT INTO videos (usuario_id, titulo, destinatario, caminho_arquivo, categoria, visibilidade, memorial_id)
             VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (usuario_id, titulo, destinatario, caminho_arquivo, categoria, visibilidade, memorial_id))
+
+    # ========================================================================
+    # CONVITES DE MEMORIAL (SUPABASE POSTGRES)
+    # ========================================================================
+    def criar_convite_memorial(self, memorial_id, usuario_id, nome, telefone, email, parentesco, observacao, token):
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            self.executar(cursor, """
+                INSERT INTO memorial_convites (memorial_id, usuario_id, nome, telefone, email, parentesco, observacao, token, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pendente')
+                RETURNING id
+            """, (memorial_id, usuario_id, nome, telefone, email, parentesco, observacao, token))
+            convite_id = cursor.fetchone()[0]
+            conn.commit()
+            return convite_id
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            cursor.close()
+            conn.close()
+
+    def obter_convite_memorial_por_token(self, token):
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            self.executar(cursor, """
+                SELECT id, memorial_id, usuario_id, nome, telefone, email, parentesco, observacao, token, status, criado_em, aceito_em
+                FROM memorial_convites
+                WHERE token = ?
+            """, (token,))
+            r = cursor.fetchone()
+            if r:
+                return {
+                    "id": r[0],
+                    "memorial_id": r[1],
+                    "usuario_id": r[2],
+                    "nome": r[3],
+                    "telefone": r[4],
+                    "email": r[5],
+                    "parentesco": r[6],
+                    "observacao": r[7],
+                    "token": r[8],
+                    "status": r[9],
+                    "criado_em": r[10],
+                    "aceito_em": r[11],
+                }
+            return None
+        finally:
+            cursor.close()
+            conn.close()
+
+    def atualizar_status_convite_memorial(self, convite_id, status):
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            if status == 'aceito':
+                self.executar(cursor, """
+                    UPDATE memorial_convites
+                    SET status = ?, aceito_em = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                """, (status, convite_id))
+            else:
+                self.executar(cursor, """
+                    UPDATE memorial_convites
+                    SET status = ?
+                    WHERE id = ?
+                """, (status, convite_id))
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            cursor.close()
+            conn.close()
+
+    def listar_convites_memorial(self, memorial_id):
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            self.executar(cursor, """
+                SELECT id, memorial_id, usuario_id, nome, telefone, email, parentesco, observacao, token, status, criado_em, aceito_em
+                FROM memorial_convites
+                WHERE memorial_id = ?
+                ORDER BY criado_em DESC
+            """, (memorial_id,))
+            rows = cursor.fetchall()
+            return [{
+                "id": r[0],
+                "memorial_id": r[1],
+                "usuario_id": r[2],
+                "nome": r[3],
+                "telefone": r[4],
+                "email": r[5],
+                "parentesco": r[6],
+                "observacao": r[7],
+                "token": r[8],
+                "status": r[9],
+                "criado_em": r[10],
+                "aceito_em": r[11],
+            } for r in rows]
+        finally:
+            cursor.close()
+            conn.close()
+
+    def remover_convite_memorial(self, convite_id):
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            self.executar(cursor, "DELETE FROM memorial_convites WHERE id = ?", (convite_id,))
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            cursor.close()
+            conn.close()
+
+    def listar_convites_recebidos_usuario(self, email, telefone):
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            # We clean the phone number to perform a highly robust match
+            tel_limpo = ''.join(filter(str.isdigit, str(telefone or "")))
+            
+            self.executar(cursor, """
+                SELECT id, memorial_id, usuario_id, nome, telefone, email, parentesco, observacao, token, status, criado_em, aceito_em
+                FROM memorial_convites
+                WHERE status = 'aceito' AND (
+                    LOWER(email) = LOWER(?) OR 
+                    REGEXP_REPLACE(telefone, '\\D', '', 'g') = ? OR
+                    REGEXP_REPLACE(telefone, '\\D', '', 'g') LIKE ?
+                )
+            """, (email or "", tel_limpo or "---", f"%{tel_limpo}%" if tel_limpo else "---"))
+            rows = cursor.fetchall()
+            return [{
+                "id": r[0],
+                "memorial_id": r[1],
+                "usuario_id": r[2],
+                "nome": r[3],
+                "telefone": r[4],
+                "email": r[5],
+                "parentesco": r[6],
+                "observacao": r[7],
+                "token": r[8],
+                "status": r[9],
+                "criado_em": r[10],
+                "aceito_em": r[11],
+            } for r in rows]
+        except Exception as e:
+            # Fallback query if regexp_replace raises some compatibility issues (postgres vs sqlite/others)
+            try:
+                self.executar(cursor, """
+                    SELECT id, memorial_id, usuario_id, nome, telefone, email, parentesco, observacao, token, status, criado_em, aceito_em
+                    FROM memorial_convites
+                    WHERE status = 'aceito' AND (LOWER(email) = LOWER(?) OR telefone = ?)
+                """, (email or "", telefone or ""))
+                rows = cursor.fetchall()
+                return [{
+                    "id": r[0],
+                    "memorial_id": r[1],
+                    "usuario_id": r[2],
+                    "nome": r[3],
+                    "telefone": r[4],
+                    "email": r[5],
+                    "parentesco": r[6],
+                    "observacao": r[7],
+                    "token": r[8],
+                    "status": r[9],
+                    "criado_em": r[10],
+                    "aceito_em": r[11],
+                } for r in rows]
+            except Exception:
+                return []
+        finally:
+            cursor.close()
+            conn.close()

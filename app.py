@@ -5565,6 +5565,13 @@ def render_novidades(
 def main():
     inject_custom_css()
 
+    # Intercept Memorial Invitations
+    convite_token = st.query_params.get("convite") or st.query_params.get("token")
+    if convite_token:
+        from components.memorial import render_aceite_convite
+        render_aceite_convite(convite_token)
+        return
+
     if not st.session_state.autenticado:
         render_login_compacto(
             carregar_logo,
