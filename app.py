@@ -13,6 +13,7 @@ from utils.usuarios import GerenciadorUsuarios
 from utils.upload_video import GerenciadorVideos
 from styles.theme import aplicar_tema
 from components.chat_luto import render_chat_luto, render_curador_memoria_primeiro
+from components.memorial import render_memoriais_lista, render_criar_memorial, render_pagina_memorial, render_curador_perfil
 from components.login_compacto import render_login_compacto
 from components.dashboard_ui import (
     aplicar_css_dashboard,
@@ -4399,6 +4400,7 @@ def render_sidebar_principal(
         _botao_sidebar("🏠 Início", "inicio")
         _botao_sidebar("📖 Minha História", "minha_historia")
         _botao_sidebar("👥 Pessoas", "pessoas")
+        _botao_sidebar("🤍 Memorial", "memorial_lista")
         _botao_sidebar(
             "🤝 Compartilhadas Comigo",
             "historias_compartilhadas",
@@ -5801,6 +5803,16 @@ def main():
             )
         elif pagina == "minha_historia":
             render_minha_historia()
+        elif pagina == "memorial_lista":
+            render_memoriais_lista()
+        elif pagina == "memorial_criar":
+            render_criar_memorial()
+        elif pagina.startswith("memorial_ver_"):
+            memorial_id = int(pagina.split("_")[-1])
+            render_pagina_memorial(memorial_id)
+        elif pagina.startswith("memorial_curador_"):
+            memorial_id = int(pagina.split("_")[-1])
+            render_curador_perfil(memorial_id)
         elif pagina == "historias_compartilhadas":
             render_historias_compartilhadas_lista(historias_compartilhadas)
         elif pagina == "novidades":

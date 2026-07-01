@@ -594,6 +594,7 @@ class BancoDados:
             contatos_ids: List[int],
             categoria: str = "geral",
             visibilidade: str = "contatos",
+            memorial_id: int = None,
     ):
         if visibilidade not in ("privado", "contatos", "seletivo"):
             raise ValueError("Visibilidade inválida.")
@@ -613,9 +614,10 @@ class BancoDados:
                         destinatario,
                         caminho_arquivo,
                         categoria,
-                        visibilidade
+                        visibilidade,
+                        memorial_id
                     )
-                    VALUES (%s, %s, %s, %s, %s, %s)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
                     RETURNING id
                 ''', (
                     usuario_id,
@@ -624,6 +626,7 @@ class BancoDados:
                     caminho_arquivo,
                     categoria,
                     visibilidade,
+                    memorial_id,
                 ))
 
                 video_id = cursor.fetchone()[0]
@@ -786,6 +789,7 @@ class BancoDados:
             caminho_arquivo: str,
             contatos_ids: List[int],
             visibilidade: str = "contatos",
+            memorial_id: int = None,
     ):
         if visibilidade not in ("privado", "contatos", "seletivo"):
             raise ValueError("Visibilidade inválida.")
@@ -804,9 +808,10 @@ class BancoDados:
                     descricao,
                     categoria,
                     caminho_arquivo,
-                    visibilidade
+                    visibilidade,
+                    memorial_id
                 )
-                VALUES (%s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
             """, (
                 usuario_id,
@@ -815,6 +820,7 @@ class BancoDados:
                 categoria,
                 caminho_arquivo,
                 visibilidade,
+                memorial_id,
             ))
 
             foto_id = cursor.fetchone()[0]
@@ -2305,6 +2311,7 @@ class BancoDados:
             pessoas_relacionadas: str = None,
             visibilidade: str = "contatos",
             contatos_ids: List[int] = None,
+            memorial_id: int = None,
     ):
         if visibilidade not in ("privado", "contatos", "seletivo"):
             raise ValueError("Visibilidade inválida.")
@@ -2349,7 +2356,8 @@ class BancoDados:
                         categoria = %s,
                         local = COALESCE(local, %s),
                         data_evento = COALESCE(data_evento, %s),
-                        pessoas_relacionadas = COALESCE(pessoas_relacionadas, %s)
+                        pessoas_relacionadas = COALESCE(pessoas_relacionadas, %s),
+                        memorial_id = COALESCE(memorial_id, %s)
                     WHERE id = %s AND usuario_id = %s
                 """, (
                     conteudo_atualizado,
@@ -2358,6 +2366,7 @@ class BancoDados:
                     local,
                     data_evento,
                     pessoas_final,
+                    memorial_id,
                     memoria_id,
                     usuario_id,
                 ))
@@ -2387,8 +2396,9 @@ class BancoDados:
                     data_evento,
                     pessoas_relacionadas
                     , visibilidade
+                    , memorial_id
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
             """, (
                 usuario_id,
@@ -2400,6 +2410,7 @@ class BancoDados:
                 data_evento,
                 pessoas_relacionadas,
                 visibilidade,
+                memorial_id,
             ))
 
             memoria_id = cursor.fetchone()[0]
@@ -3375,3 +3386,304 @@ class BancoDados:
         row = cursor.fetchone()
         conn.close()
         return row[0] if row else None
+
+    # ========================================================================
+    # MEMORIAIS (SUPABASE POSTGRES)
+    # ========================================================================
+    def criar_memorial(self, usuario_id, nome, foto_perfil, data_nascimento, data_falecimento, parentesco, biografia, visibilidade):
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            self.executar(cursor, """
+                INSERT INTO memoriais (usuario_id, nome, foto_perfil, data_nascimento, data_falecimento, parentesco, biografia, visibilidade)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                RETURNING id
+            """, (usuario_id, nome, foto_perfil, data_nascimento, data_falecimento, parentesco, biografia, visibilidade))
+            memorial_id = cursor.fetchone()[0]
+            conn.commit()
+            return memorial_id
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            cursor.close()
+            conn.close()
+
+    def listar_memoriais_usuario(self, usuario_id):
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            self.executar(cursor, """
+                SELECT id, usuario_id, nome, foto_perfil, data_nascimento, data_falecimento, parentesco, biografia, visibilidade, conversa_curador, curador_etapa, criado_em
+                FROM memoriais
+                WHERE usuario_id = ?
+                ORDER BY criado_em DESC
+            """, (usuario_id,))
+            rows = cursor.fetchall()
+            return [{
+                "id": r[0],
+                "usuario_id": r[1],
+                "nome": r[2],
+                "foto_perfil": r[3],
+                "data_nascimento": r[4],
+                "data_falecimento": r[5],
+                "parentesco": r[6],
+                "biografia": r[7],
+                "visibilidade": r[8],
+                "conversa_curador": r[9],
+                "curador_etapa": r[10],
+                "criado_em": r[11],
+            } for r in rows]
+        finally:
+            cursor.close()
+            conn.close()
+
+    def obter_memorial(self, memorial_id):
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            self.executar(cursor, """
+                SELECT id, usuario_id, nome, foto_perfil, data_nascimento, data_falecimento, parentesco, biografia, visibilidade, conversa_curador, curador_etapa, criado_em
+                FROM memoriais
+                WHERE id = ?
+            """, (memorial_id,))
+            r = cursor.fetchone()
+            if r:
+                return {
+                    "id": r[0],
+                    "usuario_id": r[1],
+                    "nome": r[2],
+                    "foto_perfil": r[3],
+                    "data_nascimento": r[4],
+                    "data_falecimento": r[5],
+                    "parentesco": r[6],
+                    "biografia": r[7],
+                    "visibilidade": r[8],
+                    "conversa_curador": r[9],
+                    "curador_etapa": r[10],
+                    "criado_em": r[11],
+                }
+            return None
+        finally:
+            cursor.close()
+            conn.close()
+
+    def atualizar_conversa_curador_memorial(self, memorial_id, conversa_json, etapa):
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            self.executar(cursor, """
+                UPDATE memoriais
+                SET conversa_curador = ?, curador_etapa = ?
+                WHERE id = ?
+            """, (conversa_json, etapa, memorial_id))
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            cursor.close()
+            conn.close()
+
+    def listar_memorias_memorial(self, memorial_id):
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            self.executar(cursor, """
+                SELECT id, categoria, titulo, conteudo, origem, data_criacao, visibilidade, local, data_evento, pessoas_relacionadas
+                FROM memorias
+                WHERE memorial_id = ?
+                ORDER BY data_criacao DESC
+            """, (memorial_id,))
+            rows = cursor.fetchall()
+            return [{
+                "id": r[0],
+                "categoria": r[1],
+                "titulo": r[2],
+                "conteudo": r[3],
+                "origem": r[4],
+                "data_criacao": r[5],
+                "visibilidade": r[6],
+                "local": r[7],
+                "data_evento": r[8],
+                "pessoas_relacionadas": r[9],
+            } for r in rows]
+        finally:
+            cursor.close()
+            conn.close()
+
+    def listar_fotos_memorial(self, memorial_id):
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            self.executar(cursor, """
+                SELECT id, titulo, descricao, categoria, caminho_arquivo, data_criacao, visibilidade
+                FROM fotos
+                WHERE memorial_id = ?
+                ORDER BY data_criacao DESC
+            """, (memorial_id,))
+            rows = cursor.fetchall()
+            return [{
+                "id": r[0],
+                "titulo": r[1],
+                "descricao": r[2],
+                "categoria": r[3],
+                "caminho_arquivo": r[4],
+                "data_criacao": r[5],
+                "visibilidade": r[6],
+            } for r in rows]
+        finally:
+            cursor.close()
+            conn.close()
+
+    def listar_videos_memorial(self, memorial_id):
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            self.executar(cursor, """
+                SELECT id, titulo, destinatario, caminho_arquivo, url_externa, categoria, notas, data_criacao, visibilidade
+                FROM videos
+                WHERE memorial_id = ?
+                ORDER BY data_criacao DESC
+            """, (memorial_id,))
+            rows = cursor.fetchall()
+            return [{
+                "id": r[0],
+                "titulo": r[1],
+                "destinatario": r[2],
+                "caminho_arquivo": r[3],
+                "url_externa": r[4],
+                "categoria": r[5],
+                "notas": r[6],
+                "data_criacao": r[7],
+                "visibilidade": r[8],
+            } for r in rows]
+        finally:
+            cursor.close()
+            conn.close()
+
+    def listar_contatos_memorial(self, memorial_id):
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            self.executar(cursor, """
+                SELECT id, usuario_id, nome, sobrenome, email, parentesco, foto_perfil
+                FROM contatos
+                WHERE memorial_id = ?
+                ORDER BY nome ASC
+            """, (memorial_id,))
+            rows = cursor.fetchall()
+            return [{
+                "id": r[0],
+                "usuario_id": r[1],
+                "nome": r[2],
+                "sobrenome": r[3],
+                "email": r[4],
+                "parentesco": r[5],
+                "foto_perfil": r[6],
+            } for r in rows]
+        finally:
+            cursor.close()
+            conn.close()
+
+    def criar_contribuicao_memorial(self, usuario_dono_id, usuario_contribuidor_email, usuario_contribuidor_nome, tipo_contribuicao, texto, arquivo_url, memorial_id, arquivo_nome="", arquivo_tipo=""):
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            self.executar(cursor, """
+                INSERT INTO contribuicoes (usuario_dono_id, usuario_contribuidor_email, usuario_contribuidor_nome, tipo_contribuicao, texto, arquivo_url, status, memorial_id, arquivo_nome, arquivo_tipo)
+                VALUES (?, ?, ?, ?, ?, ?, 'pendente', ?, ?, ?)
+                RETURNING id
+            """, (usuario_dono_id, usuario_contribuidor_email, usuario_contribuidor_nome, tipo_contribuicao, texto, arquivo_url, memorial_id, arquivo_nome, arquivo_tipo))
+            contribuicao_id = cursor.fetchone()[0]
+            conn.commit()
+            return contribuicao_id
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            cursor.close()
+            conn.close()
+
+    def listar_contribuicoes_memorial_status(self, memorial_id, status='pendente'):
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            self.executar(cursor, """
+                SELECT id, usuario_dono_id, usuario_contribuidor_email, usuario_contribuidor_nome, tipo_contribuicao, texto, arquivo_url, status, criado_em, arquivo_nome, arquivo_tipo, arquivo_tamanho
+                FROM contribuicoes
+                WHERE memorial_id = ? AND status = ?
+                ORDER BY criado_em DESC
+            """, (memorial_id, status))
+            rows = cursor.fetchall()
+            return [{
+                "id": r[0],
+                "usuario_dono_id": r[1],
+                "usuario_contribuidor_email": r[2],
+                "usuario_contribuidor_nome": r[3],
+                "tipo_contribuicao": r[4],
+                "texto": r[5],
+                "arquivo_url": r[6],
+                "status": r[7],
+                "criado_em": r[8],
+                "arquivo_nome": r[9],
+                "arquivo_tipo": r[10],
+                "arquivo_tamanho": r[11],
+            } for r in rows]
+        finally:
+            cursor.close()
+            conn.close()
+
+    def avaliar_contribuicao(self, contribuicao_id, status, avaliado_por):
+        conn = self.conectar()
+        cursor = conn.cursor()
+        try:
+            self.executar(cursor, """
+                UPDATE contribuicoes
+                SET status = ?, avaliado_em = CURRENT_TIMESTAMP, avaliado_por = ?
+                WHERE id = ?
+            """, (status, avaliado_por, contribuicao_id))
+            
+            # If approved, move to the actual table!
+            if status == "aprovado":
+                self.executar(cursor, """
+                    SELECT usuario_dono_id, tipo_contribuicao, texto, arquivo_url, memorial_id, usuario_contribuidor_nome
+                    FROM contribuicoes
+                    WHERE id = ?
+                """, (contribuicao_id,))
+                c = cursor.fetchone()
+                if c:
+                    dono_id, tipo, texto, url, memorial_id, autor = c
+                    titulo = f"Contribuição de {autor}"
+                    if tipo == "historia":
+                        self.salvar_memoria_com_cursor(cursor, dono_id, texto, titulo, "Outro", "curador", None, None, autor, "contatos", [], memorial_id)
+                    elif tipo == "foto":
+                        self.adicionar_foto_com_cursor(cursor, dono_id, titulo, texto or "", "Outro", url, [], "contatos", memorial_id)
+                    elif tipo == "video":
+                        self.adicionar_video_com_cursor(cursor, dono_id, titulo, autor, url, [], "Outro", "contatos", memorial_id)
+                        
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            cursor.close()
+            conn.close()
+
+    def salvar_memoria_com_cursor(self, cursor, usuario_id, conteudo, titulo, categoria, origem, local, data_evento, pessoas_relacionadas, visibilidade, contatos_ids, memorial_id):
+        self.executar(cursor, """
+            INSERT INTO memorias (usuario_id, categoria, titulo, conteudo, origem, local, data_evento, pessoas_relacionadas, visibilidade, memorial_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (usuario_id, categoria, titulo, conteudo, origem, local, data_evento, pessoas_relacionadas, visibilidade, memorial_id))
+
+    def adicionar_foto_com_cursor(self, cursor, usuario_id, titulo, descricao, categoria, caminho_arquivo, contatos_ids, visibilidade, memorial_id):
+        self.executar(cursor, """
+            INSERT INTO fotos (usuario_id, titulo, descricao, categoria, caminho_arquivo, visibilidade, memorial_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (usuario_id, titulo, descricao, categoria, caminho_arquivo, visibilidade, memorial_id))
+
+    def adicionar_video_com_cursor(self, cursor, usuario_id, titulo, destinatario, caminho_arquivo, contatos_ids, categoria, visibilidade, memorial_id):
+        self.executar(cursor, """
+            INSERT INTO videos (usuario_id, titulo, destinatario, caminho_arquivo, categoria, visibilidade, memorial_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (usuario_id, titulo, destinatario, caminho_arquivo, categoria, visibilidade, memorial_id))
