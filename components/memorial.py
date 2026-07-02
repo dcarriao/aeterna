@@ -179,54 +179,56 @@ def render_memoriais_lista():
         gap: 1.15rem;
         margin-top: 0.85rem;
     }
-    .ae-memorial-card {
-        background: #FFFFFF;
-        border: 1.5px solid rgba(212, 168, 79, 0.22);
-        border-radius: 20px;
-        padding: 1rem;
-        box-shadow: 0 10px 30px rgba(43,23,71,0.03);
+    .ae-memorial-card-v2 {
+        background: #FFFFFF !important;
+        border: 1.5px solid rgba(212, 168, 79, 0.22) !important;
+        border-radius: 20px !important;
+        padding: 1.1rem !important;
+        box-shadow: 0 10px 30px rgba(43,23,71,0.03) !important;
         display: flex;
         flex-direction: column;
         align-items: center;
         text-align: center;
+        margin-bottom: 0.45rem !important;
     }
-    .ae-memorial-card-img {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid #D4AF37;
-        margin-bottom: 0.55rem;
+    .ae-memorial-card-img-v2 {
+        width: 72px !important;
+        height: 72px !important;
+        border-radius: 50% !important;
+        object-fit: cover !important;
+        border: 2px solid #D4AF37 !important;
+        margin-bottom: 0.45rem !important;
     }
-    .ae-memorial-card-img-placeholder {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        background: #F4EEFC;
-        border: 2px solid #C1B1E7;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2.2rem;
-        margin-bottom: 0.55rem;
+    .ae-memorial-card-img-placeholder-v2 {
+        width: 72px !important;
+        height: 72px !important;
+        border-radius: 50% !important;
+        background: #F4EEFC !important;
+        border: 2px solid #C1B1E7 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 1.8rem !important;
+        margin-bottom: 0.45rem !important;
     }
-    .ae-memorial-card-nome {
-        color: #2B1747;
-        font-weight: 900;
-        font-size: 1.05rem;
-        margin-bottom: 0.15rem;
+    .ae-memorial-card-nome-v2 {
+        color: #2B1747 !important;
+        font-weight: 900 !important;
+        font-size: 0.95rem !important;
+        margin-bottom: 0.15rem !important;
+        line-height: 1.25 !important;
     }
-    .ae-memorial-card-rel {
-        color: #B77A46;
-        font-weight: 800;
-        font-size: 0.78rem;
-        text-transform: uppercase;
-        margin-bottom: 0.35rem;
+    .ae-memorial-card-rel-v2 {
+        color: #B77A46 !important;
+        font-weight: 800 !important;
+        font-size: 0.74rem !important;
+        text-transform: uppercase !important;
+        margin-bottom: 0.25rem !important;
     }
-    .ae-memorial-card-dates {
-        color: #6F6478;
-        font-size: 0.74rem;
-        margin-bottom: 0.85rem;
+    .ae-memorial-card-dates-v2 {
+        color: #6F6478 !important;
+        font-size: 0.7rem !important;
+        margin-bottom: 0.15rem !important;
     }
     .stButton>button {
         border-radius: 12px !important;
@@ -234,20 +236,32 @@ def render_memoriais_lista():
         min-height: 2.15rem !important;
     }
     
-    /* Gold gradient buttons */
-    [class*="st-key-btn_goto_criar_memorial"] button,
+    /* Discreet small buttons inside memorial cards */
     [class*="st-key-btn_abrir_mem_"] button,
-    [class*="st-key-curador_perfil_enviar"] button,
-    [class*="st-key-curador_perfil_guest_enviar"] button {
+    [class*="st-key-btn_abrir_shared_mem_"] button {
         background: linear-gradient(135deg, #f8dc92, #d4af37 62%, #b77a46) !important;
         color: #1b0f2e !important;
         border: none !important;
-        border-radius: 12px !important;
-        font-weight: 950 !important;
+        border-radius: 10px !important;
+        font-size: 0.74rem !important;
+        font-weight: 900 !important;
+        min-height: 1.85rem !important;
+        height: 1.85rem !important;
+        padding: 0 6px !important;
+    }
+    [class*="st-key-btn_curador_mem_"] button {
+        background: #2B1747 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 10px !important;
+        font-size: 0.74rem !important;
+        font-weight: 900 !important;
+        min-height: 1.85rem !important;
+        height: 1.85rem !important;
+        padding: 0 6px !important;
     }
     
     /* Purple buttons */
-    [class*="st-key-btn_curador_mem_"] button,
     [class*="st-key-curador_nova_memoria_btn"] button,
     [class*="st-key-curador_perfil_guest_finish"] button {
         background: #2B1747 !important;
@@ -293,59 +307,66 @@ def render_memoriais_lista():
     if not memoriais:
         st.info("💡 Você ainda não possui nenhum memorial criado. Clique acima para começar a preservar um lindo legado.")
     else:
-        st.markdown('<div class="ae-memorial-grid">', unsafe_allow_html=True)
-        for m in memoriais:
-            st.markdown(f'<div class="ae-memorial-card">', unsafe_allow_html=True)
-            if m["foto_perfil"]:
-                st.markdown(f'<img src="{m["foto_perfil"]}" class="ae-memorial-card-img" />', unsafe_allow_html=True)
-            else:
-                st.markdown('<div class="ae-memorial-card-img-placeholder">👤</div>', unsafe_allow_html=True)
+        # Render cards inside native st.columns(3) grid
+        cols = st.columns(3, gap="medium")
+        for idx, m in enumerate(memoriais):
+            col = cols[idx % 3]
+            with col:
+                img_html = f'<img src="{m["foto_perfil"]}" class="ae-memorial-card-img-v2" />' if m["foto_perfil"] else '<div class="ae-memorial-card-img-placeholder-v2">👤</div>'
+                nasc = datetime.strptime(str(m["data_nascimento"]), "%Y-%m-%d").strftime("%d/%m/%Y") if m["data_nascimento"] else "N/A"
+                fal = datetime.strptime(str(m["data_falecimento"]), "%Y-%m-%d").strftime("%d/%m/%Y") if m["data_falecimento"] else "N/A"
                 
-            st.markdown(f'<div class="ae-memorial-card-nome">{html.escape(m["nome"])}</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="ae-memorial-card-rel">{html.escape(m["parentesco"] or "Homenageado(a)")}</div>', unsafe_allow_html=True)
-            
-            nasc = datetime.strptime(str(m["data_nascimento"]), "%Y-%m-%d").strftime("%d/%m/%Y") if m["data_nascimento"] else "N/A"
-            fal = datetime.strptime(str(m["data_falecimento"]), "%Y-%m-%d").strftime("%d/%m/%Y") if m["data_falecimento"] else "N/A"
-            st.markdown(f'<div class="ae-memorial-card-dates">🌟 {nasc}  ✝️ {fal}</div>', unsafe_allow_html=True)
-            
-            if st.button("📖 Abrir Memorial", key=f"btn_abrir_mem_{m['id']}", use_container_width=True):
-                st.session_state.pagina_atual = f"memorial_ver_{m['id']}"
-                st.rerun()
-            
-            st.markdown('<div style="margin-top:0.35rem;"></div>', unsafe_allow_html=True)
-            if st.button("✨ Curador de Perfil", key=f"btn_curador_mem_{m['id']}", use_container_width=True):
-                st.session_state.pagina_atual = f"memorial_curador_{m['id']}"
-                st.rerun()
-            
-            st.markdown('</div>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+                # Single robust self-contained HTML block
+                card_html = f"""
+                <div class="ae-memorial-card-v2">
+                    {img_html}
+                    <div class="ae-memorial-card-nome-v2">{html.escape(m["nome"])}</div>
+                    <div class="ae-memorial-card-rel-v2">{html.escape(m["parentesco"] or "Homenageado(a)")}</div>
+                    <div class="ae-memorial-card-dates-v2">🌟 {nasc} &nbsp;✝️ {fal}</div>
+                </div>
+                """
+                st.markdown(card_html, unsafe_allow_html=True)
+                
+                # Discrete buttons row
+                c_btns = st.columns(2, gap="small")
+                with c_btns[0]:
+                    if st.button("📖 Abrir", key=f"btn_abrir_mem_{m['id']}", use_container_width=True):
+                        st.session_state.pagina_atual = f"memorial_ver_{m['id']}"
+                        st.rerun()
+                with c_btns[1]:
+                    if st.button("✨ Curador", key=f"btn_curador_mem_{m['id']}", use_container_width=True):
+                        st.session_state.pagina_atual = f"memorial_curador_{m['id']}"
+                        st.rerun()
 
     if invites_recebidos:
         st.markdown("---")
         st.markdown("### 🤝 Compartilhados Comigo")
-        st.markdown('<div class="ae-memorial-grid">', unsafe_allow_html=True)
-        for inv in invites_recebidos:
+        cols_shared = st.columns(3, gap="medium")
+        for idx, inv in enumerate(invites_recebidos):
             m_id = inv["memorial_id"]
             m = db.obter_memorial(m_id)
             if m:
-                st.markdown(f'<div class="ae-memorial-card">', unsafe_allow_html=True)
-                if m["foto_perfil"]:
-                    st.markdown(f'<img src="{m["foto_perfil"]}" class="ae-memorial-card-img" />', unsafe_allow_html=True)
-                else:
-                    st.markdown('<div class="ae-memorial-card-img-placeholder">👤</div>', unsafe_allow_html=True)
+                col = cols_shared[idx % 3]
+                with col:
+                    img_html = f'<img src="{m["foto_perfil"]}" class="ae-memorial-card-img-v2" />' if m["foto_perfil"] else '<div class="ae-memorial-card-img-placeholder-v2">👤</div>'
+                    nasc = datetime.strptime(str(m["data_nascimento"]), "%Y-%m-%d").strftime("%d/%m/%Y") if m["data_nascimento"] else "N/A"
+                    fal = datetime.strptime(str(m["data_falecimento"]), "%Y-%m-%d").strftime("%d/%m/%Y") if m["data_falecimento"] else "N/A"
                     
-                st.markdown(f'<div class="ae-memorial-card-nome">{html.escape(m["nome"])}</div>', unsafe_allow_html=True)
-                st.markdown(f'<div class="ae-memorial-card-rel">{html.escape(m["parentesco"] or "Homenageado(a)")}</div>', unsafe_allow_html=True)
-                
-                nasc = datetime.strptime(str(m["data_nascimento"]), "%Y-%m-%d").strftime("%d/%m/%Y") if m["data_nascimento"] else "N/A"
-                fal = datetime.strptime(str(m["data_falecimento"]), "%Y-%m-%d").strftime("%d/%m/%Y") if m["data_falecimento"] else "N/A"
-                st.markdown(f'<div class="ae-memorial-card-dates">🌟 {nasc}  ✝️ {fal}</div>', unsafe_allow_html=True)
-                
-                if st.button("📖 Abrir Memorial", key=f"btn_abrir_shared_mem_{m['id']}", use_container_width=True):
-                    st.session_state.pagina_atual = f"memorial_ver_{m['id']}"
-                    st.rerun()
-                st.markdown('</div>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+                    # Single robust self-contained HTML block
+                    card_html = f"""
+                    <div class="ae-memorial-card-v2">
+                        {img_html}
+                        <div class="ae-memorial-card-nome-v2">{html.escape(m["nome"])}</div>
+                        <div class="ae-memorial-card-rel-v2">{html.escape(m["parentesco"] or "Homenageado(a)")}</div>
+                        <div class="ae-memorial-card-dates-v2">🌟 {nasc} &nbsp;✝️ {fal}</div>
+                    </div>
+                    """
+                    st.markdown(card_html, unsafe_allow_html=True)
+                    
+                    # Discrete single button
+                    if st.button("📖 Abrir", key=f"btn_abrir_shared_mem_{m['id']}", use_container_width=True):
+                        st.session_state.pagina_atual = f"memorial_ver_{m['id']}"
+                        st.rerun()
 
 def render_curador_perfil(memorial_id):
     st.markdown("""
