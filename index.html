@@ -862,10 +862,94 @@
       font-size: .82rem;
     }
 
+    /* Memorial Section Styles */
+    .memorial-grid {
+      display: grid;
+      grid-template-columns: .95fr 1.05fr;
+      gap: 38px;
+      align-items: center;
+    }
+
+    .memorial-image {
+      min-height: 460px;
+      border: 1px solid rgba(212, 175, 55, .28);
+      border-radius: 26px;
+      background:
+        linear-gradient(180deg, rgba(8,0,20,.04), rgba(8,0,20,.42)),
+        url("assets/memorial.png") center/cover;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .memorial-copy h2 {
+      margin: 17px 0 14px;
+      font-family: "Cormorant Garamond", serif;
+      font-size: clamp(2.25rem, 4.5vw, 3.7rem);
+      line-height: .98;
+      letter-spacing: -.04em;
+    }
+
+    .memorial-copy p {
+      color: var(--muted);
+      font-size: 1.04rem;
+      margin-bottom: 20px;
+    }
+
+    .memorial-benefits {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .benefit-card {
+      border: 1px solid rgba(212, 175, 55, .15);
+      border-radius: 18px;
+      background: rgba(255,255,255,.02);
+      padding: 18px;
+      transition: border-color .18s ease;
+    }
+
+    .benefit-card:hover {
+      border-color: rgba(212, 175, 55, .35);
+    }
+
+    .benefit-card strong {
+      display: block;
+      color: var(--gold);
+      font-size: 0.95rem;
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
+
+    .benefit-card p {
+      color: var(--muted);
+      font-size: .84rem;
+      line-height: 1.35;
+      margin: 0;
+    }
+
+    .ae-highlight-quote {
+      font-family: "Cormorant Garamond", serif;
+      font-size: clamp(1.4rem, 2.5vw, 1.95rem);
+      font-style: italic;
+      color: var(--gold-pale);
+      max-width: 820px;
+      margin: 0 auto;
+      line-height: 1.3;
+      border: none;
+      padding: 0;
+    }
+
     @media (max-width: 1080px) {
       .hero-grid,
       .problem-grid,
-      .privacy-panel {
+      .privacy-panel,
+      .memorial-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .memorial-benefits {
         grid-template-columns: 1fr;
       }
 
@@ -1015,7 +1099,8 @@
         border-radius: 24px;
       }
 
-      .photo-story {
+      .photo-story,
+      .memorial-image {
         min-height: 300px;
       }
 
@@ -1221,6 +1306,60 @@
       </div>
     </section>
 
+    <section class="section" id="memorial-secao">
+      <div class="container">
+        <div class="memorial-grid">
+          <div class="memorial-image"></div>
+
+          <div class="memorial-copy">
+            <div class="eyebrow">Funcionalidade adicional</div>
+            <h2>E a história de quem já partiu?</h2>
+            <p style="color: var(--gold-pale); font-size: 1.15rem; font-weight: 600; line-height: 1.35; margin-bottom: 12px;">
+              Ela também faz parte da história da sua família.
+            </p>
+            <p style="margin-bottom: 24px;">
+              Crie um Memorial para preservar histórias, fotos, vídeos e lembranças de alguém importante.
+              Convide familiares e amigos para contribuir e construir juntos um legado que continuará vivo nas próximas gerações.
+            </p>
+
+            <div class="memorial-benefits">
+              <article class="benefit-card">
+                <strong>Preserve histórias</strong>
+                <p>Conte quem essa pessoa foi, seus valores, aprendizados, conquistas e momentos marcantes.</p>
+              </article>
+
+              <article class="benefit-card">
+                <strong>Convide quem viveu essa história</strong>
+                <p>Familiares e amigos podem contribuir com fotos, vídeos, histórias e lembranças. Tudo permanece organizado em um único Memorial.</p>
+              </article>
+
+              <article class="benefit-card">
+                <strong>Enriqueça o legado</strong>
+                <p>Transforme fotos e vídeos em uma história completa, preservando o contexto para as próximas gerações.</p>
+              </article>
+
+              <article class="benefit-card">
+                <strong>Converse com o Curador</strong>
+                <p>Depois que o Memorial estiver enriquecido com histórias e contribuições, o Curador poderá responder perguntas sobre aquela pessoa utilizando apenas as informações registradas. Ele não representa a pessoa homenageada. Ele ajuda a conhecer sua história.</p>
+              </article>
+            </div>
+
+            <div style="margin-top: 32px;">
+              <a class="btn btn-primary" href="https://aeterna.streamlit.app/">Criar um Memorial</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-tight" style="margin-top: -34px; margin-bottom: 14px;">
+      <div class="container text-center">
+        <blockquote class="ae-highlight-quote">
+          "Algumas pessoas deixam saudade. Outras deixam histórias. Com a aEterna, elas podem deixar as duas."
+        </blockquote>
+      </div>
+    </section>
+
     <section class="section" id="telas">
       <div class="container">
         <div class="section-title">
@@ -1280,8 +1419,8 @@
 
           <article class="difference-card">
             <strong>Memorial</strong>
-            <h3>Costuma olhar para a perda.</h3>
-            <p>A aEterna olha para histórias vivas, relações e legado familiar.</p>
+            <h3>Costumava focar apenas na perda.</h3>
+            <p>Na aEterna, o Memorial celebra e preserva as histórias, aprendizados e o legado vivo de quem já partiu, mantendo o foco no afeto familiar.</p>
           </article>
         </div>
       </div>
