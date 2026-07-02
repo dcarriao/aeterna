@@ -5563,6 +5563,8 @@ def render_novidades(
 # MAIN
 # ============================================================================
 def main():
+    # Cache buster to force Streamlit to bust cache and reload components
+    print("RELOADING AETERNA CORE SYSTEM...")
     inject_custom_css()
 
     # Intercept Memorial Invitations
