@@ -868,11 +868,11 @@ def render_minha_historia():
 
     def render_detalhes_memoria(memoria: dict, key_contexto: str):
         if memoria.get("data_evento"):
-            st.markdown(f"**Data:** {memoria['data_evento']}")
+            st.markdown(f"**Data:** {memoria.get('data_evento', '')}")
         if memoria.get("local"):
-            st.markdown(f"**Local:** {memoria['local']}")
+            st.markdown(f"**Local:** {memoria.get('local', '')}")
         if memoria.get("pessoas_relacionadas"):
-            st.markdown(f"**Pessoas:** {memoria['pessoas_relacionadas']}")
+            st.markdown(f"**Pessoas:** {memoria.get('pessoas_relacionadas', '')}")
 
         st.markdown(memoria.get("conteudo", ""))
         render_editor_visibilidade(
@@ -883,10 +883,10 @@ def render_minha_historia():
             key_contexto=key_contexto,
         )
         render_contribuicoes_aprovadas(
-            contribuicoes_por_memoria.get(memoria["id"], [])
+            contribuicoes_por_memoria.get(memoria.get("id"), [])
         )
 
-        fotos = fotos_por_memoria.get(memoria["id"], [])
+        fotos = fotos_por_memoria.get(memoria.get("id"), [])
         if fotos:
             st.markdown("**📷 Fotos desta história**")
             for foto in fotos:
@@ -895,7 +895,7 @@ def render_minha_historia():
                     caption=foto.get("titulo", ""),
                 )
 
-        videos = videos_por_memoria.get(memoria["id"], [])
+        videos = videos_por_memoria.get(memoria.get("id"), [])
         if videos:
             st.markdown("**🎥 Vídeos desta história**")
             for video in videos:
@@ -1632,9 +1632,6 @@ def render_videos():
                         except Exception as e:
                             print("ERRO AO SALVAR VIDEO:", e)
                             st.error(f"Erro ao salvar vídeo: {e}")
-
-                else:
-                    st.error("❌ Preencha o título e selecione um vídeo")
 
     with col2:
         videos = db.listar_videos_usuario(st.session_state.usuario_atual['id'])
@@ -3758,7 +3755,7 @@ def render_agendamentos():
     else:
         st.info("Você ainda não cadastrou datas importantes.")
 
-    plano = db.obter_plano_usuario(st.session_state.usuario_atual['id'])
+    plano = db.obter_plano_usuario(st.session_state.usuario_atual['id']) or {}
 
     if not plano.get("tem_agendamento", False):
         st.info("💡 Esta funcionalidade estará disponível em breve nos planos pagos!")
@@ -3944,6 +3941,10 @@ def render_agendamentos():
 # COFRE DIGITAL
 # ============================================================================
 def render_cofre():
+    from utils.criptografia import GerenciadorCriptografia
+    if st.session_state.crypto is None:
+        chave_mestre = st.session_state.usuario_atual.get("email") or st.session_state.usuario_atual.get("id", "default")
+        st.session_state.crypto = GerenciadorCriptografia(str(chave_mestre))
     st.markdown("<h3 class='ae-section-h3'>📁 Cofre Digital</h3>", unsafe_allow_html=True)
     st.info("🔒 Todas as informações são criptografadas localmente.")
 
@@ -4962,11 +4963,11 @@ def render_inicio(
         if expanded_home_mem and expanded_home_key:
             st.divider()
             if expanded_home_mem.get("data_evento"):
-                st.markdown(f"**Data:** {expanded_home_mem['data_evento']}")
+                st.markdown(f"**Data:** {expanded_home_mem.get('data_evento', '')}")
             if expanded_home_mem.get("local"):
-                st.markdown(f"**Local:** {expanded_home_mem['local']}")
+                st.markdown(f"**Local:** {expanded_home_mem.get('local', '')}")
             if expanded_home_mem.get("pessoas_relacionadas"):
-                st.markdown(f"**Pessoas:** {expanded_home_mem['pessoas_relacionadas']}")
+                st.markdown(f"**Pessoas:** {expanded_home_mem.get('pessoas_relacionadas', '')}")
             st.markdown(expanded_home_mem.get("conteudo", ""))
             close_key = f"_close_{expanded_home_key}"
             if st.button("✕ Fechar", key=close_key):
