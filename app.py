@@ -269,6 +269,32 @@ def inject_custom_css():
             border-radius: 12px !important;
         }
 
+        div[data-testid="stFormSubmitButton"] button {
+            background: linear-gradient(135deg, #f8dc92, #d4af37 62%, #b77a46) !important;
+            color: #1b0f2e !important;
+            border: none !important;
+            border-radius: 12px !important;
+            font-weight: 800 !important;
+            transition: all 0.25s ease !important;
+        }
+        div[data-testid="stFormSubmitButton"] button:hover {
+            box-shadow: 0 6px 20px rgba(212,175,55,0.35) !important;
+            transform: translateY(-1px);
+        }
+
+        div[data-testid="stSelect"] > div {
+            border-color: rgba(212,175,55,0.32) !important;
+            border-radius: 12px !important;
+        }
+        div[data-testid="stDateInput"] > div {
+            border-color: rgba(212,175,55,0.32) !important;
+            border-radius: 12px !important;
+        }
+        div[data-testid="stMultiSelect"] > div {
+            border-color: rgba(212,175,55,0.32) !important;
+            border-radius: 12px !important;
+        }
+
         div[data-testid="stForm"] {
             border: 1px solid rgba(212,175,55,0.18);
             border-radius: 22px;
@@ -287,6 +313,79 @@ def inject_custom_css():
             border: 1px solid rgba(212,175,55,0.14);
             border-radius: 14px;
             overflow: hidden;
+        }
+
+        /* Alertas estilizados com a marca */
+        div[data-testid="stAlert"] {
+            background: rgba(212,175,55,0.08) !important;
+            border: 1px solid rgba(212,175,55,0.22) !important;
+            border-radius: 16px !important;
+            padding: 0.85rem 1rem !important;
+            color: #2b2233 !important;
+        }
+        div[data-testid="stAlert"] svg,
+        div[data-testid="stAlert"] path {
+            fill: #d4af37 !important;
+            color: #d4af37 !important;
+        }
+        div[data-testid="stAlert"] p {
+            color: #2b2233 !important;
+        }
+        div[data-testid="stAlert"][kind="warning"] {
+            background: rgba(212,168,79,0.10) !important;
+            border-color: rgba(212,168,79,0.32) !important;
+        }
+        div[data-testid="stAlert"][kind="success"] {
+            background: rgba(72,163,109,0.08) !important;
+            border-color: rgba(72,163,109,0.25) !important;
+        }
+        div[data-testid="stAlert"][kind="error"] {
+            background: rgba(200,60,60,0.07) !important;
+            border-color: rgba(200,60,60,0.20) !important;
+        }
+
+        /* Sidebar: expander "Mais" com a marca */
+        [data-testid="stSidebar"] details {
+            border: 1px solid rgba(212,175,55,0.18) !important;
+            border-radius: 14px !important;
+            background: rgba(255,255,255,0.04) !important;
+            margin-top: 0.35rem !important;
+        }
+        [data-testid="stSidebar"] summary {
+            color: #f2c572 !important;
+            font-weight: 900 !important;
+            font-size: 0.78rem !important;
+            padding: 0.35rem 0.55rem !important;
+        }
+
+        /* Estado vazio com a marca */
+        .ae-empty-state {
+            background: rgba(255,255,255,0.92);
+            border: 1px dashed rgba(212,175,55,0.35);
+            border-radius: 18px;
+            padding: 1.25rem 1.1rem;
+            text-align: center;
+            color: #6f6478;
+            font-size: 0.9rem;
+            line-height: 1.45;
+        }
+        .ae-empty-state strong {
+            display: block;
+            color: #4b256f;
+            margin-bottom: 0.2rem;
+            font-size: 0.95rem;
+        }
+
+        /* Cabeçalhos de seção com a marca */
+        .ae-section-h3 {
+            color: #4b256f;
+            margin: 0 0 0.65rem;
+            font-weight: 900;
+        }
+        .ae-section-h2 {
+            color: #21104a;
+            font-weight: 900;
+            margin: 0 0 0.5rem;
         }
 
         @media (max-width: 768px) {
@@ -1364,7 +1463,7 @@ def render_assistente():
 # VÍDEOS
 # ============================================================================
 def render_videos():
-    st.markdown("<h3 style='color: #4b256f;'>📹 Vídeos da Minha História</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 class='ae-section-h3'>📹 Vídeos da Minha História</h3>", unsafe_allow_html=True)
 
     plano = db.obter_plano_usuario(st.session_state.usuario_atual['id'])
     videos_atual = len(db.listar_videos_usuario(st.session_state.usuario_atual['id']))
@@ -1582,7 +1681,7 @@ def render_videos_visitante(contato_id=None, nome_pessoa=None):
     )
 
     st.markdown(
-        f"<h3 style='color: #4b256f;'>🎥 Vídeos compartilhados por {nome_falecido}</h3>",
+        f"<h3 class='ae-section-h3'>🎥 Vídeos compartilhados por {nome_falecido}</h3>",
         unsafe_allow_html=True
     )
 
@@ -1607,7 +1706,7 @@ def render_videos_visitante(contato_id=None, nome_pessoa=None):
 # ============================================================================
 
 def render_fotos():
-    st.markdown("<h3 style='color: #4b256f;'>📷 Álbum de Memórias</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 class='ae-section-h3'>📷 Álbum de Memórias</h3>", unsafe_allow_html=True)
 
     col1, col2 = st.columns([1, 2])
 
@@ -1819,7 +1918,7 @@ def render_fotos_visitante(contato_id=None, nome_pessoa=None):
     )
 
     st.markdown(
-        f"<h3 style='color: #4b256f;'>📷 Fotos compartilhadas por {nome_falecido}</h3>",
+        f"<h3 class='ae-section-h3'>📷 Fotos compartilhadas por {nome_falecido}</h3>",
         unsafe_allow_html=True
     )
 
@@ -2840,7 +2939,7 @@ def render_contatos():
 # PREFERÊNCIAS (GOSTOS)
 # ============================================================================
 def render_preferencias():
-    st.markdown("<h3 style='color: #4b256f;'>👤 Minha Essência</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 class='ae-section-h3'>👤 Minha Essência</h3>", unsafe_allow_html=True)
     st.info(
         "Essas informações ajudam o Curador e o Explorador da aEterna "
         "a compreender melhor sua história, seus valores, gostos e lembranças importantes."
@@ -3538,7 +3637,7 @@ def render_planos():
 # ============================================================================
 def render_agendamentos():
     st.markdown(
-        "<h3 style='color: #4b256f;'>💌 Mensagens para o Futuro</h3>",
+        "<h3 class='ae-section-h3'>💌 Mensagens para o Futuro</h3>",
         unsafe_allow_html=True
     )
 
@@ -3843,7 +3942,7 @@ def render_agendamentos():
 # COFRE DIGITAL
 # ============================================================================
 def render_cofre():
-    st.markdown("<h3 style='color: #4b256f;'>📁 Cofre Digital</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 class='ae-section-h3'>📁 Cofre Digital</h3>", unsafe_allow_html=True)
     st.info("🔒 Todas as informações são criptografadas localmente.")
 
     tab_senhas, tab_documentos = st.tabs(["🔐 Senhas", "📄 Documentos"])
@@ -3982,7 +4081,7 @@ def render_cofre():
 # SOBRE
 # ============================================================================
 def render_sobre():
-    st.markdown("<h3 style='color: #4b256f;'>✨ Sobre o aEterna</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 class='ae-section-h3'>✨ Sobre o aEterna</h3>", unsafe_allow_html=True)
     st.markdown("""
     <div class="info-card">
         <h3>📖 Histórias que atravessam gerações</h3>
@@ -4011,7 +4110,7 @@ def render_sobre():
 # ADMIN PANEL
 # ============================================================================
 def render_admin_panel():
-    st.markdown("<h2 style='color: #4b256f;'>👑 Painel Administrativo</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 class='ae-section-h2'>👑 Painel Administrativo</h2>", unsafe_allow_html=True)
 
     usuarios = gerente_usuarios.listar_usuarios()
     st.metric("👥 Total Usuários", len(usuarios))
