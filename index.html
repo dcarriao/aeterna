@@ -15,16 +15,16 @@
   <meta property="og:url" content="https://www.aeternalegado.com.br/" />
   <meta property="og:title" content="aEterna | Histórias de família preservadas com contexto" />
   <meta property="og:description" content="Preserve histórias, valores, aprendizados e momentos importantes da sua família para as próximas gerações." />
-  <meta property="og:image" content="https://www.aeternalegado.com.br/assets/hero-familia.webp" />
+  <meta property="og:image" content="https://www.aeternalegado.com.br/assets/landing/hero/02-primeira-bicicleta.webp" />
   <meta property="og:locale" content="pt_BR" />
 
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="aEterna | Histórias de família preservadas com contexto" />
   <meta name="twitter:description" content="Preserve histórias, valores e aprendizados da sua família em uma linha do tempo privada." />
-  <meta name="twitter:image" content="https://www.aeternalegado.com.br/assets/hero-familia.webp" />
+  <meta name="twitter:image" content="https://www.aeternalegado.com.br/assets/landing/hero/02-primeira-bicicleta.webp" />
 
   <link rel="preload" as="image" href="assets/logo-navbar-clean.png" />
-  <link rel="preload" as="image" href="assets/hero-familia.webp" />
+  <link rel="preload" as="image" href="assets/landing/hero/02-primeira-bicicleta.webp" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet" />
@@ -237,7 +237,9 @@
       border: 1px solid transparent;
       font-size: .95rem;
       font-weight: 900;
+      line-height: 1;
       white-space: nowrap;
+      text-decoration: none;
       transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
     }
 
@@ -265,61 +267,61 @@
     }
 
     .hero {
-      padding: 58px 0 86px;
+      padding: 32px 0 48px;
     }
 
     .hero-grid {
       display: grid;
-      grid-template-columns: minmax(0, .95fr) minmax(420px, .88fr);
-      gap: 54px;
-      align-items: center;
+      grid-template-columns: minmax(0, .85fr) minmax(440px, 1.1fr);
+      gap: 48px;
+      align-items: start;
     }
 
     .hero h1 {
-      max-width: 760px;
-      margin: 22px 0 22px;
+      max-width: 560px;
+      margin: 12px 0 14px;
       font-family: "Cormorant Garamond", serif;
-      font-size: clamp(3.15rem, 5.6vw, 5.35rem);
-      line-height: .92;
-      letter-spacing: -.052em;
+      font-size: clamp(2.55rem, 4.5vw, 4.3rem);
+      line-height: .96;
+      letter-spacing: -.04em;
     }
 
     .hero-copy {
-      max-width: 650px;
-      margin-bottom: 28px;
+      max-width: 560px;
+      margin-bottom: 22px;
       color: rgba(255,255,255,.84);
-      font-size: clamp(1.03rem, 1.35vw, 1.17rem);
+      font-size: clamp(.98rem, 1.15vw, 1.05rem);
     }
 
     .hero-actions {
       display: flex;
       flex-wrap: wrap;
-      gap: 14px;
-      margin-bottom: 26px;
+      gap: 12px;
+      margin-bottom: 22px;
     }
 
     .hero-proof {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
-      max-width: 670px;
+      gap: 10px;
+      max-width: 560px;
     }
 
     .proof-item {
       border: 1px solid rgba(212, 175, 55, .22);
-      border-radius: 16px;
-      padding: 13px 14px;
+      border-radius: 14px;
+      padding: 10px 12px;
       color: rgba(255,255,255,.82);
       background: rgba(255,255,255,.045);
-      font-size: .86rem;
+      font-size: .78rem;
       font-weight: 800;
+      line-height: 1.3;
     }
 
     .hero-visual {
       position: relative;
-      min-height: 610px;
-      display: grid;
-      place-items: center;
+      min-height: 100%;
+      display: block;
     }
 
     .hero-visual::before {
@@ -328,8 +330,9 @@
       width: 530px;
       height: 530px;
       border-radius: 999px;
-      background: radial-gradient(circle, rgba(212,175,55,.2), transparent 62%);
+      background: radial-gradient(circle, rgba(212,175,55,.1), transparent 62%);
       filter: blur(6px);
+      z-index: 0;
     }
 
     .screen-shell {
@@ -513,7 +516,7 @@
       border-radius: 26px;
       background:
         linear-gradient(180deg, rgba(8,0,20,.04), rgba(8,0,20,.58)),
-        url("assets/hero-familia.webp") center/cover;
+        url("assets/landing/hero/13-almoco-domingo-familia-negra.webp") center/cover;
       position: relative;
       overflow: hidden;
     }
@@ -605,7 +608,7 @@
 
     .step-card {
       overflow: hidden;
-      background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(43,23,71,.54));
+      background: rgba(255,255,255,.045);
     }
 
     .step-image {
@@ -731,7 +734,7 @@
       gap: 28px;
       align-items: center;
       border: 1px solid rgba(212,175,55,.28);
-      border-radius: 30px;
+      border-radius: 32px;
       padding: 34px;
       background:
         linear-gradient(135deg, rgba(212,175,55,.09), rgba(76,32,111,.5)),
@@ -798,8 +801,8 @@
     }
 
     .cta-final {
-      border: 1px solid rgba(212,175,55,.3);
-      border-radius: 34px;
+      border: 1px solid rgba(212,175,55,.28);
+      border-radius: 32px;
       padding: 48px 28px;
       text-align: center;
       background: linear-gradient(135deg, rgba(212,175,55,.13), rgba(76,32,111,.54));
@@ -903,10 +906,10 @@
     }
 
     .benefit-card {
-      border: 1px solid rgba(212, 175, 55, .15);
-      border-radius: 18px;
-      background: rgba(255,255,255,.02);
-      padding: 18px;
+      border: 1px solid rgba(212, 175, 55, .22);
+      border-radius: 22px;
+      background: rgba(255,255,255,.045);
+      padding: 22px;
       transition: border-color .18s ease;
     }
 
@@ -929,16 +932,1544 @@
       margin: 0;
     }
 
-    .ae-highlight-quote {
+    /* ===== SPRINT 2: Novas seções da plataforma ===== */
+
+    .examples-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .example-card {
+      border: 1px solid rgba(212, 175, 55, .22);
+      border-radius: 22px;
+      background: rgba(255, 255, 255, .045);
+      padding: 28px;
+      min-height: 240px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .example-card .example-quote {
       font-family: "Cormorant Garamond", serif;
-      font-size: clamp(1.4rem, 2.5vw, 1.95rem);
-      font-style: italic;
+      font-size: clamp(1.45rem, 2.4vw, 1.95rem);
+      line-height: 1.18;
+      letter-spacing: -.02em;
       color: var(--gold-pale);
-      max-width: 820px;
+    }
+
+    .example-card .example-foot {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: .92rem;
+      font-weight: 700;
+    }
+
+    .resolve-panel {
+      border: 1px solid rgba(212, 175, 55, .28);
+      border-radius: 32px;
+      padding: 42px 32px;
+      background:
+        linear-gradient(135deg, rgba(76, 32, 111, .55), rgba(18, 3, 34, .82)),
+        radial-gradient(circle at 80% 10%, rgba(212, 175, 55, .14), transparent 32%);
+      box-shadow: var(--shadow);
+    }
+
+    .resolve-flow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .resolve-step {
+      position: relative;
+      border: 1px solid rgba(212, 175, 55, .28);
+      border-radius: 22px;
+      background: rgba(8, 0, 20, .55);
+      padding: 20px;
+      text-align: center;
+    }
+
+    .resolve-step .resolve-num {
+      display: inline-grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      margin-bottom: 12px;
+      color: #1b0f2e;
+      background: linear-gradient(135deg, #f8dc92, var(--gold) 62%, #c48b36);
+      font-weight: 950;
+      font-size: .88rem;
+    }
+
+    .resolve-step h3 {
+      font-family: "Cormorant Garamond", serif;
+      font-size: 1.4rem;
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+
+    .resolve-step p {
+      color: var(--muted);
+      font-size: .86rem;
+    }
+
+    .platform-manifesto {
+      max-width: 880px;
       margin: 0 auto;
-      line-height: 1.3;
-      border: none;
+      text-align: center;
+    }
+
+    .platform-manifesto h2 {
+      font-family: "Cormorant Garamond", serif;
+      font-size: clamp(2.4rem, 4.6vw, 3.7rem);
+      line-height: .98;
+      letter-spacing: -.04em;
+      margin-bottom: 22px;
+    }
+
+    .platform-manifesto p {
+      color: var(--muted);
+      font-size: 1.1rem;
+      line-height: 1.55;
+      max-width: 760px;
+      margin: 0 auto 14px;
+    }
+
+    .curador-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.05fr;
+      gap: 36px;
+      align-items: center;
+    }
+
+    .curador-visual {
+      position: relative;
+      min-height: 560px;
+      display: grid;
+      place-items: center;
+    }
+
+    .curador-visual::before {
+      content: "";
+      position: absolute;
+      width: 460px;
+      height: 460px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(212, 175, 55, .22), transparent 62%);
+      filter: blur(4px);
+    }
+
+    .curador-visual .screen-shot img {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      border-radius: 32px;
+    }
+
+    .curador-copy h2 {
+      font-family: "Cormorant Garamond", serif;
+      font-size: clamp(2.25rem, 4.5vw, 3.6rem);
+      line-height: .98;
+      letter-spacing: -.04em;
+      margin: 18px 0 18px;
+    }
+
+    .curador-copy p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      margin-bottom: 18px;
+    }
+
+    .curador-points {
+      display: grid;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .curador-point {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      color: rgba(255, 255, 255, .88);
+      font-size: .96rem;
+      font-weight: 700;
+    }
+
+    .curador-point::before {
+      content: "";
+      flex-shrink: 0;
+      width: 10px;
+      height: 10px;
+      margin-top: 8px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f8dc92, var(--gold) 62%, #c48b36);
+    }
+
+    .family-panel {
+      border: 1px solid rgba(212, 175, 55, .28);
+      border-radius: 32px;
+      padding: 42px;
+      background:
+        linear-gradient(135deg, rgba(212, 175, 55, .1), rgba(76, 32, 111, .52)),
+        radial-gradient(circle at 12% 0%, rgba(212, 175, 55, .14), transparent 32%);
+      box-shadow: var(--shadow);
+    }
+
+    .family-grid {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 38px;
+      align-items: center;
+    }
+
+    .family-copy h2 {
+      font-family: "Cormorant Garamond", serif;
+      font-size: clamp(2.25rem, 4.4vw, 3.5rem);
+      line-height: .98;
+      letter-spacing: -.04em;
+      margin: 16px 0 18px;
+    }
+
+    .family-copy p {
+      color: var(--muted);
+      font-size: 1.04rem;
+      margin-bottom: 14px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .feature-card {
+      position: relative;
+      border: 1px solid rgba(212, 175, 55, .22);
+      border-radius: 22px;
+      background: rgba(255, 255, 255, .045);
+      padding: 24px;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: border-color .18s ease, transform .18s ease;
+    }
+
+    .feature-card:hover {
+      border-color: rgba(212, 175, 55, .55);
+      transform: translateY(-2px);
+    }
+
+    .feature-icon {
+      display: grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(212, 175, 55, .25), rgba(76, 32, 111, .55));
+      color: var(--gold-soft);
+      font-size: 1.35rem;
+      font-weight: 900;
+      border: 1px solid rgba(212, 175, 55, .35);
+    }
+
+    .feature-card h3 {
+      font-size: 1.06rem;
+      line-height: 1.18;
+      margin-top: 4px;
+    }
+
+    .feature-card p {
+      color: var(--muted);
+      font-size: .88rem;
+      line-height: 1.45;
+    }
+
+    .integration-panel {
+      border: 1px solid rgba(212, 175, 55, .28);
+      border-radius: 32px;
+      padding: 42px;
+      background:
+        linear-gradient(135deg, rgba(76, 32, 111, .58), rgba(18, 3, 34, .84)),
+        radial-gradient(circle at 90% 0%, rgba(212, 175, 55, .14), transparent 30%);
+      box-shadow: var(--shadow);
+    }
+
+    .integration-flow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .integration-step {
+      border: 1px solid rgba(212, 175, 55, .24);
+      border-radius: 22px;
+      background: rgba(8, 0, 20, .55);
+      padding: 20px;
+      position: relative;
+    }
+
+    .integration-step .int-num {
+      color: var(--gold-soft);
+      font-size: .76rem;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .integration-step h3 {
+      font-size: 1.02rem;
+      line-height: 1.18;
+      margin-bottom: 6px;
+    }
+
+    .integration-step p {
+      color: var(--muted);
+      font-size: .85rem;
+    }
+
+    /* ===== SPRINT 3: Humanização & Storytelling ===== */
+
+    .micro-story {
+      max-width: 760px;
+      margin: 28px auto 0;
+      padding: 0 8px;
+      color: rgba(255, 255, 255, .86);
+      font-size: 1.02rem;
+      line-height: 1.6;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .micro-story em {
+      color: var(--gold-pale);
+      font-style: normal;
+      font-weight: 800;
+    }
+
+    .inter-quote {
+      padding: 36px 22px;
+      text-align: center;
+    }
+
+    .inter-quote blockquote {
+      max-width: 780px;
+      margin: 0 auto;
+      font-family: "Cormorant Garamond", serif;
+      font-size: clamp(1.45rem, 2.8vw, 2.1rem);
+      font-style: italic;
+      line-height: 1.25;
+      color: var(--gold-pale);
+      letter-spacing: -.015em;
+    }
+
+    .future-jump {
+      border: 1px solid rgba(212, 175, 55, .28);
+      border-radius: 32px;
+      padding: 42px;
+      background:
+        linear-gradient(135deg, rgba(76, 32, 111, .55), rgba(18, 3, 34, .86)),
+        radial-gradient(circle at 88% 0%, rgba(212, 175, 55, .14), transparent 32%);
+      box-shadow: var(--shadow);
+    }
+
+    .future-jump-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 28px;
+      align-items: center;
+    }
+
+    .future-jump-card {
+      border: 1px solid rgba(212, 175, 55, .24);
+      border-radius: 22px;
+      background: rgba(8, 0, 20, .55);
+      padding: 26px 24px;
+    }
+
+    .future-jump-card .fj-label {
+      display: inline-block;
+      color: var(--gold-soft);
+      font-size: .78rem;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .future-jump-card h3 {
+      font-family: "Cormorant Garamond", serif;
+      font-size: 1.5rem;
+      line-height: 1.15;
+      margin-bottom: 10px;
+    }
+
+    .future-jump-card p {
+      color: rgba(255, 255, 255, .88);
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .future-jump-arrow {
+      width: 54px;
+      height: 54px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: #1b0f2e;
+      background: linear-gradient(135deg, #f8dc92, var(--gold) 62%, #c48b36);
+      font-size: 1.5rem;
+      font-weight: 950;
+      flex-shrink: 0;
+    }
+
+    .small-stories {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .small-story-card {
+      border: 1px solid rgba(212, 175, 55, .22);
+      border-radius: 22px;
+      background: rgba(255, 255, 255, .045);
+      padding: 24px;
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .small-story-card .ss-emoji {
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(212, 175, 55, .25), rgba(76, 32, 111, .55));
+      color: var(--gold-soft);
+      font-size: 1.15rem;
+      border: 1px solid rgba(212, 175, 55, .35);
+      margin-bottom: 12px;
+      flex-shrink: 0;
+    }
+
+    .small-story-card p {
+      font-family: "Cormorant Garamond", serif;
+      font-size: 1.25rem;
+      line-height: 1.2;
+      color: var(--gold-pale);
+    }
+
+    .small-story-card .ss-note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-family: Inter, sans-serif;
+      font-size: .88rem;
+      font-weight: 600;
+    }
+
+    .curador-dialogue {
+      margin-top: 28px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .curador-dialogue .cd-line {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .curador-dialogue .cd-speaker {
+      color: var(--gold-soft);
+      font-size: .82rem;
+      font-weight: 950;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding-top: 8px;
+    }
+
+    .curador-dialogue .cd-bubble {
+      border: 1px solid rgba(212, 175, 55, .22);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, .045);
+      padding: 14px 18px;
+      color: rgba(255, 255, 255, .92);
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .curador-dialogue .cd-line.you .cd-speaker {
+      color: var(--muted);
+    }
+
+    .family-story {
+      margin-top: 28px;
+      border: 1px solid rgba(212, 175, 55, .22);
+      border-radius: 22px;
+      background: rgba(8, 0, 20, .55);
+      padding: 26px;
+    }
+
+    .family-story h4 {
+      color: var(--gold-soft);
+      font-size: .82rem;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .family-story .fs-step {
+      display: grid;
+      grid-template-columns: 32px 1fr;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-top: 1px solid rgba(212, 175, 55, .14);
+    }
+
+    .family-story .fs-step:first-of-type {
+      border-top: 0;
+    }
+
+    .family-story .fs-step .fs-num {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: #1b0f2e;
+      background: linear-gradient(135deg, #f8dc92, var(--gold) 62%, #c48b36);
+      font-weight: 950;
+      font-size: .82rem;
+    }
+
+    .family-story .fs-step p {
+      color: rgba(255, 255, 255, .9);
+      font-size: .98rem;
+      line-height: 1.5;
+    }
+
+    .family-story .fs-step p strong {
+      color: var(--gold-pale);
+    }
+
+    .timeline-example {
+      margin-top: 28px;
+      border: 1px solid rgba(212, 175, 55, .24);
+      border-radius: 22px;
+      background: rgba(8, 0, 20, .55);
+      padding: 26px;
+    }
+
+    .timeline-example h4 {
+      color: var(--gold-soft);
+      font-size: .82rem;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    .timeline-example .tl-row {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 18px;
+      align-items: center;
+      padding: 10px 0;
+      border-top: 1px solid rgba(212, 175, 55, .14);
+    }
+
+    .timeline-example .tl-row:first-of-type {
+      border-top: 0;
+    }
+
+    .timeline-example .tl-year {
+      color: var(--gold-soft);
+      font-weight: 950;
+      font-size: 1rem;
+    }
+
+    .timeline-example .tl-event {
+      color: rgba(255, 255, 255, .9);
+      font-size: .98rem;
+      line-height: 1.5;
+    }
+
+
+
+    /* ===== SPRINT 4: Experiência visual / Demonstrações ===== */
+
+    /* Microanimações sutis */
+    @keyframes ae-fade-up {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes ae-soft-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+      50% { box-shadow: 0 0 0 8px rgba(212, 175, 55, 0.08); }
+    }
+
+    @keyframes ae-glow-drift {
+      0%, 100% { transform: translate(0, 0) scale(1); opacity: .9; }
+      50% { transform: translate(8px, -4px) scale(1.05); opacity: 1; }
+    }
+
+    /* Acessibilidade: conteúdo apenas para leitores de tela */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
       padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .ae-anim-in {
+      animation: ae-fade-up .8s ease-out both;
+    }
+
+    .ae-pulse {
+      animation: ae-soft-pulse 3.5s ease-in-out infinite;
+    }
+
+    /* Showcase: tela do app com label e contexto */
+    .showcase {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 42px;
+      align-items: center;
+    }
+
+    .showcase-visual {
+      position: relative;
+      min-height: 560px;
+      display: grid;
+      place-items: center;
+    }
+
+    .showcase-visual::before {
+      content: "";
+      position: absolute;
+      width: 480px;
+      height: 480px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(212, 175, 55, .22), transparent 62%);
+      filter: blur(6px);
+      animation: ae-glow-drift 8s ease-in-out infinite;
+    }
+
+    .showcase-visual .screen-main {
+      position: relative;
+      z-index: 2;
+    }
+
+    .showcase-copy h2 {
+      font-family: "Cormorant Garamond", serif;
+      font-size: clamp(2.2rem, 4.4vw, 3.5rem);
+      line-height: .98;
+      letter-spacing: -.04em;
+      margin: 18px 0 18px;
+    }
+
+    .showcase-copy p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      margin-bottom: 16px;
+    }
+
+    .showcase-label {
+      display: inline-block;
+      color: var(--gold-soft);
+      font-size: .76rem;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    /* Visual flow: 3 steps com setas */
+    .visual-flow {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .visual-flow-step {
+      border: 1px solid rgba(212, 175, 55, .24);
+      border-radius: 22px;
+      background: rgba(255, 255, 255, .045);
+      padding: 24px 18px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .visual-flow-step .vf-num {
+      display: inline-grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      color: #1b0f2e;
+      background: linear-gradient(135deg, #f8dc92, var(--gold) 62%, #c48b36);
+      font-weight: 950;
+      font-size: .92rem;
+    }
+
+    .visual-flow-step h3 {
+      font-size: 1.05rem;
+      line-height: 1.18;
+    }
+
+    .visual-flow-step p {
+      color: var(--muted);
+      font-size: .88rem;
+    }
+
+    .visual-flow-arrow {
+      display: grid;
+      place-items: center;
+      color: var(--gold-soft);
+      font-size: 1.6rem;
+      font-weight: 950;
+      align-self: center;
+    }
+
+    /* Visual transformation: foto → história */
+    .photo-transformation {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 28px;
+      align-items: center;
+    }
+
+    .photo-trans-card {
+      border: 1px solid rgba(212, 175, 55, .24);
+      border-radius: 22px;
+      background: rgba(8, 0, 20, .55);
+      padding: 22px;
+    }
+
+    .photo-trans-card .pt-tag {
+      color: var(--gold-soft);
+      font-size: .76rem;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .photo-trans-card .pt-shot {
+      height: 180px;
+      border-radius: 16px;
+      background-size: cover;
+      background-position: center;
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    .photo-trans-card .pt-shot::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(8, 0, 20, .04), rgba(8, 0, 20, .58));
+      pointer-events: none;
+    }
+
+    .photo-trans-card .pt-shot.video::after {
+      content: "▶";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 2.4rem;
+      text-shadow: 0 4px 14px rgba(0, 0, 0, .55);
+    }
+
+    .photo-trans-card .pt-line {
+      color: rgba(255, 255, 255, .88);
+      font-size: .9rem;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .photo-trans-card .pt-line strong {
+      color: var(--gold-pale);
+    }
+
+    .photo-trans-arrow {
+      display: grid;
+      place-items: center;
+      color: var(--gold-soft);
+      font-size: 2rem;
+      font-weight: 950;
+    }
+
+    /* Message card demo: visualização de Mensagem para o Futuro */
+    .message-demo {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .message-demo-card {
+      border: 1px solid rgba(212, 175, 55, .26);
+      border-radius: 22px;
+      background: rgba(255, 255, 255, .045);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .message-demo-card .md-step {
+      color: var(--gold-soft);
+      font-size: .76rem;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .message-demo-card h3 {
+      font-family: "Cormorant Garamond", serif;
+      font-size: 1.4rem;
+      line-height: 1.1;
+    }
+
+    .message-demo-card p {
+      color: var(--muted);
+      font-size: .92rem;
+    }
+
+    .message-demo-card .md-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: rgba(255, 255, 255, .9);
+      font-size: .92rem;
+      font-weight: 700;
+    }
+
+    .message-demo-card .md-meta .md-pill {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(212, 175, 55, .14);
+      border: 1px solid rgba(212, 175, 55, .35);
+      color: var(--gold-soft);
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .04em;
+    }
+
+    .message-demo-card .md-icon {
+      display: grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(212, 175, 55, .25), rgba(76, 32, 111, .55));
+      color: var(--gold-soft);
+      font-size: 1.4rem;
+      border: 1px solid rgba(212, 175, 55, .35);
+    }
+
+    /* Vault demo: visualização do Cofre */
+    .vault-list {
+      display: grid;
+      gap: 10px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .vault-heading {
+      font-family: "Cormorant Garamond", serif;
+      font-size: clamp(2.2rem, 4.4vw, 3.5rem);
+      line-height: .98;
+      letter-spacing: -.04em;
+      margin: 18px 0;
+    }
+
+    .vault-sub {
+      color: var(--muted);
+      font-size: 1.05rem;
+      margin-bottom: 18px;
+    }
+
+    .vault-item {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      border: 1px solid rgba(212, 175, 55, .22);
+      border-radius: 18px;
+      padding: 16px 18px;
+      background: rgba(8, 0, 20, .55);
+      color: rgba(255, 255, 255, .92);
+    }
+
+    .vault-item .vi-icon {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(212, 175, 55, .25), rgba(76, 32, 111, .55));
+      color: var(--gold-soft);
+      font-size: 1.05rem;
+      border: 1px solid rgba(212, 175, 55, .35);
+      flex-shrink: 0;
+    }
+
+    .vault-item .vi-text {
+      flex: 1;
+    }
+
+    .vault-item .vi-text strong {
+      display: block;
+      color: var(--gold-pale);
+      font-size: 1rem;
+    }
+
+    .vault-item .vi-text span {
+      color: var(--muted);
+      font-size: .82rem;
+    }
+
+    .vault-item .vi-lock {
+      color: var(--gold-soft);
+      font-size: 1.05rem;
+    }
+
+    /* Share flow: visualização de compartilhamento */
+    .share-flow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+    }
+
+    .share-step {
+      border: 1px solid rgba(212, 175, 55, .24);
+      border-radius: 18px;
+      background: rgba(8, 0, 20, .55);
+      padding: 18px 14px;
+      text-align: center;
+      position: relative;
+    }
+
+    .share-step .ss-icon {
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      margin: 0 auto 10px;
+      background: linear-gradient(135deg, rgba(212, 175, 55, .25), rgba(76, 32, 111, .55));
+      color: var(--gold-soft);
+      font-size: 1.15rem;
+      border: 1px solid rgba(212, 175, 55, .35);
+    }
+
+    .share-step h3 {
+      font-size: .98rem;
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+
+    .share-step p {
+      color: var(--muted);
+      font-size: .82rem;
+    }
+
+    /* People grid: visualização de pessoas */
+    .people-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .people-card {
+      border: 1px solid rgba(212, 175, 55, .22);
+      border-radius: 20px;
+      background: rgba(255, 255, 255, .045);
+      padding: 18px;
+      text-align: center;
+      transition: transform .2s ease, border-color .2s ease;
+    }
+
+    .people-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(212, 175, 55, .5);
+    }
+
+    .people-card .pc-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      margin: 0 auto 12px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, rgba(212, 175, 55, .35), rgba(76, 32, 111, .55));
+      color: var(--gold-pale);
+      font-family: "Cormorant Garamond", serif;
+      font-size: 1.6rem;
+      border: 2px solid rgba(212, 175, 55, .5);
+    }
+
+    .people-card h4 {
+      font-size: .98rem;
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+
+    .people-card .pc-relation {
+      color: var(--muted);
+      font-size: .82rem;
+      margin-bottom: 8px;
+    }
+
+    .people-card .pc-tag {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(212, 175, 55, .12);
+      border: 1px solid rgba(212, 175, 55, .3);
+      color: var(--gold-soft);
+      font-size: .72rem;
+      font-weight: 800;
+    }
+
+    /* Timeline visual showcase */
+    .timeline-showcase {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 36px;
+      align-items: center;
+    }
+
+    .timeline-screen {
+      position: relative;
+      min-height: 520px;
+      display: grid;
+      place-items: center;
+    }
+
+    .timeline-screen::before {
+      content: "";
+      position: absolute;
+      width: 460px;
+      height: 460px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(212, 175, 55, .2), transparent 62%);
+      filter: blur(4px);
+      animation: ae-glow-drift 9s ease-in-out infinite;
+    }
+
+    .timeline-screen .screen-main {
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Reuso: enhancements */
+    .feature-card,
+    .small-story-card,
+    .example-card,
+    .resolve-step,
+    .integration-step {
+      transition: transform .2s ease, border-color .2s ease;
+    }
+
+    .feature-card:hover,
+    .small-story-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(212, 175, 55, .55);
+    }
+
+    /* ===== SPRINT 5.6: Hero Vivo (carrossel de histórias) ===== */
+
+    .hero-carousel {
+      position: relative;
+      width: 100%;
+      height: 480px;
+      min-height: 480px;
+      border-radius: 20px;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    .hero-carousel-track {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .hero-carousel-slide {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity .8s ease;
+    }
+
+    .hero-carousel-slide.is-active {
+      opacity: 1 !important;
+      visibility: visible !important;
+      z-index: 2;
+    }
+
+    .hero-carousel-photo {
+      position: absolute;
+      inset: 0;
+      background-size: cover !important;
+      background-position: center !important;
+      background-repeat: no-repeat;
+      transform: scale(1.02);
+      transition: transform 6s ease-out;
+    }
+
+    .hero-carousel-slide.is-active .hero-carousel-photo {
+      transform: scale(1);
+    }
+
+    .hero-carousel-photo::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg,
+          rgba(0, 0, 0, 0) 0%,
+          rgba(0, 0, 0, 0) 45%,
+          rgba(0, 0, 0, .25) 70%,
+          rgba(0, 0, 0, .75) 100%);
+    }
+
+    .hero-carousel-card {
+      position: absolute;
+      left: 28px;
+      right: 28px;
+      bottom: 48px;
+      max-width: 400px;
+      z-index: 3;
+      border: 1px solid rgba(255, 255, 255, .14);
+      border-radius: 14px;
+      background: rgba(20, 8, 32, .72);
+      backdrop-filter: blur(16px) saturate(140%);
+      -webkit-backdrop-filter: blur(16px) saturate(140%);
+      padding: 18px 20px;
+      color: rgba(255, 255, 255, .98);
+      transform: translateY(8px);
+      transition: transform .6s ease, opacity .6s ease;
+      opacity: 0;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, .18);
+    }
+
+    .hero-carousel-slide.is-active .hero-carousel-card {
+      transform: translateY(0);
+      opacity: 1;
+      transition-delay: .15s;
+    }
+
+    .hero-carousel-title {
+      font-family: "Cormorant Garamond", serif;
+      font-size: 1.35rem;
+      line-height: 1.1;
+      margin: 0 0 4px;
+      color: var(--gold-pale);
+      text-shadow: 0 1px 8px rgba(0, 0, 0, .4);
+    }
+
+    .hero-carousel-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 12px;
+      color: rgba(255, 255, 255, .85);
+      font-size: .78rem;
+      margin-bottom: 8px;
+    }
+
+    .hero-carousel-meta .meta-date {
+      color: var(--gold-soft);
+      font-weight: 800;
+      letter-spacing: .02em;
+    }
+
+    .hero-carousel-meta .meta-people {
+      color: rgba(255, 255, 255, .9);
+    }
+
+    .hero-carousel-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+
+    .hero-carousel-tag {
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .12);
+      border: 1px solid rgba(255, 255, 255, .18);
+      color: rgba(255, 255, 255, .92);
+      font-size: .7rem;
+      font-weight: 700;
+    }
+
+    .hero-carousel-excerpt {
+      font-family: "Cormorant Garamond", serif;
+      font-style: italic;
+      font-size: .88rem;
+      line-height: 1.4;
+      color: rgba(255, 255, 255, .95);
+      margin-bottom: 8px;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, .3);
+    }
+
+    .hero-carousel-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--gold-soft);
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .hero-carousel-cta::after {
+      content: "→";
+      font-size: 1rem;
+    }
+
+    .hero-carousel-cta:focus-visible {
+      outline: 2px solid var(--gold-soft);
+      outline-offset: 4px;
+      border-radius: 4px;
+    }
+
+    .hero-carousel-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 5;
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: rgba(8, 0, 20, .45);
+      border: 1px solid rgba(255, 255, 255, .18);
+      color: rgba(255, 255, 255, .85);
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background .2s ease, transform .2s ease, opacity .2s ease;
+      opacity: .75;
+      backdrop-filter: blur(8px);
+    }
+
+    .hero-carousel-nav:hover {
+      background: rgba(8, 0, 20, .7);
+      transform: translateY(-50%) scale(1.06);
+      opacity: 1;
+    }
+
+    .hero-carousel-nav:focus-visible {
+      outline: 2px solid var(--gold-soft);
+      outline-offset: 3px;
+    }
+
+    .hero-carousel-nav--prev {
+      left: 12px;
+    }
+
+    .hero-carousel-nav--next {
+      right: 12px;
+    }
+
+    .hero-carousel-dots {
+      position: absolute;
+      left: 50%;
+      bottom: 16px;
+      transform: translateX(-50%);
+      z-index: 5;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .hero-carousel-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .4);
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+      transition: background .25s ease, transform .25s ease, width .25s ease;
+      opacity: .7;
+    }
+
+    .hero-carousel-dot.is-active {
+      background: var(--gold-soft);
+      width: 22px;
+      border-radius: 999px;
+      opacity: 1;
+    }
+
+    .hero-carousel-dot:focus-visible {
+      outline: 2px solid var(--gold-soft);
+      outline-offset: 3px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hero-carousel-slide,
+      .hero-carousel-card {
+        transition: none;
+      }
+    }
+
+    /* ===== SPRINT 5.6.3: Modal de história ===== */
+
+    .story-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(8, 0, 20, .78);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity .3s ease, visibility .3s ease;
+    }
+
+    .story-modal.is-open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .story-modal-dialog {
+      position: relative;
+      max-width: 640px;
+      width: 100%;
+      max-height: calc(100vh - 48px);
+      background: #0e0518;
+      border: 1px solid rgba(212, 175, 55, .25);
+      border-radius: 20px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, .55);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform: translateY(12px) scale(.97);
+      transition: transform .3s ease;
+    }
+
+    .story-modal.is-open .story-modal-dialog {
+      transform: translateY(0) scale(1);
+    }
+
+    .story-modal-cover {
+      position: relative;
+      height: 180px;
+      background-size: cover;
+      background-position: center;
+      flex-shrink: 0;
+    }
+
+    .story-modal-cover::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg,
+          rgba(14, 5, 24, 0) 0%,
+          rgba(14, 5, 24, .55) 60%,
+          rgba(14, 5, 24, 1) 100%);
+    }
+
+    .story-modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 2;
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: rgba(8, 0, 20, .55);
+      border: 1px solid rgba(255, 255, 255, .2);
+      color: #fff;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background .2s ease;
+    }
+
+    .story-modal-close:hover {
+      background: rgba(8, 0, 20, .8);
+    }
+
+    .story-modal-body {
+      padding: 22px 28px 28px;
+      overflow-y: auto;
+    }
+
+    .story-modal-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .story-modal-tag {
+      padding: 2px 9px;
+      border-radius: 999px;
+      background: rgba(212, 175, 55, .12);
+      border: 1px solid rgba(212, 175, 55, .3);
+      color: var(--gold-soft);
+      font-size: .7rem;
+      font-weight: 800;
+      letter-spacing: .04em;
+    }
+
+    .story-modal-title {
+      font-family: "Cormorant Garamond", serif;
+      font-size: 1.75rem;
+      line-height: 1.1;
+      margin: 0 0 8px;
+      color: var(--gold-pale);
+    }
+
+    .story-modal-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 12px;
+      color: rgba(255, 255, 255, .7);
+      font-size: .82rem;
+      margin-bottom: 18px;
+    }
+
+    .story-modal-meta strong {
+      color: var(--gold-soft);
+      font-weight: 800;
+    }
+
+    .story-modal-text {
+      font-size: 1rem;
+      line-height: 1.65;
+      color: rgba(255, 255, 255, .94);
+      white-space: pre-wrap;
+      margin-bottom: 16px;
+    }
+
+    .story-modal-note {
+      font-size: .8rem;
+      color: rgba(255, 255, 255, .55);
+      font-style: italic;
+      margin-bottom: 22px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, .08);
+    }
+
+    .story-modal-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .story-modal-actions .btn-primary,
+    .story-modal-actions .btn-outline {
+      min-height: 48px;
+      padding: 0 22px;
+      font-size: .9rem;
+    }
+
+    .story-modal-actions .btn-close {
+      background: transparent;
+      color: rgba(255, 255, 255, .8);
+      border: 1px solid rgba(255, 255, 255, .2);
+      padding: 0 18px;
+      min-height: 48px;
+      font-size: .88rem;
+      font-weight: 700;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: background .2s ease, border-color .2s ease;
+    }
+
+    .story-modal-actions .btn-close:hover {
+      background: rgba(255, 255, 255, .06);
+      border-color: rgba(255, 255, 255, .35);
+    }
+
+    @media (max-width: 620px) {
+      .story-modal {
+        padding: 12px;
+      }
+      .story-modal-dialog {
+        max-height: calc(100vh - 24px);
+        border-radius: 16px;
+      }
+      .story-modal-cover {
+        height: 130px;
+      }
+      .story-modal-body {
+        padding: 18px 18px 22px;
+      }
+      .story-modal-title {
+        font-size: 1.4rem;
+      }
+      .story-modal-text {
+        font-size: .94rem;
+      }
+      .story-modal-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .story-modal-actions .btn-primary,
+      .story-modal-actions .btn-outline,
+      .story-modal-actions .btn-close {
+        width: 100%;
+        justify-content: center;
+      }
     }
 
     @media (max-width: 1080px) {
@@ -976,6 +2507,99 @@
         max-width: 360px;
         width: 100%;
         margin-inline: auto;
+      }
+
+      .examples-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .resolve-flow {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .curador-grid,
+      .family-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .integration-flow {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .resolve-panel,
+      .family-panel,
+      .integration-panel {
+        padding: 28px;
+        border-radius: 24px;
+      }
+
+      .future-jump-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+
+      .future-jump-arrow {
+        margin: 0 auto;
+        transform: rotate(90deg);
+      }
+
+      .small-stories {
+        grid-template-columns: 1fr;
+      }
+
+      .curador-dialogue .cd-line {
+        grid-template-columns: 80px 1fr;
+      }
+
+      .family-story,
+      .timeline-example {
+        padding: 18px;
+      }
+
+      .showcase,
+      .vault-demo,
+      .timeline-showcase {
+        grid-template-columns: 1fr;
+      }
+
+      .showcase-visual,
+      .vault-visual,
+      .timeline-screen {
+        min-height: 460px;
+      }
+
+      .visual-flow {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .visual-flow-arrow {
+        transform: rotate(90deg);
+      }
+
+      .photo-transformation {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .photo-trans-arrow {
+        transform: rotate(90deg);
+      }
+
+      .message-demo {
+        grid-template-columns: 1fr;
+      }
+
+      .share-flow {
+        grid-template-columns: 1fr;
+      }
+
+      .people-grid {
+        grid-template-columns: repeat(2, 1fr);
       }
     }
 
@@ -1048,13 +2672,18 @@
       }
 
       .hero h1 {
-        font-size: clamp(2.55rem, 12vw, 3.35rem);
+        font-size: clamp(2.2rem, 12vw, 3.35rem);
         line-height: .96;
-        margin-top: 18px;
+        margin-top: 16px;
       }
 
       .hero-copy {
         font-size: 1rem;
+        margin-bottom: 18px;
+      }
+
+      .hero-actions {
+        margin-bottom: 18px;
       }
 
       .hero-actions .btn {
@@ -1062,8 +2691,44 @@
       }
 
       .hero-visual {
-        min-height: 500px;
-        margin-top: -8px;
+        min-height: 400px;
+        margin-top: -6px;
+      }
+
+      .hero-carousel {
+        height: 400px;
+        min-height: 400px;
+        border-radius: 16px;
+      }
+
+      .hero-carousel-card {
+        left: 14px;
+        right: 14px;
+        bottom: 44px;
+        max-width: none;
+        padding: 14px 16px;
+      }
+
+      .hero-carousel-title {
+        font-size: 1.1rem;
+      }
+
+      .hero-carousel-excerpt {
+        font-size: .8rem;
+      }
+
+      .hero-carousel-nav {
+        width: 34px;
+        height: 34px;
+        font-size: .95rem;
+      }
+
+      .hero-carousel-nav--prev {
+        left: 8px;
+      }
+
+      .hero-carousel-nav--next {
+        right: 8px;
       }
 
       .screen-main {
@@ -1118,6 +2783,20 @@
         border-radius: 30px;
       }
 
+      .resolve-flow,
+      .integration-flow,
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .curador-visual {
+        min-height: 480px;
+      }
+
+      .people-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
       .footer-brand img {
         width: 205px;
       }
@@ -1138,11 +2817,12 @@
 
       <nav class="nav-links" id="navLinks" aria-label="Menu principal">
         <a href="#inicio">Início</a>
-        <a href="#problema">Por que existe</a>
-        <a href="#como-funciona">Como funciona</a>
-        <a href="#telas">Telas</a>
+        <a href="#problema">O problema</a>
+        <a href="#curador">O Curador</a>
+        <a href="#plataforma">A plataforma</a>
+        <a href="#memorial">Memorial</a>
         <a href="#faq">FAQ</a>
-        <a class="nav-cta" href="https://aeterna.streamlit.app/">Acessar</a>
+        <a class="nav-cta" href="https://aeterna.streamlit.app/">Começar minha história</a>
       </nav>
     </div>
   </header>
@@ -1151,55 +2831,60 @@
     <section class="hero" id="inicio">
       <div class="container hero-grid">
         <div>
-          <div class="eyebrow">Legado familiar privado</div>
-          <h1>Preserve as histórias que explicam de onde sua família veio.</h1>
+          <div class="eyebrow">Histórias que atravessam gerações</div>
+          <h1>A história da sua família ainda está sendo escrita.</h1>
           <p class="hero-copy">
-            A aEterna organiza fotos, momentos, pessoas, valores e aprendizados em uma linha do tempo privada para que sua família não herde apenas imagens soltas.
+            A aEterna transforma fotos, vídeos e lembranças em histórias vivas — construídas pela família, preservadas com contexto e continuadas ao longo das gerações.
           </p>
 
           <div class="hero-actions">
-            <a class="btn btn-primary" href="https://aeterna.streamlit.app/">Começar minha história</a>
-            <a class="btn btn-outline" href="#como-funciona">Ver como funciona</a>
+            <a class="btn btn-primary" href="https://aeterna.streamlit.app/">Descobrir uma história</a>
+            <a class="btn btn-outline" href="#como-funciona">Começar a contar a minha</a>
           </div>
 
           <div class="hero-proof" aria-label="Resumo do produto">
-            <div class="proof-item">Histórias com contexto</div>
-            <div class="proof-item">Linha do tempo familiar</div>
-            <div class="proof-item">Acesso privado</div>
+            <div class="proof-item">Histórias com pessoas, datas e contexto</div>
+            <div class="proof-item">Família contribui com suas versões</div>
+            <div class="proof-item">Legado que atravessa gerações</div>
           </div>
         </div>
 
-        <div class="hero-visual" aria-label="Prévia do aplicativo aEterna">
-          <div class="screen-shell screen-main">
-            <div class="screen-shot">
-              <img src="assets/home.webp" alt="Tela inicial da aEterna" onerror="this.style.display='none'" />
-              <div class="screen-fallback">
-                <div class="screen-top">
-                  <div class="screen-logo"><span class="mark">a</span><span>aEterna</span></div>
-                  <span>Hoje</span>
+        <div class="hero-visual" aria-label="Carrossel de histórias de família">
+          <div class="hero-carousel" id="heroCarousel" data-carousel>
+            <div class="hero-carousel-track" data-carousel-track>
+              <!-- Slide 0: fallback estático (sempre visível, mesmo sem JS) -->
+              <article class="hero-carousel-slide is-active" data-slide-index="0" role="group" aria-roledescription="slide" aria-label="História 1 de 8: Primeira bicicleta" aria-hidden="false">
+                <div class="hero-carousel-photo" style="background-image: url('assets/landing/hero/02-primeira-bicicleta.webp');" role="img" aria-label="Primeira bicicleta"></div>
+                <div class="hero-carousel-card">
+                  <h3 class="hero-carousel-title">Primeira bicicleta</h3>
+                  <div class="hero-carousel-meta">
+                    <span class="meta-date">12 de outubro de 2026</span>
+                    <span class="meta-people">Lucas · Ana · João</span>
+                  </div>
+                  <div class="hero-carousel-tags">
+                    <span class="hero-carousel-tag">Infância</span>
+                    <span class="hero-carousel-tag">Coragem</span>
+                    <span class="hero-carousel-tag">Família</span>
+                  </div>
+                  <p class="hero-carousel-excerpt">"Você caiu três vezes. Na quarta, olhou para mim e disse: 'Agora eu consigo sozinho.' Foi ali que eu entendi que crescer também é aprender a soltar a mão."</p>
+                  <a class="hero-carousel-cta" href="#" data-story-cta>Ler esta história</a>
                 </div>
-                <div class="screen-card">
-                  <h3>Domingo na casa da avó</h3>
-                  <p>Uma lembrança sobre família, cuidado e pequenas tradições.</p>
-                  <div class="screen-photo"></div>
-                  <div class="tag-row"><span class="tag">Família</span><span class="tag">Infância</span><span class="tag">Tradições</span></div>
-                </div>
-                <div class="screen-card">
-                  <h3>Histórias recentes</h3>
-                  <p>Momentos preservados com pessoas, contexto e significado.</p>
-                </div>
-                <div class="screen-card">
-                  <h3>Linha do tempo</h3>
-                  <p>Memórias organizadas por fases da vida.</p>
-                </div>
-              </div>
+              </article>
+              <!-- Slides 1-7 renderizados via JavaScript -->
             </div>
-          </div>
 
-          <div class="screen-shell screen-side" aria-hidden="true">
-            <div class="screen-shot">
-              <img src="assets/memoria-detalhe.webp" alt="" onerror="this.style.display='none'" />
+            <button type="button" class="hero-carousel-nav hero-carousel-nav--prev" data-carousel-prev aria-label="História anterior">
+              ‹
+            </button>
+            <button type="button" class="hero-carousel-nav hero-carousel-nav--next" data-carousel-next aria-label="Próxima história">
+              ›
+            </button>
+
+            <div class="hero-carousel-dots" data-carousel-dots role="tablist" aria-label="Selecionar história">
+              <!-- Dots renderizados via JavaScript -->
             </div>
+
+            <div class="sr-only" aria-live="polite" aria-atomic="true" data-carousel-status></div>
           </div>
         </div>
       </div>
@@ -1209,20 +2894,28 @@
       <div class="container problem-panel">
         <div class="problem-grid">
           <div class="photo-story">
-            <span>A foto fica. A história costuma desaparecer.</span>
+            <span>Você fotografou o almoço de Natal da família. A foto vai ficar. Mas quem vai contar para os seus netos o que aconteceu naquela noite?</span>
           </div>
 
           <div class="problem-copy">
-            <div class="eyebrow">O problema</div>
-            <h2>Temos milhares de fotos. Mas poucas histórias realmente registradas.</h2>
+            <div class="eyebrow">O que estamos perdendo</div>
+            <h2>As fotos sobrevivem. As histórias, quase nunca.</h2>
             <p>
-              Uma imagem mostra que algo aconteceu. Mas nem sempre preserva quem estava ali, o que aquele momento significou e quais aprendizados ficaram para a família.
+              Hoje produzimos milhares de fotos por ano. Registramos o que aconteceu.
+              Mas quase nunca registramos o que aquilo significou: quem estava presente, o que
+              estávamos sentindo, o que aprendemos, o que aquela pessoa diria se pudesse falar
+              com a gente daqui a vinte anos.
+            </p>
+            <p>
+              Quando alguém parte, normalmente ficam as imagens. O resto se perde —
+              em conversas que não aconteceram, em perguntas que nunca foram feitas, em
+              histórias que ninguém teve tempo de ouvir.
             </p>
 
             <div class="question-list">
-              <div class="question">Quem estava presente?</div>
-              <div class="question">O que estava acontecendo naquele dia?</div>
-              <div class="question">O que aquela pessoa sentia?</div>
+              <div class="question">Quem estava presente naquele momento?</div>
+              <div class="question">O que estava acontecendo de verdade?</div>
+              <div class="question">O que aquela pessoa estava sentindo?</div>
               <div class="question">Que valor ou aprendizado ficou daquela história?</div>
             </div>
           </div>
@@ -1230,30 +2923,116 @@
       </div>
     </section>
 
-    <section class="section" id="o-que-e">
+    <section class="section" id="por-que-desaparecem">
       <div class="container">
         <div class="section-title">
-          <h2>O que é a <span class="gold">aEterna</span></h2>
-          <p>Uma plataforma para preservar histórias familiares com contexto, vínculo e significado.</p>
+          <h2>Por que as histórias <span class="gold">desaparecem</span>?</h2>
+          <p>Não é por falta de memória. É por falta de estrutura para registrar — e de tempo para perguntar.</p>
         </div>
 
-        <div class="definition-grid">
-          <article class="definition-card">
-            <small>Não é álbum</small>
-            <h3>Fotos sozinhas não explicam uma vida.</h3>
-            <p>A aEterna conecta imagens a histórias, pessoas, datas, sentimentos, valores e aprendizados.</p>
+        <div class="examples-grid">
+          <article class="example-card">
+            <p class="example-quote">"Ninguém esquece a foto. Mas quase todo mundo esquece a história."</p>
+            <p class="example-foot">O registro mostra o que aconteceu. Raramente mostra o porquê.</p>
           </article>
 
-          <article class="definition-card">
-            <small>Não é rede social</small>
-            <h3>O foco não é exposição.</h3>
-            <p>As memórias ficam em um espaço privado, organizado para a família e para as próximas gerações.</p>
+          <article class="example-card">
+            <p class="example-quote">"O vídeo do aniversário continua existindo. Mas quem lembrará da conversa que aconteceu cinco minutos antes?"</p>
+            <p class="example-foot">O momento público é preservado. O momento real, quase nunca.</p>
           </article>
 
-          <article class="definition-card">
-            <small>Não é memorial</small>
-            <h3>É sobre vida, presença e legado.</h3>
-            <p>A proposta é registrar histórias enquanto elas ainda podem ser contadas por quem as viveu.</p>
+          <article class="example-card">
+            <p class="example-quote">"Sabemos onde a foto foi tirada. Mas raramente registramos por que aquele dia foi tão importante."</p>
+            <p class="example-foot">O lugar fica na legenda. O significado fica na cabeça de quem viveu.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-tight inter-quote">
+      <div class="container">
+        <blockquote>"Hoje conseguimos guardar arquivos. Ainda estamos aprendendo a guardar significado."</blockquote>
+      </div>
+    </section>
+
+    <section class="section section-tight" id="futuro">
+      <div class="container">
+        <div class="section-title">
+          <h2>Imagine daqui a <span class="gold">30 anos</span></h2>
+          <p>Você tira uma foto hoje. O que vai acontecer com ela no futuro depende de uma escolha pequena agora.</p>
+        </div>
+
+        <div class="future-jump">
+          <div class="future-jump-grid">
+            <div class="future-jump-card">
+              <span class="fj-label">Hoje</span>
+              <h3>Você registra uma história</h3>
+              <p>Uma foto do aniversário do seu filho, com um texto dizendo o que estava acontecendo, quem estava ali, por que aquele dia foi tão importante.</p>
+            </div>
+
+            <div class="future-jump-arrow" aria-hidden="true">→</div>
+
+            <div class="future-jump-card">
+              <span class="fj-label">Daqui a 30 anos</span>
+              <h3>Seu neto encontra essa foto</h3>
+              <p>Mas junto dela existe uma história escrita por você. Ele não vai ver só uma imagem. Ele vai entender quem estava ali, o que riam, por que aquele dia importou.</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="micro-story">
+          Esse é o tipo de coisa que <em>não cabe em uma legenda</em> e que quase nunca cabe em uma conversa. Mas cabe em uma história bem registrada.
+        </p>
+      </div>
+    </section>
+
+    <section class="section" id="manifesto">
+      <div class="container">
+        <div class="platform-manifesto">
+          <div class="eyebrow">A plataforma</div>
+          <h2>Mais do que um lugar para escrever histórias.</h2>
+          <p>A aEterna é uma plataforma integrada para preservar o patrimônio invisível de uma família: histórias, pessoas, relações, fotos, vídeos, aprendizados, datas, mensagens e tudo o que normalmente se perde com o tempo.</p>
+          <p>Você não precisa usar tudo de uma vez. Pode começar por uma história, e ir descobrindo o restante à medida que a sua família cresce junto com a plataforma.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-tight inter-quote">
+      <div class="container">
+        <blockquote>"Cada família possui um patrimônio invisível. A aEterna existe para torná-lo visível."</blockquote>
+      </div>
+    </section>
+
+    <section class="section" id="pequenas-historias">
+      <div class="container">
+        <div class="section-title">
+          <h2>As <span class="gold">pequenas histórias</span></h2>
+          <p>Nem sempre os momentos mais importantes são os maiores. Às vezes, são os que cabem em uma frase, em um gesto ou em uma tradição que ninguém lembra quem começou.</p>
+        </div>
+
+        <div class="small-stories">
+          <article class="small-story-card">
+            <span class="ss-emoji">🍰</span>
+            <p>"O melhor bolo da família."</p>
+            <p class="ss-note">A receita que só a sua avó sabia fazer — e que talvez só você conheça.</p>
+          </article>
+
+          <article class="small-story-card">
+            <span class="ss-emoji">🎵</span>
+            <p>"A música que seu pai sempre cantava."</p>
+            <p class="ss-note">Aquela do caminho do trabalho, do churrasco de domingo, do nada específico.</p>
+          </article>
+
+          <article class="small-story-card">
+            <span class="ss-emoji">📷</span>
+            <p>"A história por trás daquela fotografia antiga."</p>
+            <p class="ss-note">Todo mundo já viu a foto. Quase ninguém sabe o que aconteceu cinco minutos antes.</p>
+          </article>
+
+          <article class="small-story-card">
+            <span class="ss-emoji">💬</span>
+            <p>"O conselho que seu pai deu uma vez."</p>
+            <p class="ss-note">E que você lembra exatamente como foi dito, mesmo anos depois.</p>
           </article>
         </div>
       </div>
@@ -1263,7 +3042,7 @@
       <div class="container">
         <div class="section-title">
           <h2>Como funciona</h2>
-          <p>O fluxo precisa ser simples: registrar, contextualizar, relacionar pessoas e preservar.</p>
+          <p>Quatro passos simples para transformar uma lembrança em uma história que a sua família vai conseguir entender daqui a vinte anos.</p>
         </div>
 
         <div class="steps-grid">
@@ -1271,8 +3050,8 @@
             <div class="step-image" style="--screen: url('assets/nova-memoria.webp');"></div>
             <div class="step-body">
               <span class="step-number">Passo 1</span>
-              <h3>Registre um momento</h3>
-              <p>Adicione uma foto, uma data, um título e conte o que aconteceu com suas palavras.</p>
+              <h3>Conte um momento</h3>
+              <p>Adicione uma foto, uma data, um título e conte o que aconteceu com suas próprias palavras. Pode ser uma viagem, um almoço em família, uma conversa que marcou você.</p>
             </div>
           </article>
 
@@ -1280,8 +3059,8 @@
             <div class="step-image" style="--screen: url('assets/memoria-detalhe.webp');"></div>
             <div class="step-body">
               <span class="step-number">Passo 2</span>
-              <h3>Preserve o contexto</h3>
-              <p>Transforme uma lembrança solta em uma história com significado para quem vier depois.</p>
+              <h3>Dê contexto à história</h3>
+              <p>Quem estava presente? O que vocês estavam sentindo? O que aquilo ensinou? A aEterna ajuda você a transformar uma lembrança solta em uma narrativa com significado.</p>
             </div>
           </article>
 
@@ -1289,8 +3068,8 @@
             <div class="step-image" style="--screen: url('assets/pessoas.webp');"></div>
             <div class="step-body">
               <span class="step-number">Passo 3</span>
-              <h3>Conecte pessoas</h3>
-              <p>Relacione cada memória às pessoas importantes que participaram daquela história.</p>
+              <h3>Conecte as pessoas</h3>
+              <p>Relacione cada história a quem participou dela — filhos, pais, avós, amigos. As memórias ganham rosto e a família vai aparecer nas histórias, não só você.</p>
             </div>
           </article>
 
@@ -1298,131 +3077,592 @@
             <div class="step-image" style="--screen: url('assets/timeline.webp');"></div>
             <div class="step-body">
               <span class="step-number">Passo 4</span>
-              <h3>Organize no tempo</h3>
-              <p>As histórias formam uma linha do tempo familiar clara, visual e fácil de revisitar.</p>
+              <h3>Construa sua linha do tempo</h3>
+              <p>As histórias vão se organizando em uma linha do tempo da sua família — clara, visual, fácil de revisitar e de compartilhar com quem você quiser.</p>
             </div>
           </article>
+        </div>
+
+        <div class="timeline-example" aria-label="Exemplo de linha do tempo familiar">
+          <h4>Como uma linha do tempo pode ficar</h4>
+          <div class="tl-row">
+            <span class="tl-year">2001</span>
+            <span class="tl-event">Nascimento da filha. O dia em que a família começou a crescer.</span>
+          </div>
+          <div class="tl-row">
+            <span class="tl-year">2008</span>
+            <span class="tl-event">Primeira viagem em família para a praia. Todo mundo levou um prato diferente para a ceia improvisada.</span>
+          </div>
+          <div class="tl-row">
+            <span class="tl-year">2016</span>
+            <span class="tl-event">Primeiro emprego. A história do dia em que a filha voltou para casa dizendo que tinha sido contratada.</span>
+          </div>
+          <div class="tl-row">
+            <span class="tl-year">2035</span>
+            <span class="tl-event">Uma mensagem escrita em 2016 e agendada para abrir daqui a 20 anos — quando o neto completar 18 anos.</span>
+          </div>
+        </div>
+
+        <div class="timeline-showcase" aria-label="Demonstração visual da Linha do Tempo">
+          <div class="showcase-copy">
+            <span class="showcase-label">Linha do Tempo</span>
+            <h2>A sua família, organizada em uma linha visual.</h2>
+            <p>As histórias vão se encaixando em uma linha que atravessa os anos — fotos de infância, casamentos, viagens, nascimentos, mudanças, conquistas e memórias do dia a dia.</p>
+          </div>
+
+          <div class="timeline-screen">
+            <div class="screen-shell screen-main">
+              <div class="screen-shot">
+                <img src="assets/timeline.webp" alt="Tela de Linha do Tempo da aEterna" onerror="this.style.display='none'" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="section" id="memorial-secao">
+    <section class="section" id="curador">
+      <div class="container">
+        <div class="curador-grid">
+          <div class="curador-copy">
+            <div class="eyebrow">O Curador</div>
+            <h2>Você não precisa saber por onde começar.</h2>
+            <p>
+              O Curador de Histórias é um guia silencioso dentro da plataforma. Ele faz as perguntas
+              certas para ajudar você a transformar uma lembrança solta em uma história com
+              pessoas, contexto, datas e aprendizados.
+            </p>
+            <p>
+              Você não precisa escrever um texto longo. Você responde, ele estrutura — para
+              que a história fique clara para quem for ler daqui a anos.
+            </p>
+
+            <div class="curador-points">
+              <div class="curador-point">Faz perguntas que despertam a memória certa no momento certo.</div>
+              <div class="curador-point">Organiza a história em uma narrativa com pessoas, contexto e aprendizado.</div>
+              <div class="curador-point">Sugere conexões com outras histórias, datas e pessoas da família.</div>
+              <div class="curador-point">Permite que você revise cada história antes de ela entrar para a linha do tempo.</div>
+            </div>
+
+            <div class="curador-dialogue" aria-label="Exemplo de conversa com o Curador">
+              <div class="cd-line you">
+                <span class="cd-speaker">Você</span>
+                <div class="cd-bubble">Quero contar a história de um almoço de domingo na casa da minha avó.</div>
+              </div>
+              <div class="cd-line">
+                <span class="cd-speaker">Curador</span>
+                <div class="cd-bubble">Quem estava com você nesse dia?</div>
+              </div>
+              <div class="cd-line you">
+                <span class="cd-speaker">Você</span>
+                <div class="cd-bubble">Meu pai, minha mãe e meu irmão mais novo.</div>
+              </div>
+              <div class="cd-line">
+                <span class="cd-speaker">Curador</span>
+                <div class="cd-bubble">O que o seu pai fez nesse dia que você lembra até hoje?</div>
+              </div>
+              <div class="cd-line you">
+                <span class="cd-speaker">Você</span>
+                <div class="cd-bubble">Ele ensinou meu irmão a descascar laranja sem quebrar a casca. Ficou meia hora explicando.</div>
+              </div>
+              <div class="cd-line">
+                <span class="cd-speaker">Curador</span>
+                <div class="cd-bubble">E o que você sentiu vendo aquilo?</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="curador-visual" aria-label="Tela do Curador de Histórias">
+            <div class="screen-shell screen-main">
+              <div class="screen-shot">
+                <img src="assets/curadoria.webp" alt="Tela do Curador de Histórias da aEterna" onerror="this.style.display='none'" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="fotos-videos">
+      <div class="container">
+        <div class="section-title">
+          <h2>Fotos e vídeos viram <span class="gold">histórias</span></h2>
+          <p>Na aEterna, uma foto ou um vídeo nunca fica solto. Ele entra em uma história com pessoas, contexto, datas e aprendizado.</p>
+        </div>
+
+        <div class="photo-transformation" aria-label="Transformação de foto em história">
+          <div class="photo-trans-card">
+            <span class="pt-tag">Antes</span>
+            <div class="pt-shot" style="background-image: url('assets/landing/hero/13-almoco-domingo-familia-negra.webp');"></div>
+            <p class="pt-line">Uma foto antiga da família reunida.</p>
+            <p class="pt-line">Por si só, ela mostra quem estava ali — mas <strong>não conta o que estava acontecendo</strong>.</p>
+          </div>
+
+          <div class="photo-trans-arrow" aria-hidden="true">→</div>
+
+          <div class="photo-trans-card">
+            <span class="pt-tag">Depois</span>
+            <div class="pt-shot" style="background-image: url('assets/landing/hero/13-almoco-domingo-familia-negra.webp');"></div>
+            <p class="pt-line"><strong>Quem estava ali:</strong> avó, três filhos, dois netos.</p>
+            <p class="pt-line"><strong>Onde:</strong> casa nova da família, no interior.</p>
+            <p class="pt-line"><strong>O que estava acontecendo:</strong> primeira ceia depois da mudança.</p>
+            <p class="pt-line"><strong>O que isso significou:</strong> recomeço.</p>
+          </div>
+        </div>
+
+        <div class="photo-transformation" aria-label="Transformação de vídeo em história" style="margin-top: 22px;">
+          <div class="photo-trans-card">
+            <span class="pt-tag">Antes</span>
+            <div class="pt-shot video" style="background-image: url('assets/landing/hero/19-familia-no-sitio.webp');"></div>
+            <p class="pt-line">Um vídeo curto do avô falando sobre a vida dele.</p>
+            <p class="pt-line">Por si só, ele é um arquivo — <strong>sem rosto, sem nome, sem data</strong>.</p>
+          </div>
+
+          <div class="photo-trans-arrow" aria-hidden="true">→</div>
+
+          <div class="photo-trans-card">
+            <span class="pt-tag">Depois</span>
+            <div class="pt-shot" style="background-image: url('assets/landing/hero/19-familia-no-sitio.webp');"></div>
+            <p class="pt-line"><strong>Pessoa:</strong> avô Antônio.</p>
+            <p class="pt-line"><strong>Data:</strong> 14 de julho de 1998.</p>
+            <p class="pt-line"><strong>Contexto:</strong> entrevista gravada pelos netos antes da viagem.</p>
+            <p class="pt-line"><strong>Significado:</strong> a única vez em que ele falou sobre a infância no campo.</p>
+          </div>
+        </div>
+
+        <p class="micro-story">
+          A foto continua sendo a foto. Mas agora ela tem <em>rosto, nome, data e o que significou</em>. É uma história que alguém da sua família vai poder ler daqui a vinte anos.
+        </p>
+      </div>
+    </section>
+
+    <section class="section section-tight" id="familia">
+      <div class="container">
+        <div class="family-grid">
+          <div class="family-copy">
+            <div class="eyebrow">A família participa</div>
+            <h2>Sua família também tem pedaços dessa história.</h2>
+            <p>
+              A aEterna não é uma plataforma em que só você escreve. As histórias podem
+              crescer com a contribuição de quem viveu os mesmos momentos de um jeito
+              diferente — filhos, irmãos, pais, avós, amigos.
+            </p>
+            <p>
+              Cada pessoa pode acrescentar fotos, vídeos e suas próprias versões daquela
+              lembrança. Você continua sendo o autor da sua história, mas ela deixa de
+              ser uma história só sua.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="family-story" aria-label="Exemplo de uma história construída em conjunto">
+          <h4>Como uma história cresce na sua família</h4>
+          <div class="fs-step">
+            <span class="fs-num">1</span>
+            <p><strong>Você</strong> começa a história do Natal de 1998 com uma foto antiga e a frase: "Era a primeira vez que reunimos todo mundo na casa nova."</p>
+          </div>
+          <div class="fs-step">
+            <span class="fs-num">2</span>
+            <p><strong>Sua irmã</strong> acrescenta uma fotografia da ceia que você nem lembrava que existia, e um detalhe sobre a torta que ninguém mais sabe a receita.</p>
+          </div>
+          <div class="fs-step">
+            <span class="fs-num">3</span>
+            <p><strong>Seu pai</strong> lembra de um detalhe: foi o ano em que ele mais sentiu que a família estava finalmente reunida.</p>
+          </div>
+          <div class="fs-step">
+            <span class="fs-num">4</span>
+            <p><strong>Seu filho</strong>, anos depois, lê aquela história inteira e descobre que o Natal de 1998 teve um significado que ninguém tinha contado para ele.</p>
+          </div>
+        </div>
+
+        <p class="micro-story">
+          Uma história <em>quase nunca está pronta</em> quando você termina de escrevê-la. Ela termina de crescer quando alguém da sua família acrescenta a peça que faltava.
+        </p>
+
+        <div class="timeline-showcase" aria-label="Demonstração visual de Pessoas">
+          <div class="showcase-visual">
+            <div class="screen-shell screen-main">
+              <div class="screen-shot">
+                <img src="assets/pessoas.webp" alt="Tela de Pessoas da aEterna" onerror="this.style.display='none'" />
+              </div>
+            </div>
+          </div>
+
+          <div class="showcase-copy">
+            <span class="showcase-label">Pessoas</span>
+            <h2>Toda a sua família, organizada em um só lugar.</h2>
+            <p>Cadastre cada pessoa que aparece nas suas histórias — com parentesco, datas especiais e o tipo de acesso. As pessoas deixam de ser apenas rostos em fotos e passam a fazer parte ativa da sua linha do tempo.</p>
+          </div>
+        </div>
+
+        <div class="people-grid" aria-label="Exemplo de pessoas cadastradas na plataforma">
+          <div class="people-card">
+            <div class="pc-avatar">M</div>
+            <h4>Maria</h4>
+            <p class="pc-relation">Mãe</p>
+            <span class="pc-tag">Aniversário em 12/03</span>
+          </div>
+          <div class="people-card">
+            <div class="pc-avatar">P</div>
+            <h4>Paulo</h4>
+            <p class="pc-relation">Pai</p>
+            <span class="pc-tag">Aniversário em 04/08</span>
+          </div>
+          <div class="people-card">
+            <div class="pc-avatar">J</div>
+            <h4>Júlia</h4>
+            <p class="pc-relation">Filha</p>
+            <span class="pc-tag">Aniversário em 21/11</span>
+          </div>
+          <div class="people-card">
+            <div class="pc-avatar">C</div>
+            <h4>Carlos</h4>
+            <p class="pc-relation">Irmão</p>
+            <span class="pc-tag">Aniversário em 30/06</span>
+          </div>
+          <div class="people-card">
+            <div class="pc-avatar">A</div>
+            <h4>Ana</h4>
+            <p class="pc-relation">Avó</p>
+            <span class="pc-tag">In memoriam</span>
+          </div>
+          <div class="people-card">
+            <div class="pc-avatar">R</div>
+            <h4>Roberto</h4>
+            <p class="pc-relation">Amigo</p>
+            <span class="pc-tag">Aniversário em 17/02</span>
+          </div>
+          <div class="people-card">
+            <div class="pc-avatar">L</div>
+            <h4>Luísa</h4>
+            <p class="pc-relation">Prima</p>
+            <span class="pc-tag">Aniversário em 09/09</span>
+          </div>
+          <div class="people-card">
+            <div class="pc-avatar">+</div>
+            <h4>Adicionar</h4>
+            <p class="pc-relation">Uma nova pessoa</p>
+            <span class="pc-tag">Quando quiser</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="plataforma">
+      <div class="container">
+        <div class="section-title">
+          <h2>Tudo o que a <span class="gold">aEterna</span> oferece</h2>
+          <p>Cada funcionalidade existe para cumprir um único propósito: ajudar a sua família a preservar o que normalmente se perde com o tempo.</p>
+        </div>
+
+        <div class="features-grid">
+          <article class="feature-card">
+            <div class="feature-icon">📖</div>
+            <h3>Minha História</h3>
+            <p>O seu espaço principal de histórias. Cada memória registrada com título, data, pessoas, contexto e aprendizado.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">✨</div>
+            <h3>Curador de Histórias</h3>
+            <p>Um guia que faz perguntas para ajudar você a transformar lembranças em histórias organizadas, com estrutura e significado.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">🔎</div>
+            <h3>Explorador de Histórias</h3>
+            <p>Quando alguém quer conhecer a sua história, ele responde perguntas usando apenas o que foi registrado por você e pela família.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">👥</div>
+            <h3>Pessoas</h3>
+            <p>Cadastre as pessoas que fazem parte das suas histórias — com datas especiais, parentesco e o tipo de acesso a cada conteúdo.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">📷</div>
+            <h3>Fotos</h3>
+            <p>As fotos entram na história, com o contexto do que estava acontecendo, quem estava ali e por que aquele momento importou.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">🎥</div>
+            <h3>Vídeos</h3>
+            <p>Mensagens, gravações e vídeos familiares que ficam guardados junto da história a que pertencem.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">📅</div>
+            <h3>Linha do Tempo</h3>
+            <p>As histórias se organizam em uma narrativa visual da sua família, do passado até o presente.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">🤝</div>
+            <h3>Compartilhadas comigo</h3>
+            <p>Você decide se uma história é só sua, se é da família toda ou se é apenas para algumas pessoas escolhidas.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">💌</div>
+            <h3>Contribuições</h3>
+            <p>Familiares e amigos podem acrescentar suas próprias memórias a uma história que você começou. Você revisa antes de publicar.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">🔔</div>
+            <h3>Novidades</h3>
+            <p>Acompanhe tudo o que acontece nas histórias que importam para você: novas contribuições, atividades da família e mensagens recebidas.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">🤍</div>
+            <h3>Memorial</h3>
+            <p>Quando alguém importante se vai, abre-se um espaço para a história daquela pessoa ser construída em conjunto pela família.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">⏰</div>
+            <h3>Mensagens para o Futuro</h3>
+            <p>Mensagens e vídeos que podem ser agendados para datas especiais da vida de quem você ama.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">🔒</div>
+            <h3>Cofre</h3>
+            <p>Um espaço criptografado dentro da plataforma para guardar senhas, documentos e informações importantes da família.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">📈</div>
+            <h3>Planos</h3>
+            <p>Você pode começar gratuitamente. Os planos pagos liberam mais memórias, mídias e contribuições para famílias maiores.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">👤</div>
+            <h3>Quem Sou Eu</h3>
+            <p>Um pequeno questionário para registrar gostos, valores, preferências e aprendizados — que alimentam o Curador.</p>
+          </article>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="section section-tight" id="mensagens-futuro">
+      <div class="container">
+        <div class="section-title">
+          <h2>Mensagens para o <span class="gold">futuro</span></h2>
+          <p>Você escreve hoje. A mensagem chega no dia certo. Para a pessoa certa. No momento em que ela mais vai precisar ouvir.</p>
+        </div>
+
+        <div class="message-demo" aria-label="Demonstração de Mensagem para o Futuro">
+          <div class="message-demo-card">
+            <span class="md-step">1. Você escreve</span>
+            <div class="md-icon">✍️</div>
+            <h3>Um texto ou vídeo</h3>
+            <p>Você registra uma mensagem exatamente como gostaria que ela fosse lida.</p>
+            <div class="md-meta">
+              <span class="md-pill">Vídeo</span>
+              <span>Para Julia, 2036</span>
+            </div>
+          </div>
+          <div class="message-demo-card">
+            <span class="md-step">2. Você agenda</span>
+            <div class="md-icon">📅</div>
+            <h3>Define a data</h3>
+            <p>Escolhe o dia e a pessoa que vai receber. Pode ser um aniversário, uma conquista, um Natal.</p>
+            <div class="md-meta">
+              <span class="md-pill">21/11/2036</span>
+              <span>18 anos</span>
+            </div>
+          </div>
+          <div class="message-demo-card">
+            <span class="md-step">3. A mensagem chega</span>
+            <div class="md-icon">💌</div>
+            <h3>Entrega futura</h3>
+            <p>Na data marcada, a pessoa recebe a mensagem exatamente como você deixou — escrita, datada e sua.</p>
+            <div class="md-meta">
+              <span class="md-pill">Entregue</span>
+              <span>No momento certo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="cofre-digital">
+      <div class="container">
+        <div class="vault-list">
+          <span class="showcase-label">Cofre</span>
+          <h2 class="vault-heading">Informações importantes em um só lugar, com criptografia.</h2>
+          <p class="vault-sub">
+            Senhas, documentos e informações que precisam estar guardadas com cuidado —
+            mas acessíveis quando a família precisar. Tudo criptografado e organizado dentro
+            da mesma plataforma.
+          </p>
+
+          <div class="vault-item">
+            <div class="vi-icon">🔐</div>
+            <div class="vi-text">
+              <strong>Senha do e-mail da família</strong>
+              <span>atualizada em 12/04/2025</span>
+            </div>
+            <div class="vi-lock" aria-hidden="true">🔒</div>
+          </div>
+          <div class="vault-item">
+            <div class="vi-icon">📄</div>
+            <div class="vi-text">
+              <strong>Documentos do seguro</strong>
+              <span>apólice, contato da corretora</span>
+            </div>
+            <div class="vi-lock" aria-hidden="true">🔒</div>
+          </div>
+          <div class="vault-item">
+            <div class="vi-icon">💼</div>
+            <div class="vi-text">
+              <strong>Acesso ao plano de saúde</strong>
+              <span>carteirinha, contato de emergência</span>
+            </div>
+            <div class="vi-lock" aria-hidden="true">🔒</div>
+          </div>
+          <div class="vault-item">
+            <div class="vi-icon">🏦</div>
+            <div class="vi-text">
+              <strong>Informações financeiras essenciais</strong>
+              <span>contas, procuradores, senhas críticas</span>
+            </div>
+            <div class="vi-lock" aria-hidden="true">🔒</div>
+          </div>
+          <div class="vault-item">
+            <div class="vi-icon">📞</div>
+            <div class="vi-text">
+              <strong>Contatos de confiança</strong>
+              <span>quem a família deve procurar se precisar</span>
+            </div>
+            <div class="vi-lock" aria-hidden="true">🔒</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-tight" id="integracao">
+      <div class="container">
+        <div class="section-title">
+          <h2>Como tudo <span class="gold">funciona junto</span></h2>
+          <p>As funcionalidades não são telas isoladas. Elas formam um único ecossistema onde cada história puxa pessoas, fotos, vídeos, datas e contribuidores.</p>
+        </div>
+
+        <div class="integration-panel">
+          <div class="integration-flow">
+            <div class="integration-step">
+              <div class="int-num">Etapa 1</div>
+              <h3>Você registra uma história</h3>
+              <p>Com pessoas, fotos, vídeos e contexto.</p>
+            </div>
+            <div class="integration-step">
+              <div class="int-num">Etapa 2</div>
+              <h3>A família complementa</h3>
+              <p>Contribuições, versões diferentes, detalhes que só quem viveu sabe.</p>
+            </div>
+            <div class="integration-step">
+              <div class="int-num">Etapa 3</div>
+              <h3>Tudo entra na linha do tempo</h3>
+              <p>Conectado às outras histórias da família.</p>
+            </div>
+            <div class="integration-step">
+              <div class="int-num">Etapa 4</div>
+              <h3>O legado continua crescendo</h3>
+              <p>Mais histórias, mais pessoas, mais anos preservados juntos.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="section-tight inter-quote">
+      <div class="container">
+        <blockquote>"Você herdou histórias da sua família. Com a aEterna, você também pode deixá-las."</blockquote>
+      </div>
+    </section>
+
+    <section class="section" id="memorial">
       <div class="container">
         <div class="memorial-grid">
           <div class="memorial-image"></div>
 
           <div class="memorial-copy">
-            <div class="eyebrow">Funcionalidade adicional</div>
-            <h2>E a história de quem já partiu?</h2>
+            <div class="eyebrow">Memorial</div>
+            <h2>E quando alguém se torna parte da história de muitas pessoas?</h2>
             <p style="color: var(--gold-pale); font-size: 1.15rem; font-weight: 600; line-height: 1.35; margin-bottom: 12px;">
-              Ela também faz parte da história da sua família.
+              O Memorial não inicia uma história. Ele continua uma história que já existia.
             </p>
             <p style="margin-bottom: 24px;">
-              Crie um Memorial para preservar histórias, fotos, vídeos e lembranças de alguém importante.
-              Convide familiares e amigos para contribuir e construir juntos um legado que continuará vivo nas próximas gerações.
+              Algumas pessoas marcam tantas vidas que merecem um espaço só para a história
+              que deixaram. O Memorial é a continuação natural da aEterna: a família
+              se reúne para construir juntas a história de quem marcou a vida de todos.
             </p>
 
             <div class="memorial-benefits">
               <article class="benefit-card">
-                <strong>Preserve histórias</strong>
-                <p>Conte quem essa pessoa foi, seus valores, aprendizados, conquistas e momentos marcantes.</p>
+                <strong>Um espaço só para aquela pessoa</strong>
+                <p>Quem ela foi, seus valores, aprendizados, conquistas e os momentos que marcaram quem conviveu com ela.</p>
               </article>
 
               <article class="benefit-card">
-                <strong>Convide quem viveu essa história</strong>
-                <p>Familiares e amigos podem contribuir com fotos, vídeos, histórias e lembranças. Tudo permanece organizado em um único Memorial.</p>
+                <strong>Construído em conjunto</strong>
+                <p>Filhos, irmãos, amigos e outros familiares contribuem com fotos, vídeos, histórias e lembranças. Tudo organizado em um único Memorial.</p>
               </article>
 
               <article class="benefit-card">
-                <strong>Enriqueça o legado</strong>
-                <p>Transforme fotos e vídeos em uma história completa, preservando o contexto para as próximas gerações.</p>
+                <strong>Conecte-se ao que ficou</strong>
+                <p>O Memorial entra na linha do tempo da família e conversa com as outras histórias já registradas.</p>
               </article>
 
               <article class="benefit-card">
-                <strong>Converse com o Curador</strong>
-                <p>Depois que o Memorial estiver enriquecido com histórias e contribuições, o Curador poderá responder perguntas sobre aquela pessoa utilizando apenas as informações registradas. Ele não representa a pessoa homenageada. Ele ajuda a conhecer sua história.</p>
+                <strong>Converse com a história registrada</strong>
+                <p>O Explorador de Histórias responde perguntas sobre aquela pessoa usando apenas o que foi registrado — sem inventar nada.</p>
               </article>
             </div>
+
+            <div class="family-story" aria-label="Exemplo de Memorial construído em conjunto">
+              <h4>Como um Memorial cresce com a família</h4>
+              <div class="fs-step">
+                <span class="fs-num">1</span>
+                <p>Uma filha abre o Memorial do pai com a história que ela conhecia e uma foto antiga do casamento.</p>
+              </div>
+              <div class="fs-step">
+                <span class="fs-num">2</span>
+                <p>O irmão acrescenta uma fotografia que o pai guardava na gaveta — uma que quase ninguém da família conhecia.</p>
+              </div>
+              <div class="fs-step">
+                <span class="fs-num">3</span>
+                <p>A esposa envia um vídeo curto em que ele fala sobre o dia em que decidiu se tornar o pai que queria ter sido.</p>
+              </div>
+              <div class="fs-step">
+                <span class="fs-num">4</span>
+                <p>O neto, anos depois, escreve uma lembrança do avô que só ele guarda — e completa uma história que agora pertence a todos.</p>
+              </div>
+            </div>
+
+            <p class="micro-story">
+              A história daquela pessoa <em>continua crescendo</em> com cada contribuição. O Memorial não termina — ele vai sendo escrito pela vida que ela deixou.
+            </p>
 
             <div style="margin-top: 32px;">
-              <a class="btn btn-primary" href="https://aeterna.streamlit.app/">Criar um Memorial</a>
+              <a class="btn btn-primary" href="https://aeterna.streamlit.app/">Conhecer o Memorial</a>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="section section-tight" style="margin-top: -34px; margin-bottom: 14px;">
-      <div class="container text-center">
-        <blockquote class="ae-highlight-quote">
-          "Algumas pessoas deixam saudade. Outras deixam histórias. Com a aEterna, elas podem deixar as duas."
-        </blockquote>
-      </div>
-    </section>
-
-    <section class="section" id="telas">
+    <section class="section-tight inter-quote">
       <div class="container">
-        <div class="section-title">
-          <h2>A experiência no aplicativo</h2>
-          <p>As telas mostram como as memórias são registradas, aprofundadas e organizadas ao longo do tempo.</p>
-        </div>
-
-        <div class="screens-band">
-          <div class="screens-grid">
-            <div class="screen-preview" style="--screen: url('assets/home.webp');" aria-label="Tela inicial da aEterna"></div>
-            <div class="screen-preview" style="--screen: url('assets/curadoria.webp');" aria-label="Tela de curadoria de memória"></div>
-            <div class="screen-preview" style="--screen: url('assets/timeline.webp');" aria-label="Tela de linha do tempo familiar"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section section-tight">
-      <div class="container message-grid">
-        <article class="message-card">
-          <strong>Por que isso importa</strong>
-          <p>Nós sabemos mais sobre pessoas famosas do que sobre as pessoas que construíram nossa família.</p>
-        </article>
-
-        <article class="message-card">
-          <strong>O que se perde</strong>
-          <p>O problema não é a falta de fotos. É que quase ninguém registra as histórias por trás delas.</p>
-        </article>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="container">
-        <div class="section-title">
-          <h2>O que torna a aEterna diferente</h2>
-          <p>A aEterna não guarda apenas arquivos. Ela organiza contexto familiar.</p>
-        </div>
-
-        <div class="difference-grid">
-          <article class="difference-card">
-            <strong>Fotos</strong>
-            <h3>Mostram o momento.</h3>
-            <p>A aEterna preserva o que aquele momento significou.</p>
-          </article>
-
-          <article class="difference-card">
-            <strong>Diários</strong>
-            <h3>Registram fatos.</h3>
-            <p>A aEterna conecta fatos a pessoas, fases da vida e aprendizados.</p>
-          </article>
-
-          <article class="difference-card">
-            <strong>Nuvem</strong>
-            <h3>Armazena arquivos.</h3>
-            <p>A aEterna organiza histórias para serem compreendidas no futuro.</p>
-          </article>
-
-          <article class="difference-card">
-            <strong>Memorial</strong>
-            <h3>Costumava focar apenas na perda.</h3>
-            <p>Na aEterna, o Memorial celebra e preserva as histórias, aprendizados e o legado vivo de quem já partiu, mantendo o foco no afeto familiar.</p>
-          </article>
-        </div>
+        <blockquote>"Algumas pessoas deixam saudade. Outras deixam histórias. A aEterna ajuda a sua família a deixar as duas."</blockquote>
       </div>
     </section>
 
@@ -1430,17 +3670,17 @@
       <div class="container privacy-panel">
         <div>
           <div class="eyebrow">Privacidade</div>
-          <h2>Histórias importantes precisam de um espaço seguro.</h2>
+          <h2>Histórias de família precisam de um espaço seguro.</h2>
           <p>
-            Memórias familiares não devem parecer conteúdo público. A experiência precisa transmitir calma, controle e confiança desde a primeira visita.
+            Suas memórias não são conteúdo público. Na aEterna, você decide quem vê cada história — se é só você, se é a família toda ou se são apenas algumas pessoas escolhidas por você.
           </p>
         </div>
 
         <div class="privacy-list">
-          <div class="privacy-item">Acesso privado à plataforma</div>
-          <div class="privacy-item">Memórias organizadas por contexto</div>
-          <div class="privacy-item">Pessoas relacionadas a cada história</div>
-          <div class="privacy-item">Linha do tempo familiar</div>
+          <div class="privacy-item">Acesso privado à plataforma, com convite quando você quiser</div>
+          <div class="privacy-item">Histórias organizadas por pessoas, contexto e aprendizados</div>
+          <div class="privacy-item">Cada história com nível de visibilidade definido por você</div>
+          <div class="privacy-item">Linha do tempo da família, construída em conjunto</div>
         </div>
       </div>
     </section>
@@ -1454,32 +3694,42 @@
         <div class="faq-grid">
           <details>
             <summary>A aEterna é uma rede social?</summary>
-            <p>Não. A aEterna é um espaço privado para organizar histórias familiares, fotos, pessoas, valores e aprendizados.</p>
+            <p>Não. A aEterna é um espaço privado, feito para histórias de família. Nada ali é público nem feito para ser compartilhado com estranhos.</p>
           </details>
 
           <details>
-            <summary>A aEterna é um álbum de fotos?</summary>
-            <p>Não. Fotos fazem parte da experiência, mas o objetivo principal é preservar as histórias e o contexto por trás delas.</p>
+            <summary>A aEterna é só mais um álbum de fotos?</summary>
+            <p>Não. As fotos entram na história, mas o que importa é o que está em volta delas: quem estava ali, o que se aprendeu, por que aquele momento marcou a família. A plataforma integra fotos, vídeos, pessoas, datas, mensagens, Memorial e muito mais.</p>
           </details>
 
           <details>
-            <summary>O que posso registrar?</summary>
-            <p>Momentos familiares, lembranças de infância, histórias dos pais e avós, viagens, aprendizados, conselhos e acontecimentos marcantes.</p>
+            <summary>Preciso usar todas as funcionalidades?</summary>
+            <p>Não. Você pode começar por uma única história e ir descobrindo o restante aos poucos — fotos, vídeos, pessoas, datas, Memorial. A plataforma cresce junto com a sua família.</p>
           </details>
 
           <details>
-            <summary>Posso relacionar pessoas às memórias?</summary>
-            <p>Sim. Cada memória pode ser conectada às pessoas que participaram dela ou que fazem parte daquela história.</p>
+            <summary>Que tipo de história eu posso contar?</summary>
+            <p>Memórias de infância, momentos com os pais e avós, viagens, ensinamentos, conselhos que você recebeu, conquistas, tradições, superstições, receitas — qualquer história que faça parte da sua família.</p>
           </details>
 
           <details>
-            <summary>Existe uma linha do tempo?</summary>
-            <p>Sim. As histórias podem ser organizadas por período, criando uma narrativa visual da família ao longo do tempo.</p>
+            <summary>Quem mais pode ver e contribuir com as histórias?</summary>
+            <p>Você decide. As histórias podem ser só suas, podem ser compartilhadas com as pessoas da sua família ou apenas com quem você escolher. Você também pode convidar familiares para acrescentar suas próprias memórias a uma história que você começou.</p>
           </details>
 
           <details>
-            <summary>Preciso começar com muitas histórias?</summary>
-            <p>Não. Uma única memória bem registrada já é suficiente para começar a construir um legado familiar.</p>
+            <summary>O que é o Curador de Histórias?</summary>
+            <p>É um guia dentro da plataforma. Ele faz perguntas para ajudar você a transformar uma lembrança solta em uma história com pessoas, contexto, datas e aprendizados. Você responde, ele estrutura — e você revisa antes de a história entrar para a linha do tempo.</p>
+          </details>
+
+          <details>
+            <summary>O que é o Memorial?</summary>
+            <p>É um espaço da plataforma dedicado à história de uma pessoa que marcou a vida de várias pessoas da família. A família contribui em conjunto com fotos, vídeos e lembranças. Não é uma página de luto fria: é a história daquela pessoa sendo construída em conjunto.</p>
+          </details>
+
+          <details>
+            <summary>A aEterna é gratuita?</summary>
+            <p>Você pode começar gratuitamente. Existem planos pagos que liberam mais memórias, mídias, contatos e contribuições para famílias maiores e para quem quer ir mais fundo na preservação.</p>
           </details>
         </div>
       </div>
@@ -1487,41 +3737,42 @@
 
     <section class="section section-tight">
       <div class="container cta-final">
-        <h2>Comece preservando uma história que sua família não deveria perder.</h2>
-        <p>Uma foto mostra o momento. Uma história preserva o significado.</p>
-        <a class="btn btn-primary" href="https://aeterna.streamlit.app/">Criar minha primeira memória</a>
+        <h2>Comece registrando uma história que sua família não deveria perder.</h2>
+        <p>Você guarda as fotos. A aEterna ajuda você a guardar também o que aconteceu em volta delas.</p>
+        <a class="btn btn-primary" href="https://aeterna.streamlit.app/">Começar a contar minha história</a>
       </div>
     </section>
   </main>
 
   <footer class="footer">
-    <div class="container footer-grid">
-      <div class="footer-brand">
-        <img src="assets/logo-navbar-clean.png" alt="aEterna" />
-        <p>Histórias de família preservadas com contexto, vínculo e significado.</p>
+      <div class="container footer-grid">
+        <div class="footer-brand">
+          <img src="assets/logo-navbar-clean.png" alt="aEterna" />
+          <p>Uma plataforma para você registrar, junto da sua família, as histórias que explicam quem vocês são — para que continuem vivas nas próximas gerações.</p>
+        </div>
+
+        <div>
+          <h3>Navegação</h3>
+          <a href="#inicio">Início</a>
+          <a href="#problema">O problema</a>
+          <a href="#curador">O Curador</a>
+          <a href="#plataforma">A plataforma</a>
+          <a href="#memorial">Memorial</a>
+          <a href="#faq">FAQ</a>
+        </div>
+
+        <div>
+          <h3>Plataforma</h3>
+          <a href="https://aeterna.streamlit.app/">Começar a contar minha história</a>
+          <a href="mailto:contato@aeternalegado.com.br">contato@aeternalegado.com.br</a>
+          <a href="/insights/">Insights</a>
+        </div>
       </div>
 
-      <div>
-        <h3>Navegação</h3>
-        <a href="#inicio">Início</a>
-        <a href="#problema">Por que existe</a>
-        <a href="#como-funciona">Como funciona</a>
-        <a href="#telas">Telas</a>
-        <a href="#faq">FAQ</a>
+      <div class="container copyright">
+        © 2026 aEterna. Todos os direitos reservados.
       </div>
-
-      <div>
-        <h3>Contato</h3>
-        <a href="https://aeterna.streamlit.app/">Acessar plataforma</a>
-        <a href="mailto:contato@aeternalegado.com.br">contato@aeternalegado.com.br</a>
-        <a href="/insights/">Insights</a>
-      </div>
-    </div>
-
-    <div class="container copyright">
-      © 2026 aEterna. Todos os direitos reservados.
-    </div>
-  </footer>
+    </footer>
 
   <script>
     const menuBtn = document.getElementById("menuBtn");
@@ -1544,6 +3795,371 @@
         if (menuBtn) menuBtn.setAttribute("aria-expanded", "false");
       });
     });
+
+    (function initHeroCarousel() {
+      console.log("[hero-carousel] init started");
+
+      const root = document.getElementById("heroCarousel");
+      if (!root) { console.error("[hero-carousel] #heroCarousel not found"); return; }
+
+      const track = root.querySelector("[data-carousel-track]");
+      const dotsRoot = root.querySelector("[data-carousel-dots]");
+      const status = root.querySelector("[data-carousel-status]");
+      const prevBtn = root.querySelector("[data-carousel-prev]");
+      const nextBtn = root.querySelector("[data-carousel-next]");
+
+      console.log("[hero-carousel] elements", { track: !!track, dotsRoot: !!dotsRoot, status: !!status, prevBtn: !!prevBtn, nextBtn: !!nextBtn });
+      if (!track || !dotsRoot || !status || !prevBtn || !nextBtn) {
+        console.error("[hero-carousel] required elements missing");
+        return;
+      }
+
+      const stories = [
+        { image: "assets/landing/hero/02-primeira-bicicleta.webp",         title: "Primeira bicicleta",         date: "12 de outubro de 2026", people: "Lucas · Ana · João",          tags: ["Infância","Coragem","Família"],                  excerpt: "Você caiu três vezes. Na quarta, olhou para mim e disse: 'Agora eu consigo sozinho.' Foi ali que eu entendi que crescer também é aprender a soltar a mão.", fullStory: "Você caiu três vezes naquela tarde.\n\nNa primeira, ficou bravo. Na segunda, quase desistiu. Na terceira, olhou para mim como quem perguntava se ainda valia a pena tentar.\n\nNa quarta tentativa, eu soltei o banco sem você perceber. Você pedalou sozinho por poucos metros, virou o rosto e gritou: \"Agora eu consigo!\"\n\nFoi ali que eu entendi que crescer também é aprender a soltar a mão." },
+        { image: "assets/landing/hero/13-almoco-domingo-familia-negra.webp",title: "Almoço de domingo",          date: "25 de maio de 2024",    people: "Dona Lúcia · Paulo · Renata · Júlia", tags: ["Família","Tradições","Casa cheia"],          excerpt: "Parecia só mais um almoço. Mas foi naquele domingo que a Júlia ouviu pela primeira vez a história de como a bisavó chegou à cidade com uma mala e uma receita.", fullStory: "Parecia só mais um almoço de domingo. A mesa estava cheia, como sempre, e o barulho cobria tudo.\n\nMas foi naquele domingo que a Júlia, que tinha acabado de fazer sete anos, ouviu pela primeira vez a história de como a bisavó chegou à cidade.\n\nChegou com uma mala e uma receita. Só isso. A mala com tudo o que tinha. A receita com tudo o que sabia.\n\nA Júlia olhou para a bisavó como quem descobre que a família inteira tinha começado numa cozinha pequena, com uma panela só, e com uma mulher que não sabia ainda que aquela comida ia alimentar três gerações.\n\nNaquele dia, o almoço virou outra coisa." },
+        { image: "assets/landing/hero/18-familia-na-praia-com-pet.webp",  title: "O dia em que o Bento entrou no mar", date: "18 de janeiro de 2025", people: "Clara · Bento · Vó Célia · Miguel",     tags: ["Praia","Verão","Primeiras vezes"],        excerpt: "O Bento passou a manhã inteira fugindo das ondas. No fim da tarde, entrou no mar segurando a mão da avó — e saiu contando para todo mundo que tinha vencido o oceano.", fullStory: "O Bento passou a manhã inteira fugindo das ondas. Cada vez que a água encostava nos pés, ele voltava correndo para a toalha.\n\nA Vó Célia não disse nada. Ficou ali, sentada na areia, esperando.\n\nNo fim da tarde, o sol já estava baixo, o Bento olhou para o mar com aquele olhar de quem está pesando alguma coisa na cabeça. Levantou, deu a mão para a avó, e entrou.\n\nNão entrou de uma vez. Entrou aos poucos. Primeiro os pés, depois o joelho, depois a cintura. Mas entrou.\n\nQuando voltou, molhado, com sal no rosto, subiu na cadeira e disse, olhando para todo mundo: \"Venci o oceano.\"\n\nA avó riu. E a gente também." },
+        { image: "assets/landing/hero/27-receita-em-familia-asiatica.webp",title: "A receita sem medida",      date: "7 de julho de 2024",    people: "Vó Emiko · Marina · Theo · Rafael",     tags: ["Receita","Tradição","Aprendizado"],        excerpt: "A vó Emiko nunca media nada. Dizia que o ponto certo a gente reconhece pelo cheiro, pelo som e pela memória. Naquele dia, a receita virou história.", fullStory: "A vó Emiko nunca media nada. Dizia que o ponto certo a gente reconhece pelo cheiro, pelo som e pela memória.\n\nQuando a Marina perguntou da receita, a avó respondeu: \"Está tudo aqui.\" E apontou para a cabeça, para o nariz, para a ponta dos dedos.\n\nA Marina tentou anotar. A avó riu.\n\n— Você não vai conseguir escrever, minha filha. Essa receita não cabe no papel. Cabe no que a gente faz com as mãos, e no tanto que a gente ama quem vai comer.\n\nNaquele dia, a Marina entendeu que estava aprendendo algo que nenhum livro ensinava." },
+        { image: "assets/landing/hero/21-mercado-em-familia.webp",       title: "As bananas do Pedro",          date: "3 de março de 2025",    people: "Pedro · Camila · Vó Neide",           tags: ["Rotina","Infância","Pequenas histórias"],  excerpt: "O Pedro fazia questão de escolher as bananas. Quase nunca acertava, mas dizia com muita certeza que aquelas eram as mais bonitas do mercado.", fullStory: "O Pedro fazia questão de escolher as bananas. Quase nunca acertava.\n\nA Camila já tinha desistido de discutir. A Vó Neide já tinha desistido de discutir. Até a balconista já tinha desistido de discutir.\n\nMas o Pedro parava diante de cada penca, apertava, avaliava com uma seriedade de adulto, e dizia com muita certeza: \"Essa é a boa.\"\n\nE a Camila sempre pagava aquela banana. Mesmo quando estava verde. Mesmo quando estava passada.\n\nPorque o que ele estava aprendendo não era sobre bananas. Era sobre escolher. Sobre ter voz. Sobre dizer \"eu acho que é essa\" e ter alguém que respeita isso.\n\nA Vó Neide, no caminho de volta, disse baixinho: \"Deixa ele. Está crescendo.\"" },
+        { image: "assets/landing/hero/23-mudanca-de-casa.webp",          title: "A primeira noite na casa nova", date: "14 de setembro de 2023", people: "Marcos · Aline · Sofia · Nico",         tags: ["Recomeço","Casa nova","Família"],          excerpt: "Ainda não tinha sofá, nem mesa montada. Mesmo assim, comemos pizza no chão da sala e decidimos que aquele seria o primeiro jantar oficial da casa.", fullStory: "Ainda não tinha sofá, nem mesa montada. As caixas estavam empilhadas no canto e a luz do corredor fazia tudo parecer maior do que era.\n\nO Marcos olhou para a sala vazia e disse: \"Aqui a gente começa de novo.\"\n\nA Aline abriu a pizza no chão. A Sofia dormia no meio das caixas. O Nico tentava montar uma cadeira com as mãos.\n\nNão tinha nada no lugar. Mas tinha tudo que importava.\n\nNaquela noite, no chão da sala, decidiram que aquele seria o primeiro jantar oficial da casa. E que cada risada ali contava como inaugurar um cômodo.\n\nA casa veio depois. A família já estava ali." },
+        { image: "assets/landing/hero/30-album-de-fotos-em-familia.webp", title: "Quem era essa moça na fotografia?", date: "9 de agosto de 2024", people: "Dona Helena · Bia · Carlos · Fernanda",  tags: ["Memória","Gerações","Descoberta"],         excerpt: "A Bia apontou para uma foto antiga e perguntou quem era aquela moça. A avó sorriu antes de responder: 'Essa era eu, antes de vocês todos existirem.'", fullStory: "A Bia folheava o álbum com cuidado. Parou em uma foto e apontou.\n\n— Quem é essa moça?\n\nA Dona Helena olhou por cima dos óculos. A foto estava desbotada, meio amarelada, com o canto dobrado. Mas ela reconheceu na hora.\n\n— Essa era eu. Antes de vocês todos existirem.\n\nO Carlos e a Fernanda pararam do que estavam fazendo. A avó continuou, sem olhar para a foto:\n\n— Eu estava com o vestido que a minha mãe costurou. Tinha medo de sair de casa. Tinha acabado de conhecer o vosso avô. E não sabia ainda que ia virar avó de quatro.\n\nA sala ficou em silêncio. A Bia olhou para a foto de outro jeito, como quem descobre que ali, dentro daquela moldura, existia alguém que ainda não era ninguém que ela conhecia.\n\nMas que já era todos eles." },
+        { image: "assets/landing/hero/19-familia-no-sitio.webp",         title: "O pé de jabuticaba",          date: "2 de novembro de 2025", people: "Seu Antônio · Lara · Felipe · Teca",   tags: ["Sítio","Infância","Natureza"],            excerpt: "O avô dizia que aquele pé de jabuticaba tinha crescido junto com a família. As crianças não entenderam tudo naquele dia, mas nunca esqueceram o lugar.", fullStory: "O Seu Antônio parou embaixo do pé de jabuticaba e disse: \"Esse pé tem mais idade do que vocês três juntos.\"\n\nA Lara e o Felipe olharam para cima. A Teca, que tinha doze anos e adorava anotar tudo, perguntou: \"Quanto tempo, vô?\"\n\n— Mais do que a casa. Mais do que o poço. Quando eu era criança, ele já dava jabuticaba.\n\nO Seu Antônio se agachou, pegou uma jabuticaba caída, e entregou para a Teca.\n\n— Vocês não vão lembrar desta conversa. Mas vão lembrar deste lugar. Vão lembrar do cheiro, do chão, da sombra. Vão voltar aqui quando forem grandes e vão sentir que pertencem.\n\nAs crianças não entenderam tudo naquele dia. Mas nunca esqueceram o lugar.\n\nE quando a Teca cresceu, voltou. E trouxe os filhos." }
+      ];
+
+      console.log("[hero-carousel] stories loaded", stories.length);
+
+      const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const AUTOPLAY_MS = reduceMotion ? 0 : 7000;
+
+      // O slide 0 já existe no HTML (fallback). Aqui criamos os slides 1..7.
+      // Cada slide é construído via DOM (sem innerHTML).
+      function buildSlide(story, index) {
+        const slide = document.createElement("article");
+        slide.className = "hero-carousel-slide";
+        slide.setAttribute("data-slide-index", String(index));
+        slide.setAttribute("role", "group");
+        slide.setAttribute("aria-roledescription", "slide");
+        slide.setAttribute("aria-label", "História " + (index + 1) + " de " + stories.length + ": " + story.title);
+        slide.setAttribute("aria-hidden", "true");
+
+        const photo = document.createElement("div");
+        photo.className = "hero-carousel-photo";
+        photo.setAttribute("data-bg", story.image); // lazy load
+        photo.setAttribute("role", "img");
+        photo.setAttribute("aria-label", story.title);
+
+        const card = document.createElement("div");
+        card.className = "hero-carousel-card";
+
+        const title = document.createElement("h3");
+        title.className = "hero-carousel-title";
+        title.textContent = story.title;
+
+        const meta = document.createElement("div");
+        meta.className = "hero-carousel-meta";
+
+        const dateEl = document.createElement("span");
+        dateEl.className = "meta-date";
+        dateEl.textContent = story.date;
+        meta.appendChild(dateEl);
+
+        const peopleEl = document.createElement("span");
+        peopleEl.className = "meta-people";
+        peopleEl.textContent = story.people;
+        meta.appendChild(peopleEl);
+
+        const tagsEl = document.createElement("div");
+        tagsEl.className = "hero-carousel-tags";
+        for (let t = 0; t < story.tags.length; t++) {
+          const tagEl = document.createElement("span");
+          tagEl.className = "hero-carousel-tag";
+          tagEl.textContent = story.tags[t];
+          tagsEl.appendChild(tagEl);
+        }
+
+        const excerpt = document.createElement("p");
+        excerpt.className = "hero-carousel-excerpt";
+        excerpt.textContent = "\u201C" + story.excerpt + "\u201D";
+
+        const cta = document.createElement("a");
+        cta.className = "hero-carousel-cta";
+        cta.href = "#";
+        cta.setAttribute("data-story-cta", "");
+        cta.setAttribute("data-story-index", String(index));
+        cta.textContent = "Ler esta história";
+
+        card.appendChild(title);
+        card.appendChild(meta);
+        card.appendChild(tagsEl);
+        card.appendChild(excerpt);
+        card.appendChild(cta);
+
+        slide.appendChild(photo);
+        slide.appendChild(card);
+        return slide;
+      }
+
+      function buildDot(index) {
+        const dot = document.createElement("button");
+        dot.type = "button";
+        dot.className = "hero-carousel-dot";
+        dot.setAttribute("data-dot-index", String(index));
+        dot.setAttribute("role", "tab");
+        dot.setAttribute("aria-label", "Ir para a história " + (index + 1));
+        dot.setAttribute("aria-selected", "false");
+        return dot;
+      }
+
+      // Lazy load helper
+      function ensurePhotoLoaded(slideEl) {
+        const photo = slideEl.querySelector(".hero-carousel-photo");
+        if (!photo) return;
+        const bg = photo.getAttribute("data-bg");
+        if (bg && !photo.style.backgroundImage) {
+          photo.style.backgroundImage = "url('" + bg + "')";
+          photo.removeAttribute("data-bg");
+        }
+      }
+
+      // Coleta todos os slides (incluindo o fallback estático do HTML)
+      const slides = Array.prototype.slice.call(track.querySelectorAll(".hero-carousel-slide"));
+      const dots = [];
+
+      // Cria os slides 1..7 (o slide 0 já existe no HTML)
+      for (let i = 1; i < stories.length; i++) {
+        const slide = buildSlide(stories[i], i);
+        track.appendChild(slide);
+        slides.push(slide);
+      }
+
+      // Garante que o número de slides bate com stories
+      console.log("[hero-carousel] slides in DOM", slides.length, "expected", stories.length);
+
+      // Cria os dots
+      for (let j = 0; j < stories.length; j++) {
+        const dot = buildDot(j);
+        dotsRoot.appendChild(dot);
+        dots.push(dot);
+      }
+      console.log("[hero-carousel] dots in DOM", dots.length);
+
+      let current = 0;
+      let autoplayId = null;
+
+      function show(index) {
+        const next = ((index % stories.length) + stories.length) % stories.length;
+        for (let i = 0; i < slides.length; i++) {
+          const active = (i === next);
+          slides[i].classList.toggle("is-active", active);
+          slides[i].setAttribute("aria-hidden", active ? "false" : "true");
+          if (active) ensurePhotoLoaded(slides[i]);
+        }
+        for (let k = 0; k < dots.length; k++) {
+          const active = (k === next);
+          dots[k].classList.toggle("is-active", active);
+          dots[k].setAttribute("aria-selected", active ? "true" : "false");
+        }
+        if (stories[next]) {
+          status.textContent = "História " + (next + 1) + " de " + stories.length + ": " + stories[next].title;
+        }
+        current = next;
+      }
+
+      function next() { show(current + 1); }
+      function prev() { show(current - 1); }
+
+      function startAutoplay() {
+        if (!AUTOPLAY_MS) return;
+        stopAutoplay();
+        autoplayId = window.setInterval(next, AUTOPLAY_MS);
+      }
+
+      function stopAutoplay() {
+        if (autoplayId) { window.clearInterval(autoplayId); autoplayId = null; }
+      }
+
+      // Event listeners
+      prevBtn.addEventListener("click", function (e) { e.preventDefault(); prev(); });
+      nextBtn.addEventListener("click", function (e) { e.preventDefault(); next(); });
+      for (let m = 0; m < dots.length; m++) {
+        (function (idx) {
+          dots[idx].addEventListener("click", function (e) { e.preventDefault(); show(idx); });
+        })(m);
+      }
+
+      // CTA "Ler esta história" — abre o modal com a história completa
+      function bindCtas() {
+        const ctas = track.querySelectorAll('[data-story-cta]');
+        for (let k = 0; k < ctas.length; k++) {
+          ctas[k].addEventListener("click", function (e) {
+            e.preventDefault();
+            const idx = parseInt(ctas[k].getAttribute("data-story-index"), 10) || 0;
+            const story = stories[idx];
+            if (story && typeof window.__heroOpenStory === "function") {
+              window.__heroOpenStory(story, ctas[k]);
+            }
+          });
+        }
+      }
+      bindCtas();
+
+      root.addEventListener("mouseenter", stopAutoplay);
+      root.addEventListener("mouseleave", startAutoplay);
+      root.addEventListener("focusin", stopAutoplay);
+      root.addEventListener("focusout", startAutoplay);
+
+      root.addEventListener("keydown", function (event) {
+        if (event.key === "ArrowRight") { event.preventDefault(); next(); }
+        else if (event.key === "ArrowLeft") { event.preventDefault(); prev(); }
+      });
+
+      // Touch / swipe
+      let touchStartX = null, touchStartY = null, touchEndX = null;
+      root.addEventListener("touchstart", function (event) {
+        if (event.touches.length !== 1) return;
+        touchStartX = event.touches[0].clientX;
+        touchStartY = event.touches[0].clientY;
+      }, { passive: true });
+      root.addEventListener("touchmove", function (event) {
+        if (event.touches.length !== 1) return;
+        touchEndX = event.touches[0].clientX;
+      }, { passive: true });
+      root.addEventListener("touchend", function (event) {
+        if (touchStartX === null || touchEndX === null) return;
+        const dx = touchEndX - touchStartX;
+        const dy = touchStartY !== null ? Math.abs(event.changedTouches[0].clientY - touchStartY) : 0;
+        touchStartX = null; touchStartY = null; touchEndX = null;
+        if (Math.abs(dx) < 40 || dy > 60) return;
+        if (dx < 0) next(); else prev();
+      });
+
+      document.addEventListener("visibilitychange", function () {
+        if (document.hidden) stopAutoplay(); else startAutoplay();
+      });
+
+      root.tabIndex = 0;
+
+      // Initial render — garante que o slide 0 esteja ativo
+      show(0);
+      startAutoplay();
+      console.log("[hero-carousel] init complete — slides:", slides.length, "dots:", dots.length);
+    })();
+  </script>
+
+  <!-- Modal de história (Sprint 5.6.3) -->
+  <div class="story-modal" id="storyModal" role="dialog" aria-modal="true" aria-labelledby="storyModalTitle" aria-describedby="storyModalText" aria-hidden="true">
+    <div class="story-modal-dialog" tabindex="-1">
+      <div class="story-modal-cover" id="storyModalCover" role="img" aria-label=""></div>
+      <button type="button" class="story-modal-close" id="storyModalClose" aria-label="Fechar história">&times;</button>
+      <div class="story-modal-body">
+        <div class="story-modal-tags" id="storyModalTags"></div>
+        <h3 class="story-modal-title" id="storyModalTitle"></h3>
+        <div class="story-modal-meta" id="storyModalMeta"></div>
+        <p class="story-modal-text" id="storyModalText"></p>
+        <p class="story-modal-note">História organizada com ajuda do Curador da aEterna.</p>
+        <div class="story-modal-actions">
+          <a class="btn btn-primary" id="storyModalPrimary" href="https://aeterna.streamlit.app/">Começar a história da minha família</a>
+          <button type="button" class="btn-close" id="storyModalSecondary">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function initStoryModal() {
+      const modal = document.getElementById("storyModal");
+      if (!modal) return;
+
+      const dialog = modal.querySelector(".story-modal-dialog");
+      const cover = document.getElementById("storyModalCover");
+      const tagsEl = document.getElementById("storyModalTags");
+      const titleEl = document.getElementById("storyModalTitle");
+      const metaEl = document.getElementById("storyModalMeta");
+      const textEl = document.getElementById("storyModalText");
+      const closeBtn = document.getElementById("storyModalClose");
+      const secondaryBtn = document.getElementById("storyModalSecondary");
+      let lastFocus = null;
+
+      function openModal(story, trigger) {
+        if (!story) return;
+        lastFocus = trigger || document.activeElement;
+
+        // Preencher conteúdo
+        if (cover) {
+          cover.style.backgroundImage = "url('" + story.image + "')";
+          cover.setAttribute("aria-label", story.title);
+        }
+        if (titleEl) titleEl.textContent = story.title;
+        if (metaEl) {
+          metaEl.innerHTML = "";
+          const dateEl = document.createElement("span");
+          dateEl.innerHTML = "<strong>" + story.date + "</strong>";
+          metaEl.appendChild(dateEl);
+          const peopleEl = document.createElement("span");
+          peopleEl.textContent = story.people;
+          metaEl.appendChild(peopleEl);
+        }
+        if (tagsEl) {
+          tagsEl.innerHTML = "";
+          for (let i = 0; i < story.tags.length; i++) {
+            const tag = document.createElement("span");
+            tag.className = "story-modal-tag";
+            tag.textContent = story.tags[i];
+            tagsEl.appendChild(tag);
+          }
+        }
+        if (textEl) textEl.textContent = story.fullStory || story.excerpt || "";
+
+        // Mostrar modal
+        modal.classList.add("is-open");
+        modal.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+
+        // Foco no diálogo
+        setTimeout(function () { dialog.focus(); }, 50);
+      }
+
+      function closeModal() {
+        modal.classList.remove("is-open");
+        modal.setAttribute("aria-hidden", "true");
+        setTimeout(function () { document.body.style.overflow = ""; }, 300);
+        if (lastFocus && typeof lastFocus.focus === "function") {
+          setTimeout(function () { lastFocus.focus(); }, 50);
+        }
+      }
+
+      // API global para o carrossel
+      window.__heroOpenStory = openModal;
+
+      // Fechar: botão ×
+      if (closeBtn) closeBtn.addEventListener("click", closeModal);
+      // Fechar: botão "Fechar"
+      if (secondaryBtn) secondaryBtn.addEventListener("click", closeModal);
+      // Fechar: clique fora do diálogo
+      modal.addEventListener("click", function (e) {
+        if (e.target === modal) closeModal();
+      });
+      // Fechar: ESC
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && modal.classList.contains("is-open")) {
+          closeModal();
+        }
+      });
+      // Trap de foco: Tab fica dentro do modal
+      modal.addEventListener("keydown", function (e) {
+        if (e.key !== "Tab" || !modal.classList.contains("is-open")) return;
+        const focusables = modal.querySelectorAll("a, button, [tabindex]:not([tabindex='-1'])");
+        if (focusables.length === 0) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      });
+    })();
   </script>
 </body>
 </html>

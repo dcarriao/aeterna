@@ -86,60 +86,86 @@ def remover_fundo_branco(imagem):
 def inject_custom_css():
     st.markdown("""
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,500&family=Inter:wght@400;600;700;800;900&display=swap');
+
         .stDeployButton { display: none !important; }
         header[data-testid="stHeader"] { background: transparent !important; }
         .stApp > header { display: none !important; }
 
         .main .block-container { padding-top: 0.5rem; padding-bottom: 1rem; }
-        .stApp { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f5f5 0%, #e8f5e9 100%); }
+
+        .stApp {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background:
+                radial-gradient(circle at 22% 12%, rgba(76,32,111,0.08), transparent 32%),
+                radial-gradient(circle at 88% 18%, rgba(212,175,55,0.06), transparent 30%),
+                linear-gradient(180deg, #f9f6f0 0%, #f1ece4 100%);
+        }
 
         .aeterna-header {
-            background: linear-gradient(135deg, #90EE90 0%, #2E8B57 50%, #1B5E20 100%);
+            background: linear-gradient(135deg, #26113f 0%, #4b256f 52%, #b77945 100%);
             padding: 0.8rem;
             border-radius: 20px;
             text-align: center;
             margin-bottom: 1.5rem;
         }
-        .aeterna-header h2 { color: #1B5E20 !important; margin: 0; }
+        .aeterna-header h2 { color: #f2c572 !important; margin: 0; font-family: "Cormorant Garamond", Georgia, serif; }
 
         .info-card {
-            background: white;
+            background: rgba(255,255,255,0.88);
             padding: 1rem;
-            border-radius: 12px;
-            border-left: 4px solid #2E8B57;
+            border-radius: 16px;
+            border-left: 4px solid #d4af37;
             margin: 0.75rem 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
 
         .stButton > button {
-            background: linear-gradient(135deg, #3CB371 0%, #1B5E20 100%);
-            color: white;
+            background: linear-gradient(135deg, #f8dc92, #d4af37 62%, #b77a46);
+            color: #1b0f2e;
             border: none;
-            border-radius: 8px;
-            transition: all 0.3s ease;
+            border-radius: 12px;
+            font-weight: 800;
+            transition: all 0.25s ease;
         }
         .stButton > button:hover {
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(46, 139, 87, 0.3);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.35);
+        }
+        .stButton > button[kind="secondary"] {
+            background: transparent;
+            color: #4b256f;
+            border: 1.5px solid rgba(212,175,55,0.38);
+        }
+        .stButton > button[kind="secondary"]:hover {
+            background: rgba(212,175,55,0.08);
+            border-color: #d4af37;
         }
 
-        [data-testid="stSidebar"] { background: linear-gradient(180deg, #e8f5e9 0%, #f0faf0 100%); }
-        .sidebar-logo-container { display: flex; justify-content: center; padding: 20px 0; }
-        [data-testid="stSidebar"] img { max-width: 220px !important; background: transparent !important; }
+        [data-testid="stSidebar"] { background: transparent; }
 
-        .footer-aeterna { text-align: center; padding: 1rem; color: #808080; font-size: 0.7rem; border-top: 1px solid #d0e8d0; margin-top: 2rem; }
+        .footer-aeterna {
+            text-align: center;
+            padding: 1rem;
+            color: #8a7b95;
+            font-size: 0.7rem;
+            border-top: 1px solid rgba(212,175,55,0.18);
+            margin-top: 2rem;
+        }
 
         /* Chat Widget */
         .chat-widget {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            background: rgba(255,255,255,0.92);
+            border-radius: 18px;
+            box-shadow: 0 8px 30px rgba(72,44,21,0.10);
             overflow: hidden;
             position: sticky;
             top: 20px;
+            border: 1px solid rgba(212,175,55,0.18);
         }
 
         .chat-header {
-            background: #075e54;
+            background: linear-gradient(135deg, #26113f, #4b256f);
             padding: 10px 12px;
             color: white;
             display: flex;
@@ -148,7 +174,7 @@ def inject_custom_css():
         }
 
         .chat-avatar {
-            background: #128C7E;
+            background: rgba(242,197,114,0.20);
             width: 32px;
             height: 32px;
             border-radius: 50%;
@@ -156,18 +182,20 @@ def inject_custom_css():
             align-items: center;
             justify-content: center;
             font-size: 16px;
+            border: 1px solid rgba(212,175,55,0.28);
         }
 
         .chat-header-name {
-            font-weight: bold;
+            font-weight: 700;
             font-size: 0.85rem;
+            font-family: "Cormorant Garamond", Georgia, serif;
         }
 
         .chat-body {
             height: 320px;
             overflow-y: auto;
             padding: 12px;
-            background: #e5ddd5;
+            background: #f7f1ea;
             display: flex;
             flex-direction: column;
         }
@@ -195,39 +223,70 @@ def inject_custom_css():
         }
 
         .message-bubble.user {
-            background: #dcf8c5;
-            color: #075e54;
+            background: linear-gradient(135deg, #4b256f, #26113f);
+            color: white;
             border-bottom-right-radius: 4px;
         }
 
         .message-bubble.bot {
             background: white;
-            color: #1a1a1a;
+            color: #2b2233;
             border-bottom-left-radius: 4px;
-            box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
         }
 
         .chat-footer {
             padding: 10px;
-            background: white;
-            border-top: 1px solid #eee;
+            background: rgba(255,255,255,0.95);
+            border-top: 1px solid rgba(212,175,55,0.14);
         }
 
         .chat-warning {
-            background: #fff3cd;
+            background: rgba(212,175,55,0.10);
             padding: 4px 8px;
             font-size: 0.65rem;
-            color: #856404;
+            color: #8a6e2a;
             text-align: center;
+            border-top: 1px solid rgba(212,175,55,0.14);
         }
 
         .stTextInput > div > div > input {
-            color: #1a1a1a !important;
-            background-color: #ffffff !important;
-            border: 1px solid #c8e6c8 !important;
-            border-radius: 10px !important;
+            color: #1b0f2e !important;
+            background-color: rgba(255,255,255,0.95) !important;
+            border: 1px solid rgba(212,175,55,0.32) !important;
+            border-radius: 12px !important;
             padding: 8px !important;
             font-size: 14px !important;
+        }
+        .stTextInput > div > div > input:focus {
+            border-color: #d4af37 !important;
+            box-shadow: 0 0 0 2px rgba(212,175,55,0.20) !important;
+        }
+
+        .stTextArea textarea {
+            color: #1b0f2e !important;
+            border: 1px solid rgba(212,175,55,0.32) !important;
+            border-radius: 12px !important;
+        }
+
+        div[data-testid="stForm"] {
+            border: 1px solid rgba(212,175,55,0.18);
+            border-radius: 22px;
+            padding: 1.5rem;
+            background: rgba(255,255,255,0.80);
+        }
+
+        div[data-testid="stMetric"] {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(212,175,55,0.18);
+            border-radius: 16px;
+            padding: 0.85rem;
+        }
+
+        div[data-testid="stDataFrame"] {
+            border: 1px solid rgba(212,175,55,0.14);
+            border-radius: 14px;
+            overflow: hidden;
         }
 
         @media (max-width: 768px) {
@@ -1305,7 +1364,7 @@ def render_assistente():
 # VÍDEOS
 # ============================================================================
 def render_videos():
-    st.markdown("<h3 style='color: #2E8B57;'>📹 Vídeos da Minha História</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #4b256f;'>📹 Vídeos da Minha História</h3>", unsafe_allow_html=True)
 
     plano = db.obter_plano_usuario(st.session_state.usuario_atual['id'])
     videos_atual = len(db.listar_videos_usuario(st.session_state.usuario_atual['id']))
@@ -1523,7 +1582,7 @@ def render_videos_visitante(contato_id=None, nome_pessoa=None):
     )
 
     st.markdown(
-        f"<h3 style='color: #2E8B57;'>🎥 Vídeos compartilhados por {nome_falecido}</h3>",
+        f"<h3 style='color: #4b256f;'>🎥 Vídeos compartilhados por {nome_falecido}</h3>",
         unsafe_allow_html=True
     )
 
@@ -1548,7 +1607,7 @@ def render_videos_visitante(contato_id=None, nome_pessoa=None):
 # ============================================================================
 
 def render_fotos():
-    st.markdown("<h3 style='color: #2E8B57;'>📷 Álbum de Memórias</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #4b256f;'>📷 Álbum de Memórias</h3>", unsafe_allow_html=True)
 
     col1, col2 = st.columns([1, 2])
 
@@ -1760,7 +1819,7 @@ def render_fotos_visitante(contato_id=None, nome_pessoa=None):
     )
 
     st.markdown(
-        f"<h3 style='color: #2E8B57;'>📷 Fotos compartilhadas por {nome_falecido}</h3>",
+        f"<h3 style='color: #4b256f;'>📷 Fotos compartilhadas por {nome_falecido}</h3>",
         unsafe_allow_html=True
     )
 
@@ -2781,7 +2840,7 @@ def render_contatos():
 # PREFERÊNCIAS (GOSTOS)
 # ============================================================================
 def render_preferencias():
-    st.markdown("<h3 style='color: #2E8B57;'>👤 Minha Essência</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #4b256f;'>👤 Minha Essência</h3>", unsafe_allow_html=True)
     st.info(
         "Essas informações ajudam o Curador e o Explorador da aEterna "
         "a compreender melhor sua história, seus valores, gostos e lembranças importantes."
@@ -3479,7 +3538,7 @@ def render_planos():
 # ============================================================================
 def render_agendamentos():
     st.markdown(
-        "<h3 style='color: #2E8B57;'>💌 Mensagens para o Futuro</h3>",
+        "<h3 style='color: #4b256f;'>💌 Mensagens para o Futuro</h3>",
         unsafe_allow_html=True
     )
 
@@ -3784,7 +3843,7 @@ def render_agendamentos():
 # COFRE DIGITAL
 # ============================================================================
 def render_cofre():
-    st.markdown("<h3 style='color: #2E8B57;'>📁 Cofre Digital</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #4b256f;'>📁 Cofre Digital</h3>", unsafe_allow_html=True)
     st.info("🔒 Todas as informações são criptografadas localmente.")
 
     tab_senhas, tab_documentos = st.tabs(["🔐 Senhas", "📄 Documentos"])
@@ -3923,7 +3982,7 @@ def render_cofre():
 # SOBRE
 # ============================================================================
 def render_sobre():
-    st.markdown("<h3 style='color: #2E8B57;'>✨ Sobre o aEterna</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #4b256f;'>✨ Sobre o aEterna</h3>", unsafe_allow_html=True)
     st.markdown("""
     <div class="info-card">
         <h3>📖 Histórias que atravessam gerações</h3>
@@ -3952,7 +4011,7 @@ def render_sobre():
 # ADMIN PANEL
 # ============================================================================
 def render_admin_panel():
-    st.markdown("<h2 style='color: #2E8B57;'>👑 Painel Administrativo</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color: #4b256f;'>👑 Painel Administrativo</h2>", unsafe_allow_html=True)
 
     usuarios = gerente_usuarios.listar_usuarios()
     st.metric("👥 Total Usuários", len(usuarios))
