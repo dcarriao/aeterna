@@ -761,7 +761,7 @@ def _render_curador_memoria_primeiro(db: BancoDados, usuario: dict, nome_referen
         
         preview_titulo = st.session_state.get(prefixo + "titulo", "").strip() or "Título da memória aparecerá aqui"
         preview_texto = _curador_trecho(st.session_state.get(prefixo + "conteudo", ""))
-        preview_data = _curador_preview_data(data_memoria) if data_memoria else (st.session_state.get(prefixo + "data_txt", "") or "Data da memória")
+        preview_data = _curador_preview_data(data_memoria_val) if data_memoria_val else (st.session_state.get(prefixo + "data_txt", "") or "Data da memória")
         
         sel_pessoas = st.session_state.get(prefixo + "pessoas", [])
         preview_pessoas = ", ".join(sel_pessoas) if sel_pessoas else "Pessoas relacionadas"
