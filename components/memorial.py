@@ -320,7 +320,7 @@ def render_memoriais_lista():
                 card_html = f"""
                 <div class="ae-memorial-card-v2">
                     {img_html}
-                    <div class="ae-memorial-card-nome-v2">{html.escape(m["nome"])}</div>
+                    <div class="ae-memorial-card-nome-v2">{html.escape(m.get("nome") or "")}</div>
                     <div class="ae-memorial-card-rel-v2">{html.escape(m["parentesco"] or "Homenageado(a)")}</div>
                     <div class="ae-memorial-card-dates-v2">🌟 {nasc} &nbsp;✝️ {fal}</div>
                 </div>
@@ -356,7 +356,7 @@ def render_memoriais_lista():
                     card_html = f"""
                     <div class="ae-memorial-card-v2">
                         {img_html}
-                        <div class="ae-memorial-card-nome-v2">{html.escape(m["nome"])}</div>
+                        <div class="ae-memorial-card-nome-v2">{html.escape(m.get("nome") or "")}</div>
                         <div class="ae-memorial-card-rel-v2">{html.escape(m["parentesco"] or "Homenageado(a)")}</div>
                         <div class="ae-memorial-card-dates-v2">🌟 {nasc} &nbsp;✝️ {fal}</div>
                     </div>
@@ -447,7 +447,7 @@ def render_curador_perfil(memorial_id):
         st.error("Memorial não encontrado.")
         return
 
-    st.markdown(f'<div class="ae-curador-header">✨ Curador de Perfil: {html.escape(memorial["nome"])}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="ae-curador-header">✨ Curador de Perfil: {html.escape(memorial.get("nome") or "")}</div>', unsafe_allow_html=True)
     st.markdown('<div class="ae-curador-subheader">Converse com o Curador para resgatar ricas lembranças e construir o perfil biográfico do homenageado.</div>', unsafe_allow_html=True)
 
     # Initialize or load conversation history
@@ -673,7 +673,7 @@ def render_pagina_memorial(memorial_id):
     <div class="ae-memorial-banner">
         {foto_html}
         <div>
-            <div class="ae-memorial-banner-nome">{html.escape(memorial["nome"])}</div>
+            <div class="ae-memorial-banner-nome">{html.escape(memorial.get("nome") or "")}</div>
             <div class="ae-memorial-banner-info">🌟 {nasc} &nbsp;✝️ {fal} &nbsp;|&nbsp; Relação: {html.escape(memorial["parentesco"] or "Homenageado(a)")}</div>
             {bio_html}
         </div>
@@ -715,8 +715,8 @@ def render_pagina_memorial(memorial_id):
                 st.markdown(f"""
                 <div class="ae-timeline-item">
                     <div style="font-size:0.75rem; color:#B77A46; font-weight:800;">{dt_f}</div>
-                    <div class="ae-card-header">{html.escape(item["titulo"])}</div>
-                    <div style="font-size:0.84rem; color:#6F6478; margin-top:0.15rem;">{html.escape(item["conteudo"][:250])}...</div>
+                    <div class="ae-card-header">{html.escape(item.get("titulo") or "")}</div>
+                    <div style="font-size:0.84rem; color:#6F6478; margin-top:0.15rem;">{html.escape((item.get("conteudo") or "")[:250])}...</div>
                 </div>
                 """, unsafe_allow_html=True)
 
@@ -833,7 +833,7 @@ def render_pagina_memorial(memorial_id):
             for idx, video in enumerate(videos_list):
                 with c_cols[idx % 2]:
                     st.video(video["caminho_arquivo"])
-                    st.write(f"**{html.escape(video['titulo'])}**")
+                    st.write(f"**{html.escape(video.get('titulo') or '')}**")
 
     # Tab 5: Related People
     with tab_people:
@@ -860,7 +860,10 @@ def render_pagina_memorial(memorial_id):
             st.info("Nenhuma pessoa relacionada vinculada a este memorial ainda.")
         else:
             for c in contatos_list:
-                st.markdown(f"👤 **{html.escape(c['nome'])} {html.escape(c['sobrenome'])}** ({html.escape(c['parentesco'] or 'Relação não informada')})")
+                nome_c = html.escape(c.get("nome") or "")
+                sobrenome_c = html.escape(c.get("sobrenome") or "")
+                parentesco_c = html.escape(c.get("parentesco") or "Relação não informada")
+                st.markdown(f"👤 **{nome_c} {sobrenome_c}** ({parentesco_c})")
 
         if is_owner:
             st.markdown("---")
@@ -910,7 +913,9 @@ def render_pagina_memorial(memorial_id):
             else:
                 for c in convites:
                     status_badge = "⏳ Pendente" if c["status"] == "pendente" else "✅ Aceito"
-                    st.markdown(f"**{html.escape(c['nome'])}** ({html.escape(c['parentesco'] or 'contato')}) &nbsp;|&nbsp; {status_badge}")
+                    nome_conv = html.escape(c.get("nome") or "")
+                    parentesco_conv = html.escape(c.get("parentesco") or "contato")
+                    st.markdown(f"**{nome_conv}** ({parentesco_conv}) &nbsp;|&nbsp; {status_badge}")
                     if c["telefone"]:
                         st.caption(f"📞 Telefone: {c['telefone']}")
                     if c["email"]:
@@ -1058,11 +1063,14 @@ Contexto disponível sobre {memorial['nome']}:
                 st.info("Nenhuma contribuição pendente para aprovação.")
             else:
                 for p in pendentes:
-                    st.markdown(f"**Autor(a):** {html.escape(p['usuario_contribuidor_nome'])} ({html.escape(p['usuario_contribuidor_email'])})")
-                    st.markdown(f"**Tipo:** {html.escape(p['tipo_contribuicao'])}")
-                    if p["texto"]:
+                    autor_nome = html.escape(p.get("usuario_contribuidor_nome") or "Anônimo")
+                    autor_email = html.escape(p.get("usuario_contribuidor_email") or "email não informado")
+                    tipo_contrib = html.escape(p.get("tipo_contribuicao") or "Contribuição")
+                    st.markdown(f"**Autor(a):** {autor_nome} ({autor_email})")
+                    st.markdown(f"**Tipo:** {tipo_contrib}")
+                    if p.get("texto"):
                         st.markdown(f'*" {html.escape(p["texto"])} "*')
-                    if p["arquivo_url"]:
+                    if p.get("arquivo_url"):
                         st.markdown(f"[Ver arquivo contribuído]({p['arquivo_url']})")
                         
                     c_eval = st.columns(2)
@@ -1282,9 +1290,9 @@ def render_aceite_convite(token):
     <div class="ae-invite-card">
         <h2>Convite Especial</h2>
         <p style="color:#6F6478; font-size:0.96rem; line-height:1.45; margin-bottom:1.5rem;">
-            Olá, <strong>{html.escape(convite["nome"])}</strong>!<br><br>
+            Olá, <strong>{html.escape(convite.get("nome") or "")}</strong>!<br><br>
             <strong>{html.escape(owner_nome)}</strong> convidou você para acessar e contribuir com o Memorial de 
-            <strong style="color:#B77A46; font-size:1.15rem; display:block; margin:0.35rem 0;">{html.escape(memorial["nome"])} ({html.escape(convite["parentesco"] or "conhecido")})</strong>
+            <strong style="color:#B77A46; font-size:1.15rem; display:block; margin:0.35rem 0;">{html.escape(memorial.get("nome") or "")} ({html.escape(convite.get("parentesco") or "conhecido")})</strong>
             um espaço de memórias e afetos para preservar para sempre esse lindo legado.
         </p>
     """, unsafe_allow_html=True)

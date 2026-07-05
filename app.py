@@ -2354,7 +2354,9 @@ def render_perfil_pessoa_vivo(contato: dict, contatos: list, usuario_id: int):
             return
         html_eventos = []
         for evento in itens:
-            imagem = f'<img src="{html.escape(evento["imagem"])}" alt="{html.escape(evento["titulo"])}">' if evento.get("imagem") else ""
+            img_src = html.escape(evento["imagem"]) if evento.get("imagem") else ""
+            img_alt = html.escape(evento.get("titulo") or "")
+            imagem = f'<img src="{img_src}" alt="{img_alt}">' if evento.get("imagem") else ""
             html_eventos.append(
                 f'<div class="ae-person-timeline-item">'
                 f'<div class="ae-person-timeline-icon">{html.escape(evento.get("icone") or "•")}</div>'
@@ -5659,15 +5661,20 @@ def render_novidades(
                 fotos_html += f'<span class="ae-news-more">+{len(evento.get("fotos", [])) - 3}</span>'
             midia_html = f'<div class="ae-news-media">{fotos_html}</div>' if fotos_html else ""
             trecho_html = f'<div class="ae-news-quote">{html.escape(evento.get("trecho") or "")[:160]}</div>' if evento.get("trecho") else ""
-            icone = {"foto": "🖼️", "historia": "📖", "convite": "👥"}.get(evento["tipo"], "⭐")
+            evento_tipo = evento.get("tipo", "")
+            icone = {"foto": "🖼️", "historia": "📖", "convite": "👥"}.get(evento_tipo, "⭐")
+            evento_pessoa = html.escape(inicial_nome(evento.get("pessoa") or ""))
+            evento_texto = html.escape(evento.get("texto") or "")
+            eventoTitulo = html.escape(evento.get("titulo") or "")
+            eventoTempo = html.escape(evento.get("tempo") or "")
             st.markdown(
                 f"""
                 <div class="ae-news-event">
                     <div class="ae-news-timeline-icon">{icone}</div>
-                    <div class="ae-news-avatar">{html.escape(inicial_nome(evento['pessoa']))}</div>
+                    <div class="ae-news-avatar">{evento_pessoa}</div>
                     <div class="ae-news-event-body">
-                        <h3>{html.escape(evento['texto'])} <strong>“{html.escape(evento['titulo'])}”</strong></h3>
-                        <span>{html.escape(evento['tempo'])}</span>
+                        <h3>{evento_texto} <strong>“{eventoTitulo}”</strong></h3>
+                        <span>{eventoTempo}</span>
                         {trecho_html}
                         {midia_html}
                     </div>
@@ -5711,7 +5718,9 @@ def render_novidades(
         for destaque in destaques[:5]:
             src = imagem_src((destaque.get("foto") or {}).get("caminho") or (destaque.get("foto") or {}).get("caminho_arquivo") or "")
             thumb = f'<img src="{html.escape(src, quote=True)}" alt="Destaque">' if src else "<span>📖</span>"
-            destaques_html += f'<div class="ae-news-highlight-row"><div>{thumb}</div><p><strong>{html.escape(destaque["titulo"])}</strong><span>{html.escape(destaque["motivo"])}</span></p></div>'
+            dest_titulo = html.escape(destaque.get("titulo") or "")
+            dest_motivo = html.escape(destaque.get("motivo") or "")
+            destaques_html += f'<div class="ae-news-highlight-row"><div>{thumb}</div><p><strong>{dest_titulo}</strong><span>{dest_motivo}</span></p></div>'
         destaques_html = destaques_html or '<div class="ae-news-muted">Sem histórias em destaque ainda.</div>'
         st.markdown(f'<div class="ae-news-side-card"><h3>Histórias em destaque</h3>{destaques_html}<b>Ver todas as histórias ›</b></div>', unsafe_allow_html=True)
         st.markdown('<div class="ae-news-brand-card"><div>♡</div><p>“Cada novidade é um novo capítulo da nossa história juntos.”</p><strong>aEterna</strong></div>', unsafe_allow_html=True)
