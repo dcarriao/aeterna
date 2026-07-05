@@ -378,14 +378,20 @@ def inject_custom_css():
 
         /* Cabeçalhos de seção com a marca */
         .ae-section-h3 {
-            color: #4b256f;
+            color: #21104a;
             margin: 0 0 0.65rem;
-            font-weight: 900;
+            font-family: "Cormorant Garamond", Georgia, serif;
+            font-size: 1.65rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
         }
         .ae-section-h2 {
             color: #21104a;
-            font-weight: 900;
+            font-weight: 800;
             margin: 0 0 0.5rem;
+            font-family: "Cormorant Garamond", Georgia, serif;
+            font-size: 1.85rem;
+            letter-spacing: -0.02em;
         }
 
         @media (max-width: 768px) {
@@ -3078,7 +3084,7 @@ def render_planos():
 .ae-hero-container {{
     height: 100px;
     background: #FFFFFF;
-    border: 1px solid #E8DCC6;
+    border: 1px solid rgba(212,175,55,0.22);
     border-radius: 20px;
     padding: 14px 20px;
     display: flex;
@@ -3109,7 +3115,7 @@ def render_planos():
 .ae-hero-title {{
     font-size: 20px;
     font-weight: 700;
-    color: #24125A;
+    color: #21104a;
     line-height: 26px;
     margin: 0 0 4px 0;
 }}
@@ -3124,7 +3130,7 @@ def render_planos():
     height: 40px;
     width: 170px;
     min-width: 170px;
-    background: #5A2BB5;
+    background: #4b256f;
     color: #FFFFFF;
     border: none;
     border-radius: 12px;
@@ -3159,7 +3165,7 @@ def render_planos():
     min-width: 430px;
     height: 272px;
     background: #FFFFFF;
-    border: 1px solid #E8DCC6;
+    border: 1px solid rgba(212,175,55,0.22);
     border-radius: 20px;
     padding: 24px;
     box-sizing: border-box;
@@ -3175,11 +3181,11 @@ def render_planos():
 .ae-fuc-title {{
     font-size: 16px;
     font-weight: 700;
-    color: #24125A;
+    color: #21104a;
 }}
 .ae-fuc-badge {{
-    background: #F0EBF8;
-    color: #5A2BB5;
+    background: rgba(75,37,111,0.10);
+    color: #4b256f;
     font-size: 11px;
     font-weight: 600;
     padding: 3px 10px;
@@ -3206,18 +3212,18 @@ def render_planos():
 }}
 .ae-fuc-metric-count {{
     font-size: 13px;
-    color: #24125A;
+    color: #21104a;
     font-weight: 600;
 }}
 .ae-bar-track {{
     height: 6px;
-    background: #EDE8F5;
+    background: rgba(75,37,111,0.08);
     border-radius: 999px;
     overflow: hidden;
 }}
 .ae-bar-fill {{
     height: 100%;
-    background: #5A2BB5;
+    background: #4b256f;
     border-radius: 999px;
 }}
 .ae-bar-danger {{
@@ -3226,7 +3232,7 @@ def render_planos():
 .ae-fuc-footer {{
     margin-top: auto;
     padding-top: 12px;
-    border-top: 1px solid #F0EBF8;
+    border-top: 1px solid rgba(75,37,111,0.10);
     font-size: 12px;
     color: #888888;
     text-align: center;
@@ -3235,7 +3241,7 @@ def render_planos():
     flex: 1;
     height: 272px;
     background: #FFFFFF;
-    border: 1px solid #E8DCC6;
+    border: 1px solid rgba(212,175,55,0.22);
     border-radius: 20px;
     padding: 24px;
     box-sizing: border-box;
@@ -3246,7 +3252,7 @@ def render_planos():
 .ae-limit-card-inner {{
     height: 152px;
     width: 100%;
-    background: #F3EDF8;
+    background: rgba(75,37,111,0.06);
     border-radius: 16px;
     padding: 14px 20px;
     box-sizing: border-box;
@@ -3264,7 +3270,7 @@ def render_planos():
 .ae-limit-title {{
     font-size: 15px;
     font-weight: 700;
-    color: #24125A;
+    color: #21104a;
     font-family: 'Inter', sans-serif;
     margin: 0 0 5px 0;
     line-height: 1.3;
@@ -3280,7 +3286,7 @@ def render_planos():
 .ae-limit-btn {{
     height: 36px;
     width: 180px;
-    background: #5A2BB5;
+    background: #4b256f;
     color: #FFFFFF;
     border: none;
     border-radius: 12px;
@@ -3294,7 +3300,7 @@ def render_planos():
 .ae-pricing-container {{
     height: 362px;
     background: #FFFFFF;
-    border: 1px solid #E8DCC6;
+    border: 1px solid rgba(212,175,55,0.22);
     border-radius: 20px;
     padding: 16px 18px;
     box-sizing: border-box;
@@ -3313,7 +3319,7 @@ def render_planos():
 .ae-pricing-title {{
     font-size: 16px;
     font-weight: 700;
-    color: #24125A;
+    color: #21104a;
     margin: 0 0 2px 0;
     font-family: 'Inter', sans-serif;
 }}
@@ -3336,7 +3342,7 @@ def render_planos():
     min-width: 0;
     height: 100%;
     background: #FFFFFF;
-    border: 1px solid #E8DCC6;
+    border: 1px solid rgba(212,175,55,0.22);
     border-radius: 16px;
     padding: 20px;
     box-sizing: border-box;
@@ -3349,7 +3355,7 @@ def render_planos():
     min-width: 0;
     height: 100%;
     background: #FFFFFF;
-    border: 2px solid #8D5AE8;
+    border: 2px solid #4b256f;
     border-radius: 16px;
     padding: 20px;
     box-sizing: border-box;
@@ -3376,7 +3382,7 @@ def render_planos():
 .ae-plan-name {{
     font-size: 16px;
     font-weight: 700;
-    color: #24125A;
+    color: #21104a;
     margin: 0 0 2px 0;
 }}
 .ae-plan-desc {{
@@ -3389,7 +3395,7 @@ def render_planos():
 .ae-plan-price {{
     font-size: 20px;
     font-weight: 700;
-    color: #24125A;
+    color: #21104a;
     margin: 0 0 8px 0;
     line-height: 1.2;
 }}
@@ -3418,7 +3424,7 @@ def render_planos():
     min-width: 18px;
     border-radius: 50%;
     background: #E8F5E9;
-    color: #2E7D32;
+    color: #4b256f;
     font-size: 10px;
     font-weight: 700;
     display: flex;
@@ -3431,8 +3437,8 @@ def render_planos():
     height: 18px;
     min-width: 18px;
     border-radius: 50%;
-    background: #EDE8F8;
-    color: #5A2BB5;
+    background: rgba(75,37,111,0.10);
+    color: #4b256f;
     font-size: 10px;
     font-weight: 700;
     display: flex;
@@ -3457,9 +3463,9 @@ def render_planos():
 .ae-plan-btn-current {{
     height: 36px;
     width: 100%;
-    background: #F0EBF8;
-    color: #5A2BB5;
-    border: 1px solid #D0C0F0;
+    background: rgba(75,37,111,0.10);
+    color: #4b256f;
+    border: 1px solid rgba(75,37,111,0.20);
     border-radius: 12px;
     font-size: 14px;
     font-weight: 600;
@@ -3470,7 +3476,7 @@ def render_planos():
 .ae-plan-btn-family {{
     height: 36px;
     width: 100%;
-    background: #5A2BB5;
+    background: #4b256f;
     color: #FFFFFF;
     border: none;
     border-radius: 12px;
@@ -3500,7 +3506,7 @@ def render_planos():
 .ae-security-container {{
     height: 54px;
     background: #FFFFFF;
-    border: 1px solid #E8DCC6;
+    border: 1px solid rgba(212,175,55,0.22);
     border-radius: 16px;
     padding: 0 24px;
     box-sizing: border-box;
@@ -3522,7 +3528,7 @@ def render_planos():
 .ae-security-link {{
     font-size: 14px;
     font-weight: 600;
-    color: #5A2BB5;
+    color: #4b256f;
     font-family: 'Inter', sans-serif;
     text-decoration: none;
     white-space: nowrap;

@@ -58,8 +58,8 @@ header,
 
 .ae-sidebar-brand {
     text-align: center;
-    padding: 0.15rem 0 0.3rem;
-    margin-bottom: 0.35rem;
+    padding: 0;
+    margin: -1.2rem 0 0.15rem;
     border-bottom: 1px solid rgba(212,175,55,0.22);
 }
 
@@ -267,7 +267,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
 .ae-contrib-approved-title {
     color: #21104a;
     font-size: 1.45rem;
-    margin: 0;
+    margin: 1rem 0 0.45rem;
     font-weight: 900;
 }
 
@@ -436,10 +436,6 @@ button[data-baseweb="tab"][aria-selected="true"] {
     color: #21104a;
     font-weight: 800;
     padding: 0.45rem 0.7rem;
-}
-
-.ae-contrib-approved-title {
-    margin: 1rem 0 0.45rem;
 }
 
 .ae-contrib-approved-grid {
@@ -1008,8 +1004,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
 .ae-home-card,
 .ae-memory-card,
 .ae-activity-card,
-.ae-shared-card,
-.ae-mini-card {
+.ae-shared-card {
     background: rgba(255,255,255,0.96);
     border-radius: 22px;
     padding: 1.15rem 1.25rem;
@@ -1049,8 +1044,12 @@ button[data-baseweb="tab"][aria-selected="true"] {
 }
 
 .ae-mini-card {
+    background: rgba(255,255,255,0.96);
     padding: 0.85rem 1rem;
     border-radius: 18px;
+    border: 1px solid rgba(212,168,79,0.24);
+    box-shadow: 0 12px 34px rgba(43,23,71,0.08);
+    margin-bottom: 0.75rem;
 }
 
 .ae-mini-card strong {
@@ -2716,8 +2715,7 @@ a.ae-card-read-btn:hover {
     box-shadow: 0 10px 24px rgba(43,23,71,0.14);
 }
 
-.ae-news-avatar,
-.ae-news-person-avatar {
+.ae-news-avatar {
     width: 50px;
     height: 50px;
     border-radius: 999px;
@@ -3145,8 +3143,7 @@ a.ae-card-read-btn:hover {
     font-weight: 950;
 }
 
-.ae-person-panel-title,
-.ae-person-contrib-row {
+.ae-person-panel-title {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -3438,7 +3435,6 @@ a.ae-card-read-btn:hover {
     padding-top: 0 !important;
     margin-top: 0 !important;
 }
-.ae-sidebar-brand { padding: 0 !important; margin: -1.2rem 0 0.15rem !important; border-bottom: 1px solid rgba(212,175,55,0.22) !important; }
 .ae-sidebar-brand img, [data-testid="stSidebar"] .ae-sidebar-brand img { max-width: 130px !important; margin: 0 auto !important; }
 .ae-sidebar-plan, .ae-plan-status, .plan-status-card, .ae-sidebar-card-plan {
     background: rgba(255,255,255,0.065) !important;
