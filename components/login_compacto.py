@@ -26,9 +26,10 @@ def _css_login_compacto():
     padding-bottom: 1.2rem !important;
 }
 
+/* --- Header / Logo --- */
 .ae-login-header {
     text-align: center;
-    margin-bottom: 0.45rem;
+    margin-bottom: 0.35rem;
 }
 
 .ae-logo-text {
@@ -62,59 +63,37 @@ def _css_login_compacto():
 
 .ae-login-title {
     color: #ffffff;
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 1.45rem;
+    font-weight: 700;
+    margin-top: 0.55rem;
+    letter-spacing: -0.02em;
 }
 
 .ae-login-subtitle {
-    color: rgba(255,255,255,0.86);
+    color: rgba(255,255,255,0.80);
+    font-size: 0.82rem;
+    line-height: 1.45;
+    max-width: 320px;
+    margin: 0.15rem auto 0;
 }
 
+/* --- Mode title inside card --- */
 .ae-login-mode-title {
     color: #1b0f2e;
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
 }
 
-div[data-testid="stForm"] label,
-div[data-testid="stForm"] label p {
-    color: #2b1845 !important;
-}
-
-.ae-login-footer {
-    color: #6f6478;
-    text-align: center;
-    font-size: 0.82rem;
-    margin-top: 0.85rem;
-    padding-top: 0.85rem;
-    border-top: 1px solid rgba(212,175,55,0.35);
-}
-
-.ae-login-secondary-block {
-    margin-top: 0.85rem;
-    padding: 0.82rem 1rem;
-    border-radius: 20px 20px 0 0;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(212,175,55,0.20);
-    border-bottom: 0;
-}
-
-.ae-login-secondary-title {
-    color: #f2c572;
-    text-align: center;
-    font-weight: 900;
-    font-size: 0.9rem;
-    margin-bottom: 0.18rem;
-}
-
-.ae-login-secondary-text {
-    color: rgba(255,255,255,0.84);
-    text-align: center;
-    font-size: 0.78rem;
-    margin-bottom: 0.05rem;
-}
-
+/* --- Form card --- */
 div[data-testid="stForm"] {
     background: rgba(255,255,255,0.98);
-    border: 1px solid rgba(212,175,55,0.34);
+    border: 1px solid rgba(212,175,55,0.30);
     border-radius: 26px;
-    padding: 1.25rem 1.45rem 1rem;
+    padding: 1.35rem 1.5rem 1.15rem;
     box-shadow: 0 28px 90px rgba(0, 0, 0, 0.34);
 }
 
@@ -123,17 +102,27 @@ div[data-testid="stForm"] label p,
 div[data-testid="stWidgetLabel"],
 div[data-testid="stWidgetLabel"] p {
     color: #2b1845 !important;
-    font-weight: 800 !important;
+    font-weight: 700 !important;
+    font-size: 0.82rem !important;
     opacity: 1 !important;
 }
 
+/* --- Inputs --- */
 .stTextInput > div > div > input,
 .stDateInput > div > div > input,
 .stTextArea textarea {
     border-radius: 12px !important;
     color: #1b0f2e !important;
     background: #ffffff !important;
-    border: 1px solid rgba(27, 15, 46, 0.35) !important;
+    border: 1px solid rgba(27, 15, 46, 0.28) !important;
+    font-size: 0.92rem !important;
+    min-height: 2.45rem !important;
+}
+
+.stTextInput > div > div > input:focus,
+.stDateInput > div > div > input:focus {
+    border-color: #d4af37 !important;
+    box-shadow: 0 0 0 2px rgba(212,175,55,0.18) !important;
 }
 
 input::placeholder,
@@ -142,14 +131,16 @@ textarea::placeholder {
     opacity: 1 !important;
 }
 
+/* --- Buttons --- */
 div.stButton > button,
 div[data-testid="stFormSubmitButton"] button,
 button[data-testid*="baseButton"] {
     border-radius: 12px !important;
-    font-weight: 900 !important;
+    font-weight: 800 !important;
     min-height: 2.65rem !important;
 }
 
+/* Primary button (Entrar / Criar conta / etc) */
 div[data-testid="stFormSubmitButton"] button,
 button[data-testid="baseButton-primary"],
 button[data-testid="stBaseButton-primary"],
@@ -158,53 +149,153 @@ button[kind="primary"] {
     background: linear-gradient(135deg, #f8dc92 0%, #d4af37 55%, #b77a46 100%) !important;
     color: #1b0f2e !important;
     border: none !important;
-    font-weight: 900 !important;
+    font-weight: 800 !important;
     box-shadow: 0 8px 24px rgba(212,175,55,0.25) !important;
+    letter-spacing: 0.02em;
 }
 
-div.stButton > button,
+div[data-testid="stFormSubmitButton"] button:hover,
+button[kind="primary"]:hover {
+    box-shadow: 0 10px 28px rgba(212,175,55,0.35) !important;
+    transform: translateY(-1px);
+}
+
+/* Secondary buttons (Criar conta, Acessar história) */
+div.stButton > button:not([kind="primary"]),
 button[data-testid="baseButton-secondary"],
 button[data-testid="stBaseButton-secondary"],
 button[kind="secondary"] {
-    background: rgba(255,255,255,0.94) !important;
-    color: #1b0f2e !important;
-    border: 1px solid rgba(212,175,55,0.38) !important;
+    background: rgba(255,255,255,0.12) !important;
+    color: #f2c572 !important;
+    border: 1px solid rgba(212,175,55,0.28) !important;
+    font-weight: 700 !important;
+    backdrop-filter: blur(4px);
 }
 
-.ae-login-secondary-block + div button,
-.ae-login-secondary-block + div [data-testid="baseButton-secondary"],
-.ae-login-secondary-block + div [data-testid="stBaseButton-secondary"] {
-    background: linear-gradient(135deg, #f8dc92, #d4af37 62%, #b77a46) !important;
-    color: #1b0f2e !important;
-    border: 0 !important;
+div.stButton > button:not([kind="primary"]):hover,
+button[kind="secondary"]:hover {
+    background: rgba(255,255,255,0.18) !important;
+    border-color: #d4af37 !important;
 }
 
-@media (max-width: 768px) {
+/* Forgot password button — styled as subtle link */
+.ae-forgot-btn button {
+    background: none !important;
+    border: none !important;
+    color: rgba(255,255,255,0.55) !important;
+    font-size: 0.78rem !important;
+    font-weight: 500 !important;
+    text-decoration: underline !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+    letter-spacing: normal !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+}
+
+.ae-forgot-btn button:hover {
+    color: #d4af37 !important;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* --- Login footer inside card --- */
+.ae-login-footer {
+    color: #8a7b95;
+    text-align: center;
+    font-size: 0.72rem;
+    margin-top: 1rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid rgba(212,175,55,0.22);
+}
+
+/* --- Secondary action blocks (outside the form) --- */
+.ae-secondary-section {
+    margin-top: 0.75rem;
+    padding: 0.9rem 1rem 0.65rem;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(212,175,55,0.16);
+    text-align: center;
+}
+
+.ae-secondary-section + .ae-secondary-section {
+    margin-top: 0.45rem;
+}
+
+.ae-secondary-title {
+    color: rgba(242,197,114,0.90);
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-bottom: 0.1rem;
+}
+
+.ae-secondary-text {
+    color: rgba(255,255,255,0.60);
+    font-size: 0.75rem;
+    margin-bottom: 0.4rem;
+    line-height: 1.35;
+}
+
+.ae-secondary-section button {
+    background: rgba(255,255,255,0.10) !important;
+    color: #f2c572 !important;
+    border: 1px solid rgba(212,175,55,0.25) !important;
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
+    min-height: 2.25rem !important;
+}
+
+.ae-secondary-section button:hover {
+    background: rgba(255,255,255,0.16) !important;
+    border-color: #d4af37 !important;
+}
+
+/* --- Divider between sections --- */
+.ae-login-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0.65rem 0 0.35rem;
+    color: rgba(255,255,255,0.20);
+    font-size: 0.72rem;
+}
+
+.ae-login-divider::before,
+.ae-login-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: rgba(212,175,55,0.15);
+}
+
+/* --- Mobile / Narrow --- */
+@media (max-width: 500px) {
+    .block-container {
+        padding-left: 0.6rem !important;
+        padding-right: 0.6rem !important;
+    }
+
     .ae-login-title {
-        color: #2b1747 !important;
-        text-shadow: none !important;
+        font-size: 1.25rem;
     }
 
     .ae-login-subtitle {
-        color: #4a3a66 !important;
-        text-shadow: none !important;
+        font-size: 0.78rem;
     }
-    
-    .ae-login-secondary-title {
-        color: #f2c572 !important;
+
+    div[data-testid="stForm"] {
+        padding: 1rem 1.1rem 0.9rem;
     }
-    
-    .ae-login-secondary-text {
-        color: rgba(255,255,255,0.92) !important;
+
+    .ae-logo-text {
+        font-size: 2.3rem;
     }
-    
-    div[data-testid="stForm"] label,
-    div[data-testid="stForm"] label p,
-    div[data-testid="stWidgetLabel"],
-    div[data-testid="stWidgetLabel"] p {
-        color: #2b1845 !important;
-        opacity: 1 !important;
-        font-weight: 800 !important;
+
+    .ae-logo-symbol {
+        font-size: 1.8rem;
     }
 }
 </style>
@@ -219,10 +310,10 @@ def _render_logo():
     st.markdown("""
     <div class="ae-login-header">
         <div class="ae-logo-text"><span class="ae-logo-symbol">∞</span>aEterna</div>
-        <div class="ae-logo-subtitle">MEMÓRIAS VIVAS PARA QUEM VOCÊ AMA</div>
+        <div class="ae-logo-subtitle">HISTÓRIAS QUE CONECTAM GERAÇÕES</div>
         <div class="ae-login-title">Bem-vindo à aEterna</div>
         <div class="ae-login-subtitle">
-            Guarde histórias, fotos, vídeos e lembranças para conectar gerações..
+            Guarde histórias, fotos, vídeos e lembranças<br>para preservar o que realmente importa.
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -230,17 +321,10 @@ def _render_logo():
 
 def _render_login_principal(fazer_login):
     with st.form("login_form_compacto"):
-        st.markdown('<div class="ae-login-mode-title">Acessar minha conta</div>', unsafe_allow_html=True)
+        st.markdown('<div class="ae-login-mode-title">Acesse sua conta</div>', unsafe_allow_html=True)
         email = st.text_input("E-mail", key="login_email_compacto")
         senha = st.text_input("Senha", type="password", key="login_senha_compacto")
-        c_btns = st.columns(2)
-        with c_btns[0]:
-            submitted = st.form_submit_button("Entrar", use_container_width=True, type="primary")
-        with c_btns[1]:
-            forgot_clicked = st.form_submit_button("Esqueci minha senha", use_container_width=True)
-            if forgot_clicked:
-                _set_mode("recuperar")
-                st.rerun()
+        submitted = st.form_submit_button("Entrar", use_container_width=True, type="primary")
 
         if submitted:
             if not email or not senha:
@@ -251,14 +335,22 @@ def _render_login_principal(fazer_login):
             else:
                 st.error("E-mail ou senha incorretos.")
 
-        st.markdown('<div class="ae-login-footer">Memórias vivas para quem você ama</div>', unsafe_allow_html=True)
+        st.markdown('<div class="ae-login-footer">aEterna — sua história continua</div>', unsafe_allow_html=True)
 
-    st.markdown('<div class="ae-login-secondary-block"><div class="ae-login-secondary-title">Novo por aqui?</div><div class="ae-login-secondary-text">Crie sua conta para começar a preservar sua história.</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="ae-forgot-btn">', unsafe_allow_html=True)
+    fcols = st.columns([1.2, 2, 1.2])
+    with fcols[1]:
+        if st.button("esqueci minha senha", key="btn_forgot_sutil", use_container_width=True):
+            _set_mode("recuperar")
+            st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="ae-secondary-section"><div class="ae-secondary-title">Ainda não tem conta?</div><div class="ae-secondary-text">Crie sua conta para começar a preservar sua história.</div></div>', unsafe_allow_html=True)
     if st.button("Criar conta", use_container_width=True):
         _set_mode("cadastro")
         st.rerun()
 
-    st.markdown('<div class="ae-login-secondary-block"><div class="ae-login-secondary-title">Recebeu uma chave?</div><div class="ae-login-secondary-text">Conheça histórias compartilhadas com você.</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="ae-secondary-section"><div class="ae-secondary-title">Recebeu uma chave?</div><div class="ae-secondary-text">Acesse uma história compartilhada com você.</div></div>', unsafe_allow_html=True)
     if st.button("Acessar história compartilhada", use_container_width=True):
         _set_mode("visitante")
         st.rerun()
@@ -266,17 +358,17 @@ def _render_login_principal(fazer_login):
 
 def _render_visitante(fazer_login_visitante):
     with st.form("visitante_form_compacto"):
-        st.markdown('<div class="ae-login-mode-title">Conhecer a história de alguém</div>', unsafe_allow_html=True)
-        st.info("Use esta opção apenas se você recebeu uma chave de acesso autorizada.")
+        st.markdown('<div class="ae-login-mode-title">Acessar história compartilhada</div>', unsafe_allow_html=True)
+        st.info("Use esta opção apenas se você recebeu uma chave de acesso.")
         nome_visitante = st.text_input("Seu nome", key="visitante_nome_compacto")
-        email_falecido = st.text_input("E-mail da pessoa responsável pela história", key="visitante_email_compacto")
+        email_resp = st.text_input("E-mail da pessoa responsável", key="visitante_email_compacto")
         chave = st.text_input("Chave de acesso", type="password", key="visitante_chave_compacto")
-        submitted = st.form_submit_button("Conhecer História", use_container_width=True, type="primary")
+        submitted = st.form_submit_button("Acessar história", use_container_width=True, type="primary")
 
         if submitted:
-            if not nome_visitante or not email_falecido or not chave:
+            if not nome_visitante or not email_resp or not chave:
                 st.error("Preencha todos os campos.")
-            elif fazer_login_visitante(nome_visitante, chave, email_falecido):
+            elif fazer_login_visitante(nome_visitante, chave, email_resp):
                 st.success(f"Bem-vindo(a), {nome_visitante}!")
                 st.rerun()
             else:
@@ -289,7 +381,7 @@ def _render_visitante(fazer_login_visitante):
 
 def _render_cadastro(fazer_cadastro):
     with st.form("cadastro_form_compacto"):
-        st.markdown('<div class="ae-login-mode-title">Criar minha conta</div>', unsafe_allow_html=True)
+        st.markdown('<div class="ae-login-mode-title">Criar sua conta</div>', unsafe_allow_html=True)
 
         col1, col2 = st.columns(2)
         with col1:
@@ -396,8 +488,8 @@ def render_login_compacto(
 
 def _render_recuperar_senha():
     with st.form("recuperar_senha_form_compacto"):
-        st.markdown('<div class="ae-login-mode-title">Esqueci minha senha</div>', unsafe_allow_html=True)
-        st.info("Informe seu e-mail cadastrado para enviarmos as instruções de redefinição de senha.")
+        st.markdown('<div class="ae-login-mode-title">Redefinir senha</div>', unsafe_allow_html=True)
+        st.info("Informe seu e-mail cadastrado para receber as instruções de redefinição.")
         email = st.text_input("E-mail cadastrado", key="recuperar_email_input")
         submitted = st.form_submit_button("Solicitar instruções", use_container_width=True, type="primary")
 
@@ -468,13 +560,13 @@ def render_redefinicao_senha(recuperar_param):
     with center:
         _render_logo()
         with st.form("form_nova_senha_redefinicao"):
-            st.markdown('<div class="ae-login-mode-title">Nova Senha</div>', unsafe_allow_html=True)
-            st.caption(f"Defina uma nova senha de acesso seguro para a conta: {html.escape(email)}")
+            st.markdown('<div class="ae-login-mode-title">Nova senha</div>', unsafe_allow_html=True)
+            st.caption(f"Defina sua nova senha de acesso: {html.escape(email)}")
             
             nova_senha = st.text_input("Nova senha *", type="password", key="redef_nova_senha")
             confirmar_nova_senha = st.text_input("Confirmar nova senha *", type="password", key="redef_confirmar_senha")
             
-            submitted = st.form_submit_button("💾 Salvar Nova Senha", use_container_width=True, type="primary")
+            submitted = st.form_submit_button("Salvar nova senha", use_container_width=True, type="primary")
 
             if submitted:
                 if not nova_senha or not confirmar_nova_senha:
