@@ -5248,7 +5248,7 @@ def render_historias_compartilhadas_lista(historias_compartilhadas: list):
     if not historias_compartilhadas:
         st.markdown(
             """
-            <div class="ae-shared-empty">
+            <div class="ae-empty-state">
                 <strong>Nenhuma história foi compartilhada com você ainda.</strong>
                 <span>Quando uma pessoa importante liberar histórias para você, elas aparecerão aqui.</span>
             </div>
@@ -5649,7 +5649,7 @@ def render_novidades(
     with main_col:
         if not eventos:
             st.markdown(
-                '<div class="ae-news-empty"><strong>Sem novidades por enquanto.</strong><span>Quando algo importante acontecer nas suas histórias, aparecerá aqui.</span></div>',
+                '<div class="ae-empty-state"><strong>Sem novidades por enquanto.</strong><span>Quando algo importante acontecer nas suas histórias, aparecerá aqui.</span></div>',
                 unsafe_allow_html=True,
             )
         grupo_atual = None
