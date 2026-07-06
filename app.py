@@ -368,6 +368,7 @@ def inject_custom_css():
             color: #6f6478;
             font-size: 0.9rem;
             line-height: 1.45;
+            margin: 0.65rem 0;
         }
         .ae-empty-state strong {
             display: block;
@@ -715,12 +716,9 @@ def render_minha_historia():
 
     if not memorias:
         st.markdown(
-            """
-            <div class="ae-empty-story">
-                <h3>📖 Sua história começa com o primeiro capítulo.</h3>
-                <p>Quando você registrar a primeira lembrança, ela aparecerá aqui como o primeiro capítulo da sua coleção viva.</p>
-            </div>
-            """,
+            '<div class="ae-empty-state">'
+            '<strong>📖 Sua história começa com o primeiro capítulo.</strong>'
+            'Quando você registrar a primeira lembrança, ela aparecerá aqui como o primeiro capítulo da sua coleção viva.</div>',
             unsafe_allow_html=True,
         )
         return
@@ -4354,7 +4352,7 @@ def render_visao_historia_compartilhada(
 
 
 def render_contribuicoes_pendentes(usuario_dono_id: int):
-    CARD = "background:rgba(255,255,255,.94);border:1px solid rgba(222,202,166,.8);border-radius:18px;box-shadow:0 18px 44px rgba(70,46,20,.08);"
+    CARD = "background:rgba(255,255,255,.94);border:1px solid rgba(212,175,55,0.22);border-radius:20px;box-shadow:0 14px 38px rgba(43,23,71,0.07);"
 
     def formatar_data(valor) -> str:
         if not valor:
@@ -4395,7 +4393,7 @@ def render_contribuicoes_pendentes(usuario_dono_id: int):
 
     st.markdown(
         '<div class="ae-contrib-hero" style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin:.55rem 0 .65rem;">'
-        '<div><h1 style="color:#21104a;font-size:2.05rem;line-height:1;margin:0 0 .22rem;font-weight:900;">✦ Contribuições</h1>'
+        '<div><h1 style="color:#21104a;font-size:2.05rem;line-height:1;margin:0 0 .22rem;font-weight:700;font-family:&quot;Cormorant Garamond&quot;,Georgia,serif;letter-spacing:-0.02em;">Contribuições</h1>'
         '<p style="color:#6d6380;font-size:.92rem;margin:0;">Lembranças, fotos e vídeos enviados por pessoas importantes para enriquecer suas histórias.</p></div>'
         '<span style="border:1.5px solid rgba(104,79,176,.55);border-radius:11px;color:#21104a;font-weight:900;padding:.58rem 1rem;background:rgba(255,255,255,.55);white-space:nowrap;">↗ Ver histórico completo</span></div>',
         unsafe_allow_html=True,
@@ -4416,15 +4414,15 @@ def render_contribuicoes_pendentes(usuario_dono_id: int):
 
     with main_col:
         st.markdown(
-            '<div class="ae-contrib-section-title" style="margin:.15rem 0 .35rem;"><h2 style="color:#21104a;font-size:1.22rem;margin:0;font-weight:900;">Aguardando sua aprovação</h2>'
+            '<div class="ae-contrib-section-title" style="margin:.15rem 0 .35rem;"><h2 style="color:#21104a;font-size:1.25rem;margin:0;font-weight:700;font-family:&quot;Cormorant Garamond&quot;,Georgia,serif;letter-spacing:-0.02em;">Aguardando sua aprovação</h2>'
             '<p style="color:#6d6380;margin:.08rem 0 0;font-size:.9rem;">Nada entra na sua história sem sua autorização.</p></div>',
             unsafe_allow_html=True,
         )
         if not pendentes:
             st.markdown(
-                '<div class="ae-contrib-empty" style="border:1px dashed rgba(104,79,176,.28);background:rgba(255,255,255,.55);border-radius:14px;color:#6d6380;padding:.75rem .9rem;font-size:.9rem;">'
-                '<strong style="color:#21104a;display:block;margin-bottom:.18rem;">Nenhuma contribuição aguardando aprovação.</strong>'
-                '<span>Quando alguém enviar uma lembrança, foto ou vídeo para enriquecer suas histórias, ela aparecerá aqui.</span></div>',
+                '<div class="ae-empty-state">'
+                '<strong>Nenhuma contribuição aguardando aprovação.</strong>'
+                'Quando alguém enviar uma lembrança, foto ou vídeo para enriquecer suas histórias, ela aparecerá aqui.</div>',
                 unsafe_allow_html=True,
             )
 
@@ -4451,7 +4449,7 @@ def render_contribuicoes_pendentes(usuario_dono_id: int):
             f'<p style="margin:0;color:#6d6380;line-height:1.25;"><strong style="display:block;color:#21104a;">{html.escape(nome)}</strong>{qtd} {"contribuição" if qtd == 1 else "contribuições"}</p>'
             '<button style="border:1px solid rgba(218,167,66,.42);border-radius:9px;background:rgba(255,248,231,.75);color:#21104a;font-weight:800;padding:.45rem .7rem;">Ver perfil</button></div>'
             for nome, qtd in list(sorted(contagem.items(), key=lambda item: item[1], reverse=True))[:3]
-        ) or '<div class="ae-contrib-empty-small" style="border:1px dashed rgba(104,79,176,.28);background:rgba(255,255,255,.55);border-radius:14px;color:#6d6380;padding:.75rem .9rem;font-size:.9rem;">Nenhum contribuidor recente.</div>'
+        ) or '<div class="ae-empty-state" style="padding:.75rem .9rem;">Nenhum contribuidor recente.</div>'
         st.markdown(
             f'<div class="ae-contrib-side-card" style="{CARD}padding:.75rem .9rem;margin:0 0 .55rem;"><h3 style="color:#21104a;margin:0 0 .45rem;font-size:1.08rem;font-weight:900;">Fluxo de aprovação</h3>{fluxo_html}</div>'
             f'<div class="ae-contrib-side-card" style="{CARD}padding:.75rem .9rem;margin:0 0 .55rem;"><h3 style="color:#21104a;margin:0 0 .45rem;font-size:1.08rem;font-weight:900;">Contribuidores recentes</h3>{recentes_html}</div>',
@@ -4511,10 +4509,10 @@ def render_contribuicoes_pendentes(usuario_dono_id: int):
             f'<div class="ae-contrib-approved-card" style="{CARD}display:grid;grid-template-columns:48px 1fr auto;align-items:center;gap:.8rem;padding:.75rem;">'
             f'<div style="width:48px;height:48px;border-radius:999px;display:grid;place-items:center;color:#21104a;background:linear-gradient(135deg,#efe6dc,#d7c9ec);font-weight:900;">{html.escape(iniciais(c.get("contribuidor_nome")))}</div>'
             f'<p style="margin:0;color:#6d6380;line-height:1.25;"><strong style="color:#21104a;display:block;">{html.escape(c.get("contribuidor_nome") or "Pessoa convidada")}</strong>{html.escape(c.get("memoria_titulo") or "História sem título")}</p>'
-            '<span style="background:rgba(222,247,229,.9);color:#167044;border:1px solid rgba(72,163,109,.3);border-radius:9px;padding:.45rem .75rem;font-weight:800;">Aprovada</span></div>'
+            '<span style="background:rgba(75,37,111,.08);color:#4b256f;border:1px solid rgba(75,37,111,.20);border-radius:9px;padding:.45rem .75rem;font-weight:800;">Aprovada</span></div>'
         )
     if not aprovadas_html:
-        aprovadas_html = '<div class="ae-contrib-empty-small" style="border:1px dashed rgba(104,79,176,.28);background:rgba(255,255,255,.55);border-radius:14px;color:#6d6380;padding:1rem;">Nenhuma contribuição aprovada recentemente.</div>'
+        aprovadas_html = '<div class="ae-empty-state">Nenhuma contribuição aprovada recentemente.</div>'
     st.markdown(f'<div class="ae-contrib-approved-grid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.85rem;margin-bottom:.75rem;">{aprovadas_html}</div>', unsafe_allow_html=True)
 
 
